@@ -1,0 +1,18 @@
+%% Grammar for the Booster2 language
+%% By default, based on an example "entities" syntax
+module Booster2
+
+imports Common
+
+exports
+
+  context-free start-symbols
+  
+    Start
+
+  context-free syntax
+  
+    "module" ID Definition*       -> Start {"Module"}
+    "entity" ID "{" Property* "}" -> Definition {"Entity"}
+    ID ":" Type                   -> Property {"Property"}
+    ID                            -> Type {"Type"}
