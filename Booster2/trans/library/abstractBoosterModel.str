@@ -1,0 +1,446 @@
+module library/abstractBoosterModel
+
+imports
+  include/Booster2
+  
+
+  library/setDef
+ 
+  library/constraint
+  library/valueExpression
+  library/strategy
+ 
+ rules
+ 	
+/* 	lookup-set-name:
+		Takes an identifier, and a model, and returns it back again
+		if the identifier is the name of a set in the model 	
+*/
+
+	lookup-set-name:
+		setname -> setname
+		where
+			<elem>(setname, <map(get-setdef-name)> <ABM> "Sets")
+
+/* 	lookup-set-value:
+		Takes an identifier, and a model, and returns the 
+		name of the set it appears in 	
+*/
+
+	lookup-set-value:
+		setvalue -> setname
+		where
+			setname := <lookup-value-in-sets> (setvalue, <ABM> "Sets") 
+			
+/* 	lookup-class-name:
+		Takes an identifier, and a model, and returns it back again
+		if the identifier is the name of a class in the model 	
+*/
+
+	lookup-class-name:
+		classname
+			-> classname
+		where
+			<elem>(classname, <ABM> "Classes")
+			
+/* 	lookup-attribute-type:
+		Takes a class name, and an attribute name, and a model, 
+		and returns the type of that attribute in the model 	
+*/
+
+	lookup-attribute-type:
+		(classname, attname)
+			-> type
+		where
+			type := <lookup>((classname, attname), <ABM> "Type" )
+			
+/* 	lookup-input-type:
+		Takes a class name, and a method name, and an input name,
+		and a model, 
+		and returns the type of that input in the model 	
+*/
+
+	lookup-input-type:
+		((classname, methname), inputname)
+			-> type
+		where
+			type := <lookup>(inputname,<lookup>((classname, methname), <ABM> "Inputs"))
+			
+	lookup-input-type:
+			e -> String()
+		where
+			log(|Error(), "lookup-input-type fail", e)
+			
+			
+/* 	lookup-input-type:
+		Takes a class name, and a method name, and an input name,
+		and a model, 
+		and returns the type of that input in the model 	
+*/
+
+	lookup-output-type:
+		(((classname, methname), outputname))
+			-> type
+		where
+			type := <lookup>(outputname,<lookup>((classname, methname), <ABM> "Outputs"))
+			
+			
+/* 	lookup-opposite:
+		Takes a class name, and an attribute name, and a model, 
+		and returns the class name, attribute name pair that is its opposite 	
+*/
+
+	lookup-opposite:
+		((classname, attname))
+			-> (classname1, attname1)
+		where
+			(classname1, attname1) := <lookup>((classname, attname), <ABM> "Opposites")
+			
+			
+
+										
+	get-modified-attributes:
+		(Skip(), classname, methodname)
+			-> []	
+			
+	get-modified-attributes:
+		(Parallel(p1, p2), classname, methodname)
+			-> <union> (as1, as2)
+		where
+			as1 := <get-modified-attributes>(p1, classname, methodname);
+			as2 := <get-modified-attributes>(p2, classname, methodname)
+	
+	get-modified-attributes:
+		(Choice(p1, p2), classname, methodname)
+			-> <union> (as1, as2)
+		where
+			as1 := <get-modified-attributes>(p1, classname, methodname);
+			as2 := <get-modified-attributes>(p2, classname, methodname)
+			
+	get-modified-attributes:
+		(Sequence(p1, p2), classname, methodname)
+			-> <union> (as1, as2)
+		where
+			as1 := <get-modified-attributes>(p1, classname, methodname);
+			as2 := <get-modified-attributes>(p2, classname, methodname)
+			
+	get-modified-attributes:
+		(Guard(constraint, program), classname, methodname)
+			-> as1
+		where
+			as1 := <get-modified-attributes>(program, classname, methodname)
+			
+/*	get-modified-attributes:
+		(Assign(path, expression), classname, methodname, abm)
+			-> [(classname1, attname)]
+		where
+			Class(classname1) := <resolve-path-type>(classname, path, abm, Some(methodname));
+			attname := <get-path-attribute-name> (path, abm)
+*/
+			
+	get-modified-attributes:
+		(Assign(Path(exp, PathComponent(attname, maybeprimed)), expression), classname, methodname)
+			-> [((classname2, attname2), exp)]
+		where
+			[(classname2, attname2)] := <get-path-attribute>(classname, methodname, Path(exp, PathComponent(attname, maybeprimed)))
+			
+
+	get-modified-attributes:
+		(New(o, cl), classname, methodname)
+			-> []
+			
+			
+	get-type-constraint:
+		([], classname, methodname) -> True()
+		
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, StringExtent()), constraint1 )
+		where
+			String() := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+	
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, IntExtent()), constraint1 )
+		where
+			Int() := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(SubsetEquals(path, StringExtent()), constraint1 )
+		where
+			Set(String()) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+	
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(SubsetEquals(path, IntExtent()), constraint1 )
+		where
+			Set(Int()) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, PathStart(name1, None())), constraint1 )
+		where
+			Optional(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(SubsetEquals(path, PathStart(name1, None())), constraint1 )
+		where
+			Set(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, PathStart(name1, None())), constraint1 )
+		where
+			Class(name1) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	/*get-type-constraint:
+		([path, paths*], classname, methodname, abm) 
+			-> True()
+		where
+			log(|Error(), "get-type-constraint nightmare", <resolve-path-type>(classname, path, methodname));
+			log(|Error(), "get-type-constraint nightmare", [paths*]) */ 
+			
+				
+										
+	get-modified-attributes:
+		(Skip(), classname, methodname)
+			-> []	
+			
+	get-modified-attributes:
+		(Parallel(p1, p2), classname, methodname)
+			-> <union> (as1, as2)
+		where
+			as1 := <get-modified-attributes>(p1, classname, methodname);
+			as2 := <get-modified-attributes>(p2, classname, methodname)
+	
+	get-modified-attributes:
+		(Choice(p1, p2), classname, methodname)
+			-> <union> (as1, as2)
+		where
+			as1 := <get-modified-attributes>(p1, classname, methodname);
+			as2 := <get-modified-attributes>(p2, classname, methodname)
+			
+	get-modified-attributes:
+		(Then(p1, p2), classname, methodname)
+			-> <union> (as1, as2)
+		where
+			as1 := <get-modified-attributes>(p1, classname, methodname);
+			as2 := <get-modified-attributes>(p2, classname, methodname)
+			
+	get-modified-attributes:
+		(Guard(constraint, program), classname, methodname)
+			-> as1
+		where
+			as1 := <get-modified-attributes>(program, classname, methodname)
+			
+/*	get-modified-attributes:
+		(Assign(path, expression), classname, methodname, abm)
+			-> [(classname1, attname)]
+		where
+			Class(classname1) := <resolve-path-type>(classname, path, abm, Some(methodname));
+			attname := <get-path-attribute-name> (path, abm)
+*/
+			
+	get-modified-attributes:
+		(Assign(Path(exp, PathComponent(attname, maybeprimed)), expression), classname, methodname)
+			-> [((classname2, attname2), exp)]
+		where
+			[(classname2, attname2)] := <get-path-attribute>(classname, methodname, Path(exp, PathComponent(attname, maybeprimed)))
+			
+			
+			
+	get-type-constraint:
+		([], classname, methodname) -> True()
+		
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, StringExtent()), constraint1 )
+		where
+			String() := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+	
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, IntExtent()), constraint1 )
+		where
+			Int() := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, PathStart(name1, None())), constraint1 )
+		where
+			Optional(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(SubsetEquals(path, PathStart(name1, None())), constraint1 )
+		where
+			Set(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	get-type-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(In(path, PathStart(name1, None())), constraint1 )
+		where
+			Class(name1) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+
+	/*get-type-constraint:
+		([path, paths*], classname, methodname, abm) 
+			-> True()
+		where
+			log(|Error(), "get-type-constraint nightmare", <resolve-path-type>(classname, path, methodname));
+			log(|Error(), "get-type-constraint nightmare", [paths*]) */ 
+			
+			
+	lookup-invariants:
+		[] 
+			-> []
+		
+	lookup-invariants:
+		[((classname, attname), path), atts*]
+			-> [invs*]
+		where
+			True() := <lookup>((classname, attname), <ABM> "ClassBasedInvariants");
+			[invs*] := <lookup-invariants>[atts*]
+
+
+
+	lookup-invariants:
+		[((classname, attname), path), atts*]
+			->  [inv2, invs*]
+		where
+			inv := <lookup>((classname, attname), <ABM> "ClassBasedInvariants");
+			inv2 := <substitute> (inv, This(), path);
+			[invs*] := <lookup-invariants>[atts*]
+	
+
+	get-multiplicity-constraint:
+		([], classname, methodname) -> True()
+		
+	get-multiplicity-constraint:
+		([path, paths*], classname, methodname) 
+			-> And(constraint2, constraint1 )
+		where
+			[att] := <get-path-attribute>(classname, methodname, path);
+			Set(s) := <lookup-attribute-type> att;
+			constraint2 := <get-mult-constraint>(path, att);
+			constraint1 := <get-multiplicity-constraint>([paths*], classname, methodname);
+			log(|Error(), "get-multiplicity-constraint")
+
+	get-multiplicity-constraint:
+		([path, paths*], classname, methodname) 
+			-> constraint1
+		where
+			constraint1 := <get-multiplicity-constraint>([paths*], classname, methodname)
+
+
+	get-mult-constraint:
+		(path, att)
+			-> GreaterThanEquals(Cardinality(path), Integer(min))
+		where
+			"*" := <lookup-max-mult> att ;
+			min := <lookup-min-mult> att
+
+	get-mult-constraint:
+		(path, att)
+			-> And(LessThanEquals(Cardinality(path), Integer(max)), GreaterThanEquals(Cardinality(path), Integer(min)))
+		where
+			max := <lookup-max-mult> att;
+			min := <lookup-min-mult> att
+
+
+	lookup-max-mult:
+		(classname, attname)
+			-> n
+		where
+			n := <lookup>((classname, attname), <ABM> "MaxMults")
+
+	lookup-min-mult:
+		(classname, attname)
+			-> n
+		where
+			n := <lookup>((classname, attname), <ABM> "MinMults")
+
+
+/*	lookup-invariants:
+		(l, abm)
+			-> []
+		where
+			debug */ 
+			
+	lookup-class-attributes:
+		classname
+		->
+			<lookup>(classname, <ABM> "Attributes")
+
+	lookup-class-methods:
+		classname
+		->
+			<lookup>(classname, <ABM> "Operations")
+
+	lookup-system-name:
+		x -> <ABM> "Name"
+
+	lookup-classes:
+		x -> <ABM> "Classes"
+
+	set-attribute-table-name:
+		(classname, attname, tablename) ->
+			[]
+		where
+			tableNames := (<ABM> "TableNames");
+			tableNames' := <union>(tableNames, [((classname, attname), tablename)]);
+			rules(
+				ABM :+ "TableNames" -> tableNames'
+			)
+
+	set-attribute-table-name:
+		(classname, attname, tablename) ->
+			[]
+		where
+			rules(
+				ABM :+ "TableNames" -> [((classname, attname), tablename)]
+			)
+
+	get-attribute-table-name:
+		(classname, attname)
+			-> elem
+		where
+			elem := <lookup>((classname, attname), <ABM> "TableNames")
+
+
+	add-class-id:
+		(classname, attname) ->
+			[]
+		where
+			ids := (<ABM> "IDs");
+			ids' := <union>(ids, [(classname, attname)]);
+			rules(
+				ABM :+ "IDs" -> ids'
+			)
+
+	add-class-id:
+		(classname, attname) ->
+			[]
+		where
+			rules(
+				ABM :+ "IDs" -> [(classname, attname)]
+			)
+
+	get-class-ids:
+		x
+			-> elems
+		where
+			elems := <ABM> "Ids"

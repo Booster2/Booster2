@@ -1,0 +1,186 @@
+module translate/booster/abstractBoosterModel
+
+imports
+  include/Booster2
+
+  library/abstractBoosterModel
+  translate/booster/expression
+  translate/booster/constraint
+  translate/booster/relation
+  translate/booster/valueExpression
+ 
+
+ rules
+ 	
+/* output-to-booster:
+*/
+
+	output-to-booster:
+	 	system
+	 		-> $[system [<ABM> "Name"] 
+	 			 
+	 			 [<output-to-booster-sets> <ABM> "Sets"]
+	 			 [<output-to-booster-classes> (<ABM> "Classes")]
+	 			 ]
+
+	output-to-booster-sets:
+		[] -> $[ ]
+		
+	output-to-booster-sets:
+		[SetDef(name, [values*]), sets*]
+			-> $[   set [name] { [<output-to-booster-set-values>values*] } 
+				
+				[<output-to-booster-sets> [sets*]] ]
+	
+	output-to-booster-set-values:
+		[name] -> $[[name]]
+			
+	output-to-booster-set-values:
+		[name, names*]
+			-> $[[name] , [<output-to-booster-set-values> [names*]]]
+
+	output-to-booster-classes:
+		[] -> $[]		
+			
+	output-to-booster-classes:
+		[classname, classes*]
+			-> $[class [classname] {
+					attributes
+						[<output-to-booster-attributes>(classname, <lookup>(classname, <ABM> "Attributes" ))]
+					invariant
+						[<output-to-booster-constraint>(<lookup>(classname, <ABM> "Invariants"))]
+					methods
+						[<output-to-booster-methods>(classname, <lookup>(classname, <ABM> "Operations")) ]
+				 }
+				 [<output-to-booster-classes>[classes*]]]	
+				
+	output-to-booster-attributes:
+		(classname, []) 
+			-> $[]				
+			
+	output-to-booster-attributes:
+		(classname, [attname, atts*]) 
+			-> $[[attname] : [<output-to-booster-attribute-type>(classname, attname)]
+				 [<output-to-booster-attributes>(classname, [atts*])]]
+				
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> $[STRING]
+		where
+			String() := <lookup-attribute-type>(classname, attname)
+
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${[ STRING ]}
+		where
+			Optional(String()) := <lookup-attribute-type>(classname, attname)
+				
+	output-to-booster-attribute-type:
+		(classname, attname )
+			-> ${set ( STRING ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
+		where
+			Set(String()) := <lookup-attribute-type>(classname, attname)
+			
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> $[INT]
+		where
+			Int() := <lookup-attribute-type>(classname, attname)						
+	
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${[ INT ]}
+		where
+			Optional(Int()) := <lookup-attribute-type>(classname, attname)
+			
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${set ( INT ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
+		where
+			Set(Int()) := <lookup-attribute-type>(classname, attname)
+			
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> $[ [name] . [attname2] ]
+		where
+			Class(name) := <lookup-attribute-type>(classname, attname);
+			(name, attname2) := <lookup>((classname, attname), <ABM> "Opposites")
+
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> $[ [name] ]
+		where
+			Class(name) := <lookup-attribute-type>(classname, attname)
+
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${[ {name} . {attname2} ]}
+		where
+			Optional(Class(name)) := <lookup-attribute-type>(classname, attname);
+			(name, attname2) := <lookup>((classname, attname), <ABM> "Opposites") 
+
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${[ {name} ]}
+		where
+			Optional(Class(name)) := <lookup-attribute-type>(classname, attname)
+			
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${set ( {name} . {attname2}  ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), "MaxMults")} ]}
+		where
+			Set(Class(name)) := <lookup-attribute-type>(classname, attname);
+			(name, attname2) := <lookup>((classname, attname), <ABM> "Opposites")
+
+	output-to-booster-attribute-type:
+		(classname, attname)
+			-> ${set ( {name} ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
+		where
+			Set(Class(name)) := <lookup-attribute-type>(classname, attname)
+			
+	
+	output-to-booster-methods:
+		(classname, [])
+			-> $[]
+			
+	output-to-booster-methods:
+		(classname, [methodname, meths*])
+			-> $[ [methodname] {  }
+				  [<output-to-booster-methods> (classname, [meths*])] ]
+		/* Debug fix here... [<output-to-booster-guarded-command> ( <lookup>((classname, methodname), <ABM> "Programs"))] */
+
+	output-to-booster-guarded-command:
+		Skip()
+			-> $[skip]
+
+	output-to-booster-guarded-command:
+		New(o, cl)
+			-> $[new [o]! : [cl]]
+
+			
+	output-to-booster-guarded-command:
+		Assign(path, expression)
+			-> $[[<output-to-booster-expression> path] := [<output-to-booster-expression> expression]]								
+			
+	output-to-booster-guarded-command:
+		Parallel (gc1, gc2)
+			-> $[ ([<output-to-booster-guarded-command> gc1]) 
+			        || ([<output-to-booster-guarded-command> gc2])]
+			
+	output-to-booster-guarded-command:
+		Choice (gc1, gc2)
+			-> ${({<output-to-booster-guarded-command> gc1}) 
+				   [] ({<output-to-booster-guarded-command> gc2})}
+			
+	output-to-booster-guarded-command:
+		Sequence (gc1, gc2)
+			-> $[([<output-to-booster-guarded-command> gc1]) 
+			       ; ([<output-to-booster-guarded-command> gc2])]
+			
+	output-to-booster-guarded-command:
+		Guard (constraint, gc)
+			-> $[ [<output-to-booster-constraint> constraint] 
+				  --> ( [<output-to-booster-guarded-command> gc] )]
+										
+										
+										

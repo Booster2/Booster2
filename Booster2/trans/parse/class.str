@@ -1,0 +1,195 @@
+module parse/class
+
+imports
+
+  include/Booster2
+  
+  parse/attribute
+  parse/method
+
+
+
+rules
+
+/* get-class-name: 
+		Takes a class and returns its class name
+*/
+	get-class-name:
+		Class(name,classComponents) 
+			-> name
+			
+			
+			
+/* get-class-attributes: 
+		Takes a class and returns a list of attributes 
+*/
+ 
+ 	get-class-attributes:
+		Class(name,[]) -> [] 
+ 		
+ 	get-class-attributes:
+ 		Class(name, [ Attributes(attrs1), classComponents*])
+ 			-> <union>(attrs1,attrs2)
+ 		with
+ 			attrs2 := <get-class-attributes> Class(name, [classComponents*])
+ 			
+ 	get-class-attributes:
+ 		Class(name, [Methods(meths), classComponents*])
+ 			-> attrs
+ 		with
+ 			attrs := <get-class-attributes> Class(name, [classComponents*])
+ 	
+  	get-class-attributes:
+ 		Class(name, [Invariant(inv), classComponents*])
+ 			-> attrs
+ 		with
+ 			attrs := <get-class-attributes> Class(name, [classComponents*])
+ 			
+/* get-class-attribute-names: 
+		Takes a class and returns a pair of name, attribute names
+*/
+
+	get-class-attribute-names: 
+		Class(name, systemComponents*)
+			-> (name, attnames)
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, systemComponents*)
+
+/* get-class-attribute-types: 
+		Takes a class and returns a list of triples: classname, attname, type
+*/
+
+	get-class-attribute-types: 
+		Class(name, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, systemComponents*);
+			atttypes := <map(get-attribute-type)> <get-class-attributes> Class(name, systemComponents*);
+			xs := <zip>(<cart(id)>([name], attnames), atttypes)
+
+/* get-class-attribute-max-mults: 
+		Takes a class and returns a list of triples: classname, attname, maxmult
+*/
+
+	get-class-attribute-max-mults: 
+		Class(name, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, systemComponents*);
+			maxmults := <map(get-attribute-max-mult)> <get-class-attributes> Class(name, systemComponents*);
+			xs :=  <zip>(<cart(id)>([name], attnames), maxmults)
+
+/* get-class-attribute-min-mults: 
+		Takes a class and returns a list of triples: classname, attname, minmult
+*/
+
+	get-class-attribute-min-mults: 
+		Class(name, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, systemComponents*);
+			minmults := <map(get-attribute-min-mult)> <get-class-attributes> Class(name, systemComponents*);
+			xs :=  <zip>(<cart(id)>([name], attnames), minmults)
+
+/* get-class-attribute-opposites: 
+		Takes a class and returns a list of triples: classname, attname, opposite
+*/
+
+	get-class-attribute-opposites: 
+		Class(name, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, systemComponents*);
+			opposites := <map(get-attribute-opposite)> <get-class-attributes> Class(name, systemComponents*);
+			xs :=  <filter(has-opposite)> <zip>(<cart(id)>([name], attnames), opposites)
+
+
+/* get-class-invariant: 
+		Takes a class and returns its invariant
+*/
+ 
+ 	get-class-invariant:
+ 		Class(name, []) -> True()
+ 		
+ 	get-class-invariant:
+ 		Class(name, [Attributes(meths), classComponents*])
+ 			-> inv
+ 		where
+ 			inv := <get-class-invariant> Class(name, [classComponents*])
+ 			
+ 	get-class-invariant:
+ 		Class(name, [Methods(meths), classComponents*])
+ 			-> inv
+ 		where
+ 			inv := <get-class-invariant> Class(name, [classComponents*])
+ 	
+  	get-class-invariant:
+ 		Class(name, [Invariant([]), classComponents*])
+ 			-> inv2
+ 		where
+ 			inv2 := <get-class-invariant> Class(name, [classComponents*])
+
+  	get-class-invariant:
+ 		Class(name, [Invariant([inv1, invs2*]), classComponents*])
+ 			-> inv1
+ 		where
+ 			True() := <get-class-invariant> Class(name, [Invariant([invs2*]),classComponents*])
+
+
+  	get-class-invariant:
+ 		Class(name, [Invariant([inv1, invs2*]), classComponents*])
+ 			-> And(inv1, inv3)
+ 		where
+ 			inv3 := <get-class-invariant> Class(name, [Invariant([invs2*]),classComponents*])
+
+
+ 	
+
+/* get-class-attributes: 
+		Takes a class and returns a list of attributes 
+*/
+ 
+ 	get-class-methods:
+		Class(name,[]) -> [] 
+ 		
+ 	get-class-methods:
+ 		Class(name, [ Methods(meths1), classComponents*])
+ 			-> <union>(meths1,meths2)
+ 		with
+ 			meths2 := <get-class-methods> Class(name, [classComponents*])
+ 			
+ 	get-class-methods:
+ 		Class(name, [Attributes(atts), classComponents*])
+ 			-> meths
+ 		with
+ 			meths := <get-class-methods> Class(name, [classComponents*])
+ 	
+  	get-class-methods:
+ 		Class(name, [Invariant(inv), classComponents*])
+ 			-> meths
+ 		with
+ 			meths := <get-class-methods> Class(name, [classComponents*])
+
+/* get-class-method-names: 
+		Takes a class and returns a pair of name, method names
+*/
+
+	get-class-method-names: 
+		Class(name, systemComponents*)
+			-> (name, methnames)
+		with
+			methnames := <map(get-method-name)> <get-class-methods> Class(name, systemComponents*)
+
+/* get-class-method-constraints: 
+		Takes a class and returns a list of triples: classname, methodname, constraint
+*/
+
+	get-class-method-constraints: 
+		Class(name, systemComponents*)
+			-> xs
+		with
+			methnames := <map(get-method-name)> <get-class-methods> Class(name, systemComponents*);
+			constraints := <map(get-method-constraint)> <get-class-methods> Class(name, systemComponents*);
+			xs := <zip>(<cart(id)>([name], methnames), constraints)
+			
+			

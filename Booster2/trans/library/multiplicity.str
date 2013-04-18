@@ -1,0 +1,52 @@
+module library/multiplicity
+
+imports
+  include/Booster2
+   
+ 
+ rules
+ 	 
+ 	 
+/*	get-max:
+		Gets the maximum of this multiplicity
+	
+*/ 
+
+	get-max:
+		MultMinAndMax(a,b) -> <string-to-int>b
+		
+		
+	get-max:
+		MultJustMax(a) -> <string-to-int>a
+		
+	get-max:
+		MultJustMin(a) -> "*"
+		
+	get-max:
+		MultSingle(a) -> <string-to-int>a
+		
+	get-max:
+		MultAny() -> "*"
+		
+/*	get-min:
+		Gets the minimum of this multiplicity
+	
+*/ 
+
+	get-min:
+		MultMinAndMax(a,b) -> <string-to-int>a
+		
+		
+	get-min:
+		MultJustMax(a) -> 0
+		
+	get-min:
+		MultJustMin(a) -> <string-to-int>a
+		
+	get-min:
+		MultSingle(a) -> <string-to-int>a
+		
+	get-min:
+		MultAny() -> 0
+		
+		

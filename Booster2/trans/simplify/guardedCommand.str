@@ -1,0 +1,17 @@
+module simplify/guardedCommand
+
+imports
+  include/Booster2
+    
+  	
+rules
+
+
+	simplify:
+		Guard(e1, Guard(e2, p))
+			-> Guard(And(e1,e2),p)
+
+	simplify:
+		Guard(True(), p)
+			-> p
+			

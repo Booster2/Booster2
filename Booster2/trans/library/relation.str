@@ -1,0 +1,443 @@
+module library/relation
+
+imports
+  include/Booster2
+   
+  library/expression
+  library/valueExpression
+ 
+ rules
+ 	 
+
+/* 	is-old:
+		takes a relation, and returns True() or False() depending on whether
+		the relation can be evaluated in the pre-state or not	
+*/
+
+	is-old:
+		Equal(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		NotEqual(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		LessThan(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		LessThanEquals(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		GreaterThan(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		GreaterThanEquals(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Subset(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		SubsetEquals(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Superset(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		SupersetEquals(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+
+/* 	get-mentioned-attributes:
+		takes a relation, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/
+	get-mentioned-attributes:
+		(name, maybename, Equal(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, NotEqual(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, In(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, NotIn(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, LessThan(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, GreaterThan(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, LessThanEquals(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, GreaterThanEquals(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, Subset(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, SubsetEquals(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, Superset(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+	get-mentioned-attributes:
+		(name, maybename, SupersetEquals(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+
+	
+	substitute:
+		 (Equal(expression1, expression2), path, expression)
+		 	-> Equal(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+		 	
+	substitute:
+		 (NotEqual(expression1, expression2), path, expression)
+		 	-> NotEqual(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (In(expression1, expression2), path, expression)
+		 	-> In(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (NotIn(expression1, expression2), path, expression)
+		 	-> NotIn(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (GreaterThan(expression1, expression2), path, expression)
+		 	-> GreaterThan(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (LessThan(expression1, expression2), path, expression)
+		 	-> LessThan(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (GreaterThanEquals(expression1, expression2), path, expression)
+		 	-> GreaterThanEquals(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (LessThanEquals(expression1, expression2), path, expression)
+		 	-> LessThanEquals(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (Subset(expression1, expression2), path, expression)
+		 	-> Subset(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (SubsetEquals(expression1, expression2), path, expression)
+		 	-> SubsetEquals(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (Superset(expression1, expression2), path, expression)
+		 	-> Superset(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+	
+	substitute:
+		 (SupersetEquals(expression1, expression2), path, expression)
+		 	-> SupersetEquals(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+			 	
+/* 	make-post-state:
+		takes a relation, and returns its representation in the 
+		pre-state of a method 			
+*/
+
+	make-post-state:
+		Equal(expr1, expr2)
+			-> Equal(expr3, expr4)
+		where
+			expr3 := <make-post-state> expr1;
+			expr4 := <make-post-state> expr2
+
+
+	make-post-state:
+		NotEqual(expr1, expr2)
+			-> NotEqual(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		In(expr1, expr2)
+			-> In(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		NotIn(expr1, expr2)
+			-> NotIn(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		LessThan(expr1, expr2)
+			-> LessThan(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		GreaterThan(expr1, expr2)
+			-> GreaterThan(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		LessThanEquals(expr1, expr2)
+			-> LessThanEquals(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		GreaterThanEquals(expr1, expr2)
+			-> GreaterThanEquals(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Subset(expr1, expr2)
+			-> Subset(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		SubsetEquals(expr1, expr2)
+			-> SubsetEquals(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Superset(expr1, expr2)
+			-> Superset(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		SupersetEquals(expr1, expr2)
+			-> SupersetEquals(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+/* 	make-old:
+		takes a relation, and returns its representation in the 
+		pre-state of a method 			
+*/
+
+	make-old:
+		Equal(expr1, expr2)
+			-> Equal(expr3, expr4)
+		where
+			expr3 := <make-old> expr1;
+			expr4 := <make-old> expr2
+
+
+	make-old:
+		NotEqual(expr1, expr2)
+			-> NotEqual(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		In(expr1, expr2)
+			-> In(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		NotIn(expr1, expr2)
+			-> NotIn(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		LessThan(expr1, expr2)
+			-> LessThan(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		GreaterThan(expr1, expr2)
+			-> GreaterThan(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		LessThanEquals(expr1, expr2)
+			-> LessThanEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		GreaterThanEquals(expr1, expr2)
+			-> GreaterThanEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Subset(expr1, expr2)
+			-> Subset(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		SubsetEquals(expr1, expr2)
+			-> SubsetEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Superset(expr1, expr2)
+			-> Superset(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		SupersetEquals(expr1, expr2)
+			-> SupersetEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+					

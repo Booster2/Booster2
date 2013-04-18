@@ -1,0 +1,55 @@
+module simplify/expression
+
+imports
+  include/Booster2
+  
+  
+  	
+rules
+
+			
+	simplify:
+		(Plus(Integer(i), Integer(j)))
+			-> Integer( k )
+		where
+			k := <addS>(i, j)
+
+	simplify:
+		(Minus(Integer(i), Integer(j)))
+			-> Integer( k )
+		where
+			k := <subtS>(i, j)
+
+	simplify:
+		(Divide(Integer(i), Integer(j)))
+			-> Integer( k )
+		where
+			k := <divS>(i, j)
+
+	simplify:
+		(Times(Integer(i), Integer(j)))
+			-> Integer( k )
+		where
+			k := <mulS>(i, j)
+			
+	simplify:
+		Cardinality(Union(a,b))
+			-> Plus(Cardinality(a), Cardinality(b))
+	
+	simplify:
+		Cardinality(SetExtent([]))
+			-> Integer(0)	
+
+/*	simplify:
+		Cardinality(SetExtent([a]))
+			-> Integer(1)
+*/			
+	simplify:
+		Cardinality(SetExtent([a, as*]))
+			-> Integer(k)
+		where
+			Integer(i) := <simplify> Cardinality(SetExtent([as*]));
+			k := <add>(i,1)
+			
+
+			

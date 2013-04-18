@@ -1,0 +1,41 @@
+module parse/main
+
+imports
+  include/Booster2
+  parse/system
+  parse/class
+  parse/attribute
+  
+rules
+	
+	/* parse: 
+		Takes a system and produces its abm representation
+	 parse : System
+*/
+	parse: 
+   		system -> 
+   			system
+	with
+		constraints := <concat><map(get-class-method-constraints)><get-classes-from-system> system;
+		operations := <map(get-class-method-names)> <get-classes-from-system> system;
+		rules(
+			ABM :+ "Name" -> <get-system-name> system
+			ABM :+ "Sets" -> <get-sets> system 
+			ABM :+ "Classes" -> <map(get-class-name)> <get-classes-from-system> system
+			ABM :+ "Invariants" -> <zip>
+						(<map(get-class-name)> 
+							(<get-classes-from-system> system),
+						(<map(get-class-invariant)>
+							(<get-classes-from-system> system)))
+			ABM :+ "Attributes" -> <map(get-class-attribute-names)> <get-classes-from-system> system
+			ABM :+ "Ids" -> <zip>( <map(get-class-name)><get-classes-from-system> system,<map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))><get-classes-from-system> system)
+			ABM :+ "Type" -> <concat><map(get-class-attribute-types)><get-classes-from-system> system
+			ABM :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)><get-classes-from-system> system
+			ABM :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)><get-classes-from-system> system
+			ABM :+ "Opposites" -> <concat><map(get-class-attribute-opposites)><get-classes-from-system> system
+			ABM :+ "Operations" -> operations 
+			ABM :+ "Constraints" -> constraints
+			
+		)
+
+

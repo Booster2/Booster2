@@ -1,0 +1,101 @@
+module simplify/constraint
+
+imports
+  include/Booster2
+    
+  	
+rules
+
+
+	simplify:
+		And(True(), constraint)
+			-> constraint
+			
+	simplify:
+		And(constraint, True())
+			-> constraint
+
+	simplify:
+		And(False(), constraint)
+			-> False()
+
+	simplify:
+		And(constraint, False())
+			-> False()
+			
+	simplify:
+		Or(constraint, True())
+			-> True()
+	
+	simplify:
+		Or(True(), constraint)
+			-> True()
+			
+	simplify:
+		Implies(True(), constraint)
+			-> constraint
+	
+	simplify:
+		Guard(True(), program)
+			-> program
+			
+	simplify:
+		And(constraint, constraint)
+			-> constraint
+
+	simplify:
+		And(constraint, And(constraint1, constraint) )
+			-> And(constraint1, constraint)
+			
+	simplify:
+		And(constraint, And(constraint, constraint1) )
+			-> And(constraint1, constraint)
+			
+	simplify:
+		(Or(constraint, False()))
+			-> constraint
+
+	simplify:
+		(Or(False(), constraint))
+			-> constraint
+		
+
+	simplify:
+		And(And(constraint, constraint1), constraint  )
+			-> And(constraint1, constraint)
+
+	simplify:
+		And(And(constraint1, constraint), constraint  )
+			-> And(constraint1, constraint)
+			
+	simplify:
+		And(Equal(expression1, expression2), NotEqual(expression1, expression2))
+			-> False()
+
+	simplify:
+		And(NotEqual(expression1, expression2), Equal(expression1, expression2))
+			-> False()
+			
+	simplify:
+		Or(
+			And(
+				NotEqual(expression1, expression2),
+				NotEqual(expression1, expression3)),
+			Or(Equal(expression1, expression2),
+			   Equal(expression1, expression3)))
+		-> True()
+			
+	simplify:
+		Or(
+			And(
+				NotEqual(expression1, expression2),
+				NotEqual(expression1, expression3)),
+			Or(
+				Equal(expression1, expression3),
+				Equal(expression1, expression2)))
+		-> True()
+		
+	
+			
+			
+	

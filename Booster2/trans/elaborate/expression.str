@@ -1,0 +1,290 @@
+ module elaborate/expression
+
+imports
+  include/Booster2
+
+  elaborate/valueExpression
+
+ 
+ rules
+ 	
+/* 	infer-type:
+		Description goes here	
+*/
+ 	
+ 	infer-type:
+ 		(classname, methodname, Plus(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Minus(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Times(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Divide(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Maximum(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Minimum(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Intersection(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Union(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Concat(expr1, expr2), type, inorout)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+ 					
+ 	infer-type:
+ 		(classname, methodname, Head(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Tail(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Cardinality(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Negative(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+
+ 	
+/*	deduce-types:
+		Description goes here
+*/ 	
+
+			
+
+/* 	insert-this:
+		Takes an expression, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/
+			
+	insert-this:
+		(Head(expr1), classname)
+			-> Head(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+	insert-this:
+		(Tail(expr1), classname)
+			-> Tail(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+	insert-this:
+		(Negative(expr1), classname)
+			-> Negative(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+	insert-this:
+		(Cardinality(expr1), classname)
+			-> Cardinality(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+
+	insert-this:
+		(Plus(expr1, expr2), classname)
+			-> Plus(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Minus(expr1, expr2), classname)
+			-> Minus(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Times(expr1, expr2), classname)
+			-> Times(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Divide(expr1, expr2), classname)
+			-> Divide(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Maximum(expr1, expr2), classname)
+			-> Maximum(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Minimum(expr1, expr2), classname)
+			-> Minimum(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Union(expr1, expr2), classname)
+			-> Union(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Intersection(expr1, expr2), classname)
+			-> Intersection(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+	insert-this:
+		(Concat(expr1, expr2), classname)
+			-> Concat(expr3, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+			
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Plus(expr1, expr2))
+			-> (And(constraint1, constraint2), Plus(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Minus(expr1, expr2))
+			-> (And(constraint1, constraint2), Minus(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Times(expr1, expr2))
+			-> (And(constraint1, constraint2), Times(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Divide(expr1, expr2))
+			-> (And(constraint1, constraint2), Divide(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Maximum(expr1, expr2))
+			-> (And(constraint1, constraint2), Maximum(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Minimum(expr1, expr2))
+			-> (And(constraint1, constraint2), Minimum(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Union(expr1, expr2))
+			-> (And(constraint1, constraint2), Union(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Intersection(expr1, expr2))
+			-> (And(constraint1, constraint2), Intersection(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Concat(expr1, expr2))
+			-> (And(constraint1, constraint2), Concat(expr3, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Head(expr1))
+			-> (constraint1, Head(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Tail(expr1))
+			-> (constraint1, Tail(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Cardinality(expr1))
+			-> (constraint1, Cardinality(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Negative(expr1))
+			-> (constraint1, Negative(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+			

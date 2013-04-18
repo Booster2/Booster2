@@ -1,0 +1,14 @@
+module Stratego-Booster 
+imports StrategoMix[StrategoHost]
+
+imports Booster2 
+		AbstractBoosterModel
+
+exports 
+context-free start-symbols Module [[StrategoHost]]
+
+
+context-free syntax 
+
+
+    "|[" BoosterTerm "]|" -> Term [[StrategoHost]] {cons("ToTerm"),prefer} 

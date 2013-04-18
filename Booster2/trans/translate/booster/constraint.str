@@ -1,0 +1,80 @@
+module translate/booster/constraint
+
+imports
+  include/Booster2
+
+  library/abstractBoosterModel
+  translate/booster/expression
+  translate/booster/valueExpression
+  translate/booster/relation
+  
+ rules
+ 	
+ 	/*	output-to-booster-constraint:
+*/ 	
+
+	output-to-booster-constraint: 
+		True()
+			-> $[true]
+			
+	output-to-booster-constraint: 
+		False()
+			-> $[false]
+			
+	output-to-booster-constraint:
+			Not(constraint)
+				-> $[not ([constraint2])]
+			where
+				constraint2 := <output-to-booster-constraint> (constraint)		
+	
+	
+			
+	output-to-booster-constraint: 
+		And(constraint1, constraint2)
+			-> $[([constraint3] 
+				  & [constraint4])]
+		with 
+			constraint3 := <output-to-booster-constraint> constraint1;
+			constraint4 := <output-to-booster-constraint> constraint2
+
+	output-to-booster-constraint: 
+		Or(constraint1, constraint2)
+			-> $[([constraint3] 
+				  or [constraint4])]
+		with 
+			constraint3 := <output-to-booster-constraint> constraint1;
+			constraint4 := <output-to-booster-constraint> constraint2
+
+	output-to-booster-constraint: 
+		Then(constraint1, constraint2)
+			-> $[([constraint3] 
+				  ; [constraint4])]
+		with 
+			constraint3 := <output-to-booster-constraint> constraint1;
+			constraint4 := <output-to-booster-constraint> constraint2
+
+	output-to-booster-constraint: 
+		Implies(constraint1, constraint2)
+			-> $[([constraint3]
+					=> [constraint4])]
+		with 
+			constraint3 := <output-to-booster-constraint> constraint1;
+			constraint4 := <output-to-booster-constraint> constraint2
+
+
+	output-to-booster-constraint: 
+		Exists(name, expr, constraint)
+			-> $[(exists [name] : [expression]
+					@ ([constraint2]))]
+		with 
+			expression := <output-to-booster-expression> expr;
+			constraint2 := <output-to-booster-constraint> constraint
+
+
+	output-to-booster-constraint: 
+		Forall(name, expr, constraint)
+			-> $[(forall [name] : [expression]
+					@ ([constraint2]))]
+		with 
+			expression := <output-to-booster-expression> expr;
+			constraint2 := <output-to-booster-constraint> constraint

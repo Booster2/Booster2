@@ -1,0 +1,89 @@
+module compile/valueExpression
+
+imports
+  include/Booster2
+    
+  elaborate/valueExpression
+  library/valueExpression
+  
+rules
+	
+	
+
+/* 	is-defined
+*/
+
+	is-defined:
+		 (classname, method, Integer(i))
+		 	-> In(Integer(i), IntExtent())
+		 	
+	is-defined:
+		 (classname, method, String(s))
+		 	-> In(String(s), StringExtent())
+		 	
+	is-defined:
+		 (classname, method, IntExtent())
+		 	-> True()
+		 	
+	is-defined:
+		 (classname, method, StringExtent())
+		 	-> True()
+
+	is-defined:
+		 (classname, method, Null())
+		 	-> True()
+		 	
+	is-defined:
+		 (classname, method, Input(i))
+		 	-> True()
+		 	
+	is-defined:
+		 (classname, method, Output(i))
+		 	-> True()
+		 	
+	is-defined:
+		 (classname, method, This())
+		 	-> True()
+		 	
+	is-defined:
+		 (classname, method, ThisPrimed())
+		 	-> True()
+
+	is-defined:
+		 (classname, method, Path(a,b))
+		 	-> And(constraint, NotEqual(a, Null()))
+		 where
+		 	Optional(type) := <resolve-path-type>(classname, a, method);
+		 	constraint := <is-defined> (classname, method, a) 
+
+	is-defined:
+		 (classname, method, Path(a,b))
+		 	-> <is-defined> (classname, method, a)
+
+	is-defined:
+		 (classname, method, PathStart(a,maybeprimed))
+		 	-> True()
+
+	is-defined:
+		 (classname, method, PathComponent(a,maybeprimed))
+		 	-> <is-defined> (classname, method, a) 
+		 	
+	is-defined:
+		 (classname, method, SetExtent([]))
+		 	-> True()
+	
+	is-defined:
+		 (classname, method, SetExtent([elem, elems*]))
+		 	-> And(constraint1, constraint2)
+		 where
+		 	constraint1 := <is-defined> (classname, method, elem);
+		 	constraint2 := <is-defined> (classname, method, SetExtent([elems*])) 
+	
+	/* is-defined:
+		(classname, method, expr) -> 
+			True()
+		where
+			log(|Error(), " Error!", classname);
+			log(|Error(), method, expr) */ 	 	
+		
+ 

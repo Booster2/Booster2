@@ -1,0 +1,124 @@
+module compile/main
+
+imports
+  include/Booster2
+  
+  library/constraint
+  library/relation
+  library/expression
+  library/valueExpression
+  
+  library/abstractBoosterModel
+  compile/relation
+  compile/constraint
+  compile/guardedCommand
+
+rules
+
+	compile:
+		system -> system
+	where
+		<program-main> system
+		
+/* 	program:
+		Applies run-program to the constraints in a model
+*/
+
+	program-main:
+		system -> system
+		with
+			programs := <map(run-program)>(<ABM> "Constraints");
+			rules(
+				ABM :+ "Programs" -> programs
+			)
+			
+		
+
+/* 	run-program:
+		Applies program to each constraint, with the abstract booster machine for reference
+*/
+			
+	run-program:
+			((classname, methname), constraint)
+				-> ((classname, methname), Guard(constraint7, program2))
+			with
+				program := <program> (classname, methname, constraint);
+				
+				// Copied in:
+				[paths*] := <get-modified-paths>(program);
+				constraint2a :=  <get-type-constraint> ([paths*], classname, methname);
+				constraint2b :=  <get-multiplicity-constraint> ([paths*], classname, methname);
+				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
+				
+				[atts*] := <get-modified-attributes>(program, classname, methname);
+				invs := <lookup-invariants>([atts*]);
+				constraint4 := <make-post-state><combine-constraints>(invs);
+				// End Copy
+				
+				constraint5 := And(constraint4, constraint3);
+				
+				(constraint6, program2) := <calculate-wp>(program, constraint5, classname, methname);
+				constraint7 := <make-old> constraint6 
+				
+			
+/*
+*/
+	calculate-wp:
+		(Skip(), constraint, classname, methodname)
+			-> (constraint, Skip())
+
+	calculate-wp:
+		(Assign(path, expression), constraint1, classname, methname)
+			-> (And( constraint2, And(constraint3, constraint4)), Assign(path, expression))
+		where 
+			
+			path1 := <make-post-state> path;
+			constraint2 := <substitute> (constraint1, path1, expression);
+			constraint3 := <is-defined> (classname, methname, expression);
+			constraint4 := <is-defined> (classname, methname, path)
+
+	calculate-wp:
+		(New(o, cl), constraint1, classname, methname)
+			-> (And(constraint4, And(constraint3, constraint2)), New(o, cl))
+		where 
+			
+			constraint2 := <substitute> (constraint1, PathStart(cl, None()), Union(PathStart(cl, None()),Output(o)));
+			constraint3 := <is-defined> (classname, methname, Union(PathStart(cl, None()),Output(o)));
+			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()))
+
+
+				
+	calculate-wp:
+		(Guard(constraint1, program1), constraint2, classname, methname)
+			-> (And(constraint4, constraint3), Guard(constraint1, program2))
+		where
+			(constraint3, program2) := <calculate-wp> (program1, constraint2, classname, methname);
+			constraint4 := <is-defined>(classname, methname, constraint3)
+	calculate-wp:
+		(Sequence(program1, program2), constraint1, classname, methname)
+			-> (constraint3, Sequence(program4, program3))
+		where
+			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
+			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname)
+
+	calculate-wp:
+		(Choice(program1, program2), constraint1, classname, methname)
+			-> (Or(constraint2, constraint3), 
+				Choice(Guard(constraint2, program3), 
+					   Guard(constraint3, program4)))
+				where
+			(constraint2, program3) := <calculate-wp> (program1, constraint1, classname, methname);
+			(constraint3, program4) := <calculate-wp> (program2, constraint1, classname, methname)
+
+	calculate-wp:
+		(Parallel(program1, program2), constraint1, classname, methname)
+			-> (constraint3, Parallel(program3, program4))
+		where
+			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
+			//<debug> ("constraint2", constraint2);
+			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname)
+			//<debug> ("constraint3", constraint3)
+			
+
+
+	

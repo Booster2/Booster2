@@ -1,0 +1,679 @@
+module compile/relation
+
+imports
+  include/Booster2
+  
+  compile/expression
+  compile/valueExpression
+
+  elaborate/valueExpression
+
+  library/abstractBoosterModel
+  library/expression
+  library/valueExpression
+ 
+ rules
+ 	
+ 	
+
+/* 	program:
+		takes a relation, in the context of a class, and a method name,
+		and a model, and returns a candidate program to achieve 
+		the constraint as a goal			
+*/
+
+
+
+
+
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Assign(path1, expression)
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Int() := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
+			
+
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Assign(path1, expression)
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			String() := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
+
+
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Assign(path1, expression)
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Class(name) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name2 := <lookup-set-name> name;
+			<equal>(name, name2) 
+
+
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Assign(path1, expression)
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Optional(Int()) := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
+			
+
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Assign(path1, expression)
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Optional(String()) := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
+
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Assign(path1, expression)
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Optional(Class(name)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name2 := <lookup-set-name> name;
+			<equal>(name, name2) 
+			
+			
+	program:
+		(classname, methodname, In(expression, Path(a,b)))
+			-> Assign(path1, Union(path1, SetExtent([expression])))
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Set(Int()) := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
+
+	program:
+		(classname, methodname, In(expression, Path(a,b)))
+			-> Assign(path1, Union(path1, SetExtent([expression])))
+		where
+			path1 := <make-old> Path(a,b);
+			False() := <is-old> Path(a,b) ;
+			Set(String()) := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
+
+	program:
+		(classname, methodname, In(Output(o), PathStart(cl,Some(Primed()))))
+			-> New(o, cl) 
+		where
+			/*log(|Warning(), "Matching new"); */
+			path1 := <make-old> PathStart(cl,Some(Primed()));
+			False() := <is-old> PathStart(cl,Some(Primed())) ;
+			Set(Class(cl)) := <resolve-path-type> (classname, PathStart(cl,Some(Primed())), (classname, methodname))  
+
+
+			
+
+ 
+ /* Optional-to-Mandatory */
+	program:			
+		(classname, methodname, Equal(Path(a,b), Null()))
+			-> Parallel(Assign(path3, Null()),
+						Guard(NotEqual(path3, Null()),
+							  Assign(name2,
+							  		 Minus(name2,
+							  		 	   SetExtent([path3])))))
+		where
+			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name> (name2);
+			<equal>(name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+
+ /* Optional-to-Optional */
+	program:			
+		(classname, methodname, Equal(Path(a,b), Null()))
+			-> Parallel(Assign(path3, Null()),
+						Guard(NotEqual(path3, Null()),
+							  Assign(Path(path3, PathComponent(name6, None())),
+							  		 Null())))
+		where
+			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name> (name2);
+			<equal>(name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+	
+ /* Optional-to-Set-valued */
+	program:			
+		(classname, methodname, Equal(Path(a,b), Null()))
+			-> Parallel(Assign(path3, Null()),
+						Guard(NotEqual(path3, Null()),
+							  Assign(Path(Path(path3, 
+							  		 			PathComponent(name6, None()))),
+							  		 Minus(Path(path3, 
+							  		 			PathComponent(name6, None())), 
+							  		 	   SetExtent([path1])))))
+		where
+			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name> (name2);
+			<equal>(name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))		
+
+ /* Set-valued-to-Mandatory */
+	program:			
+		(classname, methodname, NotIn(expression, Path(a,b)))
+			-> Parallel(Assign(path3, Minus(path3, SetExtent([expression]))),
+					    Assign(PathStart(name2, None()),
+					    	   Minus(PathStart(name2, None()),
+					    	   		 SetExtent([path3]))))
+		where
+			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name> (name2);
+			<equal>(name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+			
+ /* Set-valued-to-Optional */
+	program:			
+		(classname, methodname, NotIn(expression, Path(a,b)))
+			-> Parallel(Assign(path3,
+							   Minus(path3, SetExtent([expression]))),
+						Assign(Path(expression, PathComponent(name6, None())),
+							   Null()))
+		where
+			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name> (name2);
+			<equal> (name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+			
+
+ /* Set-valued-to-Set-valued */
+	program:			
+		(classname, methodname, NotIn(expression, Path(a,b)))
+			-> Parallel(Assign(path3,
+							   Minus(path3, SetExtent([expression]))),
+						Assign(Path(expression, PathComponent(name6, None())),
+							   Minus(Path(expression, PathComponent(name6, None())), 
+							   		 SetExtent([path1]))))
+		where
+			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name> (name2);
+			<equal> (name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+
+/* Mandatory-to-Mandatory */
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Guard(NotIn(expression, name2), 
+				Parallel(Assign(path3, expression), 
+						 Assign(Path(expression,PathComponent(name6, None())),path1)))
+		where
+			Class(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal> (name, name2);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type>(classname, path1, (classname, methodname) );
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b)) ;
+			False() := <is-old> (Path(a,b))
+			
+/* Mandatory-to-Optional */
+	program:
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Parallel(Parallel(Assign(path3, expression),
+								 Assign(Path(expression, name6), path1)),
+						Assign(Path(path3, PathComponent(name6, None())), Null()) )
+		where
+			Class(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal> (name, name2);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type>(classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal> (name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+			
+/* Mandatory-to-Set-valued */
+	program:			
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Parallel(Parallel(Assign(path3, expression),
+								 Assign(Path(Path(path1, PathComponent(name3, None())), 
+								 			 PathComponent(name6, None())),
+								 		Minus(Path(Path(path1, PathComponent(name3, None())), 
+								 	    	  PathComponent(name6, None())), SetExtent([path1])))),
+						Assign(Path(expression, PathComponent(name6, None())), 
+							   Union(Path(expression, PathComponent(name6, None())),
+							   		 SetExtent([path1]))))
+								 
+		where
+			Class(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal> (name, name2);
+			name3 := <get-path-attribute-name>(Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+
+/* Optional-to-mandatory */
+	program:			
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Guard(NotIn(path3, name2),
+					 Parallel(Parallel(Assign(path3, expression),
+					 		  		   Choice(Guard(And(NotEqual(path3, Null()),
+					 		  			                NotEqual(path3, expression)),
+					 		  				        Assign(name2, Minus(name2, 
+					 		  							  		        SetExtent([Path(path1, 
+					 		  											                PathComponent(name3, None()))])))),
+					 		  			      Guard(Or(Equal(path3, Null()),
+					 		  			      		   Equal(path3, expression)),
+					 		  			      		Skip()))),
+					 		  Assign(Path(expression, PathComponent(name6, None())),
+					 		  	     path1)))
+		where
+			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal>(name, name2);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path>(Path(a,b));	
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old>(Path(a,b));
+			False() := <is-old> (Path(a,b))
+			
+/* Optional-to-optional */
+	program:			
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Parallel(Parallel(Assign(path3, expression),
+								 Choice(Guard(And(NotEqual(path3, Null()),
+								 				  NotEqual(path3, expression)),
+								 			  Assign(Path(Path(path1, PathComponent(name3, None())),
+								 			  			  PathComponent(name6, None())),
+								 			  		 Null())),
+								 		Guard(Or(Equal(path3, Null()),
+								 				 Equal(path3, expression)),
+								 			  Skip()))),
+						Parallel(Choice(Guard(And(NotEqual(Path(expression, PathComponent(name6, None())),
+														   Null()),
+												  NotEqual(Path(expression, PathComponent(name6, None())),
+														   path1)),
+											  Assign(Path(Path(expression, PathComponent(name6, None())),
+											  			  PathComponent(name3, None())),
+											  		 Null())),
+										Guard(Or(Equal(Path(expression, PathComponent(name6, None())),
+													   Null()),
+												 Equal(Path(expression, PathComponent(name6, None())),
+													   path1)),
+											  Skip())),
+								 Assign(Path(expression, PathComponent(name6, None())),
+								 		path1)))
+		where
+			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal>(name, name2);
+			name3 := <get-path-attribute-name>(Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite>((name4, name3));
+			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b)) 	
+	
+/* Optional-to-Set-valued */
+	program:			
+		(classname, methodname, Equal(Path(a,b), expression))
+			-> Parallel(Parallel(Assign(path3, expression),
+								 Choice(Guard(And(NotEqual(path3, Null()),
+								 				  NotEqual(path3, expression)),
+								 			  Assign(Path(Path(path1,
+								 			  				   PathComponent(name3,None())), 
+								 			  			  PathComponent(name6, None())),
+								 			  		 Minus(Path(Path(path1,
+								 			  				         PathComponent(name3,None())), 
+								 			  			        PathComponent(name6, None())),
+								 			  			   SetExtent([path1])))),
+								 		Guard(Or(Equal(path3, Null()),
+								 				 Equal(path3, expression)),
+								 			  Skip()))),
+						Assign(Path(expression, PathComponent(name6, None())),
+							   Union(Path(expression, PathComponent(name6, None())),
+							   		 SetExtent([path1]))))
+			
+		where
+			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal>(name, name2);
+			name3 := <get-path-attribute-name>(Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+
+		
+/* Set-valued-to-Mandatory */
+	program:			
+		(classname, methodname, In(expression, Path(a,b)))
+			-> (Guard(
+					NotIn(expression, path3), 
+					Parallel(
+							Parallel(
+									Assign(
+										path3,
+							  			Union(path3, SetExtent([expression]))),
+									Assign(
+										Path(expression, PathComponent(name6, None())),
+							   			path1)),
+							Assign(Path(Path(expression, PathComponent(name6, None())),
+								 	   			   PathComponent(name3, None())),
+								 	   		  Minus(Path(Path(expression, PathComponent(name6, None())),
+								 	   			   	     PathComponent(name3, None())),
+								 	   			   	SetExtent([expression]))))))
+		where
+			Set(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal>(name, name2);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+
+/* Set-valued-to-Optional */
+	program:			
+		(classname, methodname, In(expression, Path(a,b)))
+			-> Parallel(Parallel(Assign(path3,
+										Union(path3, SetExtent([expression]))),
+								 Guard(NotEqual(Path(expression, 
+								 					 PathComponent(name6, None())),
+								 				Null()),
+								 	   Assign(Path(Path(expression, PathComponent(name6, None())),
+								 	   			   PathComponent(name3, None())),
+								 	   		  Minus(Path(Path(expression, PathComponent(name6, None())),
+								 	   			   	     PathComponent(name3, None())),
+								 	   			   	SetExtent([Path(expression, PathComponent(name6, None()))]))))),
+						Assign(Path(expression, PathComponent(name6, None())),
+							   path1))
+		where
+			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal>(name, name2);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+		
+/* Set-valued-to-Set-valued */
+	program:			
+		(classname, methodname, In(expression, Path(a,b)))
+			-> Parallel(Assign(path3,
+							   Union(path3,
+							   		 SetExtent([expression]))),
+						Assign(Path(expression, PathComponent(name6, None())),
+							   Union(Path(expression, PathComponent(name6, None())),
+							   		 SetExtent([path1]))))
+		where
+			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
+			name := <lookup-class-name>(name2);
+			<equal>(name2, name);
+			name3 := <get-path-attribute-name> (Path(a,b));
+			path1 := <get-path-initial-path> (Path(a,b));
+			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			<equal>(name4, name5);
+			path3 := <make-old> (Path(a,b));
+			False() := <is-old> (Path(a,b))
+
+					
+/* Default */
+
+	program:
+		(classname, methodname, relation1)
+			-> Guard(relation2, Skip())
+		where
+			relation2 := <make-old> (relation1);
+			log(|Warning(), "cannot determine program", relation1)
+
+			
+			
+
+/* 	is-defined:
+		takes an expression in the context of a model, a classname, 
+		and a methodname, and returns a constraint
+*/			
+			
+	is-defined:
+		(classname, method, Equal(expr1, expr2))
+			-> And(And(constraint1, constraint2), Equal(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, NotEqual(expr1, expr2))
+			-> And(And(constraint1, constraint2), NotEqual(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, In(expr1, expr2))
+			-> And(And(constraint1, constraint2), In(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, NotIn(expr1, expr2))
+			-> And(And(constraint1, constraint2), NotIn(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, LessThan(expr1, expr2))
+			-> And(And(constraint1, constraint2), LessThan(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, GreaterThan(expr1, expr2))
+			-> And(And(constraint1, constraint2), GreaterThan(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, LessThanEquals(expr1, expr2))
+			-> And(And(constraint1, constraint2), LessThanEquals(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, GreaterThanEquals(expr1, expr2))
+			-> And(And(constraint1, constraint2), GreaterThanEquals(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, Subset(expr1, expr2))
+			-> And(And(constraint1, constraint2), Subset(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, SubsetEquals(expr1, expr2))
+			-> And(And(constraint1, constraint2), SubsetEquals(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, Superset(expr1, expr2))
+			-> And(And(constraint1, constraint2), Superset(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+	is-defined:
+		(classname, method, SupersetEquals(expr1, expr2))
+			-> And(And(constraint1, constraint2), SupersetEquals(expr1, expr2))
+		where
+			constraint1 := <is-defined> (classname, method, expr1);
+			constraint2 := <is-defined> (classname, method, expr2)
+		
+
+
+/* 	make-old:
+		takes a relation, and returns its representation in the 
+		pre-state of a method 			
+*/
+
+	make-old:
+		Equal(expr1, expr2)
+			-> Equal(expr3, expr4)
+		where
+			expr3 := <make-old> expr1;
+			expr4 := <make-old> expr2
+
+
+	make-old:
+		NotEqual(expr1, expr2)
+			-> NotEqual(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		In(expr1, expr2)
+			-> In(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		NotIn(expr1, expr2)
+			-> NotIn(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		LessThan(expr1, expr2)
+			-> LessThan(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		GreaterThan(expr1, expr2)
+			-> GreaterThan(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		LessThanEquals(expr1, expr2)
+			-> LessThanEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		GreaterThanEquals(expr1, expr2)
+			-> GreaterThanEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Subset(expr1, expr2)
+			-> Subset(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		SubsetEquals(expr1, expr2)
+			-> SubsetEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Superset(expr1, expr2)
+			-> Superset(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		SupersetEquals(expr1, expr2)
+			-> SupersetEquals(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+

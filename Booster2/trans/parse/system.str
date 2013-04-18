@@ -1,0 +1,53 @@
+ module parse/system
+
+imports
+  include/Booster2
+  
+  parse/class
+  
+  	
+rules
+
+	get-system-name:
+		System(sysname,systemComponents) 
+  			-> sysname
+	
+	
+/* get-sets: 
+		Takes a System and returns the sets
+*/
+	get-sets:
+  		System(sysname,[SetDef(name,elems),systemComponents*]) 
+  			-> <union>([SetDef(name,elems)],sets)
+  	with
+  		sets := <get-sets> System(sysname, systemComponents*)
+
+	get-sets:
+  		System(sysname, []) -> [] 
+  	
+	get-sets:
+  		System(sysname, [ Class(name,classComponents),systemComponents*]) 
+  			-> sets
+  	with
+  		sets := <get-sets> System(sysname, systemComponents*)
+  		
+ 
+/* get-classes-from-system: 
+		Takes a list of system components and returns a set of 
+		classes
+*/
+
+	get-classes-from-system:
+  		System(sysname, [SetDef(name,elems),systemComponents*]) 
+  			-> classes
+  	with
+  		classes := <get-classes-from-system> System(sysname, [systemComponents*])
+
+	get-classes-from-system:
+  		System(sysname,[]) -> [] 
+  	
+	get-classes-from-system:
+  		System(sysname,[Class(name,classComponents),systemComponents*])  
+  			-> <union>([Class(name,classComponents)],classes)
+  	with
+  		classes := <get-classes-from-system> System(name, [systemComponents*])

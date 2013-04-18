@@ -1,0 +1,596 @@
+ module library/expression
+
+imports
+
+  include/Booster2
+    
+  library/valueExpression
+
+rules
+	
+	
+
+/* 	get-mentioned-attributes:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/
+
+ 	get-mentioned-attributes:
+		(name, maybename, Head(expr))
+			-> atts
+		with
+			atts := <get-mentioned-attributes> (name, maybename, expr)
+ 
+ 	get-mentioned-attributes:
+		(name, maybename, Tail(expr))
+			-> atts
+		with
+			atts := <get-mentioned-attributes> (name, maybename, expr)
+ 
+ 	get-mentioned-attributes:
+		(name, maybename, Negative(expr))
+			-> atts
+		with
+			atts := <get-mentioned-attributes> (name, maybename, expr)
+ 
+ 	get-mentioned-attributes:
+		(name, maybename, Cardinality(expr))
+			-> atts
+		with
+			atts := <get-mentioned-attributes> (name, maybename, expr)
+ 
+ 	get-mentioned-attributes:
+		(name, maybename, Plus(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Minus(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Times(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Divide(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Maximum(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Minimum(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Union(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Intersection(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+	
+ 	get-mentioned-attributes:
+		(name, maybename, Concat(expr1, expr2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+
+
+/* 	is-old:
+		takes an expression, and returns True() or False()
+		depending on whether the expression can be evaluated in the pre-state
+		or not. 			
+*/
+
+	is-old:
+		Head(expr1)
+			-> True()
+		where
+			True() := <is-old> (expr1)
+
+	is-old:
+		Tail(expr1)
+			-> True()
+		where
+			True() := <is-old> (expr1)
+
+	is-old:
+		Cardinality(expr1)
+			-> True()
+		where
+			True() := <is-old> (expr1)
+
+	is-old:
+		Negative(expr1)
+			-> True()
+		where
+			True() := <is-old> (expr1)
+
+	is-old:
+		Plus(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Minus(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Times(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Divide(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Maximum(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Minimum(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Union(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Intersection(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+
+	is-old:
+		Concat(expr1, expr2)
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> expr2
+			
+			
+/* get-expression-type
+*/
+
+	get-expression-type:
+		(Head(expr1), classname, methodname)
+			-> String()
+		where
+			String() := <get-expression-type> (expr1, classname, methodname)
+			
+	get-expression-type:
+		(Head(expr1), classname, methodname)
+			-> type1
+		where
+			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+				
+	get-expression-type:
+		(Tail(expr1), classname, methodname)
+			-> String()
+		where
+			String() := <get-expression-type> (expr1, classname, methodname)
+			
+	get-expression-type:
+		(Tail(expr1), classname, methodname)
+			-> type1
+		where
+			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Negative(expr1), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Cardinality(expr1), classname, methodname)
+			-> Int()
+		where
+			String() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Cardinality(expr1), classname, methodname)
+			-> Int()
+		where
+			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Plus(expr1, expr2), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname);
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Minus(expr1, expr2), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname);
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Times(expr1, expr2), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname);
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Divide(expr1, expr2), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname);
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Maximum(expr1, expr2), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname);
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Maximum(expr1, expr2), classname, methodname)
+			-> String()
+		where
+			String() := <get-expression-type> (expr1, classname, methodname);
+			String() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Minimum(expr1, expr2), classname, methodname)
+			-> Int()
+		where
+			Int() := <get-expression-type> (expr1, classname, methodname);
+			Int() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Minimum(expr1, expr2), classname, methodname)
+			-> String()
+		where
+			String() := <get-expression-type> (expr1, classname, methodname);
+			String() := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Union(expr1, expr2), classname, methodname)
+			-> Set(type1)
+		where
+			Set(type1) := <get-expression-type> (expr1, classname, methodname);
+			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Intersection(expr1, expr2), classname, methodname)
+			-> Set(type1)
+		where
+			Set(type1) := <get-expression-type> (expr1, classname, methodname);
+			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+
+	get-expression-type:
+		(Concat(expr1, expr2), classname, methodname)
+			-> String()
+		where
+			String() := <get-expression-type> (expr1, classname, methodname);
+			String() := <get-expression-type> (expr1, classname, methodname)
+
+
+	substitute:
+		 (Head(expression1), path, expression)
+		 	-> Head(expression2)
+		 where
+		 	expression2 := <substitute>	(expression1, path, expression)
+
+	substitute:
+		 (Tail(expression1), path, expression)
+		 	-> Tail(expression2)
+		 where
+		 	expression2 := <substitute>	(expression1, path, expression)
+
+	substitute:
+		 (Cardinality(expression1), path, expression)
+		 	-> Cardinality(expression2)
+		 where
+		 	expression2 := <substitute>	(expression1, path, expression)
+
+	substitute:
+		 (Negative(expression1), path, expression)
+		 	-> Negative(expression2)
+		 where
+		 	expression2 := <substitute>	(expression1, path, expression)
+
+	substitute:
+		 (Plus(expression1, expression2), path, expression)
+		 	-> Plus(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+			 	
+	substitute:
+		 (Minus(expression1, expression2), path, expression)
+		 	-> Minus(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		 (Times(expression1, expression2), path, expression)
+		 	-> Times(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		 (Divide(expression1, expression2), path, expression)
+		 	-> Divide(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		 (Maximum(expression1, expression2), path, expression)
+		 	-> Maximum(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		 (Minimum(expression1, expression2), path, expression)
+		 	-> Minimum(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		 (Union(expression1, expression2), path, expression)
+		 	-> Union(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		 (Intersection(expression1, expression2), path, expression)
+		 	-> Intersection(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+	substitute:
+		(Concat(expression1, expression2), path, expression)
+		 	-> Concat(expression3, expression4)
+		 where
+		 	expression3 := <substitute>	(expression1, path, expression);
+		 	expression4 := <substitute>	(expression2, path, expression)
+
+/* 	make-old:
+		takes an expression, and returns its representation in the 
+		pre-state of a method 			
+*/
+
+	make-old:
+		Head(expr1)
+			-> Head(expr2)
+		where
+			expr2 := <make-old> (expr1)
+
+	make-old:
+		Tail(expr1)
+			-> Tail(expr2)
+		where
+			expr2 := <make-old> (expr1)
+
+	make-old:
+		Negative(expr1)
+			-> Negative(expr2)
+		where
+			expr2 := <make-old> (expr1)
+
+	make-old:
+		Cardinality(expr1)
+			-> Cardinality(expr2)
+		where
+			expr2 := <make-old> (expr1)
+
+
+	make-old:
+		Plus(expr1, expr2)
+			-> Plus(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Minus(expr1, expr2)
+			-> Minus(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Times(expr1, expr2)
+			-> Times(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Divide(expr1, expr2)
+			-> Divide(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Maximum(expr1, expr2)
+			-> Maximum(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Minimum(expr1, expr2)
+			-> Minimum(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Union(expr1, expr2)
+			-> Union(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Intersection(expr1, expr2)
+			-> Intersection(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+
+	make-old:
+		Concat(expr1, expr2)
+			-> Concat(expr3, expr4)
+		where
+			expr3 := <make-old> (expr1);
+			expr4 := <make-old> (expr2)
+			
+			
+/* 	make-post-state:
+		takes an expression, and returns its representation in the 
+		pre-state of a method 			
+*/
+
+	make-post-state:
+		Head(expr1)
+			-> Head(expr2)
+		where
+			expr2 := <make-post-state> (expr1)
+
+	make-post-state:
+		Tail(expr1)
+			-> Tail(expr2)
+		where
+			expr2 := <make-post-state> (expr1)
+
+	make-post-state:
+		Negative(expr1)
+			-> Negative(expr2)
+		where
+			expr2 := <make-post-state> (expr1)
+
+	make-post-state:
+		Cardinality(expr1)
+			-> Cardinality(expr2)
+		where
+			expr2 := <make-post-state> (expr1)
+
+
+	make-post-state:
+		Plus(expr1, expr2)
+			-> Plus(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Minus(expr1, expr2)
+			-> Minus(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Times(expr1, expr2)
+			-> Times(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Divide(expr1, expr2)
+			-> Divide(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Maximum(expr1, expr2)
+			-> Maximum(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Minimum(expr1, expr2)
+			-> Minimum(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Union(expr1, expr2)
+			-> Union(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Intersection(expr1, expr2)
+			-> Intersection(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)
+
+	make-post-state:
+		Concat(expr1, expr2)
+			-> Concat(expr3, expr4)
+		where
+			expr3 := <make-post-state> (expr1);
+			expr4 := <make-post-state> (expr2)

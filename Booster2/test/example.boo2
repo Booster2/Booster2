@@ -1,19 +1,9 @@
 /**
 * Example Booster2 program.
 */  
-module example
 
-entity User {
-  name     : String
-  password : String
-  homepage : URL
-}
+System something
+	
 
-entity BlogPosting {
-  poster : User
-  body   : String
-}
 
-entity URL {
-  location : String
-}
+

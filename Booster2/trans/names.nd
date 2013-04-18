@@ -1,4 +1,5 @@
 module names
+/* 
 
 imports
 	
@@ -27,3 +28,4 @@ rules
 		refers to Entity x
 		refers to Entity "String"
 		refers to Entity "Int"
+*/

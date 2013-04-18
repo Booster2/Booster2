@@ -4,14 +4,33 @@ exports
 
   lexical syntax
   
-    [a-zA-Z][a-zA-Z0-9]* -> ID
-    "-"? [0-9]+          -> INT
+    [a-zA-Z][a-zA-Z0-9\_]* -> ID
+    
+    
+    'this' -> ID {reject}
+    'null' -> ID {reject}
+    'false' -> ID {reject}
+    'true' -> ID {reject}
+    'string' -> ID {reject}
+    'int' -> ID {reject}
+    'attributes' -> ID {reject}
+    'system' -> ID {reject}
+    'invariant' -> ID {reject}
+    'methods' -> ID {reject}
+    
+    "-"? [0-9]+            -> INT
     
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar
     "\\\""                -> StringChar
     BackSlashChar         -> StringChar
     "\\"                  -> BackSlashChar
+    
+    "'" SQLStringChar* "'" -> SQLSTRING
+    ~[\'\n]               -> SQLStringChar
+    "\\'"                -> SQLStringChar
+    BackSlashChar         -> SQLStringChar
+    
     
     [\ \t\n\r] -> LAYOUT
     

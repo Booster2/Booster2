@@ -1,0 +1,25 @@
+module parse/method
+
+imports
+  include/Booster2
+  
+ 
+ 
+ rules
+ 	
+/* get-method-name: 
+		Takes a method and returns its name.
+*/
+ 	
+ 	get-method-name:
+ 		Method(methName, methConstraint)
+ 		 	-> methName
+
+/* get-method-constraint: 
+		Takes a method and returns its name.
+*/
+ 	
+ 	get-method-constraint:
+ 		Method(methName, methConstraint)
+ 		 	-> methConstraint
+

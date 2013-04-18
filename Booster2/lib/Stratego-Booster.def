@@ -1,0 +1,1623 @@
+definition
+module AbstractBoosterModel
+
+imports Common Booster2 Relational
+
+exports
+
+   context-free start-symbols
+  	MaxMult Ordering Type GuardedCommand 
+  	  	
+  context-free syntax
+    
+  INT -> MaxMult {cons("MaxMult")}
+  "*" -> MaxMult {cons("MaxMult")}
+  MaxMult -> BoosterTerm
+  
+  "SET" -> Ordering {cons("Ordering")}
+  "OSET" -> Ordering {cons("Ordering")}
+  "SEQ" -> Ordering {cons("Ordering")}
+  Ordering -> BoosterTerm
+  
+  'null' -> Type {cons("Null")}
+  'INT' -> Type {cons("Int")}
+  'STRING' -> Type {cons("String")}
+  ID -> Type {cons("Class")}
+
+  '[' Type ']' -> Type {cons("Optional")}
+  'set' '(' Type ')' -> Type {cons("Set")}
+   
+  'skip' -> GuardedCommand {cons("Skip"), prefer}
+  Path ':=' Expression -> GuardedCommand {cons("Assign"), left}
+  'new' ID '!' ':' ID -> GuardedCommand {cons("New")}
+  Constraint '-->' GuardedCommand -> GuardedCommand {cons("Guard"), left}
+  GuardedCommand '||' GuardedCommand -> GuardedCommand {cons("Parallel"), left}
+  GuardedCommand ';'  GuardedCommand -> GuardedCommand {cons("Sequence"), left}
+  GuardedCommand "[" "]" GuardedCommand -> GuardedCommand {cons("Choice"), left}
+  'ALL' ID ':' Expression '.' GuardedCommand -> GuardedCommand {cons("Any"), prefer}
+  'ANY' ID ':' Expression '.' GuardedCommand -> GuardedCommand {cons("All"), prefer}
+  "(" GuardedCommand ")" -> GuardedCommand {bracket}
+  GuardedCommand -> BoosterTerm
+  
+priorities
+  'skip' -> GuardedCommand
+  > Path ':=' Expression -> GuardedCommand
+  > Constraint '-->' GuardedCommand -> GuardedCommand
+  > GuardedCommand '||' GuardedCommand -> GuardedCommand  
+  > GuardedCommand ';'  GuardedCommand -> GuardedCommand 
+  > GuardedCommand "[" "]" GuardedCommand -> GuardedCommand
+  
+
+module Relational
+
+imports Common
+
+exports
+
+   context-free start-symbols
+  	Schema
+  	  	
+  context-free syntax
+    
+  
+	'schema' ID "{" {Table "," }* {Procedure "," }* {Statement ","}* "}" -> Schema {cons("Schema")}
+
+	'table' ID "{" {Column "," }* "}" -> Table {cons("Table")}
+	
+	
+	'column'  ID STRING BOOL SQLType Extra Key Reference?-> Column {cons("Column")}
+	%% name, default, isNullable, type, 'auto-increment', key 
+	
+	
+	'varchar' '(' INT ')' -> SQLType {cons("Varchar")}
+	
+	'INT'  -> SQLType {cons("Int")}
+	
+	'bit' -> SQLType {cons("Bit")}
+	
+	'datetime'  -> SQLType {cons("Datetime")}
+	
+	'true' -> BOOL {cons("True")}
+	'false' -> BOOL {cons("False")}
+	
+	'auto_increment' -> Extra {cons("AutoIncrement")}
+	'/"/"' -> Extra {cons("NoExtra")}
+	
+	'Primary' -> Key {cons("Primary")}
+	'Unique' -> Key {cons("Unique")}
+	'Multiple' -> Key {cons("Multiple")}
+	'None' -> Key {cons("NoKey")}
+	
+	'References' ID '(' { ID "," }* ')' -> Reference {cons("Reference")}
+	
+	"(" {Statement ";" }*  ")" -> StatementList {cons("StatementList")}
+	
+	'procedure' ID "(" {Parameter "," }*  ")" DeclareList StatementList -> Procedure {cons("Procedure")}
+	
+	'in' ID SQLType -> Parameter {cons("Input")}
+	'out' ID SQLType -> Parameter {cons("Output")}
+	'inout' ID SQLType -> Parameter {cons("InOut")}
+	
+	'if' SQLExpression 'then' StatementList
+		{ ElseIf ";" }*
+		Else?
+	'end if'   -> Statement {cons("IfThen")}
+
+	'begin' DeclareList StatementList 'end'   -> Statement {cons("BeginEnd")}
+
+	Update -> Statement
+	Query -> Statement 
+	Insert -> Statement {cons("Insert")}
+	'delete' -> Statement {cons("Delete")}
+
+	
+	'true' -> SQLExpression {cons("True")}
+	'false' -> SQLExpression {cons("False")}
+	
+	'elseif' SQLExpression 'then' StatementList -> ElseIf {cons("ElseIf")}
+	'else' StatementList -> Else {cons("Else")}
+	
+	 SQLExpression "OR" SQLExpression -> SQLExpression {cons("Or")}
+	 SQLExpression "||" SQLExpression -> SQLExpression {cons("Or")}
+  	 SQLExpression "XOR" SQLExpression -> SQLExpression {cons("Xor")}
+  	 SQLExpression "AND" SQLExpression -> SQLExpression {cons("And")}
+  	 SQLExpression "&&" SQLExpression -> SQLExpression {cons("And")}
+  	 "NOT" SQLExpression -> SQLExpression {cons("Not")}
+  	 "!" SQLExpression -> SQLExpression {cons("Not")}
+   	 BooleanPrimary "IS" Not? TFU -> SQLExpression {cons("Is")}
+   	 BooleanPrimary -> SQLExpression
+   	 SimpleExpression -> SQLExpression
+   
+   "True" -> TFU {cons("True")}
+   "False" -> TFU {cons("False")}
+   "Unknown" -> TFU {cons("Unknown")}
+   
+   "Not" -> Not{cons("Not")}
+
+    BooleanPrimary "IS" Not? "NULL" -> BooleanPrimary {cons("IsNull")}
+    BooleanPrimary "<=>" Predicate -> BooleanPrimary {cons("Iff")}
+    BooleanPrimary "=" BooleanPrimary -> BooleanPrimary {cons("Equal")}
+    BooleanPrimary ">=" BooleanPrimary -> BooleanPrimary {cons("GreaterThanEqual")}
+    BooleanPrimary ">" BooleanPrimary -> BooleanPrimary {cons("GreaterThan")}
+    BooleanPrimary "<=" BooleanPrimary -> BooleanPrimary {cons("LessThanEqual")}
+    BooleanPrimary "<" BooleanPrimary -> BooleanPrimary {cons("LessThan")}
+    BooleanPrimary "<>" BooleanPrimary -> BooleanPrimary {cons("NotEqual")}
+    BooleanPrimary "!=" BooleanPrimary -> BooleanPrimary {cons("NotEqual")}
+
+	BooleanPrimary "=" AllAny Query -> BooleanPrimary {cons("Equal")}
+    BooleanPrimary ">=" AllAny Query -> BooleanPrimary {cons("GreaterThanEqual")}
+    BooleanPrimary ">" AllAny Query -> BooleanPrimary {cons("GreaterThan")}
+    BooleanPrimary "<=" AllAny Query -> BooleanPrimary {cons("LessThanEqual")}
+    BooleanPrimary "<" AllAny Query -> BooleanPrimary {cons("LessThan")}
+    BooleanPrimary "<>" AllAny Query -> BooleanPrimary {cons("NotEqual")}
+    BooleanPrimary "!=" AllAny Query -> BooleanPrimary {cons("NotEqual")}
+    
+	"ALL" -> AllAny {cons("All")}
+	"ANY" -> AllAny {cons("All")}
+	
+	Predicate -> BooleanPrimary
+	
+	BitExpression Not? "IN" Query -> Predicate {cons("InQuery")}
+    BitExpression Not? "IN" SetExpression -> Predicate {cons("InSet")}
+    BitExpression Not? "BETWEEN" BitExpression "AND" Predicate -> Predicate {cons("Between")}
+    BitExpression "SOUNDS LIKE" BitExpression -> Predicate {cons("SoundsLike")}
+    BitExpression Not? "LIKE" SimpleExpression Escape? -> Predicate {cons("Like")}
+    BitExpression Not? "REGEXP" BitExpression -> Predicate {cons("Regexp")}
+    BitExpression -> Predicate
+    
+    "ESCAPE" SimpleExpression -> Escape {cons("Escape")}
+    
+    BitExpression "|" BitExpression -> BitExpression {cons("BitOr")}
+    BitExpression "&" BitExpression -> BitExpression {cons("BitAnd")}
+    BitExpression "<<" BitExpression -> BitExpression {cons("BitShiftLeft")}
+    BitExpression ">>" BitExpression -> BitExpression {cons("BitShiftRight")}
+    BitExpression "+" BitExpression -> BitExpression {cons("Plus")}
+    BitExpression "-" BitExpression -> BitExpression {cons("Minus")}
+    BitExpression "*" BitExpression -> BitExpression {cons("Multiply")}
+    BitExpression "/" BitExpression -> BitExpression {cons("Divide")}
+    BitExpression "DIV" BitExpression -> BitExpression {cons("Div")}
+    BitExpression "MOD" BitExpression -> BitExpression {cons("Mod")}
+    BitExpression "%" BitExpression -> BitExpression {cons("Percent")}
+    BitExpression "^" BitExpression -> BitExpression {cons("Power")}
+    BitExpression "+" IntervalExpression -> BitExpression {cons("PlusInt")}
+    BitExpression "-" IntervalExpression -> BitExpression {cons("MinusInt")}
+    SimpleExpression -> BitExpression
+    
+    
+    Literal -> SimpleExpression
+    Identifier -> SimpleExpression
+    FunctionCall -> SimpleExpression
+    SimpleExpression "COLLATE" CollationName -> SimpleExpression {cons("Collate")}
+    ParamMarker -> SimpleExpression
+    Variable -> SimpleExpression
+    SimpleExpression "||" SimpleExpression -> SimpleExpression {cons("Or")}
+    "+" SimpleExpression -> SimpleExpression {cons("UnaryPlus")}
+    "-" SimpleExpression -> SimpleExpression {cons("UnaryMinus")}
+    "~" SimpleExpression -> SimpleExpression {cons("Reverse")}
+    "!" SimpleExpression -> SimpleExpression {cons("Not")}
+    "BINARY" SimpleExpression -> SimpleExpression {cons("Binary")}
+    '(' {SQLExpression ","}+ ')' -> SetExpression {cons("SetExpression")}
+    SetExpression -> SimpleExpression 
+    "ROW" SQLExpression "," {SQLExpression ","}+ -> SimpleExpression {cons("Row")}
+    Query -> SimpleExpression
+    "EXISTS" Query -> SimpleExpression {cons("Exists")}
+    '{' Identifier SQLExpression '}' -> SimpleExpression {cons("EscapeSyntax")}
+    MatchExpression -> SimpleExpression
+    CaseExpression -> SimpleExpression
+    IntervalExpression -> SimpleExpression
+    
+    SQLSTRING -> Literal {cons("String")}
+    INT -> Literal {cons("Int")}
+    'true' -> Literal {cons("True")}
+    'false' -> Literal {cons("False")}
+    'null' -> Literal {cons("Null")}
+    
+    ID -> Identifier {cons("ColumnName")}
+    ID '.' ID -> Identifier {cons("TableColumnName")}
+    ID '.' ID '.' ID -> Identifier {cons("DBTableColumnName")}
+    
+    '@' ID -> Variable {cons("LocalVariable")}
+    ID -> Variable {cons("SystemVariable")}
+    
+    '?' -> ParamMarker {cons("Marker")}
+    
+    "MATCH" '(' {ID ","}+ ')' "AGAINST" '(' SQLExpression SearchModifier?')' -> MatchExpression {cons("MatchExpression")}
+    
+    "IN BOOLEAN MODE" -> SearchModifier {cons("InBooleanMode")}
+    "WITH QUERY EXPANSION" -> SearchModifier {cons("WithQueryExpansion")}
+    
+    "INTERVAL" SQLExpression Unit -> IntervalExpression {cons("IntervalExpression")}
+    
+    "MICROSECOND" -> Unit {cons("MicroSecondUnit")}
+	"SECOND" -> Unit {cons("SecondUnit")}
+	"MINUTE" -> Unit {cons("MinuteUnit")}
+	"HOUR" -> Unit {cons("HourUnit")}
+	"DAY" -> Unit {cons("DayUnit")}
+	"WEEK" -> Unit {cons("WeekUnit")}
+	"MONTH" -> Unit {cons("MonthUnit")}
+	"QUARTER" -> Unit {cons("QuarterUnit")}
+	"YEAR" -> Unit {cons("YearUnit")}
+	"SECOND_MICROSECOND" -> Unit {cons("SecondMicroSecondUnit")}
+	"MINUTE_MICROSECOND" -> Unit {cons("MinuteMicroSecondUnit")}
+	"MINUTE_SECOND" -> Unit {cons("MinuteSecondUnit")}
+	"HOUR_MICROSECOND" -> Unit {cons("HourMicroSecondUnit")}
+	"HOUR_SECOND" -> Unit {cons("HourSecondUnit")}
+	"HOUR_MINUTE" -> Unit {cons("HourMinuteUnit")}
+	"DAY_MICROSECOND" -> Unit {cons("DayMicroSecondUnit")}
+	"DAY_SECOND" -> Unit {cons("DaySecondUnit")}
+	"DAY_MINUTE" -> Unit {cons("DayMinuteUnit")}
+	"DAY_HOUR" -> Unit {cons("DayHourUnit")}
+	"YEAR_MONTH" -> Unit {cons("YearMonthUnit")}
+	
+	"CASE" SQLExpression {CaseWhen ""}+ CaseElse? "END" -> CaseExpression {cons("CaseExpression")} 
+	
+	"WHEN" SQLExpression "THEN" SQLExpression -> CaseWhen {cons("CaseWhen")}
+	
+	"ELSE" SQLExpression -> CaseElse {cons("CaseElse")}
+	
+	ID '(' {Parameter ","}* ')' -> FunctionCall {cons("FunctionCall")}
+	
+	SQLExpression -> Parameter
+	
+	ID -> CollationName
+	
+	"SELECT"
+	{SelectType ""}*
+    {SelectExpression ","}+
+    FromPart?
+    WherePart?
+	GroupByPart?
+    HavingPart?
+	OrderByPart?
+	LimitPart?
+	ProcedurePart?
+	IntoPart?
+	ModePart? -> Query {cons("Select")}
+   
+	
+	"ALL" -> SelectType {cons("All")}
+	"DISTINCT" -> SelectType {cons("Distinct")}
+	"DISTINCTROW" -> SelectType {cons("DistinctRow")}
+    "HIGH_PRIORITY" -> SelectType {cons("HighPriority")}
+    "STRAIGHT_JOIN" -> SelectType {cons("StraightJoin")}
+    "SQL_SMALL_RESULT"  -> SelectType {cons("SmallResult")}
+    "SQL_BIG_RESULT" -> SelectType {cons("BigResult")}
+    "SQL_BUFFER_RESULT" -> SelectType {cons("BufferResult")}
+    "SQL_CACHE" -> SelectType {cons("Cache")}
+    "SQL_NO_CACHE" -> SelectType {cons("NoCache")}
+    "SQL_CALC_FOUND_ROWS" -> SelectType {cons("CalcFoundRows")}
+    
+    
+    SQLExpression -> SelectExpression
+    ID -> SelectExpression {cons("ColumnName")}
+    ID '.' ID -> SelectExpression {cons("TableColumnName")}
+    SQLExpression 'AS' ID -> SelectExpression {cons("ExpressionAs")}
+    ID 'AS' ID  -> SelectExpression {cons("ColumnNameAs")}
+    ID '.' ID 'AS' ID  -> SelectExpression {cons("TableColumnNameAs")}
+    '*' -> SelectExpression {cons("Star")}
+    
+    "FROM" {TableReference ""}* -> FromPart {cons("FromPart")}
+    
+    "WHERE" SQLExpression -> WherePart {cons("Where")}
+
+    "GROUP BY" SQLExpression
+     Order? 
+     Rollup? -> GroupByPart {cons("GroupByPart")}
+     
+     "WITH ROLLUP" -> Rollup {cons("Rollup")}
+     
+     "ASC" -> Order {cons("Ascending")}
+     "DESC" -> Order {cons("Descending")}
+	
+	"HAVING" SQLExpression -> HavingPart {cons("HavingPart")}
+	
+	 "ORDER BY" SQLExpression
+     Order? -> OrderByPart {cons("OrderByPart")}
+
+     "LIMIT" INT? INT -> LimitPart {cons("LimitOffset")}
+     "LIMIT" INT "OFFSET" INT -> LimitPart {cons("LimitOffset")}
+
+
+     "PROCEDURE" ID '(' {Parameter "," }* ')' -> ProcedurePart {cons("ProcedurePart")}
+
+     "INTO OUTFILE" SQLSTRING
+     CharSet?
+     ExportOptions -> IntoPart {cons("IntoOutFile")}
+
+     "INTO DUMPFILE" SQLSTRING -> IntoPart {cons("IntoDumpFile")}
+     "INTO" { ID ","}*  -> IntoPart {cons("Into")}
+      
+     "CHARACTER SET" ID -> CharSet {cons("CharSet")} 
+      
+     "FOR UPDATE" -> ModePart {cons("ForUpdate")}
+     "LOCK IN SHARE MODE" -> ModePart {cons("LockShareMode")}
+
+	 "ExportOptionsUnknown" -> ExportOptions {cons("ExportOptions")}
+	 
+	 TableFactor -> TableReference
+     JoinTable -> TableReference
+
+    ID -> TableFactor {cons("TableName")}
+    ID Alias {IndexHint ""}* -> TableFactor {cons("Aliased")}
+    Query Alias -> TableFactor {cons("Query")}
+    '(' {TableReference ""}* ')' -> TableFactor {cons("Bracket")}
+    "OJ" TableReference 'LEFT OUTER JOIN' TableReference
+        "ON" SQLExpression -> TableFactor {cons("OJ")}
+
+     "AS" ID -> Alias {cons("Alias")}
+
+	
+    TableReference "INNER JOIN" TableFactor JoinCondition? -> JoinTable {cons("InnerJoin")}
+    TableReference "CROSS JOIN" TableFactor JoinCondition? -> JoinTable {cons("CrossJoin")}
+    TableReference "STRAIGHT_JOIN" TableFactor JoinCondition? -> JoinTable {cons("StraightJoin")}
+    TableReference "LEFT JOIN" TableReference JoinCondition -> JoinTable {cons("LeftJoin")}
+    TableReference "LEFT OUTER JOIN" TableReference JoinCondition -> JoinTable {cons("LeftOuterJoin")}
+    TableReference "RIGHT JOIN" TableReference JoinCondition -> JoinTable {cons("RightJoin")}
+    TableReference "RIGHT OUTER JOIN" TableReference JoinCondition -> JoinTable {cons("RightOuterJoin")}
+    TableReference "NATURAL LEFT JOIN" TableFactor JoinCondition -> JoinTable {cons("NaturalLeftJoin")}
+    TableReference "NATURAL LEFT OUTER JOIN" TableFactor JoinCondition -> JoinTable {cons("NaturalLeftOuterJoin")}
+    TableReference "NATURAL RIGHT JOIN" TableFactor JoinCondition -> JoinTable {cons("NaturalRightJoin")}
+    TableReference "NATURAL RIGHT OUTER JOIN" TableFactor JoinCondition -> JoinTable {cons("NaturalRightOuterJoin")}
+
+
+    "ON" SQLExpression -> JoinCondition {cons("On")}
+    "USING" {ID ","}+ -> JoinCondition {cons("Using")}
+
+
+    "USE" IndexKey ForClause? -> IndexHint {cons("Use")}
+    "IGNORE" IndexKey ForClause? -> IndexHint {cons("Ignore")}
+    "FORCE" IndexKey ForClause? -> IndexHint {cons("Force")}
+
+
+	"INDEX" -> IndexKey {cons("Index")}
+	"KEY" -> IndexKey {cons("Key")}
+	 
+	 
+	
+	"FOR" Jog ({ID ","}+) -> ForClause {cons("ForClause")}
+	
+	"JOIN" -> Jog {cons("Join")}
+	"ORDER BY" -> Jog {cons("OrderBy")}
+	"GROUP BY" -> Jog {cons("GroupBy")}
+	
+	
+	
+	"UPDATE" UpdateOption* TableReference
+    "SET" UpdateSet+
+    WherePart?
+    OrderByPart?
+    LimitPart? -> Update {cons("Update")}
+    
+    
+    "LOW_PRIORITY" -> UpdateOption {cons("LowPriority")}
+    "IGNORE" -> UpdateOption {cons("Ignore")}
+    
+    ID "=" SQLExpression -> UpdateSet {cons("UpdateSet")}
+    ID "=" "DEFAULT" -> UpdateSet {cons("UpdateSetDefault")}
+    
+    'INSERT'
+    InsertPriority? 
+    Ignore?
+    Into?
+    ID '(' {ID ","}* ')'
+    'values'
+    '(' {SQLExpression ","}* ')'
+    OnDuplicate? -> Insert {cons("Insert")}
+    
+    'LOW_PRIORITY' -> InsertPriority {cons("LowPriority")}
+    'DELAYED' -> InsertPriority {cons("DelayedPriority")}
+    'HIGH_PRIORITY' -> InsertPriority {cons("HighPriority")}
+    
+    'IGNORE' -> Ignore {cons("Ignore")}
+    
+    'INTO' -> Into {cons("Into")}
+    
+    'Values' -> Values {cons("Values")}
+    'Value' -> Values {cons("Values")}
+    
+    'ON' 'DUPLICATE' 'KEY' 'UPDATE' {UpdatePart ","}* -> OnDuplicate {cons("OnDuplicate")}
+
+	ID '=' SQLExpression -> UpdatePart {cons("UpdatePart")}
+	
+	{Declare ";"}* -> DeclareList {cons("DeclareList")}
+	
+	'DECLARE' {ID ","}+ SQLType DefaultDeclare? -> Declare {cons("Declare")}
+	
+	'default' SQLExpression -> DefaultDeclare {cons("DefaultDeclare")}
+
+module Common
+
+exports
+
+  lexical syntax
+  
+    [a-zA-Z][a-zA-Z0-9\_]* -> ID
+    
+    
+    'this' -> ID {reject}
+    'null' -> ID {reject}
+    'false' -> ID {reject}
+    'true' -> ID {reject}
+    'string' -> ID {reject}
+    'int' -> ID {reject}
+    'attributes' -> ID {reject}
+    'system' -> ID {reject}
+    'invariant' -> ID {reject}
+    'methods' -> ID {reject}
+    
+    "-"? [0-9]+            -> INT
+    
+    "\"" StringChar* "\"" -> STRING
+    ~[\"\n]               -> StringChar
+    "\\\""                -> StringChar
+    BackSlashChar         -> StringChar
+    "\\"                  -> BackSlashChar
+    
+    "'" SQLStringChar* "'" -> SQLSTRING
+    ~[\'\n]               -> SQLStringChar
+    "\\'"                -> SQLStringChar
+    BackSlashChar         -> SQLStringChar
+    
+    
+    [\ \t\n\r] -> LAYOUT
+    
+    [\*]                             -> CommentChar
+    "/*" (~[\*] | CommentChar)* "*/" -> LAYOUT
+    "//" ~[\n\r]* ([\n\r] | EOF)     -> LAYOUT
+    
+    -> EOF
+  
+  lexical restrictions
+  
+    %% Ensure greedy matching for lexicals
+  
+    CommentChar   -/- [\/]
+    INT           -/- [0-9]
+    ID            -/- [a-zA-Z0-9\_]
+    
+    %% EOF may not be followed by any char
+    
+    EOF           -/- ~[]
+
+    %% Backslash chars in strings may not be followed by " 
+    
+    BackSlashChar -/- [\"]
+
+  context-free restrictions
+  
+    %% Ensure greedy matching for comments
+
+    LAYOUT? -/- [\ \t\n\r]
+    LAYOUT? -/- [\/].[\/]
+    LAYOUT? -/- [\/].[\*]
+
+module Booster2
+
+imports Common AbstractBoosterModel Relational
+
+exports
+
+   context-free start-symbols
+  	System
+  	  	
+  context-free syntax
+    
+  
+	'system' ID ( SystemComponent )* -> System {cons("System")}
+	System -> BoosterTerm
+
+	
+	SetDef -> SystemComponent
+	Class -> SystemComponent
+	SystemComponent -> BoosterTerm
+
+	'class' ID '{' ClassComponents * '}' -> Class  {cons("Class")}
+	Class -> BoosterTerm
+	 
+	'attributes' Attribute*  -> ClassComponents {cons("Attributes")}
+	'methods' Method*  -> ClassComponents {cons("Methods")}
+	'invariant' Constraint* -> ClassComponents {cons("Invariant")}
+	ClassComponents -> BoosterTerm
+	 
+	 'set' ID '{' {ID ','}+ '}' -> SetDef {cons("SetDef")}
+	 SetDef -> BoosterTerm
+	 
+	 ID ':' TypeDecl -> Attribute {cons("Attribute")}
+	 ID Identity ':' TypeDecl -> Attribute {cons("Attribute")}
+	 ID ':' TypeDecl -> Attribute {cons("Attribute")}
+	 Attribute -> BoosterTerm
+	 
+	 '(' 'ID' ')' -> Identity {cons("Identity")}
+  
+	 ID '{' Constraint '}' -> Method {cons("Method")}
+	 ID '{' GuardedCommand '}' -> Method {cons("Method")}
+	 Method -> BoosterTerm
+	 
+	 PrimTypeDecl -> TypeDecl  
+	 '[' PrimTypeDecl ']' -> TypeDecl {cons("Optional")} 
+	 'set' '(' PrimTypeDecl ')' '[' Multiplicity ']' ->  TypeDecl {cons("Set")}
+	 TypeDecl -> BoosterTerm
+	 
+	 'STRING' -> PrimTypeDecl {cons("String")}
+	 'INT' -> PrimTypeDecl {cons("Int")}
+	 ID -> PrimTypeDecl {cons("UniDirectional")}
+	 ID '.' ID -> PrimTypeDecl {cons("BiDirectional")}
+	 PrimTypeDecl -> BoosterTerm
+	 
+	 INT '..' INT -> Multiplicity {cons("MultMinAndMax")}
+	     '..' INT -> Multiplicity {cons("MultJustMax")}
+	 INT '..'     -> Multiplicity {cons("MultJustMin")}
+	 INT '..' '*' -> Multiplicity {cons("MultJustMin")}
+	      INT     -> Multiplicity {cons("MultSingle")}
+	 	  '*'     -> Multiplicity {cons("MultAny")}
+	 Multiplicity -> BoosterTerm
+	 
+  	 'true' 			-> Constraint {cons("True")}
+  	 'false' 			-> Constraint {cons("False")}
+  	 Relation 			-> Constraint 
+  	 'not' Constraint		-> Constraint { cons("Not"), prefer}
+  	 Constraint '&' Constraint 	-> Constraint { cons("And"), left}
+  	 Constraint 'or' Constraint 	-> Constraint { cons("Or"), left}
+ 	 Constraint '=>' Constraint 	-> Constraint { cons("Implies"), right}
+ 	 Constraint ';' Constraint 	-> Constraint { cons("Then"), left}
+ 	 "(" Constraint ")" 		-> Constraint { bracket}
+  	 MethodReference -> Constraint {cons("MethodRef")}
+    'exists' ID
+       ":" Expression
+       "@" Constraint		-> Constraint {cons("Exists")}
+    'forall' ID
+       ":" Expression
+       "@" Constraint		-> Constraint {cons("Forall")}
+  	Constraint -> BoosterTerm 
+  	 
+  	 
+  	Expression '=' Expression 	-> Relation {cons("Equal")}
+    Expression '/=' Expression 	-> Relation {cons("NotEqual")}
+    Expression ':' Expression 	-> Relation {cons("In")}
+    Expression '/:' Expression 	-> Relation {cons("NotIn")}
+    Expression '<' Expression 	-> Relation {cons("LessThan")}
+    Expression '>' Expression 	-> Relation {cons("GreaterThan")}
+    Expression '<=' Expression 	-> Relation {cons("LessThanEquals")}
+    Expression '>=' Expression 	-> Relation {cons("GreaterThanEquals")}
+    Expression '<:' Expression 	-> Relation {cons("Subset")}
+    Expression '<<:' Expression -> Relation {cons("SubsetEquals")}
+    Expression ':>' Expression 	-> Relation {cons("Superset")}
+    Expression ':>>' Expression -> Relation {cons("SupersetEquals")}
+    Relation -> BoosterTerm
+    
+    INT 		-> ValueExpression {cons("Integer")}
+    STRING		-> ValueExpression {cons("String")}
+    Path		-> ValueExpression 
+  	"STRING"	-> ValueExpression {cons("StringExtent"), prefer}
+  	"INT"		-> ValueExpression {cons("IntExtent"), prefer}
+  	'null'		-> ValueExpression {cons("Null"), prefer}
+    "{" {Expression "," }* "}" -> ValueExpression {cons("SetExtent")}
+    ValueExpression -> BoosterTerm
+    
+    ValueExpression 	-> Expression
+    'head' Expression	-> Expression {cons("Head"), avoid}
+    'tail' Expression 	-> Expression {cons("Tail"), avoid}
+    'card' Expression 	-> Expression {cons("Cardinality"), avoid}
+    '-' Expression 		-> Expression {cons("Negative"), avoid}
+    "(" Expression ")" 	-> Expression {bracket}
+    Expression  "+"  Expression 	-> Expression {left, cons("Plus")}
+    Expression  "-"  Expression 	-> Expression {left, cons("Minus")}
+    Expression  "*"  Expression 	-> Expression {left, cons("Times")}
+    Expression  "/"  Expression 	-> Expression {left, cons("Divide")}
+    Expression "max" Expression 	-> Expression {left, cons("Maximum")}
+    Expression "min" Expression 	-> Expression {left, cons("Minimum")}
+    Expression "/\\" Expression 	-> Expression {left, cons("Intersection")}
+    Expression "\\/" Expression 	-> Expression {left, cons("Union")}
+    Expression  "++" Expression 	-> Expression {left, cons("Concat")}
+    Expression -> BoosterTerm
+    
+    
+    Path '(' { ( ID '?' '=' Expression) "," }* ')' -> MethodReference {cons("MethodReference")}
+    MethodReference -> BoosterTerm
+   
+    PathStart -> Path
+    Path '.' PathComponent -> Path {cons("Path")}
+    Path -> BoosterTerm
+    
+    Input -> PathStart
+    Output -> PathStart
+    This -> PathStart
+    ThisPrimed -> PathStart
+    ID Decorator? -> PathStart {cons("PathStart")}
+    PathStart -> BoosterTerm
+  
+    ID "?" -> Input {cons("Input")}
+    ID "!" -> Output {cons("Output")}
+    'this' -> This {cons("This")}
+    'this' "'" -> ThisPrimed {cons("ThisPrimed")}
+
+    "'" -> Decorator {cons("Primed")}
+	Decorator -> BoosterTerm
+	
+  	ID Decorator? -> PathComponent {cons("PathComponent")}
+  	PathComponent -> BoosterTerm
+  	
+ exports 
+ variables
+  	  "Name"[0-9]* -> ID {prefer}
+  	  "Const"[0-9]* -> Constraint {prefer}
+  	  "SystemComponents"[0-9]* "*" -> ( SystemComponent )* {prefer}
+
+priorities
+	 'not' Constraint		-> Constraint 
+	 > Constraint '&' Constraint 	-> Constraint 
+  	 > Constraint 'or' Constraint 	-> Constraint
+ 	 > Constraint '=>' Constraint 	-> Constraint 
+ 	 > Constraint ';' Constraint 	-> Constraint 
+
+priorities
+	'head' Expression	-> Expression
+    > 'tail' Expression 	-> Expression
+    > 'card' Expression 	-> Expression
+    > '-' Expression 		-> Expression
+    > Expression "max" Expression 	-> Expression
+    > Expression "min" Expression 	-> Expression
+    > Expression  "*"  Expression 	-> Expression
+    > Expression  "/"  Expression 	-> Expression
+    > Expression  "+"  Expression 	-> Expression
+    > Expression  "-"  Expression 	-> Expression
+    > Expression "/\\" Expression 	-> Expression
+    > Expression "\\/" Expression 	-> Expression
+    > Expression  "++" Expression 	-> Expression
+
+
+module Stratego-Sugar-Overlays
+imports
+  Stratego-Core-Identifiers
+  Stratego-Sugar-Terms
+
+exports
+  sorts Overlay
+  context-free syntax
+    Id 			 "=" Term 	-> Overlay {cons("OverlayNoArgs")}
+    Id "(" {Id ","}* ")" "=" Term 	-> Overlay {cons("Overlay")}
+
+module Stratego-Sugar-DynamicRules
+imports
+  Stratego-Core-Identifiers
+  Stratego-Sugar-Strategies
+  Stratego-Sugar-Rules
+
+exports
+ 
+  sorts ScopeLabels
+  context-free syntax
+
+    "{|" ScopeLabels ":" Strategy "|}" -> Strategy {cons("DynRuleScope")}
+
+    {DynRuleScopeId ","}*   -> ScopeLabels {cons("ScopeLabels")}
+    "~" Term		    -> ScopeLabels {cons("ScopeLabels")}
+
+  sorts DynRuleDef DynRuleId DynRuleScopeId RuleDec
+  context-free syntax
+
+    "rules" "(" DynRuleDef* ")" -> Strategy {cons("GenDynRules")}
+
+    Id "+" Term                 -> DynRuleDef {cons("AddScopeLabel")} 
+    DynRuleId ":-"  Term        -> DynRuleDef {cons("UndefineDynRule")}
+    DynRuleId ":"   Rule        -> DynRuleDef {cons("SetDynRule")}
+    DynRuleId ":+"  Rule        -> DynRuleDef {cons("AddDynRule")}
+    DynRuleId ":"   Term        -> DynRuleDef {cons("SetDynRuleMatch")}
+
+    DynRuleId ":="  Term        -> DynRuleDef {cons("DynRuleAssign")}
+    DynRuleId ":+="  Term       -> DynRuleDef {cons("DynRuleAssignAdd")}
+
+    DynRuleId ":"   Rule "depends" "on" Term -> DynRuleDef {cons("SetDynRuleDepends")}
+
+    RuleDec "." Term            -> DynRuleId {cons("LabeledDynRuleId")}
+    RuleDec "+" Term            -> DynRuleId {cons("AddLabelDynRuleId")}
+    RuleDec                     -> DynRuleId {cons("DynRuleId")}
+
+    Id "." Term                 -> DynRuleScopeId {cons("LabeledDynRuleScopeId")}
+    Id                          -> DynRuleScopeId {cons("DynRuleScopeId")}
+
+  context-free syntax
+
+    Id                          -> RuleDec {cons("RDecNoArgs")}
+    Id "(" {Typedid ","}* ")"   -> RuleDec {cons("RDec")}
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")"   -> RuleDec {cons("RDecT")}
+
+  sorts RuleNames
+  context-free syntax
+    {Id ","}*				  -> RuleNames {cons("RuleNames")}
+    "~" Term				  -> RuleNames {cons("RuleNames")}
+
+    "/" RuleNames "\\*" Strategy          -> Strategy {cons("DynRuleIntersectFix")}
+
+  syntax
+    %% no space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% 1 space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% no space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+    %% 1 space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+
+  context-free syntax
+    Strategy "/" RuleNames"\\" Strategy  -> Strategy {cons("DynRuleIntersect"),right}
+    Strategy "\\" RuleNames "/" Strategy  -> Strategy {cons("DynRuleUnion"),right}
+
+    Strategy "/" RuleNames "\\" 
+                 RuleNames "/"  Strategy  -> Strategy {cons("DynRuleIntersectUnion"),right}
+
+  priorities
+    <StrategyAngle-CF> <LAYOUT?-CF> <Term-CF> -> <Strategy-CF> {cons("BA")}
+  > {
+
+    %% no space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% 1 space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% no space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+    %% 1 space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+    }
+  > <Strategy-CF> <LAYOUT?-CF> "=>" <LAYOUT?-CF> <Term-CF> -> <Strategy-CF> {cons("AM")}
+
+  context-free priorities
+    StrategyAngle Term 		          -> Strategy {cons("BA")}
+  > "/" RuleNames "\\*" Strategy          -> Strategy {cons("DynRuleIntersectFix")}
+  > Strategy "=>" Term 		  	  -> Strategy {cons("AM")}
+  > Strategy "/" RuleNames "\\" Strategy  -> Strategy {cons("DynRuleIntersect"),right}
+  > Strategy "\\" RuleNames "/" Strategy  -> Strategy {cons("DynRuleUnion"),right}
+  > Strategy "/" RuleNames "\\" 
+                 RuleNames "/"  Strategy  -> Strategy {cons("DynRuleIntersectUnion"),right}
+  > Strategy ";" Strategy 		  -> Strategy {cons("Seq"),right}
+
+module Stratego-Sugar-Rules
+imports Stratego-Sugar-Strategies
+exports
+
+  sorts RuleDef
+  context-free syntax
+    Id ":" Rule 				-> RuleDef {cons("RDefNoArgs")}
+    
+    Anno+ RuleDef               -> Def {cons("AnnoDef")}
+
+    Id "(" {Typedid ","}* ")" ":" Rule 		-> RuleDef {cons("RDef")}
+
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")" ":" Rule 		-> RuleDef {cons("RDefT")}
+
+  sorts Rule RuleCond
+  context-free syntax
+    Term "->" Term           	    -> Rule {cons("RuleNoCond")} %% backward comp.
+    Term "->" Term "where" Strategy -> Rule {cons("Rule")}       %% backward comp.
+    Term "->" Term RuleCond+	    -> Rule {cons("Rule"), avoid}
+
+    "where" Strategy -> RuleCond {cons("WhereClause")}
+    "with"  Strategy -> RuleCond {cons("WithClause")}
+
+module Stratego-Sugar-Strategies
+imports
+  Stratego-Core-Strategies
+  Stratego-Sugar-Terms
+  Stratego-Sugar-Constants
+  Stratego-Sugar-Signatures
+
+exports
+  context-free syntax
+    Id  		      "=" Strategy -> StrategyDef {cons("SDefNoArgs")}
+    Id "(" {Typedid ","}* ")" "=" Strategy -> StrategyDef {cons("SDef")}
+
+  context-free syntax
+    ID 				  	  -> Typedid {cons("DefaultVarDec")}
+
+  sorts Rule
+
+  sorts StrategyParen StrategyCurly StrategyAngle
+  context-free syntax
+
+    %% Abstraction
+
+    SVar "(" {Strategy ","}* ")" 	  -> Strategy {cons("Call")}
+
+    %% Match and build
+
+    "{" Strategy "}" 			  -> Strategy {cons("ScopeDefault")}
+
+     %%"<" Strategy ">" Term 		  -> Strategy {cons("BA")}
+     StrategyAngle Term 		  -> Strategy {cons("BA")}
+     "<" Strategy ">"			  -> StrategyAngle {bracket} %% {cons("AngleStrat")}
+
+    %% Combinators
+
+    Strategy "<+" Strategy 		  -> Strategy {cons("LChoice"),right}
+
+    "rec" Id "(" Strategy ")" 		  -> Strategy {cons("Rec")}
+
+    "not"   "(" Strategy ")" 		  -> Strategy {cons("Not")}
+    "where" "(" Strategy ")" 		  -> Strategy {cons("Where")}
+    "with"  "(" Strategy ")" 		  -> Strategy {cons("With"), prefer}
+    "test"  "(" Strategy ")" 		  -> Strategy {cons("Test")}
+
+    %% Primitives
+
+    "prim" "(" String ")" 		  -> Strategy {cons("PrimNoArgs")}
+    "prim" "(" String "," {Term ","}* ")" -> Strategy {cons("Prim")}
+
+    %% Congruence operators
+
+    String 				  -> Strategy {cons("StrCong")}
+    Int 				  -> Strategy {cons("IntCong")}
+    Real 				  -> Strategy {cons("RealCong")}
+    Char 			 	  -> Strategy {cons("CharCong")}
+
+    String "(" {Strategy ","}* ")" 	  -> Strategy {cons("CongQ")}
+
+    %%"(" {Strategy ","}* ")" 		  -> Strategy {cons("TupleCong"),avoid}
+
+    Strategy StrategyCurly		  -> Strategy {cons("AnnoCong")}
+    
+    "{" Strategy "}"		  	  -> StrategyCurly {cons("StrategyCurly")}
+
+    "("  ")" 		  		  -> Strategy {cons("EmptyTupleCong")}
+   "(" Strategy  ")" 		          -> Strategy {bracket}
+    "(" Strategy "," {Strategy ","}+ ")"  -> Strategy {cons("TupleCong")}
+
+%%    Mod 	  			  -> Strategy {cons("ModCongNoArgs")}
+%%    Mod "(" {Strategy ","}* ")"	  	  -> Strategy {cons("ModCong")}
+%%    Id "^" Id				  -> Mod {cons("Mod")}
+    "[" {Strategy ","}* "]" 		  -> Strategy {cons("ListCongNoTail")}
+    "[" {Strategy ","}* "|" Strategy "]"  -> Strategy {cons("ListCong")}
+
+%%    Strategy "#" "(" StrategyInj ")" 	  -> Strategy {cons("ExplodeCong")}
+%%    Strategy "#" "(" Strategy ")" 	  -> Strategy {cons("ExplodeCong")}
+    Strategy "#" StrategyParen	  	  -> Strategy {cons("ExplodeCong")}
+
+  %% Syntactic sugar sugar
+
+  sorts SwitchCase
+  context-free syntax
+
+    SVar  		  		  -> Strategy {cons("CallNoArgs")}
+    "\\" Rule "\\" 			  -> Strategy {cons("LRule")}
+    "(" Rule ")" 			  -> Strategy {cons("SRule")}
+    Strategy "+" Strategy 		  -> Strategy {cons("Choice"),right} 
+    Strategy "+>" Strategy 		  -> Strategy {cons("RChoice"),right}
+
+    "proceed"                          -> Strategy {cons("ProceedNoArgs"), prefer}
+    "proceed" "(" {Strategy "," }+ ")" -> Strategy {cons("Proceed"), prefer}
+
+    "if" Strategy "then" Strategy 
+                  "else" Strategy "end"   -> Strategy {cons("CondChoice")}
+    "if" Strategy "then" Strategy "end"   -> Strategy {cons("IfThen")}
+
+    "switch" Strategy SwitchCase* "end"   -> Strategy {cons("SwitchChoiceNoOtherwise")}
+    "switch" Strategy SwitchCase*
+         "otherwise" ":" Strategy "end"   -> Strategy {cons("SwitchChoice")}
+
+    "case" Strategy ":" Strategy          -> SwitchCase {cons("SwitchCase")}
+
+    Strategy "=>" Term 		  	  -> Strategy {cons("AM")}
+
+    Term ":=" Term			  -> Strategy {cons("Assign")}
+
+  %% Priorities
+
+  context-free priorities
+    { Strategy StrategyCurly		  -> Strategy
+      Strategy "#" StrategyParen          -> Strategy
+    }
+  > { "!" Term 				  -> Strategy
+      "?" Term 				  -> Strategy
+    }
+  > StrategyAngle Term 		          -> Strategy
+  > Strategy "=>" Term 		  	  -> Strategy
+  > Strategy ";" Strategy 		  -> Strategy
+  > {right: 
+     Strategy "+" Strategy 		  -> Strategy
+     Strategy "<+" Strategy 		  -> Strategy
+     Strategy "+>" Strategy 		  -> Strategy
+     
+     Strategy "<" StrategyMid 
+              "+" Strategy 		  -> Strategy
+    }
+
+  context-free priorities
+    Strategy 				  -> StrategyMid
+  > Strategy "+" Strategy 		  -> Strategy
+
+  context-free priorities
+    { Strategy StrategyCurly      -> Strategy
+      Strategy "#" StrategyParen  -> Strategy
+    }
+    .> Term ":=" Term -> Strategy
+
+
+
+
+module Stratego-Sugar-Terms
+imports
+  Stratego-Core-Terms
+  Stratego-Sugar-Strategies
+
+exports
+  sorts LID
+  context-free syntax
+    LId 			-> LID  {cons("ListVar")}
+    LID				-> Var  {cons("Var")}
+    LID				-> ID
+
+  context-free syntax
+    "_" PreTerm 		 -> PreTerm {cons("BuildDefaultPT")}
+    "_" Term 			 -> Term {cons("BuildDefault"),prefer}
+
+    Char 			 -> PreTerm {cons("Char")}
+
+    PreTerm "{" {Term ","}* "}"	 -> Term {cons("AnnoList")}
+    PreTerm                      -> Term {cons("NoAnnoList")}
+
+    "<" Strategy ">" Term 	 -> PreTerm {cons("App")}
+    "<" Strategy ">" Term 	 -> Term {cons("App"),prefer}
+
+    StrategyAngle		 -> PreTerm {cons("RootApp")}
+    StrategyAngle		 -> Term {cons("RootApp"),prefer}
+
+    "(" {Term ","}* ")" 	 -> PreTerm {cons("Tuple")}
+    "[" {Term ","}* "]" 	 -> PreTerm {cons("List")}
+    "[" {Term ","}* "|" Term "]" -> PreTerm {cons("ListTail")}
+
+  context-free priorities
+    Term "#" "(" Term ")" 	 -> PreTerm {cons("Explode")}
+  > PreTerm "{" {Term ","}* "}"	 -> Term {cons("AnnoList")}
+  > Var "@" Term 		 -> Term {cons("As")}
+
+module Stratego-Sugar-Signatures
+imports
+  Stratego-Core-Signatures
+  Stratego-Sugar-Constants
+
+exports
+
+  sorts Sort
+  context-free syntax
+    "[" {Sort ","}* "]"		 -> Sort {cons("SortList")}
+    "[" {Sort ","}* "|" Sort "]" -> Sort {cons("SortListTl")}
+    "(" {Sort ","}* ")"		 -> Sort {cons("SortTuple")}
+
+  sorts Kind
+  context-free syntax
+    "*" 			-> Kind {cons("Star")}
+    "**" 			-> Kind {cons("StarStar")}
+
+module Stratego-Core-Signatures
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Constants
+exports
+  sorts Sdecl
+  context-free syntax
+    "sorts" Sort* 		-> Sdecl {cons("Sorts")}
+    "constructors" Opdecl* 	-> Sdecl {cons("Constructors")}
+
+  sorts Sort
+  context-free syntax
+    LCID 			 -> Sort {cons("SortVar")}
+    UCID 			 -> Sort {cons("SortNoArgs")}
+    Id "(" {Sort ","}* ")" 	 -> Sort {cons("Sort")}
+
+  sorts Opdecl
+  context-free syntax
+    Id     ":" Type 		-> Opdecl {cons("OpDecl")}
+    String ":" Type 		-> Opdecl {cons("OpDeclQ")}
+           ":" Type 		-> Opdecl {cons("OpDeclInj")}
+
+  context-free syntax
+    "external" Id     ":" Type 	-> Opdecl {cons("ExtOpDecl")}
+    "external" String ":" Type 	-> Opdecl {cons("ExtOpDeclQ")}
+    "external"        ":" Type 	-> Opdecl {cons("ExtOpDeclInj")}
+
+  sorts Type ArgType ConstType FunType RetType
+  context-free syntax
+    Sort	                -> ConstType {cons("ConstType")}
+    {ArgType "*"}+ "->" RetType -> FunType {cons("FunType")}
+    "(" Type ")"                -> ArgType {bracket}
+    ConstType			-> ArgType
+    Type	                -> RetType
+    FunType			-> RetType {reject}
+
+    FunType			-> Type
+    ConstType			-> Type
+
+  %%%
+   %% Restriction is required for the Sort* in Sdecl: List(a) is
+   %% ambiguous.
+   %%%
+  context-free restrictions
+    Sort -/- [\(]
+
+module Stratego-Core-Terms
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Constants
+
+exports
+  sorts ID Var Wld
+  context-free syntax
+    Id 				-> Var  {cons("Var")}
+    Id				-> ID
+    %% ":" Var                  -> Var  {cons("SeqVar")}
+
+  sorts Term PreTerm
+  context-free syntax
+    Var 			 -> PreTerm 
+    Var 			 -> Term {prefer}
+
+    "_" 			 -> Wld {cons("Wld")}
+    Wld 			 -> PreTerm
+    Wld 			 -> Term {prefer}
+
+    Int 			 -> PreTerm {cons("Int")}
+    Real 			 -> PreTerm {cons("Real")}
+    String 			 -> PreTerm {cons("Str")}
+
+    Id "(" {Term ","}* ")" 	 -> PreTerm {cons("Op")}
+    String "(" {Term ","}* ")" 	 -> PreTerm {cons("OpQ")}
+    Term "#" "(" Term ")" 	 -> PreTerm {cons("Explode")}
+
+    PreTerm "{^" PreTerm "}"	 -> Term {cons("Anno")}
+
+    Var "@" Term 		 -> Term {cons("As"),prefer}
+    Var "@" PreTerm 		 -> PreTerm {cons("As")}
+
+  context-free priorities
+    Term "#" "(" Term ")" 	 -> PreTerm {cons("Explode")}
+  > Var "@" Term 		 -> Term {cons("As")}
+
+module Stratego-Core-Strategies
+imports
+  Stratego-Core-Terms
+  Stratego-Core-Constants
+  Stratego-Core-Signatures
+
+exports
+  sorts Def
+  context-free syntax
+    StrategyDef					 -> Def 
+    Id						 -> SVar {cons("SVar")}
+    "let" Def* "in" Strategy "end"		 -> Strategy {cons("Let")}
+    SVar "(" {Strategy ","}* "|" {Term ","}* ")" -> Strategy {cons("CallT")}
+
+    "call" "(" Term "|" {Strategy ","}* "|" {Term ","}* ")" -> Strategy {cons("CallDynamic")}
+
+
+  sorts StrategyDef
+  context-free syntax
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")" "=" Strategy -> StrategyDef {cons("SDefT")}
+
+    Anno+ StrategyDef -> Def {cons("AnnoDef")}
+
+    "external"
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")" "=" Strategy -> StrategyDef {cons("ExtSDefInl")}
+
+    "external"
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")"		   -> StrategyDef {cons("ExtSDef")}
+
+    "external"
+    EmptyId "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")"		   -> StrategyDef {cons("ExtSDef")}
+
+
+  sorts EmptyId
+  lexical syntax
+  
+    -> EmptyId
+
+  sorts Anno
+  context-free syntax
+    "extend"      -> Anno {cons("Extend")}
+    "override"    -> Anno {cons("Override")}
+    "internal"    -> Anno {cons("Internal")}
+%%  "sealed"      -> Anno {cons("Sealed")}
+%%  "extensible"  -> Anno {cons("Extensible")}
+%%  "overridable" -> Anno {cons("Overridable")}
+
+  lexical syntax
+    
+    "extend"      -> Keyword
+    "override"    -> Keyword
+    "internal"    -> Keyword
+    "sealed"      -> Keyword
+    "extensible"  -> Keyword
+    "overridable" -> Keyword
+
+  lexical restrictions
+  
+    "extend"
+    "override"
+    "internal"
+    "sealed"
+    "extensible"
+    "overridable" -/- [a-zA-Z0-9\'\-\_]
+
+  sorts Typedid
+  context-free syntax
+    ID ":" Type 			  -> Typedid {cons("VarDec")}
+
+
+  sorts Strategy SVar StrategyParen StrategyMid 
+  context-free syntax
+    "(" Strategy ")"			  -> StrategyParen {cons("ParenStrat")}
+
+    "fail" 				  -> Strategy {cons("Fail")}
+    "id" 				  -> Strategy {cons("Id")}
+
+    "proceed" "(" {Strategy ","}* "|" {Term ","}* ")" -> Strategy {cons("ProceedT"), prefer}
+    "proceed"                                         -> Strategy {cons("ProceedNoArgs"), prefer}
+
+    %% Match and build
+
+    "?" Term 				  -> Strategy {cons("Match")}
+    "!" Term 				  -> Strategy {cons("Build")}
+    "{" {ID ","}* ":" Strategy "}" 	  -> Strategy {cons("Scope")}
+
+    %% Combinators
+
+    Strategy ";" Strategy 		  -> Strategy {cons("Seq"),right}
+    Strategy "<" StrategyMid 
+             "+" Strategy 		  -> Strategy {cons("GuardedLChoice"),right}
+    Strategy 				  -> StrategyMid
+
+    %% Primitives
+
+    "prim" "(" String "," {Strategy ","}* "|" {Term ","}*")"  -> Strategy {cons("PrimT")}
+
+    %% Traversal
+
+    "some" "(" Strategy ")" 		  -> Strategy {cons("Some")}
+    "one" "(" Strategy ")" 		  -> Strategy {cons("One")}
+    "all" "(" Strategy ")" 		  -> Strategy {cons("All")}
+
+  %% Priorities
+
+  context-free priorities
+    { "!" Term 				  -> Strategy {cons("Build")}
+      "?" Term 				  -> Strategy {cons("Match")}
+    }
+  > Strategy ";" Strategy 		  -> Strategy {cons("Seq"),right}
+  > {right: 
+     Strategy "<" StrategyMid 
+              "+" Strategy 		  -> Strategy {cons("GuardedLChoice"),right}
+    }
+
+  context-free syntax
+    "import-term" "(" ModName ")" -> Strategy {cons("ImportTerm")}
+
+module Stratego-Core-Modules
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Strategies
+  Stratego-Core-Signatures
+
+exports 
+  sorts Module
+  context-free syntax
+    "module" ModName Decl* 	 -> Module {cons("Module")}
+    "specification" Decl*	 -> Module {cons("Specification")}
+
+  sorts Decl 
+  context-free syntax
+    "imports" ImportModName* 	-> Decl {cons("Imports")}
+    "strategies" Def* 		-> Decl {cons("Strategies")}
+    "signature" Sdecl*  	-> Decl {cons("Signature")}
+
+  sorts ImportModName
+  context-free syntax
+    ModName              -> ImportModName {cons("Import")}
+  syntax
+    <ModName-CF> "/" "-" -> <ImportModName-CF> {cons("ImportWildcard")}
+
+module Stratego-Sugar-Modules
+imports
+  Stratego-Core-Modules
+  Stratego-Sugar-Strategies
+  Stratego-Sugar-Signatures
+  Stratego-Sugar-Overlays
+  Stratego-Sugar-Rules
+
+exports 
+
+  sorts Decl Def
+  context-free syntax
+    "rules" Def* 		-> Decl {cons("Rules")}
+    "overlays" Overlay* 	-> Decl {cons("Overlays")}
+
+    RuleDef 			-> Def 
+
+
+
+
+module Stratego-Sugar-StringQuotations
+exports
+
+  sorts
+    StringQuotation
+    StringQuotedPart1 StringQuotedChars1 DollarOpen1 DollarClose1 QuotedBracket1 Dollar1
+    StringQuotedPart2 StringQuotedChars2 DollarOpen2 DollarClose2 QuotedBracket2 Dollar2
+    StringQuotedPart3 StringQuotedChars3 DollarOpen3 DollarClose3 QuotedBracket3 Dollar3
+    StringQuotedPart4 StringQuotedChars4 DollarOpen4 DollarClose4 QuotedBracket4  Dollar4
+    Padding
+
+  context-free syntax
+
+    StringQuotation -> PreTerm
+
+  syntax
+
+    StringQuotation -> <PreTerm-CF>
+
+    "$" "[" Padding StringQuotedPart1*               "]"    -> StringQuotation {cons("StringQuotation1") }
+     Padding "[" <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> "]"    -> StringQuotedPart1 {cons("StringEscape1")}
+    <StringQuotedChars1-LEX>                                -> StringQuotedPart1 {cons("QStr")}
+    <Dollar1-LEX>                                           -> StringQuotedPart1 {cons("QDollar")}
+    "$" <QuotedBracket1-LEX> "$"                            -> StringQuotedPart1 {cons("QBr")}
+    ~[\[\]\$]+                                              -> <StringQuotedChars1-LEX>
+    [\[\]]                                                  -> <QuotedBracket1-LEX>
+    "$"                                                     -> <Dollar1-LEX>
+
+    "$" "{" Padding StringQuotedPart2*               "}"    -> StringQuotation {cons("StringQuotation2") }
+     Padding "{" <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> "}"    -> StringQuotedPart2 {cons("StringEscape2")}
+    <StringQuotedChars2-LEX>                                -> StringQuotedPart2 {cons("QStr")}
+    <Dollar2-LEX>                                           -> StringQuotedPart2 {cons("QDollar")}
+    "$" <QuotedBracket2-LEX> "$"                            -> StringQuotedPart2 {cons("QBr")}
+    ~[\{\}\$]+                                              -> <StringQuotedChars2-LEX>
+    [\{\}]                                                  -> <QuotedBracket2-LEX>
+    "$"                                                     -> <Dollar2-LEX>
+
+    "$" "(" Padding StringQuotedPart3*              ")"     -> StringQuotation {cons("StringQuotation3") }
+    Padding "(" <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> ")"     -> StringQuotedPart3 {cons("StringEscape3")}
+    <StringQuotedChars3-LEX>                                -> StringQuotedPart3 {cons("QStr")}
+    <Dollar3-LEX>                                           -> StringQuotedPart3 {cons("QDollar")}
+    "$" <QuotedBracket3-LEX> "$"                            -> StringQuotedPart3 {cons("QBr")}
+    ~[\(\)\$]+                                              -> <StringQuotedChars3-LEX>
+    [\(\)]                                                  -> <QuotedBracket3-LEX>
+    "$"                                                     -> <Dollar3-LEX>
+
+    "$" "<" Padding StringQuotedPart4*               ">"    -> StringQuotation {cons("StringQuotation4") }
+    Padding "<"  <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> ">"    -> StringQuotedPart4 {cons("StringEscape4")}
+    <StringQuotedChars4-LEX>                                -> StringQuotedPart4 {cons("QStr")}
+    <Dollar4-LEX>                                           -> StringQuotedPart4 {cons("QDollar")}
+    "$" <QuotedBracket4-LEX> "$"                            -> StringQuotedPart4 {cons("QBr")}
+    ~[\<\>\$]+                                              -> <StringQuotedChars4-LEX>
+    [\<\>]                                                  -> <QuotedBracket4-LEX>
+    "$"                                                     -> <Dollar4-LEX>
+   
+    %% Padding is a dummy lexical that will contain the indentation prefix of every quotation
+    <Padding-LEX>                                           -> Padding
+                                                            -> <Padding-LEX> {indentpadding}
+
+  lexical restrictions
+
+    StringQuotedChars1 -/- ~[\[\]\$]   
+    StringQuotedChars2 -/- ~[\{\}\$]    
+    StringQuotedChars3 -/- ~[\(\)\$]    
+    StringQuotedChars4 -/- ~[\<\>\$]
+    Dollar1            -/- [\[\]] . [\$]
+    Dollar2            -/- [\{\}] . [\$]
+    Dollar3            -/- [\(\)] . [\$]
+    Dollar4            -/- [\<\>] . [\$]
+
+module Stratego-Core-Constants
+exports
+  sorts Int Real String StrChar
+  lexical syntax
+    [\-]? [0-9]+ 		-> Int
+    [\-]? [0-9]+ [\.] [0-9]+ 	-> Real
+    "\"" StrChar* "\"" 		-> String
+    ~[\"\\] 			-> StrChar
+    [\\] [\"tnr\\] 		-> StrChar
+
+
+
+
+module Stratego-Sugar-Constants
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Constants
+  Stratego-Sugar-StringQuotations
+exports
+  sorts Char CharChar
+  lexical syntax
+    "'" CharChar "'"		-> Char
+    ~[\']			-> CharChar
+    [\\] [\'ntr\ ]		-> CharChar
+    Char		 	-> Id {reject}
+
+module Stratego-Core-Identifiers
+exports
+  sorts ModName ModNamePart
+  lexical syntax
+    {ModNamePart "/"}+ -> ModName
+    [a-zA-Z\.\_] [a-zA-Z0-9\'\.\-\_]* -> ModNamePart
+  lexical restrictions
+    ModName -/- [a-zA-Z0-9\'\.\-\_]
+  lexical syntax
+    "imports" 		-> ModName {reject}
+    "overlays" 		-> ModName {reject}
+    "rules" 		-> ModName {reject}
+    "signature" 	-> ModName {reject}
+    "strategies" 	-> ModName {reject}
+
+  sorts Id LId LCID UCID Wld
+  lexical syntax
+    [a-zA-Z\_] [a-zA-Z0-9\'\-\_]*     -> Id
+    [a-zA-Z\_] [a-zA-Z0-9\'\-\_]* "*" -> LId
+    [\'] [a-z]+                       -> Id
+
+    [a-z] [a-zA-Z0-9\'\-\_]*  -> LCID
+    [A-Z] [a-zA-Z0-9\'\-\_]*  -> UCID
+
+  lexical restrictions
+    Id   -/- [a-zA-Z0-9\'\-\_\*]
+    LId  -/- [a-zA-Z0-9\'\-\_]
+    LCID -/- [a-zA-Z0-9\'\-\_]
+    UCID -/- [a-zA-Z0-9\'\-\_]
+
+  lexical syntax
+    "_"     -> Id {reject}
+    "'"     -> Id {reject}
+
+    Keyword -> Id   {reject}
+    Keyword -> LId  {reject}
+    Keyword -> LCID {reject}
+    Keyword -> UCID {reject}
+
+  lexical restrictions
+    "all"
+    "case" %% not reserved kw
+    "constructors"
+    "else" %% not reserved kw
+    "end" %% not reserved kw
+    "external" %% not reserved kw
+    "fail"
+    "id"
+    "if" %% not reserved kw
+    "in"
+    "imports" %% not reserved kw
+    "let"
+    "module"
+    "not"
+    "one"
+    "overlays"
+    "otherwise" %% not reserved kw
+    "prim"
+    "rec" %% not reserved kw
+    "rules"
+    "script"
+    "signature"
+    "some"
+    "sorts"
+    "strategies"
+    "stratego"
+    "switch" %% not reserved kw
+    "test"
+    "then" %% not reserved kw
+    "where"
+    "import-term"
+      -/- [a-zA-Z0-9\'\-\_]
+  
+  context-free restrictions
+    Wld -/- [a-zA-Z0-9\'\-\_]
+
+  sorts Keyword
+  lexical syntax
+    "all"               -> Keyword
+    "constructors" 	-> Keyword
+    "fail" 		-> Keyword
+    "id" 		-> Keyword
+    "in" 		-> Keyword
+    "let" 		-> Keyword
+    "module" 		-> Keyword
+    "not" 		-> Keyword
+    "one" 		-> Keyword
+    "overlays" 		-> Keyword
+    "prim" 		-> Keyword
+    "rules" 		-> Keyword
+    "script" 		-> Keyword
+    "signature" 	-> Keyword
+    "some" 		-> Keyword
+    "sorts" 		-> Keyword
+    "strategies" 	-> Keyword
+    "stratego" 		-> Keyword
+    "test" 		-> Keyword
+    "where" 		-> Keyword
+    "import-term"	-> Keyword
+
+
+
+
+module Stratego-Core-Layout
+exports
+  sorts Ws ShortCom LongCom CommChar Asterisk Eof 
+  lexical syntax
+    [\t\ \n\r]			-> Ws
+
+    "//" ~[\n]* ([\n] | Eof)	-> ShortCom
+    "/*" CommChar* "*/"	-> LongCom
+				-> Eof  
+
+    ~[\*]     -> CommChar
+
+    "*"       -> Asterisk
+    Asterisk  -> CommChar
+
+  lexical restrictions
+    Asterisk -/- [\/]
+    Eof      -/- ~[]
+
+  lexical syntax
+    ShortCom 	-> LAYOUT
+    LongCom 	-> LAYOUT
+    Ws 		-> LAYOUT
+
+  context-free restrictions
+    LAYOUT? -/- [\ \t\n\r]
+    LAYOUT? -/- [\/].[\*]
+    LAYOUT? -/- [\/].[\/]
+
+module Stratego-Sugar-Layout
+imports Stratego-Core-Layout
+%%exports
+%%  sorts VeryLongCom Eof VLCchar Backslash
+%%  lexical syntax
+%%    "\\end{code}" VLCchar* "\\begin{code}" -> VeryLongCom
+%%    "\\begin{code}" 			   -> VeryLongCom
+%%    "\\end{code}" VLCchar* Eof 		   -> VeryLongCom
+%%    "\\literate" VLCchar* "\\begin{code}"  -> VeryLongCom
+%%    ~[\\] 				   -> VLCchar
+%%    Backslash 				   -> VLCchar
+%%    [\\] 				   -> Backslash
+
+%%  lexical restrictions
+%%    Backslash -/- [b].[e].[g].[i].[n].[\{].[c].[o].[d].[e].[\}]
+%%    Eof -/- ~[]
+
+%%  lexical syntax
+%%    VeryLongCom -> LAYOUT
+
+
+
+
+
+module Stratego-Sugar
+imports
+  Stratego-Sugar-Layout
+  Stratego-Core-Identifiers
+  Stratego-Sugar-Constants 
+  Stratego-Sugar-Modules
+  Stratego-Sugar-Signatures
+  Stratego-Sugar-Terms
+  Stratego-Sugar-Strategies
+  Stratego-Sugar-Rules
+  Stratego-Sugar-DynamicRules
+  Stratego-Sugar-Overlays
+
+hiddens
+  context-free start-symbols Module
+
+module Stratego
+imports Stratego-Sugar
+hiddens
+  context-free start-symbols Module
+
+module StrategoMix[Ctx0]
+imports Stratego
+          [ RuleNames          => RuleNames[[Ctx0]]
+            RuleDec            => RuleDec[[Ctx0]]
+            DynRuleScopeId     => DynRuleScopeId[[Ctx0]]
+            DynRuleId          => DynRuleId[[Ctx0]]
+            DynRuleDef         => DynRuleDef[[Ctx0]]
+            ScopeLabels        => ScopeLabels[[Ctx0]]
+            RuleCond           => RuleCond[[Ctx0]]
+            Rule               => Rule[[Ctx0]]
+            RuleDef            => RuleDef[[Ctx0]]
+            Overlay            => Overlay[[Ctx0]]
+            SwitchCase         => SwitchCase[[Ctx0]]
+            StrategyCurly      => StrategyCurly[[Ctx0]]
+            StrategyAngle      => StrategyAngle[[Ctx0]]
+            Kind               => Kind[[Ctx0]]
+            LID                => LID[[Ctx0]]
+            ImportModName      => ImportModName[[Ctx0]]
+            Decl               => Decl[[Ctx0]]
+            Module             => Module[[Ctx0]]
+            StrategyParen      => StrategyParen[[Ctx0]]
+            Typedid            => Typedid[[Ctx0]]
+            Anno               => Anno[[Ctx0]]
+            EmptyId            => EmptyId[[Ctx0]]
+            StrategyDef        => StrategyDef[[Ctx0]]
+            SVar               => SVar[[Ctx0]]
+            Def                => Def[[Ctx0]]
+            Type               => Type[[Ctx0]]
+            RetType            => RetType[[Ctx0]]
+            ArgType            => ArgType[[Ctx0]]
+            FunType            => FunType[[Ctx0]]
+            ConstType          => ConstType[[Ctx0]]
+            Opdecl             => Opdecl[[Ctx0]]
+            Sort               => Sort[[Ctx0]]
+            Sdecl              => Sdecl[[Ctx0]]
+            Wld                => Wld[[Ctx0]]
+            ID                 => ID[[Ctx0]]
+            Var                => Var[[Ctx0]]
+            CharChar           => CharChar[[Ctx0]]
+            Char               => Char[[Ctx0]]
+            Padding            => Padding[[Ctx0]]
+            Dollar4            => Dollar4[[Ctx0]]
+            QuotedBracket4     => QuotedBracket4[[Ctx0]]
+            StringQuotedChars4 => StringQuotedChars4[[Ctx0]]
+            StringQuotedPart4  => StringQuotedPart4[[Ctx0]]
+            Dollar3            => Dollar3[[Ctx0]]
+            QuotedBracket3     => QuotedBracket3[[Ctx0]]
+            StringQuotedChars3 => StringQuotedChars3[[Ctx0]]
+            StringQuotedPart3  => StringQuotedPart3[[Ctx0]]
+            Dollar2            => Dollar2[[Ctx0]]
+            QuotedBracket2     => QuotedBracket2[[Ctx0]]
+            StringQuotedChars2 => StringQuotedChars2[[Ctx0]]
+            StringQuotedPart2  => StringQuotedPart2[[Ctx0]]
+            Dollar1            => Dollar1[[Ctx0]]
+            QuotedBracket1     => QuotedBracket1[[Ctx0]]
+            StringQuotedChars1 => StringQuotedChars1[[Ctx0]]
+            StringQuotedPart1  => StringQuotedPart1[[Ctx0]]
+            StringQuotation    => StringQuotation[[Ctx0]]
+            StrChar            => StrChar[[Ctx0]]
+            String             => String[[Ctx0]]
+            Real               => Real[[Ctx0]]
+            Int                => Int[[Ctx0]]
+            Keyword            => Keyword[[Ctx0]]
+            UCID               => UCID[[Ctx0]]
+            LCID               => LCID[[Ctx0]]
+            LId                => LId[[Ctx0]]
+            Id                 => Id[[Ctx0]]
+            ModNamePart        => ModNamePart[[Ctx0]]
+            ModName            => ModName[[Ctx0]]
+            PreTerm            => PreTerm[[Ctx0]]
+            Term               => Term[[Ctx0]]
+            StrategyMid        => StrategyMid[[Ctx0]]
+            Strategy           => Strategy[[Ctx0]] ]
+
+
+module Stratego-Booster 
+imports StrategoMix[StrategoHost]
+
+imports Booster2 
+		AbstractBoosterModel
+
+exports 
+context-free start-symbols Module [[StrategoHost]]
+
+
+context-free syntax 
+
+
+    "|[" BoosterTerm "]|" -> Term [[StrategoHost]] {cons("ToTerm"),prefer}

@@ -1,0 +1,108 @@
+module parse/attribute
+
+imports
+  include/Booster2
+  
+  library/typeDecl
+  parse/typeDecl
+  
+ 
+ rules
+ 	
+
+/* get-attribute-name: 
+		Takes an attribute and returns its name.
+*/
+ 	
+ 	get-attribute-name:
+ 		Attribute(attName, attType)
+ 		 	-> attName
+
+ 	get-attribute-name:
+ 		Attribute(attName, identity, attType)
+ 		 	-> attName
+
+
+/* get-attribute-type: 
+		Takes an attribute and returns its type.
+*/
+ 	
+ 	get-attribute-type:
+ 		Attribute(attName, attType)
+ 			-> type
+ 		with
+ 			type := <get-minimal-type> attType
+
+ 	get-attribute-type:
+ 		Attribute(attName, identity, attType)
+ 			-> type
+ 		with
+ 			type := <get-minimal-type> attType
+
+/* get-attribute-max-mult: 
+		Takes an attribute and returns its maximum multiplicity.
+*/
+ 	
+ 	get-attribute-max-mult:
+ 		Attribute(attName, attType)
+ 			-> maxmult
+ 		with
+ 			maxmult := <get-max-mult> attType
+
+ 	get-attribute-max-mult:
+ 		Attribute(attName, identity, attType)
+ 			-> maxmult
+ 		with
+ 			maxmult := <get-max-mult> attType
+
+
+/* get-attribute-min-mult: 
+		Takes an attribute and returns its minimum multiplicity.
+*//* has-opposite: 
+		Returns the attribute if it has an opposite.
+*/
+ 	
+ 	get-attribute-min-mult:
+ 		Attribute(attName, attType)
+ 			-> minmult
+ 		with
+ 			minmult := <get-min-mult> attType
+
+ 	get-attribute-min-mult:
+ 		Attribute(attName, identity, attType)
+ 			-> minmult
+ 		with
+ 			minmult := <get-min-mult> attType
+
+
+/* get-attribute-min-mult: 
+		Takes an attribute and returns its minimum multiplicity.
+*/
+ 	
+ 	get-attribute-opposite:
+ 		Attribute(attName, attType)
+ 			-> opp
+ 		with
+ 			opp := <get-opposite> attType
+
+ 	get-attribute-opposite:
+ 		Attribute(attName, identity, attType)
+ 			-> opp
+ 		with
+ 			opp := <get-opposite> attType
+ 			
+/* has-opposite: 
+		Returns the attribute if it has an opposite.
+*/
+ 	
+ 	has-opposite:
+ 		((name1, name2), (name3, name4))
+ 			-> ((name1, name2), (name3, name4))
+ 	
+
+
+	attribute-is-id:
+		Attribute(attName, identity, attType)
+ 			-> Attribute(attName, identity, attType)
+
+	

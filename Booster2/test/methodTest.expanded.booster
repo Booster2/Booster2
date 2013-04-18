@@ -1,0 +1,16 @@
+system StudentSystem 
+
+
+class Staff {
+	attributes
+		id : INT
+		firstName : STRING
+		lastName : STRING
+		
+	invariant
+		true
+	methods
+		create {  }
+		
+}
+

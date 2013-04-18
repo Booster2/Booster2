@@ -1,0 +1,600 @@
+module library/valueExpression
+
+imports
+  include/Booster2
+  
+  library/abstractBoosterModel
+  library/constraint
+  library/relation
+  library/expression
+  
+ rules
+ 	
+	
+/* 	get-mentioned-attributes:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/		
+	get-mentioned-attributes:
+		(name, maybename, Integer(i))
+			-> []
+			
+	get-mentioned-attributes:
+		(name, maybename, String(s))
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, IntExtent())
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, StringExtent())
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, Null())
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, This())
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, ThisPrimed())
+			-> []
+					
+	get-mentioned-attributes:
+		(name, maybename, Input(i))
+			-> []
+					
+	get-mentioned-attributes:
+		(name, maybename, Output(o))
+			-> []
+					
+	get-mentioned-attributes:
+		(name, maybename, SetExtent([]))
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, SetExtent([expr, exprs*]))
+			-> <union>(atts1, atts2)
+		where
+			atts1 := <get-mentioned-attributes>(name, maybename, expr);
+			atts2 := <get-mentioned-attributes>(name, maybename, SetExtent([exprs*]))
+			
+	get-mentioned-attributes:
+		(classname, maybename, PathStart(attname, maybeprimed))
+			-> [(classname, attname)]
+		where
+			type := <lookup-attribute-type> ((classname, attname))
+		// i.e. the attribute does exist
+		
+	get-mentioned-attributes:
+		(classname, maybename, PathComponent(attname, maybeprimed))
+			-> [(classname, attname)]
+		where
+			type := <lookup-attribute-type> ((classname, attname))
+		// i.e. the attribute does exist
+
+	get-mentioned-attributes:
+		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)))
+			-> <union>(atts1, [(otherclassname, attname)])
+		where
+			atts1 := <get-mentioned-attributes>(classname, maybename, path);
+			Class(otherclassname) := <resolve-path-type>(classname, path, maybename);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+			
+	get-mentioned-attributes:
+		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)))
+			-> <union>(atts1, [(otherclassname, attname)])
+		where
+			atts1 := <get-mentioned-attributes>(classname, maybename, path);
+			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+	
+	get-mentioned-attributes:
+		(classname, maybename, PathStart(name, maybeprimed))
+			-> []
+		where
+			setname := <lookup-set-name> name;
+			<equal>(setname, name)
+
+	get-mentioned-attributes:
+		(classname, maybename, PathStart(name, maybeprimed))
+			-> []
+		where
+			setname := <lookup-set-value> name
+			
+	
+/* 	is-old:
+		takes a value expression, and returns True() or False()
+		depending on whether the expression can be evaluated in the pre-state
+		or not. 			
+*/
+
+
+	is-old:
+		Integer(i) 
+			-> True()
+
+	is-old:
+		String(s) 
+			-> True()
+			
+	is-old:
+		IntExtent()
+			-> True()
+
+	is-old:
+		StringExtent()
+			-> True()
+			
+	is-old:
+		Null()
+			-> True()
+			
+	is-old:
+		Input(inputname)
+			-> True()
+			
+	is-old:
+		Output(outputname)
+			-> False()
+			
+	is-old:
+		This()
+			-> True()
+			
+	is-old:
+		ThisPrimed()
+			-> False()
+
+	is-old:
+		Path(a,b)
+			-> True()
+		where
+			True() := <is-old> (a);
+			True() := <is-old> (b)		
+	
+	is-old:
+		PathComponent(name, Some(Primed()))
+			-> False()
+
+	is-old:
+		PathComponent(name, None())
+			-> True()
+
+	is-old:
+		PathStart(name, Some(Primed()))
+			-> False()
+
+	is-old:
+		PathStart(name, None())
+			-> True()
+			
+	is-old:
+		SetExtent([])
+			-> True()
+
+	is-old:
+		SetExtent([expr1, exprs1*])
+			-> True()
+		where
+			True() := <is-old> expr1;
+			True() := <is-old> SetExtent([exprs1*])
+			
+	// default
+	
+	is-old:
+		anything
+			-> False()
+
+
+/* 	get-path-initial-path:
+		takes a path, and returns the path of the owner object			
+*/
+
+	get-path-initial-path:
+		(This()) -> This()
+		
+	get-path-initial-path:
+		(ThisPrimed()) -> This()
+		
+	get-path-initial-path:
+		(PathStart(name, maybePrimed)) -> This()		
+
+	get-path-initial-path:
+		(Path(ps, pc)) -> ps		
+
+	get-path-initial-path:
+		(Input(name)) -> Input(name)
+		
+	get-path-initial-path:
+		(Output(name)) -> Output(name)
+		
+		 
+		
+		
+
+/* 	get-path-attribute-name:
+		takes a path, and returns the name of the resulting attribute			
+*/
+
+	get-path-attribute-name:
+		(This()) -> Null()
+		
+	get-path-attribute-name:
+		(ThisPrimed()) -> Null()
+		
+	get-path-attribute-name:
+		(PathStart(name, maybePrimed)) -> name		
+
+	get-path-attribute-name:
+		(Path(ps, PathComponent(name, maybePrimed))) -> name		
+
+	get-path-attribute-name:
+		(Input(name)) -> Null()
+		
+	get-path-attribute-name:
+		(Output(name)) -> Null()
+		
+
+/* 	get-path-attribute:
+		
+*/
+	get-path-attribute:
+		(classname, methodname, Output(name))
+			-> []
+
+	get-path-attribute:
+		(classname, methodname, Input(name))
+			-> []
+
+	get-path-attribute:
+		(classname, methodname, Path(a,b))
+			-> [(classname2, attname)]
+		where
+			Class(classname2) := <resolve-path-type> (classname, a, (classname, methodname));
+			attname := <get-path-attribute-name> (Path(a,b))
+
+	get-path-attribute:
+		(classname, methodname, Path(a,b))
+			-> [(classname2, attname)]
+		where
+			Optional(Class(classname2)) := <resolve-path-type> (classname, a, (classname, methodname));
+			attname := <get-path-attribute-name> (Path(a,b))
+			
+/* 	get-expression-type
+*/
+
+	get-expression-type:
+		(Integer(i), classname, methodname)
+			-> Int()
+
+	get-expression-type:
+		(String(s), classname, methodname)
+			-> String()
+
+	get-expression-type:
+		(IntExtent(), classname, methodname)
+			-> String()
+
+
+	substitute:
+		(path, path, expression)
+		 	-> expression
+	substitute:
+		(Integer(i), path, expression)
+		 	-> Integer(i)
+
+	substitute:
+		(String(s), path, expression)
+		 	-> String(s)
+		 	
+	substitute:
+		(StringExtent(), path, expression)
+			-> StringExtent()
+
+	substitute:
+		(IntExtent(), path, expression)
+			-> IntExtent()
+			
+	substitute:
+		(Null(), path, expression)
+			-> Null()
+
+	substitute:
+		(This(), path, expression)
+			-> This()
+
+	substitute:
+		(PathStart(a, b), path, expression)
+			-> PathStart(a,b)
+
+
+	substitute:
+		(Path(a, b), path, expression)
+			-> Path(path1,b)
+		where 
+			path1 := <substitute>(a,path, expression)
+			
+	substitute:
+		(Input(i), path, expression)
+			-> Input(i)
+
+	substitute:
+		(Output(i), path, expression)
+			-> Output(i)
+
+	substitute:
+		(SetExtent([]), path, expression)
+			-> SetExtent([])
+
+	substitute:
+		(SetExtent([exp, exps*]), path, expression)
+			-> SetExtent([exp1, exps1*])
+		where
+			exp1 := <substitute>(exp, path, expression);
+			SetExtent([exps1*]) := <substitute>(SetExtent([exps*]), path, expression)
+						
+	substitute:
+		(expression1, path, expression2)
+			-> expression1
+		where
+			log(|Error(), "Substitute nightmare", (expression1, path, expression2))
+			
+			
+			
+/* 	resolve-path-type:
+		Takes a path, the class where it is found, the model, 
+		and optionally a method where it is found, and returns its type 	
+*/
+
+	resolve-path-type:
+		(classname, This(), method, inouts) 
+			-> Class(classname)
+
+	resolve-path-type:
+		(classname, ThisPrimed(), method, inouts) 
+			-> Class(classname)
+
+	resolve-path-type:
+		(classname, Input(name), (classname, methname), inouts)
+			-> type
+		where
+			type := <lookup>(Input(name),inouts)
+
+	resolve-path-type:
+		(classname, Output(name), (classname, methname), inouts)
+			-> type
+		where
+			type := <lookup>(Output(name),inouts)
+
+			
+	resolve-path-type:
+		(classname, Input(attname), (classname, methname), inouts)
+			-> type
+		where
+			type := <lookup-input-type>(((classname, methname), attname))
+			
+	resolve-path-type:
+		(classname, Output(attname), (classname, methname), inouts)
+			-> type
+		where
+			type := <lookup-output-type>(((classname, methname), attname))
+
+
+	
+	resolve-path-type:
+		(classname, PathStart(attname, None()), method, inouts)
+			-> (Class(attname))
+		where
+			<equal>(attname, <lookup-set-name>attname)
+
+	resolve-path-type:
+		(classname, PathStart(attname, None()), method, inouts)
+			-> Class(setname)
+		where
+			setname := <lookup-set-value> (attname);
+			not(<equal>(setname, ()))
+
+	resolve-path-type:
+		(classname, PathStart(attname, maybeprimed), method, inouts)
+			-> Set(Class(attname))
+		where
+			<equal>(attname, <lookup-class-name>(attname))
+						
+	resolve-path-type:
+		(classname, PathStart(attname, maybeprimed), method)
+			-> type
+		where
+			type := <lookup-attribute-type>((classname, attname))
+
+
+	resolve-path-type:
+		(classname, Path(path, PathComponent(attname, maybeprimed)), method, inouts)
+			->  type
+		where
+			Optional(Class(classname2)) := <resolve-path-type> (classname, path, method, inouts);
+			type := <lookup-attribute-type>((classname2, attname))
+
+	resolve-path-type:
+		(classname, Path(path, PathComponent(attname, maybeprimed)), method, inouts)
+			-> type
+		where
+			Class(classname2) := <resolve-path-type> (classname, path, method, inouts);
+			type := <lookup-attribute-type>((classname2, attname))
+		
+		
+	resolve-path-type:
+		(arg1, arg2, arg3)
+			-> <resolve-path-type> (arg1, arg2, arg3, [])
+			
+				
+/*	resolve-path-type:
+		somethingelse
+			-> Int()
+		where
+			log(|Error(), "cannot resolve path type", somethingelse)
+*/			
+
+/* 	make-old:
+		Takes an expression, and returns its representation in the
+		pre-state of a method
+*/
+
+	make-old:
+		Integer(i) 
+			-> Integer(i)
+
+	make-old:
+		String(s) 
+			-> String(s)
+			
+	make-old:
+		IntExtent()
+			-> IntExtent()
+
+	make-old:
+		StringExtent()
+			-> StringExtent()
+			
+	make-old:
+		Null()
+			-> Null()
+			
+	make-old:
+		Input(inputname)
+			-> Input(inputname)
+			
+	make-old:
+		Output(outputname)
+			-> Output(outputname)
+			
+	make-old:
+		This()
+			-> This()
+			
+	make-old:
+		ThisPrimed()
+			-> ThisPrimed()
+
+	make-old:
+		Path(a,b)
+			-> Path(c,d)
+		where
+			c := <make-old> (a);
+			d := <make-old> (b)		
+	
+	make-old:
+		PathComponent(name, Some(Primed()))
+			-> PathComponent(name, None())
+
+	make-old:
+		PathComponent(name, None())
+			-> PathComponent(name, None())
+
+	make-old:
+		PathStart(name, Some(Primed()))
+			-> PathStart(name, None())
+
+	make-old:
+		PathStart(name, None())
+			-> PathStart(name, None())
+			
+	make-old:
+		SetExtent([])
+			-> SetExtent([])
+
+	make-old:
+		SetExtent([expr1, exprs1*])
+			-> SetExtent([expr2, exprs2*])
+		where
+			expr2 := <make-old> expr1;
+			SetExtent([exprs2*]) := <make-old> SetExtent([exprs1*])
+
+
+/* 	make-post-state:
+		Takes an expression, and returns its representation in the
+		pre-state of a method
+*/
+
+	make-post-state:
+		Integer(i) 
+			-> Integer(i)
+
+	make-post-state:
+		String(s) 
+			-> String(s)
+			
+	make-post-state:
+		IntExtent()
+			-> IntExtent()
+
+	make-post-state:
+		StringExtent()
+			-> StringExtent()
+			
+	make-post-state:
+		Null()
+			-> Null()
+			
+	make-post-state:
+		Input(inputname)
+			-> Input(inputname)
+			
+	make-post-state:
+		Output(outputname)
+			-> Output(outputname)
+			
+	make-post-state:
+		This()
+			-> This()
+			
+	make-post-state:
+		ThisPrimed()
+			-> ThisPrimed()
+
+	make-post-state:
+		Path(a,b)
+			-> Path(c,d)
+		where
+			c := <make-post-state> (a);
+			d := <make-post-state> (b)		
+	
+	make-post-state:
+		PathComponent(name, Some(Primed()))
+			-> PathComponent(name, Some(Primed()))
+
+	make-post-state:
+		PathComponent(name, None())
+			-> PathComponent(name, Some(Primed()))
+
+	make-post-state:
+		PathStart(name, Some(Primed()))
+			-> PathStart(name, Some(Primed()))
+
+	make-post-state:
+		PathStart(name, None())
+			-> PathStart(name, Some(Primed()))
+			
+	make-post-state:
+		SetExtent([])
+			-> SetExtent([])
+
+	make-post-state:
+		SetExtent([expr1, exprs1*])
+			-> SetExtent([expr2, exprs2*])
+		where
+			expr2 := <make-post-state> expr1;
+			SetExtent([exprs2*]) := <make-post-state> SetExtent([exprs1*])
+	
+
+ 	/*make-post-state:
+ 		x
+ 		-> True()
+ 		where
+ 			log(|Error(),"make-post-state", x) */ 
+ 
+		

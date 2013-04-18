@@ -1,0 +1,341 @@
+module library/constraint
+
+imports
+  include/Booster2
+  
+  library/relation
+  library/expression
+  library/valueExpression
+ 
+ 
+ rules
+ 	
+ 	
+
+/* 	get-mentioned-attributes:
+		takes a constraint, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/
+
+	get-mentioned-attributes:
+		(name, maybename, True())
+			-> []
+			
+	get-mentioned-attributes:
+		(name, maybename, False())
+			-> []
+			
+	get-mentioned-attributes:
+		(name, maybename, Not(constraint))
+			-> atts
+		with
+			atts := <get-mentioned-attributes> (name, maybename, constraint)
+			
+	get-mentioned-attributes:
+		(name, maybename, And(constraint1, constraint2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+
+	get-mentioned-attributes:
+		(name, maybename, Or(constraint1, constraint2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+
+	get-mentioned-attributes:
+		(name, maybename, Implies(constraint1, constraint2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+
+	get-mentioned-attributes:
+		(name, maybename, Then(constraint1, constraint2))
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+		
+			
+/*	is-defined:
+		Takes a constraint, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/ 	
+
+	is-defined:
+		(classname, method, True())
+			-> True()
+
+	is-defined:
+		(classname, method, False())
+			-> True()
+	
+	is-defined:
+		(classname, method, Not(constraint1))
+			-> Not(constraint2)
+		where
+			constraint2 := <is-defined>(classname, method, constraint1)
+			
+	is-defined:
+		(classname, method, And(constraint1, constraint2))
+			-> And(constraint3, constraint4)
+		where
+			constraint3 := <is-defined>(classname, method, constraint1);
+			constraint4 := <is-defined>(classname, method, constraint2)
+			
+	is-defined:
+		(classname, method, Or(constraint1, constraint2))
+			-> Or(And(constraint1, constraint3), And(constraint2, constraint4))
+		where
+			constraint3 := <is-defined>(classname, method, constraint1);
+			constraint4 := <is-defined>(classname, method, constraint2)
+	
+	is-defined:
+		(classname, method, Implies(constraint1, constraint2))
+			-> Implies(And(constraint1, constraint3), And(constraint2, constraint4))
+		where
+			constraint3 := <is-defined>(classname, method, constraint1);
+			constraint4 := <is-defined>(classname, method, constraint2)
+		
+	is-defined:
+		(classname, method, Then(constraint1, constraint2))
+			-> Then(constraint3, constraint4)
+		where
+			constraint3 := <is-defined>(classname, method, constraint1);
+			constraint4 := <is-defined>(classname, method, constraint2)
+			
+			
+	make-old:
+		True() -> True()
+	
+	make-old:
+		False() -> False()
+		
+	make-old:
+		Not(constraint1)
+			-> Not(constraint2)
+		where
+			constraint2 := <make-old> constraint1
+			
+	make-old:
+		And(constraint1, constraint2)
+			-> And(constraint3, constraint4)
+		where
+			constraint3 := <make-old> constraint1;
+			constraint4 := <make-old> constraint2
+		
+	make-old:
+		Or(constraint1, constraint2)
+			-> Or(constraint3, constraint4)
+		where
+			constraint3 := <make-old> constraint1;
+			constraint4 := <make-old> constraint2
+
+	make-old:
+		Then(constraint1, constraint2)
+			-> Then(constraint3, constraint4)
+		where
+			constraint3 := <make-old> constraint1;
+			constraint4 := <make-old> constraint2
+
+	make-old:
+		Implies(constraint1, constraint2)
+			-> Implies(constraint3, constraint4)
+		where
+			constraint3 := <make-old> constraint1;
+			constraint4 := <make-old> constraint2
+
+	make-old:
+		Exists(name, expr1, constraint1)
+			-> Exists(name, expr2, constraint2)
+		where
+			expr2 := <make-old> expr1;
+			constraint2 := <make-old> constraint1
+
+	make-old:
+		Forall(name, expr1, constraint1)
+			-> Forall(name, expr2, constraint2)
+		where
+			expr2 := <make-old> expr1;
+			constraint2 := <make-old> constraint1	
+	
+	 
+	make-post-state:
+		True() -> True()
+	
+	make-post-state:
+		False() -> False()
+		
+	make-post-state:
+		Not(constraint1)
+			-> Not(constraint2)
+		where
+			constraint2 := <make-post-state> constraint1
+			
+	make-post-state:
+		And(constraint1, constraint2)
+			-> And(constraint3, constraint4)
+		where
+			constraint3 := <make-post-state> constraint1;
+			constraint4 := <make-post-state> constraint2
+		
+	make-post-state:
+		Or(constraint1, constraint2)
+			-> Or(constraint3, constraint4)
+		where
+			constraint3 := <make-post-state> constraint1;
+			constraint4 := <make-post-state> constraint2
+
+	make-post-state:
+		Then(constraint1, constraint2)
+			-> Then(constraint3, constraint4)
+		where
+			constraint3 := <make-post-state> constraint1;
+			constraint4 := <make-post-state> constraint2
+
+	make-post-state:
+		Implies(constraint1, constraint2)
+			-> Implies(constraint3, constraint4)
+		where
+			constraint3 := <make-post-state> constraint1;
+			constraint4 := <make-post-state> constraint2
+	 
+	make-post-state:
+		Exists(name, expr1, constraint1)
+			-> Exists(name, expr2, constraint2)
+		where
+			expr2 := <make-post-state> expr1;
+			constraint2 := <make-post-state> constraint1
+
+	make-post-state:
+		Forall(name, expr1, constraint1)
+			-> Forall(name, expr2, constraint2)
+		where
+			expr2 := <make-post-state> expr1;
+			constraint2 := <make-post-state> constraint1
+
+			
+/* 	substitute:
+		takes a constraint, and replaces all instances of the path with the given expression
+*/			
+	substitute:
+		 (True(), path, expression)
+		 	-> True()		
+
+	substitute:
+		 (False(), path, expression)
+		 	-> False()
+		 	
+	substitute:
+		 (Not(constraint), path, expression)
+		 	-> Not(constraint2)
+		 where
+		 	constraint2 := <substitute>	(constraint, path, expression)
+		 	
+	substitute:
+		 (And(constraint1, constraint2), path, expression)
+		 	-> And(constraint3, constraint4)
+		 where
+		 	/*log(|Error(), <substitute>	(constraint1, path, expression), <substitute>	(constraint2, path, expression));*/
+		 	constraint3 := <substitute>	(constraint1, path, expression);
+		 	constraint4 := <substitute>	(constraint2, path, expression)
+	
+	substitute:
+		 (Or(constraint1, constraint2), path, expression)
+		 	-> Or(constraint3, constraint4)
+		 where
+		 	constraint3 := <substitute>	(constraint1, path, expression);
+		 	constraint4 := <substitute>	(constraint2, path, expression)
+	
+	substitute:
+		 (Implies(constraint1, constraint2), path, expression)
+		 	-> Implies(constraint3, constraint4)
+		 where
+		 	constraint3 := <substitute>	(constraint1, path, expression);
+		 	constraint4 := <substitute>	(constraint2, path, expression)
+	
+	substitute:
+		 (Then(constraint1, constraint2), path, expression)
+		 	-> Then(constraint3, constraint4)
+		 where
+		 	constraint3 := <substitute>	(constraint1, path, expression);
+		 	constraint4 := <substitute>	(constraint2, path, expression)
+
+	substitute:
+		 (Exists(name, expr1, constraint1), path, expression)
+		 	-> Exists(name, expr2, constraint2)
+		 where
+		 	expr2 := <substitute>	(expr1, path, expression);
+		 	constraint2 := <substitute>	(constraint1, path, expression)
+
+	substitute:
+		 (Forall(name, expr1, constraint1), path, expression)
+		 	-> Forall(name, expr2, constraint2)
+		 where
+		 	expr2 := <substitute>	(expr1, path, expression);
+		 	constraint2 := <substitute>	(constraint1, path, expression)
+
+		 	
+		 	
+	combine-constraints:
+		[] 
+			-> True()
+			
+	combine-constraints:
+		[constraint]
+			-> constraint
+			
+	combine-constraints:
+		[constraint, constraints*]
+			-> And(constraint, constraint1)
+		where
+			constraint1 := <combine-constraints>[constraints*]
+			
+			
+	
+/*	combine-invariants:
+		([invs1*],[invs2*])
+			-> ([invs1*],[invs2*])
+*/
+
+
+	combine-invariants:
+		([], invs)
+			-> []
+
+	combine-invariants:
+		([((classname, attname), constraint1), invs1*], [invs2*])
+			-> [((classname, attname), constraint2), invs3*]
+		where
+			constraint2 := <get-invariant> ((classname, attname), [invs2*]);
+			[invs3*] := <combine-invariants> ([invs1*], [invs2*])
+
+
+	get-invariant:
+		((classname, attname), [[((classname, attname), constraint2), invs1*], invs2*])
+			-> And(constraint2, constraint3)
+		where
+			constraint3 := <get-invariant>((classname, attname), [[invs1*], invs2*])
+
+	get-invariant:
+		((classname, attname), [[((classname1, attname1), constraint2), invs1*], invs2*])
+			-> constraint3
+		where
+			constraint3 := <get-invariant>((classname, attname), [[invs1*], invs2*])
+
+	get-invariant:
+		((classname, attname), [[], invs2*])
+			-> constraint3
+		where
+			constraint3 := <get-invariant>((classname, attname), [invs2*])
+
+	get-invariant:
+		((classname, attname), [])
+			-> True()
+		
+			
+

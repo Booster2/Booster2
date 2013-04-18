@@ -41,5 +41,15 @@
         <import file="build.generated.xml"/>   
     
         <!-- Main target -->
-        <target name="all" depends="spoofaximp.default.ctree"/>
+        <target name="all" depends="meta-syntax, spoofaximp.default.ctree"/>
+	
+		<!-- Added to allow concrete syntax in transformations -->
+			<target name="meta-syntax">
+	  		  <antcall target="sdf2table">
+	    		<param name="sdfmodule" value="Stratego-Booster"/>
+	    		<param name="build.sdf.imports" value="${build.sdf.imports} -Idef ${lib}/StrategoMix.def"/>
+	    		<param name="include" value="${lib}"/>
+	  		  </antcall>
+			</target>
+		
     </project>

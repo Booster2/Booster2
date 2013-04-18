@@ -1,0 +1,81 @@
+module parse/typeDecl
+
+imports
+  include/Booster2
+  
+  library/multiplicity
+ 
+ rules
+ 	
+ /* get-max-mult:
+ 		Takes a TypeDecl and returns its maximum multiplicity	
+ 
+ */
+ 
+	get-max-mult: 
+		String() -> 1
+		
+	get-max-mult:
+		Int() -> 1
+		
+	get-max-mult:
+		UniDirectional(name) -> 1
+	
+	get-max-mult:
+		BiDirectional(name1,name2) -> 1
+		
+	get-max-mult:
+		Optional(typedecl) -> 1
+		
+	get-max-mult:
+		Set(typedecl, mult) -> x
+	with x := <get-max> mult
+
+ /* get-min-mult:
+ 		Takes a TypeDecl and returns its minimum multiplicity	
+  */
+ 
+	get-min-mult: 
+		String() -> 1
+		
+	get-min-mult:
+		Int() -> 1
+		
+	get-min-mult:
+		UniDirectional(name) -> 1
+	
+	get-min-mult:
+		BiDirectional(name1,name2) -> 1
+		
+	get-min-mult:
+		Optional(typedecl) -> 0
+		
+	get-min-mult:
+		Set(typedecl, mult) -> x
+	with x := <get-min> mult
+
+ /* get-opposite:
+ 		Takes a TypeDecl and returns its opposite attribute	
+  */
+ 
+	get-opposite: 
+		String() -> ()
+		
+	get-opposite:
+		Int() -> ()
+		
+	get-opposite:
+		UniDirectional(name) -> ()
+	
+	get-opposite:
+		BiDirectional(name1,name2) -> (name1, name2)
+		
+	get-opposite:
+		Optional(typedecl) -> x
+	with x := <get-opposite> typedecl
+		
+	get-opposite:
+		Set(typedecl, mult) -> x
+	with x := <get-opposite> typedecl
+
+		

@@ -1,0 +1,889 @@
+module translate/sql/abstractBoosterModel 
+
+imports
+  include/Booster2
+  library/valueExpression
+  library/abstractBoosterModel
+  library/strategy
+  
+
+ rules
+ 		booster-to-relational:	
+		x -> Schema(<ABM> "Name", [ metatables*, settables*, tables*, tables'* ], [procedures*], StatementList([metaStatements*, statements*]))
+		 where
+			[metatables*] := <booster-to-metatables> <ABM> "Classes"; 
+			[tables*] := <booster-to-relational-classes> <ABM> "Classes" ;
+			[tables'*] := <booster-to-relational-assocs> x   ;
+			[settables*] := <booster-to-relational-enumerations> <ABM> "Sets" ;
+			[procedures*] := <booster-to-relational-procedures> <ABM> "Programs" ;
+			[metaStatements*] := <booster-to-metadata> x;
+			[statements*] := <booster-to-data-inserts> <ABM> "Sets" 
+			 
+	booster-to-metatables:
+		classes ->
+			[Table("_Meta_Classes", [idColumn, nameColumn, tableColumn]),
+			 Table("_Meta_Attributes", [idColumn, classColumn, attNameColumn, primTypeColumn, typeMultiplicityColumn, classNameColumn, setNameColumn, directionColumn, tableNameColumn, oppAttColumn, isIdColumn]),
+			 Table("_Meta_Methods", [idColumn, classColumn, methodNameColumn, isObjectMethodColumn]),
+			 Table("_Meta_Method_Params", [idColumn, classColumn, methodNameColumn, paramNameColumn, paramTypeColumn, paramMultiplicityColumn, paramInOutColumn, paramClassNameColumn, paramSetNameColumn])]
+
+		where
+			idColumn := Column("id" , "", False(), Int(), AutoIncrement(), Primary(), None());
+			nameColumn := Column("className" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			tableColumn := Column("tableName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+
+			classColumn := Column("class" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			attNameColumn := Column("attName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			primTypeColumn := Column("primType" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			typeMultiplicityColumn := Column("typeMultiplicity" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			classNameColumn := Column("className" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			setNameColumn := Column("setName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			directionColumn := Column("direction" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			tableNameColumn := Column("tableName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			oppAttColumn := Column("oppAttName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			isIdColumn := Column("isId" , "", False(), Bit(), NoExtra(), NoKey(), None());
+			methodNameColumn := Column("methodName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			isObjectMethodColumn := Column("isObjectMethod" , "", False(), Bit(), NoExtra(), NoKey(), None());
+			paramNameColumn := Column("paramName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			paramTypeColumn := Column("paramType" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			paramMultiplicityColumn := Column("paramMultiplicity" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			paramInOutColumn := Column("paramInOut" , "", False(), Varchar(10), NoExtra(), NoKey(), None());
+			paramClassNameColumn := Column("paramClassName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			paramSetNameColumn := Column("paramSetName" , "", False(), Varchar(500), NoExtra(), NoKey(), None())
+
+
+	booster-to-metadata:
+		x ->
+			[classnames*]
+		where
+			[classnames*] := <flatten-list><map(booster-to-metadata-classes)> <ABM> "Classes"
+
+	booster-to-metadata-classes:
+		classname ->
+			[ Insert(None(), None(), Into(), "_Meta_Classes", ["className","tablename"], [String(classname),String(classname)], None()),
+				attStmts*, methStmts*, paramStmts*] 
+		where
+			classAtts := <lookup-class-attributes> classname;
+			[attStmts*] := <currymap(booster-to-metadata-attributes)> (classname, classAtts);
+			classMeths := <lookup-class-methods> classname;
+			[methStmts*] := <currymap(booster-to-metadata-method)> (classname, classMeths);
+			[paramStmts*] := <currymap(booster-to-metadata-method-params)> (classname, classMeths)
+			
+
+	booster-to-metadata-attributes:
+		(classname, attname) ->
+			Insert(None(), None(), Into(), "_Meta_Attributes", 
+						["class","attName","primType","typeMultiplicity","oppAttName","className","setName","direction","tableName","isId"], 
+						[String(classname),String(attname),String(primType),String(typeMultiplicity),oppAttName,String(className),String(setName),String(direction),String(tableName),Int(isId)], None())
+		where
+			attType := <lookup-attribute-type> (classname, attname);
+			(primType, typeMultiplicity,className,setName) := <attribute-type-metadata> attType;
+			(direction, oppAttName) := <get-direction> (classname, attname);
+			tableName := <get-attribute-table-name>(classname, attname);
+			isId := <get-attribute-is-id>(classname, attname)
+
+	booster-to-metadata-method:
+		(classname, methodname) ->
+			Insert(None(), None(), Into(), "_Meta_Methods", 
+						["class","methodName","isObjectMethod"], 
+						[String(classname),String(methodname),True()], None())
+		where
+			<elem>(("this", Class(classname)), <lookup>((classname, methodname), <ABM> "Inputs"))
+
+	booster-to-metadata-method:
+		(classname, methodname) ->
+			Insert(None(), None(), Into(), "_Meta_Methods", 
+						["class","methodName","isObjectMethod"], 
+						[String(classname),String(methodname),False()], None())
+
+
+	booster-to-metadata-method-params:
+		(classname, methodname) ->
+			[istmts*,ostmts*]
+		where
+			i* := <lookup>((classname, methodname), <ABM> "Inputs");
+			[istmts*] := <currymap(booster-to-metadata-param)> (((classname, methodname),"input"), [i*]);
+			o* := <lookup>((classname, methodname), <ABM> "Outputs");
+			[ostmts*] := <currymap(booster-to-metadata-param)> (((classname, methodname),"output"), [o*])
+			/*log(|Error(),i*) */			
+
+	booster-to-metadata-param:
+		(((classname, methodname), inout), (name, type)) ->
+			Insert(None(), None(), Into(), "_Meta_Method_Params", 
+						["class", "methodName", "paramName","paramType","paramMultiplicity","paramInOut","paramClassName", "paramSetName"], 
+						[String(classname), String(methodname), String(name),String(paramPrimType), String(paramTypeMultiplicity),String(inout), String(paramClassName), String(paramSetName)], None())
+
+		where
+			(paramPrimType, paramTypeMultiplicity,paramClassName,paramSetName) := <attribute-type-metadata> type
+						
+
+
+	get-attribute-is-id:
+			(classname, attname) -> 1
+				where
+			<elem>(attname, <lookup> (classname, <ABM> "Ids"))
+
+	get-attribute-is-id:
+			(classname, attname) -> 0
+
+
+	get-direction:
+		(classname, attname)
+			-> ("Bi", String(attname2))
+		where
+			(classname2, attname2) := <lookup-opposite>(classname, attname)
+
+	get-direction:
+		(classname, attname)
+			-> ("Uni", Null())
+
+	attribute-type-metadata:
+		Int() -> ("Integer","Mandatory","","")
+	attribute-type-metadata:
+		String() -> ("String","Mandatory","","")
+	attribute-type-metadata:
+		Class(name) -> ("ClassRef","Mandatory",name,"")
+		where 
+			<equal>(name, <lookup-class-name> name)
+	attribute-type-metadata:
+		Class(name) -> ("SetValue","Mandatory","",name)
+		where 
+			<equal>(name, <lookup-set-name> name)
+
+	attribute-type-metadata:
+		Optional(Int()) -> ("Integer","Optional","","")
+	attribute-type-metadata:
+		Optional(String()) -> ("String","Optional","","")
+	attribute-type-metadata:
+		Optional(Class(name)) -> ("ClassRef","Optional",name,"")
+		where 
+			<equal>(name, <lookup-class-name> name)
+	attribute-type-metadata:
+		Optional(Class(name)) -> ("SetValue","Optional","",name)
+		where 
+			<equal>(name, <lookup-set-name> name)
+	
+	attribute-type-metadata:
+		Set(Int()) -> ("Integer","Set","","")
+	attribute-type-metadata:
+		Set(String()) -> ("String","Set","","")
+	attribute-type-metadata:
+		Set(Class(name)) -> ("ClassRef","Set",name,"")
+		where 
+			<equal>(name, <lookup-class-name> name )
+			
+	attribute-type-metadata:
+		Set(Class(name)) -> ("SetValue","Set","",name)
+		where 
+			<equal>(name, <lookup-set-name> name)
+
+
+
+
+	booster-to-relational-classes:
+		[]
+		 -> []
+		
+	booster-to-relational-classes:
+		[name, names*]
+			-> [Table(name, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*]), tables*]
+		where 
+			tables* := <booster-to-relational-classes> [names*];
+			[columns*] := <get-table-columns>(name, <ABM> "Attributes", <ABM> "Type", <ABM> "MaxMults", <ABM> "MinMults"); 
+			identity := <concat-strings> [name, "Id"]
+
+	booster-to-relational-enumerations:
+		[]
+			-> []
+
+	booster-to-relational-enumerations:
+		[set, sets*]
+			-> [table, tables*]
+		where 
+			tables* := <booster-to-relational-enumerations> [sets*];
+			table := <get-set-table> set
+			
+	booster-to-relational-procedures:
+		[]
+			-> []
+			
+	booster-to-relational-procedures:
+		[((classname, procname), gc), programs*]
+			-> [p, ps*]
+		where
+			ps* := <booster-to-relational-procedures> [programs*];
+			name := <concat-strings> [classname, "_", procname];
+			[procinputs*] := <booster-to-relational-inputs> (classname, procname, <ABM> "Inputs");
+			[procoutputs*] := <booster-to-relational-outputs> (classname, procname, <ABM> "Outputs");
+			statements := <booster-to-relational-guarded-command> (classname, procname, gc);
+			p := Procedure(name, [procinputs*, procoutputs*], DeclareList([]), StatementList(statements))
+
+	booster-to-data-inserts:
+		sets
+			-> [stmts*]
+		where
+			[stmts*] := <get-enumeration-data> sets				
+			
+	get-enumeration-data:
+		[] -> []
+
+	get-enumeration-data:
+		[SetDef(name, []), sets* ] -> [stmt, stmts*]
+			where
+				stmt := Insert(None(), None(), Into(), name, [name], [String("unassigned")], None());
+				[stmts*] := <get-enumeration-data> [sets*]
+ 
+	get-enumeration-data:
+		[SetDef(name, [value, values* ]), sets* ] 
+			-> [stmt, stmts* ]
+		where
+			stmt :=  Insert(None(), None(), Into(), name, [name], [String(value)], None());
+			[stmts*] := <get-enumeration-data> [SetDef(name, [values* ]), sets* ]
+
+			
+	get-table-columns:
+		(name, [], types, maxmults, minmults)
+			-> []
+	
+	get-table-columns:
+		(name, [(name, []), atts*], types, maxmults, minmults)
+			-> <get-table-columns> (name, [atts*], types, maxmults, minmults)
+
+			
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(), None()), columns*]
+		where
+			String() := <lookup> ((name,attname1), types);
+			1 := <lookup>((name, attname1), maxmults);			
+			1 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1, name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+
+
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "", False(), Int(), NoExtra(), NoKey(),None()), columns*]
+		where
+			Int() := <lookup> ((name,attname1), types);
+			1 := <lookup>((name, attname1), maxmults);			
+			1 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1, name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname]))), columns*]
+		where
+			Class(cname) := <lookup> ((name,attname1), types);
+			<equal>(<lookup-set-name> cname, cname);
+			1 := <lookup>((name, attname1), maxmults);			
+			1 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1,name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])]))), columns*]
+		where
+			Class(cname) := <lookup> ((name,attname1), types);
+			<equal>(<lookup-class-name> cname, cname);
+			not(<lookup-opposite>(name, attname1));
+			1 := <lookup>((name, attname1), maxmults);			
+			1 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1,name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+
+	
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "null", True(), Varchar(500), NoExtra(), NoKey(), None()), columns*]
+		where
+			Optional(String()) := <lookup> ((name,attname1), types);
+			1 := <lookup>((name, attname1), maxmults);			
+			0 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1, name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "null", True(), Int(), NoExtra(), NoKey(), None()), columns*]
+		where
+			Optional(Int()) := <lookup> ((name,attname1), types);
+			1 := <lookup>((name, attname1), maxmults);			
+			0 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1, name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "null", True(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname]))), columns*]
+		where
+			Optional(Class(cname)) := <lookup> ((name,attname1), types);
+			<equal>(<lookup-set-name> cname, cname);
+			1 := <lookup>((name, attname1), maxmults);			
+			0 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1,name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [Column(attname1, "null", True(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])]))), columns*]
+		where
+			Optional(Class(cname)) := <lookup> ((name,attname1), types);
+			<equal>(<lookup-class-name>cname, cname);
+			not(<lookup-opposite>(name, attname1));
+			1 := <lookup>((name, attname1), maxmults);			
+			0 := <lookup>((name, attname1), minmults);
+			[] := <set-attribute-table-name> (name, attname1, name);
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+
+		
+
+			
+	get-table-columns:
+		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
+			-> [columns*]
+		where
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+		
+	get-table-columns:
+		(name, [(name1, [attnames*]), atts*], types, maxmults, minmults)
+			-> <get-table-columns> (name, [atts*], types, maxmults, minmults)
+			
+	booster-to-relational-assocs:
+		x
+			-> <get-table-assocs> (<ABM> "Attributes", <ABM> "Type", <ABM> "MaxMults", <ABM> "MinMults", <ABM> "Opposites")
+
+
+	get-table-assocs:
+		([], types, maxmults, minmults, opposite)
+			-> []
+	
+	get-table-assocs:
+		( [(name, []), atts*], types, maxmults, minmults, opposite)
+			-> <get-table-assocs> ([atts*], types, maxmults, minmults, opposite)
+
+			
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(), None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
+		where
+			Class(oname) := <lookup> ((name, attname1), types);
+			(oname, oaname) := <lookup> ((name, attname1), opposite);
+			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*] ) ;
+			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
+			firstcolname := <concat-strings> [name, "_", attname1];			
+			secondcolname := <concat-strings> [oname, "_", oaname];
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[] := <set-attribute-table-name> (oname, oaname, tablename);
+			[tables*] := <get-table-assocs> (attrs2*, types, maxmults, minmults, opposite)
+
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
+		where
+			Optional(Class(oname)) := <lookup> ((name, attname1), types);
+			(oname, oaname) := <lookup> ((name, attname1), opposite);
+			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*]  );
+			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
+			firstcolname := <concat-strings> [name, "_", attname1];			
+			secondcolname := <concat-strings> [oname, "_", oaname];
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[] := <set-attribute-table-name> (oname, oaname, tablename);
+			[tables*] := <get-table-assocs> (attrs2*, types, maxmults, minmults, opposite)
+
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
+		where
+			Set(Class(oname)) := <lookup> ((name, attname1), types);
+			(oname, oaname) := <lookup> ((name, attname1), opposite);
+			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*] ) ;
+			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
+			firstcolname := <concat-strings> [name, "_", attname1];			
+			secondcolname := <concat-strings> [oname, "_", oaname];
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[] := <set-attribute-table-name> (oname, oaname, tablename);
+			[tables*] := <get-table-assocs> (attrs2*, types, maxmults, minmults, opposite)
+
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, 
+				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
+				 Column(attname1, "", False(), Int(), NoExtra(), NoKey(),None())]), tables*]
+		where
+			Set(Int()) := <lookup> ((name, attname1), types);
+			tablename := <concat-strings> [name, "_", attname1];
+			firstcolname := <concat-strings> [name, "Id"];			
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, 
+				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
+				 Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),None())]), tables*]
+		where
+			Set(String()) := <lookup> ((name, attname1), types);
+			tablename := <concat-strings> [name, "_", attname1];
+			firstcolname := <concat-strings> [name, "Id"];			
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, 
+				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
+				 Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))]), tables*]
+		where
+			Set(Class(cname)) := <lookup> ((name, attname1), types);
+			<equal>(<lookup-set-name> cname, cname);
+			tablename := <concat-strings> [name, "_", attname1];
+			firstcolname := <concat-strings> [name, "Id"];			
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+			
+	get-table-assocs:
+		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [Table(tablename, 
+				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
+				 Column(attname1, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))]), tables*]
+		where
+			Set(Class(cname)) := <lookup> ((name, attname1), types);
+			<equal>(<lookup-class-name> cname, cname);
+			tablename := <concat-strings> [name, "_", attname1];
+			firstcolname := <concat-strings> [name, "Id"];			
+			tableid := <concat-strings> [tablename, "Id"];
+			[] := <set-attribute-table-name> (name, attname1, tablename);
+			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+
+
+
+	get-table-assocs:
+		([(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
+			-> [tables*]
+		where
+			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+			
+			
+			
+	remove-attribute-from-list:
+		((cname,aname), [])
+			-> []
+			
+	remove-attribute-from-list:
+		((cname, aname), [(cname, [atts*]), attrs*])
+			-> [(cname, [atts2*]), attrs*]
+		where
+			[atts2*] := <remove-attribute-from-list> ( aname, [atts*])
+
+	remove-attribute-from-list:
+		((cname, aname), [(name, [atts*]), attrs*])
+			-> [(name, [atts*]), attrs2*]
+		where
+			[attrs2*] := <remove-attribute-from-list> ((cname, aname), [attrs*])
+			
+	remove-attribute-from-list:
+		(aname, [aname, atts*])
+			-> 	[atts*]
+			
+	remove-attribute-from-list:
+		(aname, [name, atts*])
+			-> [name, atts2*]
+		where
+			[atts2*] := <remove-attribute-from-list> (aname, [atts*]) 
+			
+	get-set-table:
+		SetDef(name, [values*])
+			-> Table(name, [Column(name, "unassigned", False(), Varchar(100), NoExtra(), Primary(),None())])
+			
+	booster-to-relational-inputs:
+		(classname, procname, inputs)
+			-> [ins*]
+		where
+			i* := <lookup>((classname, procname), inputs);
+			[ins*] := <convert-inputs> [i*]
+
+	booster-to-relational-outputs:
+		(classname, procname, outputs)
+			-> [outs*]
+		where
+			o* := <lookup>((classname, procname), outputs);
+			[outs*] := <convert-outputs> [o*]
+
+
+			
+	convert-inputs:
+		[] -> []
+		
+	convert-inputs:
+		[(name, String()), ins*]
+			-> [Input(name, Varchar(100)), inputs*]
+		where
+			[inputs*] := <convert-inputs> [ins*]
+
+	convert-inputs:
+		[(name, Class(cname)), ins*]
+			-> [Input(name, Int()), inputs*]
+		where
+			[inputs*] := <convert-inputs> [ins*]
+
+	convert-inputs:
+		[(name, Int()), ins*]
+			-> [Input(name, Int()), inputs*]
+		where
+			[inputs*] := <convert-inputs> [ins*]
+
+	convert-outputs:
+		[] -> []
+		
+	convert-outputs:
+		[(name, String()), outs*]
+			-> [Output(name, Varchar(100)), outputs*]
+		where
+			[outputs*] := <convert-outputs> [outs*]
+
+	convert-outputs:
+		[(name, Class(cname)), outs*]
+			-> [Output(name, Int()), outputs*]
+		where
+			[outputs*] := <convert-outputs> [outs*]
+
+	convert-outputs:
+		[(name, Int()), outs*]
+			-> [Output(name, Int()), outputs*]
+		where
+			[outputs*] := <convert-outputs> [outs*]
+
+	convert-outputs:
+		[(name, Set(Class(cname))), outs*]
+			-> [Output(name, Int()), outputs*]
+		where
+			[outputs*] := <convert-outputs> [outs*]
+
+			 	
+	booster-to-relational-guarded-command:
+		(classname, progname, Skip())
+			-> []
+			
+			
+	booster-to-relational-guarded-command:
+		(classname, progname, Assign(path, expr))
+			-> [Update([],
+				TableName(tablename),[(attname, expr')],Where(expr''),None(),None())]
+			where 
+				attname := <get-path-attribute-name> path;
+				path' := <get-path-initial-path> path;
+				Class(tablename) := <resolve-path-type>(classname, path', (classname, progname));
+				expr' := <booster-to-relational-expression> (expr, classname);
+				expr'' := <booster-path-to-where-clause> (path, classname)
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Assign(path, expr))
+			-> [Update([],
+				TableName(tablename),[(attname, expr')],Where(expr''),None(),None())]
+			where 
+				attname := <get-path-attribute-name>(path);
+				path' := <get-path-initial-path>(path);
+				Optional(Class(tablename)) := <resolve-path-type>(classname, path', (classname, progname));
+				expr' := <booster-to-relational-expression> (expr, classname);
+				expr'' := <booster-path-to-where-clause> (path, classname)
+
+	booster-to-relational-guarded-command:
+		(classname, progname, New(obj, cls))
+			-> [Insert(None(), None(), Into(), cls, [], [], None()),
+				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([obj])), None())]
+		
+
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Guard(const, gc))
+			-> []
+		where
+			[] := <booster-to-relational-guarded-command> (classname, progname, gc);
+			expr' := <booster-to-relational-constraint> (classname, progname, const)
+
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Guard(const, gc))
+			-> [IfThen(expr', StatementList([stmts*]),[],None())]
+		where
+			[stmts*] := <booster-to-relational-guarded-command> (classname, progname, gc);
+			expr' := <booster-to-relational-constraint> (classname, progname, const)
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Parallel(gc1,gc2))
+			-> [BeginEnd(DeclareList([]), StatementList(stmts1)),BeginEnd(DeclareList([]), StatementList(stmts2))]
+		where
+			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
+			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Sequence(gc1,gc2))
+			-> [BeginEnd(DeclareList([]), StatementList(stmts1)),BeginEnd(DeclareList([]), StatementList(stmts2))]
+		where
+			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
+			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Choice(Guard(constraint1, gc1),Guard(constraint2, gc2)))
+			-> [IfThen(expr1, StatementList([stmts1]),[ElseIf(expr2,StatementList([stmts2]) )],None())]
+		where
+			expr1 := <booster-to-relational-constraint> (classname, progname, constraint1);
+			expr2 := <booster-to-relational-constraint> (classname, progname, constraint2);
+			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
+			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+
+/*	booster-to-relational-guarded-command:
+		(classname, progname, gc)
+			-> []
+		where
+			log(|Error(), "cannot convert guarded command", gc)
+*/
+
+	booster-to-relational-constraint:
+		(classname, progname, True())
+			-> True()
+
+	booster-to-relational-constraint:
+		(classname, progname, False())
+			-> False()
+
+	booster-to-relational-constraint:
+		(classname, progname, Not(const))
+			-> Not(const')
+		where
+			const' := <booster-to-relational-constraint> (classname, progname, const)
+
+	booster-to-relational-constraint:
+		(classname, progname, And(const1, const2))
+			-> And(const1', const2')
+		where
+			const1' := <booster-to-relational-constraint> (classname, progname, const1);
+			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+
+	booster-to-relational-constraint:
+		(classname, progname, Or(const1, const2))
+			-> Or(const1', const2')
+		where
+			const1' := <booster-to-relational-constraint> (classname, progname, const1);
+			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+
+	booster-to-relational-constraint:
+		(classname, progname, Implies(const1, const2))
+			-> Or(const2', Not(const1'))
+		where
+			const1' := <booster-to-relational-constraint> (classname, progname, const1);
+			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+
+	booster-to-relational-constraint:
+		(classname, progname, Then(const1, const2))
+			-> And(const1', const2')
+		where
+			const1' := <booster-to-relational-constraint> (classname, progname, const1);
+			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+
+	booster-to-relational-constraint:
+		(classname, progname, Equal(expr1, expr2))
+			-> Equal(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (expr1, classname);
+			expr2' := <booster-to-relational-expression> (expr2, classname)
+
+	booster-to-relational-constraint:
+		(classname, progname, NotEqual(expr1, expr2))
+			-> NotEqual(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (expr1, classname);
+			expr2' := <booster-to-relational-expression> (expr2, classname)
+
+	booster-to-relational-constraint:
+		(classname, progname, In(expr1, StringExtent()))
+			-> True()
+
+	booster-to-relational-constraint:
+		(classname, progname, In(expr1, IntExtent()))
+			-> True()
+
+
+
+	booster-to-relational-constraint:
+		(classname, progname, In(expr1, expr2))
+			-> InSet(expr1', None(), expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-constraint:
+		(classname, progname, NotIn(expr1, expr2))
+			-> InSet(expr1', Not(), expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-constraint:
+		(classname, progname, LessThan(expr1, expr2))
+			-> LessThan(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-constraint:
+		(classname, progname, GreaterThan(expr1, expr2))
+			-> GreaterThan(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-constraint:
+		(classname, progname, LessThanEquals(expr1, expr2))
+			-> LessThanEqual(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-constraint:
+		(classname, progname, GreaterThanEquals(expr1, expr2))
+			-> GreaterThanEqual(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+
+
+
+	booster-to-relational-constraint:
+		(classname, progname, constraint)
+			-> True()
+		where
+			log(|Error(), "cannot convert constraint", constraint)
+
+	booster-to-relational-expression:
+		(String(str),cname)
+			-> String(str)
+
+	booster-to-relational-expression:
+		(Integer(i),cname)
+			-> Int(i)
+
+	booster-to-relational-expression:
+		(StringExtent(),cname)
+			-> Null()
+
+	booster-to-relational-expression:
+		(IntExtent(),cname)
+			-> Null()
+
+	booster-to-relational-expression:
+		(Null(),cname)
+			-> Null()
+
+	booster-to-relational-expression:
+		(SetExtent(exprs),cname)
+			-> SetExpression(exprs)
+
+	booster-to-relational-expression:
+		(Input(n), cname)
+			-> SystemVariable(n)
+
+	booster-to-relational-expression:
+		(Output(n), cname)
+			-> SystemVariable(n)
+
+	booster-to-relational-expression:
+		(This(), cname)
+			-> SystemVariable("this")
+
+	booster-to-relational-expression:
+		(ThisPrimed(), cname)
+			-> Null()
+			
+	booster-to-relational-expression:
+		(Path(p, PathComponent(name, maybePrimed)), cname)
+		// select name from class where classId = expr
+			-> Select([], [ColumnName(name)], Some(FromPart([TableName(c)])), 
+						  Where(Equal(expr, ColumnName(<concat-strings>[c, "Id"]))), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None())
+		where
+			Class(c) := <resolve-path-type> (cname, p, None());
+			expr :=  <booster-to-relational-expression> (p, cname)
+				 				
+
+
+
+
+	booster-to-relational-expression:
+		(classname, progname, Plus(expr1, expr2))
+			-> Plus(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-expression:
+		(classname, progname, Minus(expr1, expr2))
+			-> Minus(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-expression:
+		(classname, progname, Times(expr1, expr2))
+			-> Multiply(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-expression:
+		(classname, progname, Divide(expr1, expr2))
+			-> Divide(expr1', expr2')
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+
+	booster-to-relational-expression:
+		(expr, cname)
+			-> Null()
+		where
+			log(|Error(), "cannot convert expression", expr)
+
+
+	booster-path-to-where-clause:
+		(Path(p, PathComponent(name, None())), classname)
+			-> Equal(expr, ColumnName(<concat-strings>[classname, "Id"]))
+		where 
+			expr := <booster-to-relational-expression> (p,classname)
+	
+	
+	
+	booster-path-to-where-clause:
+		(Output(n), classname)
+			-> True()
+
+	booster-path-to-where-clause:
+		(This(), classname)
+			-> True()
+
+	booster-path-to-where-clause:
+		(ThisPrimed(), classname)
+			-> True()
+	
+	

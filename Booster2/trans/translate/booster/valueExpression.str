@@ -1,0 +1,97 @@
+module translate/booster/valueExpression
+
+imports
+  include/Booster2
+  
+  translate/booster/expression
+  
+rules
+	
+	
+/*	output-to-booster-expression:
+*/ 	
+
+
+	output-to-booster-expression:
+		Integer(i) 
+			-> $[[i]]
+
+	output-to-booster-expression:
+		String(s)
+			-> $[[s]]
+			
+	output-to-booster-expression:
+		IntExtent()
+			-> $[INT]
+
+	output-to-booster-expression:
+		StringExtent()
+			-> $[STRING]
+			
+	output-to-booster-expression:
+		Null()
+			-> $[null]
+			
+	output-to-booster-expression:
+		Input(inputname)
+			-> $[[inputname]?]
+			
+	output-to-booster-expression:
+		Output(outputname)
+			-> $[[outputname]!]
+			
+	output-to-booster-expression:
+		This()
+			-> $[this]
+			
+	output-to-booster-expression:
+		ThisPrimed()
+			-> $[this']
+
+	output-to-booster-expression:
+		Path(a,b)
+			-> $[[c].[d]]
+		where 
+			c := <output-to-booster-expression> (a);
+			d := <output-to-booster-expression> (b)
+			
+	output-to-booster-expression:
+		PathComponent(name, None())
+			-> $[[name]]
+
+	output-to-booster-expression:
+		PathComponent(name, Some(Primed()))
+			-> $[[name]']
+
+	output-to-booster-expression:
+		PathStart(name, None())
+			-> $[[name]]
+			
+	output-to-booster-expression:
+		PathStart(name, Some(Primed()))
+			-> $[[name]']
+			
+	output-to-booster-expression:
+		SetExtent([exprs*])
+			-> $[{[exprs2*]}]
+		where
+			exprs2* := <output-to-booster-list-expressions> [exprs*]
+
+	output-to-booster-list-expressions:
+		[] 
+			-> $[]
+			
+	output-to-booster-list-expressions:
+		[expr1] 
+			-> $[[expr2]]
+		where 
+			expr2 := <output-to-booster-expression> (expr1)
+			
+	output-to-booster-list-expressions:
+		[expr, exprs*] 
+			-> $[[expr2] , [exprs2*]]
+		where
+			expr2 := <output-to-booster-expression> (expr);
+			exprs2* := <output-to-booster-list-expressions> ([exprs*]) 
+			
+			

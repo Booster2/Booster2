@@ -1,21 +1,256 @@
 module check
 
 imports
-  libstratego-lib
-  include/Booster2
-  lib/editor-common.generated
-  lib/index-library.generated
-  lib/analysis-library.generated
-  lib/analysis-library-internal.generated
-  lib/nbl-library.generated
+  include/booster2
+  library/strategy
 
-rules // Other
+
+rules
+  // Analysis: does a topdown traversal of the tree,
+  // and tries to apply the record-entity rule.
+  analyze:
+    t -> t
+    with
+      <build-lookup-table> t
+      /*;
+      <topdown(try(record-class))> t;
+      <topdown(try(record-setdef))> t;
+      <topdown(try(record-setvalue))> t */
+
+  build-lookup-table:
+  	(System(name, [cs*]),filename, dir) -> (System(name, [cs*]),filename, dir)
+  		with
+  			<map(build-lookup-table)> [cs*]
   
-  constraint-warning:
-    Entity(x, _) -> (x, $[Entity names must start with a capital])
+  build-lookup-table:
+  	SetDef(name, [vs*]) -> SetDef(name, [vs*])
+  		with
+  		rules(
+  			SetDefs :+ name -> name
+  		);
+  		<currymap(build-lookup-table-setvalue)> (name, [vs*])    
+
+  build-lookup-table:
+  	Class(name, [cs*]) -> Class(name, [cs*])
+  		with
+  		rules(
+  			Classes :+ name -> name
+  		);
+  		<currymap(build-lookup-table-class-component)> (name, [cs*])    
+  	
+  build-lookup-table:
+  	x -> x
+  		with
+  		log(|Error(), "build-lookup-table", x )
+
+	build-lookup-table-setvalue:
+		(name, value) -> (name, value)
+		with
+			rules(
+				SetDefValues :+ (name, value) -> (name, value)
+			);
+			rules(
+				SetValues :+ value -> value
+			)
+			
+	build-lookup-table-class-component:
+		(name, Attributes([as*])) -> 
+			<currymap(build-lookup-table-class-component)> (name, [as*])
+
+	build-lookup-table-class-component:
+		(name, Methods([ms*])) -> 
+			<currymap(build-lookup-table-class-component)> (name, [ms*])
+
+	build-lookup-table-class-component:
+		(name, Invariant([is*])) -> 
+			<currymap(build-lookup-table-class-component)> (name, [is*])
+
+	build-lookup-table-class-component:
+		(cname, Attribute(aname, type)) -> (cname, Attribute(aname, type)) 
+		with
+			rules(
+				Attributes :+ (cname, aname) -> (cname, aname)
+			)
+
+	build-lookup-table-class-component:
+		(cname, Method(mname, const)) -> (cname, Method(mname, const)) 
+		with
+			rules(
+				Methods :+ (cname, mname) -> (cname, mname)
+			)
+
+	build-lookup-table-class-component:
+		(cname, constraint) -> (cname, constraint) 
+
+
+      
+/*  // Records the definition of an entity in a dynamic rule GetEntity.
+  record-entity: 
+    Entity(x, body) -> Entity(x, body)
+    with
+      // For a name 'x', GetEntity will return the original 'x' tree node
+      rules(
+        GetEntity :+ x -> x
+      )
+
+  // Records the definition of an entity in a dynamic rule GetEntity.
+  record-class: 
+    Class(x, body) -> Class(x, body)
+    with
+      // For a name 'x', GetEntity will return the original 'x' tree node
+      rules(
+        GetClass :+ x -> x
+      )
+
+  record-setdef: 
+    SetDef(x, body) -> SetDef(x, body)
+    with
+      // For a name 'x', GetEntity will return the original 'x' tree node
+      rules(
+        GetSetDef :+ x -> x
+      )
+
+  record-setvalue: 
+    SetDef(name, []) -> SetDef(name, [])
+    
+  record-setvalue: 
+    SetDef(name, [v, vs*]) -> <record-setvalue> SetDef(name, [vs*])
+    with
+      // For a name 'x', GetEntity will return the original 'x' tree node
+      rules(
+        GetSetValue :+ v -> v
+      )
+      
+  
+*/
+rules
+
+	constraint-error:
+		SetDef(name, [vs*]) -> (name, $[Duplicate set name: [name]])
+	where
+		not(<bagof-SetDefs> name => [_])
+		
+		
+	constraint-error:
+		SetDef(name, [vs*]) -> [es*]
+	where
+		[es*] := <currymap(constraint-error-setvalue)> (name, [vs*])
+
+	constraint-error:
+		Class(name, [cs*]) -> [es*]
+	where
+		[es*] := <currymap(constraint-error-components)> (name, [cs*])
+
+	constraint-error-components:
+		(name, Attributes([as*])) -> [es*]
+	where
+		[es*] := <currymap(constraint-error-attribute)> (name, [as*])
+
+	constraint-error-components:
+		(name, Methods([ms*])) -> [es*]
+	where
+		[es*] := <currymap(constraint-error-method)> (name, [ms*])
+
+	constraint-error-components:
+		(name, Invariant([is*])) -> []
+
+
+
+	constraint-error-attribute:
+		(cname, Attribute(aname, type)) -> (aname, $[Duplicate attribute name "[aname]" in class [cname]])
+	where
+		not(<bagof-Attributes> (cname, aname) => [_])
+
+	constraint-error-attribute:
+		(cname, aname) -> []
+
+
+	
+	constraint-error-method:
+		(cname, Method(mname, constraint)) -> (mname, $[Duplicate method name "[mname]" in class [cname]])
+	where
+		not(<bagof-Methods> (cname, mname) => [_])
+
+	constraint-error-method:
+		(cname, mname) -> []
+
+
+	constraint-error-setvalue:
+		(name, value) -> (value, $[Duplicate set element: [value]])
+	where
+		not(<bagof-SetValues> value => [_])
+
+	constraint-error-setvalue:
+		(name, value) -> []
+		
+/*  
+
+  
+  constraint-error:	
+  	MultMinAndMax(min, max) -> (MultMinAndMax(min,max), $[invalid mutiplicity [min]..[max].  Did you mean [max]..[min]?])
+  		where
+  			(max, min) := <ltS>(max,min)
+  			
+  			
+    
+  // Reports an error if a property type is undefined.
+  // This error is reported on the type name 'type'.
+  constraint-error:
+    UniDirectional(type) -> (type, $[Type [type] is not defined])
     where
-      not(<string-starts-with-capital> x)
+      not(<GetClass> type);
+      not(<GetSetDef> type)
   
-  constraint-note:
-    Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language
+
+  constraint-error:
+    Class(x, _) -> (x, $[Duplicate class name: [x]])
+    where
+      not(<bagof-GetClass> x => [_])
+
+  constraint-error:
+    Class(x, _) -> (x, $[Class and set have duplicate names: [x]])
+    where
+      not(<bagof-GetSetDef> x => [_])
+
+	constraint-error:
+		SetDef(name, [vs*]) -> (name, $[Class and set have duplicate names: [name]])
+	where
+		not(<bagof-SetDefs> name => [_])
+  
+  constraint-error:
+    SetDef(name, [_,v,vs*]) -> (v, $[Duplicate set element name])
+    where
+      not(<bagof-GetSetValue> v => [_]) 
+  		
+  constraint-error:
+    SetDef(name, [vs*]) -> <constraint-error-setValue> [vs*] 
+
+
+  constraint-error-setValue:
+	 [] -> []
+	 
+  constraint-error-setValue:
+	 [v,vs*] -> [(v, $[Duplicate set element [v]]),es*]
+    where
+      not(<bagof-GetSetValue> v => [_]);
+      [es*] := <constraint-error-setValue> [vs*] 
+  
+  constraint-error-setValue:
+	 [v,vs*] -> [es*]
+    where
+      [es*] := <constraint-error-setValue> [vs*] 
+*/
+  
+  
+   constraint-note:
+    Class("Test", _) -> ("Test", $[This is just an example program in the "entities" language
                                       (this note is defined in trans/check.str) ])
+                                      
+   constraint-warning:
+  	Class(name, []) -> (name, $[Empty class [name]])
+                                      
+  constraint-error:
+  	x -> (x, $[True is equal to False])
+  		where
+  		<equal>(True(), False()) 
+

@@ -1,0 +1,176 @@
+module elaborate/valueExpression
+
+imports
+
+  include/Booster2
+  library/abstractBoosterModel
+  library/valueExpression
+ 
+    
+  
+  
+ rules
+ 	
+/* 	infer-type:
+		Description goes here	
+*/
+			
+/*	deduce-types:
+		Description here
+*/
+
+
+/* 	insert-this:
+		Takes a value expression, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/
+
+
+	insert-this:
+		(Integer(i), classname) 
+			-> Integer(i)
+
+	insert-this:
+		(String(s) , classname)
+			-> String(s)
+			
+	insert-this:
+		(IntExtent(), classname)
+			-> IntExtent()
+
+	insert-this:
+		(StringExtent(), classname)
+			-> StringExtent()
+			
+	insert-this:
+		(Null(), classname)
+			-> Null()
+			
+	insert-this:
+		(Input(inputname), classname)
+			-> Input(inputname)
+			
+	insert-this:
+		(Output(outputname), classname)
+			-> Output(outputname)
+			
+	insert-this:
+		(This(), classname)
+			-> This()
+			
+	insert-this:
+		(ThisPrimed(), classname)
+			-> ThisPrimed()
+
+	insert-this:
+		(Path(a,b), classname)
+			-> Path(c,b)
+		where
+			c := <insert-this> (a, classname)
+			
+	insert-this:
+		(PathComponent(name, maybePrimed), classname)
+			-> PathComponent(name, maybePrimed)
+
+	insert-this:
+		(PathStart(name, maybePrimed), classname)
+			-> Path(This(), PathComponent(name, maybePrimed))
+			where
+				type := <lookup-attribute-type> ((classname, name))
+
+	 insert-this:
+		(PathStart(name, maybePrimed), classname)
+			-> PathStart(name, maybePrimed) 
+			
+	
+
+	insert-this:
+		(SetExtent([]), classname)
+			-> SetExtent([])
+
+	insert-this:
+		(SetExtent([expr1, exprs1*]), classname)
+			-> SetExtent([expr2, exprs2*])
+		where
+			expr2 := <insert-this> expr1;
+			SetExtent([exprs2*]) := <insert-this> SetExtent([exprs1*])
+	
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Integer(i))
+			-> (True(), Integer(i))
+			
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, String(s))
+			-> (True(), String(s))
+			
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, IntExtent())
+			-> (True(), IntExtent())
+			
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, StringExtent())
+			-> (True(), StringExtent())
+			
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Null())
+			-> (True(), Null())
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, This())
+			-> (True(), This())
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (True(), Path(This(),b))
+				
+		where
+			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
+			attname2 := <get-path-attribute-name>(a);
+			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
+			Class(thisclassname) := <lookup-attribute-type> ((otherclassname, attname3))
+
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (NotEqual(Path(This(),PathComponent(attname3, None())), Null()), Path(This(),b))
+				
+		where
+			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
+			attname2 := <get-path-attribute-name>(a);
+			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
+			Optional(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
+
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (NotEqual(Path(This(),PathComponent(attname3, None())), SetExtent([])), Path(This(),b))
+				
+		where
+			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
+			attname2 := <get-path-attribute-name>(a);
+			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
+			Set(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (Exists("obj",
+						PathStart(thisclassname, None()),
+						Equal(This(), 
+							  Path(PathStart("obj",None()),
+							  	   PathComponent(attname2, None())))), Path(This(),b))
+				
+		where
+			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
+			not(<equal>(thisclassname, otherclassname));
+			attname2 := <get-path-attribute-name>(a)
+			
+	
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (True(), Path(a,b))
+		
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, PathStart(a,b))
+			-> (True(), PathStart(a,b))		
+	

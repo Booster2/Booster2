@@ -1,0 +1,29 @@
+system StudentSystem
+
+/*class Student
+{
+	attributes
+		id : INT
+		firstName (ID) : STRING
+		lastName (ID) : STRING
+	methods
+		changeName { id' = id? & firstName' = firstName? & lastName' = lastName? }
+		setName { firstName' = "James" & lastName' = "Welch" } 
+		create {  s! : Student'  }
+		createSecondary {  s! : Student'  }
+} 
+*/
+class Staff
+{
+	attributes
+		id : INT
+		firstName (ID) : STRING
+		lastName (ID) : STRING
+	methods
+	//	changeName { id' = id? & firstName' = firstName? & lastName' = lastName? }
+		create {  s! : Staff' ; (s!.id' = 3 & s!.firstName = f? )}
+}
+
+
+
+

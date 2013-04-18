@@ -1,0 +1,36 @@
+module library/setDef
+
+imports
+  include/Booster2
+    
+ 
+ rules
+ 	
+/* 	get-setdef-name:
+		returns the name of a set definition	
+*/
+
+	get-setdef-name:
+		SetDef(setname, elems) -> setname
+		
+/* 	lookup-value-in-sets:
+		returns the set name of the set which contains the value
+		Again, no currying, so we'll do the map ourselves
+*/
+
+	lookup-value-in-sets:
+		(setvalue,[]) 
+			-> ()
+
+
+	lookup-value-in-sets:
+		(setvalue,[SetDef(setname, elems), setdefs*]) 
+			-> setname
+		where
+			<elem>(setvalue, elems)
+			
+	lookup-value-in-sets:
+		(setvalue,[SetDef(setname, elems), setdefs*]) 
+			-> <lookup-value-in-sets>(setvalue, [setdefs*])
+		where
+			not(<elem>(setvalue, elems))

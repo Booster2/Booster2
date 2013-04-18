@@ -1,0 +1,20 @@
+System(
+  "StudentSystem"
+, [ Class(
+      "Staff"
+    , [ Attributes(
+          [ Attribute("id", Int())
+          , Attribute("firstName", Identity(), String())
+          , Attribute("lastName", Identity(), String())
+          ]
+        )
+      , Methods(
+          [Method(
+             "create"
+           , In(Output("s"), PathStart("Staff", Some(Primed())))
+           )]
+        )
+      ]
+    )
+  ]
+)

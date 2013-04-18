@@ -1,0 +1,126 @@
+module compile/expression
+
+imports
+  include/Booster2
+    
+  elaborate/expression
+
+  
+ 
+ 
+ rules
+ 	
+ 	
+
+
+/* 	is-defined:
+		takes an expression in the context of a model, a classname, 
+		and a methodname, and returns a constraint
+*/		
+
+	is-defined:
+		something -> True()	
+			
+	is-defined:
+		 (classname, method, Head(expr1))
+			-> And(constraint1, NotEqual(expr1, String("")))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			(String(), vars) := <deduce-types>(classname, method, expr1, "?",[])
+			
+	is-defined:
+		 (classname, method, Tail(expr1))
+			-> And(constraint1, NotEqual(expr1, String("")))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			(String(), vars) := <deduce-types>(classname, method, expr1, "?",[])		
+			
+	is-defined:
+		 (classname, method, Negative(expr1))
+			-> constraint1
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			(Int(), vars) := <deduce-types>(classname, method, expr1, "?",[])
+			
+
+	is-defined:
+		 (classname, method, Plus(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Plus(expr1, expr2), IntExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Int(), vars) := <deduce-types>(classname, method, Plus(expr1, expr2), "?",[])
+
+
+	is-defined:
+		 (classname, method, Minus(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Minus(expr1, expr2), IntExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Int(), vars) := <deduce-types>(classname, method, Minus(expr1, expr2), "?",[])
+
+	is-defined:
+		 (classname, method, Minus(expr1, expr2))
+			-> And(constraint1,constraint2)
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2)
+
+
+	is-defined:
+		 (classname, method, Times(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Times(expr1, expr2), IntExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Int(), vars) := <deduce-types>(classname, method, Times(expr1, expr2), "?",[])
+
+	is-defined:
+		 (classname, method, Divide(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Divide(expr1, expr2), IntExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Int(), vars) := <deduce-types>(classname, method, Divide(expr1, expr2), "?",[])
+
+	is-defined:
+		 (classname, method, Maximum(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Maximum(expr1, expr2), IntExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Int(), vars) := <deduce-types>(classname, method, Maximum(expr1, expr2), "?",[])
+
+	is-defined:
+		 (classname, method, Minimum(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Minimum(expr1, expr2), IntExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Int(), vars) := <deduce-types>(classname, method, Minimum(expr1, expr2), "?",[])
+
+	is-defined:
+		 (classname, method, Union(expr1, expr2))
+			-> And(constraint1,constraint2)
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Set(type), vars) := <deduce-types>(classname, method, Union(expr1, expr2), "?",[])
+
+	is-defined:
+		 (classname, method, Intersection(expr1, expr2))
+			-> And(constraint1,constraint2)
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(Set(type), vars) := <deduce-types>(classname, method, Intersection(expr1, expr2), "?",[]) 
+
+	is-defined:
+		 (classname, method, Concat(expr1, expr2))
+			-> And(And(constraint1,constraint2), In(Concat(expr1, expr2), StringExtent()))
+		where
+			constraint1 := <is-defined>(classname, method, expr1);
+			constraint2 := <is-defined>(classname, method, expr2);
+			(String(), vars) := <deduce-types>(classname, method, Concat(expr1, expr2), "?",[])
+			

@@ -1,0 +1,1092 @@
+module translate/sql/sql
+
+imports
+  include/Booster2
+  
+
+
+rules 
+
+// Main editor interface (defined by editor/Booster-Builders and -References.esv)
+  
+      
+/* pp-install
+*/
+
+	pp-install:
+	 	Schema(name, tables, procedures, statements)
+	 		-> $[drop database if exists [name];
+				 create database [name];
+	 		     use [[name]];
+	 		[<pp-install> tables]
+	 		[<pp-install> procedures]
+			[<proc-statements> statements]
+			[<standard-stuff> name]]
+	 		
+	 pp-install:
+	 	[Table(name, [column, columns*]), tables*]
+	 	
+	 		-> $[drop table if exists [name];
+	 			 create table [name] ([<pp-install>(name, column)]);
+	 			[<pp-install> tables*]
+	 			[<pp-install> (name, [columns*])]]
+	 			
+	 pp-install:
+	 	[]
+	 		-> []
+
+	 pp-install:
+	 	(name, [])
+	 		-> $[ ]
+	 
+	 pp-install:
+	 	(name, [column, columns*])
+	 		-> $[ alter table [name]
+	 				add column [coldef];
+	 			[<pp-install> (name, [columns*])]]
+	 		where
+	 			coldef := <pp-install> (name, column)
+	 
+	 pp-install:
+	 	(name, Column(columnName, default, nullable, type, extra, key, reference))
+	 	
+	 		-> $[ [columnName] [<column-type> type] [<column-null> nullable] [<column-default> default] [<column-extra> extra] [<column-key> key] [<reference> (columnName, reference)]]
+
+	reference:
+		(columnname, None()) -> []
+
+	reference:
+		(columnname, Some(Reference(name, [names*])))
+			-> $[, add foreign key ([columnname]) references [name] ( [<column-names> [names*]])] 
+	 		
+	 pp-install:
+	 	[Procedure(name, inputs, DeclareList(declares), statements), procedures*]
+	 		-> $[ drop procedure if exists [name];
+	 			  delimiter //
+	 			  create procedure [name] ( [<proc-params> inputs])
+	 			    begin 
+	 				declare exit handler for not found rollback;
+    				declare exit handler for sqlwarning rollback;
+    				declare exit handler for sqlexception rollback;
+	 			    start transaction;
+	 			    [<declare-statements> declares]
+	 			    [<proc-statements> statements]
+	 			    commit;
+	 			  	end //
+	 			  delimiter ;
+	 			  
+	 			[<pp-install>[procedures*]]]
+	 			
+	 column-type:
+	 	Varchar(n)
+	 		-> $[varchar([n])]
+
+	 column-type:
+	 	Bit()
+	 		-> $[bit]
+
+	 column-type:
+	 	Int()
+	 		-> $[int]
+	 				
+	 column-type:
+	 	Datetime()
+	 		-> $[datetime]
+
+
+	 column-type:
+	 	other
+	 		-> $[something]
+	 			
+	 column-null:
+	 	False() -> ""
+	 	
+	 column-null:
+	 	True() -> "null"
+	 	
+	 column-default:
+	 	"" -> ""
+	 
+	 column-default:
+	 	"null" -> $[default null]
+
+	 column-default:
+	 	str -> $[default "[str]"]
+	 	
+	 column-extra:
+	 	AutoIncrement() -> $[auto_increment]
+
+	 column-extra:
+	 	NoExtra() -> ""
+	 	
+
+	column-key:
+			Primary() -> $[primary key]
+			
+	column-key:		
+			Unique() -> $[unique]
+
+	column-key:
+		Multiple() -> $[multiple]
+	
+	column-key:
+		NoKey() -> $[]	
+		
+	proc-params: 
+		[] -> $[] 
+
+	proc-params:
+		[Input(name, type)]
+			-> $[in [name] [<column-type> type]]
+		
+	proc-params:
+		[Input(name, type), params*]
+			-> $[in [name] [<column-type> type], [ins*]]
+		where
+			[ins*] := <proc-params> [params*]
+
+	proc-params:
+		[Output(name, type)]
+			-> $[out [name] [<column-type> type]]
+		
+	proc-params:
+		[Output(name, type), params*]
+			-> $[out [name] [<column-type> type], [ins*]]
+		where
+			[ins*] := <proc-params> [params*]
+
+	proc-params:
+		[InOut(name, type)]
+			-> $[inout [name] [<column-type> type]]
+		
+	proc-params:
+		[InOut(name, type), params*]
+			-> $[inout [name] [<column-type> type], [ins*]]
+		where
+			[ins*] := <proc-params> [params*]
+
+			
+	proc-statements:
+		StatementList([]) -> $[]
+		
+	proc-statements:
+		StatementList([stmt, stmts*])
+			->	$[[<proc-stmt> stmt] ;
+				  [<proc-statements> StatementList([stmts*])] ]
+
+	proc-stmt:
+		BeginEnd(DeclareList(declares), StatementList(stmts)) 
+			-> $[begin
+				 [<declare-statements> declares]
+				 [<proc-statements> StatementList(stmts)]
+				 end]
+	proc-stmt:
+		IfThen(expr, StatementList(stmts), elseifs, None()) 
+			-> $[if [<expression> expr]
+				 then [<proc-statements> StatementList(stmts)]
+				 [<elseifs> elseifs]
+				 end if]
+
+	proc-stmt:
+		Update(uo,tr,us,wp,obp,lp) 
+			-> $[update [<update-options> uo] [<table-reference> tr]
+				set [<update-set> us]
+				[<where-part> wp]
+				[<order-by-part> obp]
+				[<limit-part> lp]]
+
+	proc-stmt:
+		Insert( ip , ig, into ,tn,cns, es, od) 
+			-> $[insert [<insert-priority> ip] [<ignore> ig]
+				[<into> into]
+				[tn]
+				([<column-names> cns])
+				values
+				([<expression-list>es])
+				[<on-duplicate> od]]
+
+	proc-stmt:
+		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
+			-> $[[<expression> Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)]]
+
+
+	insert-priority:
+		Some(LowPriority()) -> $[low_priority]
+		
+	insert-priority:
+		Some(DelayedPriority()) -> $[delayed]
+		
+	insert-priority:
+		Some(HighPriority()) -> $[high_priority]
+	
+	insert-priority:
+		None() -> $[]
+		
+	ignore:
+		None() -> $[]
+	
+	ignore:
+		Some(Ignore()) -> $[ignore]
+		
+	into:
+		None() -> $[]
+		
+	into:
+		Into() -> $[into]
+		
+	column-names:
+		[] -> $[]
+		
+	column-names:
+		[cn] -> $[[cn]]
+		
+	column-names:
+		[cn, cns*] -> $[[cn], [<column-names> [cns*]]]
+
+	on-duplicate:
+		None() -> $[]
+			
+	on-duplicate:
+		OnDuplicate(ups)
+			-> $[on duplicate key update [<update-parts> ups]]
+			
+	update-parts:
+		[] -> $[]
+		
+	update-parts:
+		[up] -> $[[<update-part> up]]
+
+	update-parts:
+		[up, ups*] -> $[[<update-part> up] , [<update-parts> [ups*]]]
+
+	update-part:
+		UpdatePart(cn, expr)
+			-> $[[cn] = [<expression> expr]]
+
+
+/*	
+	proc-stmt:
+		stmt -> $[show tables;]
+			where
+				log(|Error(), "cannot pretty-print statement", stmt)
+*/		
+			
+	elseifs:
+		[]	
+			-> $[]		 	
+			
+	elseifs:
+		[ElseIf(expr, StatementList(stmts)), elseifs*]	
+			-> $[else if [<expression> expr]
+				 then [<proc-statements> StatementList(stmts)]
+				 [<elseifs>[elseifs*]]]
+				 
+	update-options:
+		[]
+			-> $[]
+			
+	update-options:
+		[LowPriority(), uos*]
+			-> $[LOW_PRIORITY [<update-options> [uos*]]]
+			
+	update-options:
+		[Ignore(), uos*]
+			-> $[IGNORE [<update-options> [uos*]]]
+			
+	table-reference:
+		 TableName(name)
+		 	-> $[[name]]	
+		 	
+	update-set:
+		[]
+			-> $[]
+
+	update-set:
+		[(name, expr)]
+			-> $[[name] = [<expression> expr]]
+
+	update-set:
+		[(name, expr), sets]
+			-> $[[name] = [<expression> expr], 
+				 [<update-set> [sets]]]
+
+			
+	where-part:
+		None()
+			-> $[]
+
+	where-part:
+		Where(exp)
+			-> $[where [<expression> exp]]
+
+			
+	order-by-part:
+		None()
+			-> $[]
+
+	limit-part:
+		None()
+			-> $[]
+			
+			
+	expression:
+		Or(exp1, exp2)
+			-> $[ [<expression> exp1] or [<expression> exp2]]
+
+	expression:
+		Xor(exp1, exp2)
+			-> $[ [<expression> exp1] xor [<expression> exp2]]
+
+	expression:
+		And(exp1, exp2)
+			-> $[ [<expression> exp1] and [<expression> exp2]]
+
+	expression:
+		Not(exp)
+			-> $[ not [<expression> exp]]
+			
+	expression:
+		Is(bp,Not(),tfu)
+			-> $[[<expression> bp] is not [<expression> tfu]]
+
+	expression:
+		Is(bp,None(),tfu)
+			-> $[[<expression> bp] is [<expression> tfu]]
+			
+	expression:
+		IsNull(bp,Not())
+			-> $[[<expression> bp] is not null]
+
+	expression:
+		IsNull(bp,None())
+			-> $[[<expression> bp] is null]
+		
+	expression:
+		Iff(exp1,exp2)
+			-> $[[<expression> exp1] <=> [<expression> exp2]]		
+	
+	expression:
+		Equal(exp1,exp2)
+			-> $[[<expression> exp1] = [<expression> exp2]]		
+
+	expression:
+		GreaterThanEqual(exp1,exp2)
+			-> $[[<expression> exp1] >= [<expression> exp2]]		
+
+	expression:
+		GreaterThan(exp1,exp2)
+			-> $[[<expression> exp1] > [<expression> exp2]]		
+
+	expression:
+		LessThanEqual(exp1,exp2)
+			-> $[[<expression> exp1] <= [<expression> exp2]]		
+
+	expression:
+		LessThan(exp1,exp2)
+			-> $[[<expression> exp1] < [<expression> exp2]]		
+
+	expression:
+		NotEqual(exp1,exp2)
+			-> $[[<expression> exp1] != [<expression> exp2]]		
+
+	expression:
+		Equal(exp1, allany, query)
+			-> $[[<expression> exp1] = [<all-any> allany] [<query> query]]		
+
+	expression:
+		GreaterThanEqual(exp1,allany, query)
+			-> $[[<expression> exp1] >= [<all-any> allany] [<query> query]]		
+
+	expression:
+		GreaterThan(exp1,allany, query)
+			-> $[[<expression> exp1] > [<all-any> allany] [<query> query]]		
+
+	expression:
+		LessThanEqual(exp1,allany, query)
+			-> $[[<expression> exp1] <= [<all-any> allany] [<query> query]]		
+
+	expression:
+		LessThan(exp1,allany, query)
+			-> $[[<expression> exp1] < [<all-any> allany] [<query> query]]		
+
+	expression:
+		NotEqual(exp1,allany, query)
+			-> $[[<expression> exp1] != [<all-any> allany] [<query> query]]		
+
+
+	expression:
+		InQuery(expr, maybenot, query)
+			-> $[[<expression> expr] [<maybenot> maybenot] in [<query> query]]
+
+	expression:
+		InSet(expr, maybenot, exprs)
+			-> $[[<expression> expr] [<maybenot> maybenot] in [<expression-list> exprs]]
+	
+	expression:
+		Between(expr1, maybenot, expr2, expr3)
+			-> $[[<expression> expr1] [<maybenot> maybenot] between [<expression> expr2] and [<expression> expr3]]
+
+	expression:
+		SoundsLike(expr1, expr2)
+			-> $[[<expression> expr1] sounds like [<expression> expr2]]
+
+	expression:
+		Like(expr1, maybenot, expr2, escape)
+			-> $[[<expression> expr1] [<maybenot> maybenot] like [<expression> expr2] [<maybeescape> escape]]
+
+	expression:
+		Regexp(expr1, maybenot, expr2)
+			-> $[[<expression> expr1] [<maybenot> maybenot] regexp [<expression> expr2]]
+
+	expression:
+		BitOr(expr1, expr2)
+			-> $[[<expression> expr1] | [<expression> expr2]]
+	
+	expression:
+		BitAnd(expr1, expr2)
+			-> $[[<expression> expr1] & [<expression> expr2]]
+
+	expression:
+		BitShiftLeft(expr1, expr2)
+			-> $[[<expression> expr1] << [<expression> expr2]]
+
+	expression:
+		BitShiftRight(expr1, expr2)
+			-> $[[<expression> expr1] >> [<expression> expr2]]
+
+	expression:
+		Plus(expr1, expr2)
+			-> $[[<expression> expr1] + [<expression> expr2]]
+
+	expression:
+		Minus(expr1, expr2)
+			-> $[[<expression> expr1] - [<expression> expr2]]
+
+	expression:
+		Multiply(expr1, expr2)
+			-> $[[<expression> expr1] * [<expression> expr2]]
+
+	expression:
+		Divide(expr1, expr2)
+			-> $[[<expression> expr1] / [<expression> expr2]]
+
+	expression:
+		Div(expr1, expr2)
+			-> $[[<expression> expr1] div [<expression> expr2]]
+
+	expression:
+		Mod(expr1, expr2)
+			-> $[[<expression> expr1] mod [<expression> expr2]]
+
+	expression:
+		Percent(expr1, expr2)
+			-> $[[<expression> expr1] % [<expression> expr2]]
+
+	expression:
+		Power(expr1, expr2)
+			-> $[[<expression> expr1] ^ [<expression> expr2]]
+
+	expression:
+		PlusInt(expr1, interval)
+			-> $[[<expression> expr1] + [<interval> interval]]
+
+	expression:
+		MinusInt(expr1, interval)
+			-> $[[<expression> expr1] - [<interval> interval]]
+
+	expression:
+		Collate(expr, collname)
+			-> $[[<expression> expr] collate [collname]]
+			
+	expression:
+		Or(expr1, expr2)
+			-> $[[<expression> expr1] || [<expression> expr2]]
+
+	expression:
+		UnaryPlus(expr)
+			-> $[+[<expression> expr]]
+
+	expression:
+		UnaryMinus(expr)
+			-> $[-[<expression> expr]]
+
+	expression:
+		Reverse(expr)
+			-> $[~[<expression> expr]]
+
+	expression:
+		Not(expr)
+			-> $[![<expression> expr]]
+
+	expression:
+		Binary(expr)
+			-> $[binary [<expression> expr]]
+
+	expression:
+		SetExpression(exprs)
+			-> $[([<expression-list> exprs])]
+
+	expression:
+		Row(expr, exprs)
+			-> $[row [<expression> expr], [<expression-list> exprs]]
+			
+	expression:
+		Exists(query)
+			-> $[exists [<query> query]]
+			
+	expression:
+		EscapeSyntax(name, expr)
+			-> $[{ [name] [<expression> expr]}]
+	
+	expression:
+		String(str)
+			-> $['[str]']
+	
+	expression:
+		Int(i)
+			-> $[[i]]
+
+	expression:
+		True() 
+			-> $[true]
+
+	expression:
+		False() 
+			-> $[false]
+
+	expression:
+		Unknown() 
+			-> $[unknown]
+
+	expression:
+		Null()
+			-> $[null]
+			
+	expression:
+		ColumnName(name)
+			-> $[[name]]
+
+	expression:
+		TableColumnName(tname, cname)
+			-> $[[tname].[cname]]
+
+	expression:
+		ExpressionAs(expr, i)
+			-> $[([<expression> expr] as [i])]
+
+	expression:
+		ColumnNameAs(name, i)
+			-> $[([name] as [i])]
+
+
+	expression:
+		TableColumnNameAs(tname, cname, i)
+			-> $[([tname].[cname] as i)]
+
+	expression:
+		Star()
+			-> "*"
+
+	expression:
+		DBTableColumnName(dname,tname,cname)
+			-> $[[dname].[tname].[cname]]
+
+	expression:
+		LocalVariable(name)
+			-> $[@[name]]
+
+	expression:
+		SystemVariable(name)
+			-> $[[name]]
+	
+	expression:
+		Marker()
+			-> $[?]
+			
+	expression:
+		MatchExpression(ids, expr, modifier)
+			->$[match ([<id-list>ids]) against ([<expression>expr] [<search-modifier> modifier])]
+
+	expression:
+		CaseExpression(expr, [cws*], ce)
+			->
+				$[case [<expression> expr]
+				    [<case-whens> [cws*]]
+				    [<case-else> ce]
+				  end]
+			
+	expression:
+		FunctionCall(name, params)
+			-> $[[name]([<expression-list> params])]
+				
+	expression:
+		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
+			-> $[(select [<select-type> sts] [<select-exprs> ses] [<from-part> fp]
+			   [<where-part> wp]
+			   [<group-by-part> gbp]
+			   [<having-part> hp]
+			   [<order-by-part> obp]
+			   [<limit-part> lp]
+			   [<procedure-part> pp]
+			   [<into-part> ip]
+			   [<mode-part> mp])]
+	
+
+/*				
+	expression:
+		expr -> 
+			$[expr]
+		where
+			log(|Error(), "cannot pretty-print expression:", expr)
+*/		  
+	case-whens:
+		[CaseWhen(expr1, expr2)]
+			-> $[when [<expression> expr1] then [<expression> expr2]]
+
+	case-whens:
+		[CaseWhen(expr1, expr2), cws*]
+			-> $[when [<expression> expr1] then [<expression> expr2]
+				[<case-whens> [cws*]]]
+			 
+	case-else:
+		None() 
+			-> $[]
+			
+	case-else:
+		CaseElse(expr) 
+			-> $[else [<expression> expr]]
+			
+		 
+	
+
+	id-list:
+		[] -> $[]
+	
+	id-list:
+		[i]
+			-> $[[i]]
+	
+	id-list:
+		[i,is*]
+			-> $[[i],[<id-list>[is*]]]
+
+	search-modifier:
+		None() -> $[]
+		
+	search-modifier:
+		InBooleanMode() 
+			-> $[in boolean mode]
+	
+	search-modifier:
+		WithQueryExpansion()
+			-> $[with query expansion]
+			
+
+	maybenot:
+		None() -> $[]
+		
+
+	maybenot:
+		Not() -> $[not]
+	
+	expression-list:
+		[] -> $[]
+		
+	expression-list:
+		[expr]
+			->$[[<expression> expr]]
+
+	expression-list:
+		[expr, exprs*]
+			->$[[<expression> expr],[<expression-list> exprs*]]
+
+	maybeescape:
+		None() -> $[]
+		
+	maybeescape:
+		Escape(expr)
+			-> $[escape [<expression> expr]]
+
+	interval:
+		IntervalExpression(expr, unit)
+			-> $[interval [<expression> expr] [<unit> unit]]
+			
+	unit:
+		MicroSecondUnit()
+			-> $[microsecond]		
+
+	unit:
+		SecondUnit()
+			-> $[second]		
+
+	unit:
+		MinuteUnit()
+			-> $[minute]		
+
+	unit:
+		HourUnit()
+			-> $[hour]		
+
+	unit:
+		DayUnit()
+			-> $[day]		
+
+	unit:
+		WeekUnit()
+			-> $[week]		
+
+	unit:
+		MonthUnit()
+			-> $[month]		
+
+	unit:
+		QuarterUnit()
+			-> $[quarter]		
+
+	unit:
+		YearUnit()
+			-> $[year]		
+
+	unit:
+		SecondMicroSecondUnit()
+			-> $[second_microsecond]		
+
+	unit:
+		MinuteMicroSecondUnit()
+			-> $[minute_microsecond]		
+
+	unit:
+		MinuteSecondUnit()
+			-> $[minute_second]		
+
+	unit:
+		HourMicroSecondUnit()
+			-> $[hour_microsecond]		
+
+	unit:
+		HourSecondUnit()
+			-> $[hour_second]		
+
+	unit:
+		HourMinuteUnit()
+			-> $[hour_minute]		
+
+	unit:
+		DayMicroSecondUnit()
+			-> $[day_microsecond]		
+
+	unit:
+		DaySecondUnit()
+			-> $[day_second]		
+
+	unit:
+		DayMinuteUnit()
+			-> $[day_minute]		
+
+	unit:
+		DayHourUnit()
+			-> $[day_hour]		
+
+	unit:
+		YearMonthUnit()
+			-> $[year_month]		
+
+
+	query:
+		_ -> []
+
+
+	all-any:
+		All()
+			-> "all"
+
+	all-any:
+		All()
+			-> "any"
+
+	select-type:
+		[] -> ""
+		
+	select-type:
+		[t, ts*] -> $[ [<select-type> t] [<select-type> [ts*]]]
+
+	select-type:
+		All() -> "all"
+
+	select-type:
+		Distinct() -> "distinct"
+
+	select-type:
+		DistinctRow() -> "distinctrow"
+
+	select-type:
+		HighPriority() -> "high_priority"
+
+	select-type:
+		StraightJoin() -> "straight_join"
+
+	select-type:
+		SmallResult() -> "sql_small_result"
+
+	select-type:
+		BigResult() -> "sql_big_result"
+
+	select-type:
+		BufferResult() -> "sql_buffer_result"
+
+	select-type:
+		Cache() -> "sql_cache"
+
+	select-type:
+		NoCache() -> "sql_no_cache"
+
+	select-type:
+		CalcFoundRows() -> "sql_calc_found_rows"
+
+	select-exprs:
+		[] -> ""
+		
+	select-exprs:
+		[e, es*] -> $[ [<expression> e] [<select-exprs> [es*]]]
+
+	from-part:
+		None() -> ""
+		
+	from-part:
+		Some(FromPart(trs))
+		->
+		$[from [<table-references> trs]]
+
+	table-references:
+		[] -> ""
+
+	table-references:
+		[tr]
+			-> $[[<table-reference> tr]]
+
+	table-references:
+		[tr, trs*]
+			-> $[[<table-reference> tr], [<table-references> [trs*]]]
+			
+	table-reference:
+		TableName(tn) -> $[[tn]]
+
+	table-reference:
+		Aliased(tn, a, ih) 
+			-> $[[tn] as [<alias> a] [<index-hint> ih]]
+			
+	table-reference:
+		Query(q,a)
+			-> $[<query> q [<alias> a]]
+
+	table-reference:
+		Bracket(trs) -> $[([<table-references> trs])]		
+
+	table-reference:
+		OJ(tr, tr', expr)
+			-> $[oj [<table-reference> tr] left outer join [<table-reference> tr'] on [<expression> expr]]
+
+	table-reference:
+		InnerJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] inner join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		CrossJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] cross join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		StraightJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] straight join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		LeftJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] left join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		LeftOuterJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] left outer join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		RightJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] right join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		RightOuterJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] right outer join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		NaturalLeftJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] natural left join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		NaturalLeftOuterJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] natural left outer join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		NaturalRightJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] natural right join [<table-reference> tr'] [<join-condition> jc]]
+
+	table-reference:
+		NaturalRightOuterJoin(tr, tr', jc)
+			-> $[[<table-reference> tr] natural right outer join [<table-reference> tr'] [<join-condition> jc]]
+
+
+
+	alias:
+		Alias(n)
+			-> $[as [n]]	
+
+	index-hint:
+		Use(ik, fc)
+			-> $[use [<index-key> ik] [<for-clause> fc]]
+
+	index-hint:
+		Ignore(ik, fc)
+			-> $[ignore [<index-key> ik] [<for-clause> fc]]
+
+	index-hint:
+		Force(ik, fc)
+			-> $[force [<index-key> ik] [<for-clause> fc]]
+
+
+	index-key:
+		Index() -> "Index"
+
+	index-key:
+		Key() -> "Key"
+
+	for-clause:
+		None() -> $[]
+		
+	for-clause:
+		Some(ForClause(jog, ns))
+			-> $[for [<jog> jog] [<names> ns]]
+
+	jog:
+		Join() -> "join"
+		
+	jog:
+		OrderBy() -> "order by"
+
+	jog:
+		GroupBy() -> "group by"
+		
+	names:
+		[] -> ""
+	
+	names:
+		[n] -> $[n]
+	
+	names:
+		[n,ns*] -> $[[n], [<names> [ns*]]]
+	
+	join-condition:
+		On(expr)
+			-> $[on [<expression> expr]]
+			
+	join-condition:
+		Using(ns)
+			-> $[using [<names> ns]]
+
+	group-by-part:
+		None() -> ""
+		
+	group-by-part:
+		Some(GroupByPart(expr, o, r))
+			-> $[group by [<expression> expr] [<order> o] [<rollup> r]]
+ 
+ 	order:
+ 		None() -> ""
+ 
+ 	order:
+ 		Some(Ascending()) -> "asc"
+
+ 	order:
+ 		Some(Descending()) -> "desc"
+ 		
+ 	rollup:
+ 		None() -> ""
+ 		
+ 	rollup:
+ 		Some(Rollup())
+ 			-> "with rollup"
+
+	having-part:
+		None() -> ""
+		
+	having-part:
+		Some(HavingPart(expr))
+			-> $[having [<expression> expr]]
+	
+	order-by-part:
+		None() -> ""
+
+	order-by-part:
+		Some(OrderByPart(expr, o))
+			-> $[order by [<expression> expr] [<order> o]]
+	
+	procedure-part:
+		None() -> ""
+			
+	procedure-part:
+		Some(ProcedurePart(n, ps))
+			-> $[procedure [n] ([<expression-list> ps])]
+
+     into-part:
+     	None() -> ""
+     
+    into-part:
+    	Some(IntoOutFile(s,cs,eo))
+    		-> $[into outfile [s] [<charset> cs] [<export-options> eo]] 
+
+    into-part:
+    	Some(Into(vars))
+    		-> $[into [<column-names> vars]] 
+
+
+	charset:
+		CharSet(name)
+			-> $[character set [name]]      
+			
+	export-options:
+		None() -> ""
+
+	export-options:
+		Some(ExportOptions())
+			-> "export options unknown"
+			
+	mode-part:
+		None() -> ""
+		
+	mode-part:
+		Some(ForUpdate()) -> "for update"
+
+	mode-part:
+		Some(LockShareMode()) -> "lock in share mode"
+		
+	declare-statements:
+		[] -> $[]
+		
+	declare-statements:
+		[Declare(names, type, default)] 
+			-> $[declare [<column-names> names] [<column-type> type] [<declare-default> default]]
+
+	declare-statements:
+		[Declare(names, type, default), ds*] 
+			-> $[declare [<column-names> names] [<column-type> type] [<declare-default> default] ;
+			[<declare-statements> [ds*]]]
+
+		
+	declare-default:
+		None() -> $[]
+		
+	declare-default:
+		DefaultDeclare(expr)
+			-> $[default [<expression> expr]]	
+	
+
+
+	standard-stuff:
+		name ->
+			$[]
+
