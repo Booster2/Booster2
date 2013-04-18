@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><objectModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.example.org/objectModel" xsi:noNamespaceSchemaLocation="objectModel.xsd" name="TypeTest">
+    <class name="mainClass">
+        <countObjectMethod class="ox.softeng.booster.TypeTest" method="countmainClass"/>
+        <attribute name="att1" primType="String" typeMultiplicity="Mandatory" className="" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt1"/>
+        </attribute>
+        <attribute name="att2" primType="Integer" typeMultiplicity="Mandatory" className="" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt2"/>
+        </attribute>
+        <attribute name="att3" primType="SetValue" typeMultiplicity="Mandatory" className="" setName="DaysOfWeek">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt3"/>
+        </attribute>
+        <attribute name="att4" primType="ClassRef" typeMultiplicity="Mandatory" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt4"/>
+        </attribute>
+        <attribute name="att5" primType="ClassRef" typeMultiplicity="Mandatory" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt5"/>
+        </attribute>
+        <attribute name="att6" primType="ClassRef" typeMultiplicity="Mandatory" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt6"/>
+        </attribute>
+        <attribute name="att7" primType="ClassRef" typeMultiplicity="Mandatory" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt7"/>
+        </attribute>
+        <attribute name="att8" primType="String" typeMultiplicity="Optional" className="" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt8"/>
+        </attribute>
+        <attribute name="att9" primType="Integer" typeMultiplicity="Optional" className="" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt9"/>
+        </attribute>
+        <attribute name="att10" primType="SetValue" typeMultiplicity="Optional" className="" setName="DaysOfWeek">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt10"/>
+        </attribute>
+        <attribute name="att11" primType="ClassRef" typeMultiplicity="Optional" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt11"/>
+        </attribute>
+        <attribute name="att12" primType="ClassRef" typeMultiplicity="Optional" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt12"/>
+        </attribute>
+        <attribute name="att13" primType="ClassRef" typeMultiplicity="Optional" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt13"/>
+        </attribute>
+        <attribute name="att14" primType="ClassRef" typeMultiplicity="Optional" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt14"/>
+        </attribute>
+        <attribute name="att15" primType="String" typeMultiplicity="Set" className="" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt15"/>
+        </attribute>
+        <attribute name="att16" primType="Integer" typeMultiplicity="Set" className="" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt16"/>
+        </attribute>
+        <attribute name="att17" primType="SetValue" typeMultiplicity="Set" className="" setName="DaysOfWeek">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt17"/>
+        </attribute>
+        <attribute name="att18" primType="ClassRef" typeMultiplicity="Set" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt18"/>
+        </attribute>
+        <attribute name="att19" primType="ClassRef" typeMultiplicity="Set" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt19"/>
+        </attribute>
+        <attribute name="att20" primType="ClassRef" typeMultiplicity="Set" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt20"/>
+        </attribute>
+        <attribute name="att21" primType="ClassRef" typeMultiplicity="Set" className="secondaryClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievemainClassatt21"/>
+        </attribute>
+    </class>
+    <class name="secondaryClass">
+        <countObjectMethod class="ox.softeng.booster.TypeTest" method="countsecondaryClass"/>
+        <attribute name="attA" primType="ClassRef" typeMultiplicity="Mandatory" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattA"/>
+        </attribute>
+        <attribute name="attB" primType="ClassRef" typeMultiplicity="Optional" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattB"/>
+        </attribute>
+        <attribute name="attC" primType="ClassRef" typeMultiplicity="Set" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattC"/>
+        </attribute>
+        <attribute name="attD" primType="ClassRef" typeMultiplicity="Mandatory" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattD"/>
+        </attribute>
+        <attribute name="attE" primType="ClassRef" typeMultiplicity="Optional" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattE"/>
+        </attribute>
+        <attribute name="attF" primType="ClassRef" typeMultiplicity="Set" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattF"/>
+        </attribute>
+        <attribute name="attG" primType="ClassRef" typeMultiplicity="Mandatory" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattG"/>
+        </attribute>
+        <attribute name="attH" primType="ClassRef" typeMultiplicity="Optional" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattH"/>
+        </attribute>
+        <attribute name="attI" primType="ClassRef" typeMultiplicity="Set" className="mainClass" setName="">
+            <getObjectAttributeValueMethod class="ox.softeng.booster.TypeTest" method="retrievesecondaryClassattI"/>
+        </attribute>
+    </class>
+</objectModel>

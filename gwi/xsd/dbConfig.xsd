@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+<element name="dbconnection">
+<complexType>
+	<sequence>
+		<element name="type" type="string"></element>
+		<element name="host" type="string"></element>
+		<element name="port" type="string"></element>
+		<element name="username" type="string"></element>
+		<element name="password" type="string"></element>
+		<element name="dbname" type="string"></element>
+	</sequence>
+</complexType>
+</element>
+</schema>
