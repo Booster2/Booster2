@@ -45,11 +45,35 @@ SELECT * FROM TCOUNTS;
 END
 $$
 
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(100))
+BEGIN
+
+DROP TABLE IF EXISTS ATTRIBUTES_FOR_DESC;
+CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC 
+  (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+	CALL_CLASS VARCHAR(500),
+	CALL_OID INT,
+    ATT_NAME VARCHAR(500),
+    ATT_PRIM_TYPE VARCHAR(500),
+    TYPE_MULT VARCHAR(500),
+    INT_VALUE INT,
+    STRING_VALUE VARCHAR(500),
+    SET_VALUE VARCHAR(500),
+    OID_VALUE INT,
+    CLASS_NAME VARCHAR(100)
+  ) ENGINE = MEMORY; 
+
+CALL `GET_OBJECT_DESCRIPTION_RECURSE`( className_in, objectID, objectDesc);
+
+/*SELECT * FROM ATTRIBUTES_FOR_DESC; */
+END
+$$
 
 
 DELIMITER $$
 
-CREATE PROCEDURE `GET_OBJECT_DESCRIPTION`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(100))
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_RECURSE`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(100))
 BEGIN
 DECLARE done INT DEFAULT 0;
 DECLARE ANAME CHAR(255);
@@ -61,18 +85,6 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
 OPEN attribute_names;   
 
-DROP TABLE IF EXISTS ATTRIBUTES_FOR_DESC;
-CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC 
-  (
-    ATT_NAME VARCHAR(500),
-    ATT_PRIM_TYPE VARCHAR(500),
-    TYPE_MULT VARCHAR(500),
-    INT_VALUE INT,
-    STRING_VALUE VARCHAR(500),
-    SET_VALUE VARCHAR(500),
-    OID_VALUE INT,
-    CLASS_NAME VARCHAR(100)
-  ) ENGINE = MEMORY; 
 
 
 WHILE done = 0 DO
@@ -85,27 +97,28 @@ WHILE done = 0 DO
     SET @direction = (SELECT direction FROM _Meta_Attributes WHERE attName = ANAME AND class = className_in);
     SET @className = (SELECT _Meta_Attributes.className FROM _Meta_Attributes WHERE attName = ANAME AND class = className_in);
     SET @tableName = (SELECT _Meta_Attributes.tableName FROM _Meta_Attributes WHERE attName = ANAME AND class = className_in);
+    SET @oppAttName = (SELECT _Meta_Attributes.oppAttName FROM _Meta_Attributes WHERE attName = ANAME AND class = className_in);
     
     IF @primType = 'String' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'Integer' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS SET_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Uni' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",className_in,"_",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
 
     
 
@@ -122,11 +135,42 @@ END WHILE;
 
 CLOSE attribute_names;
 
-SET objectDesc = (SELECT group_concat(STRING_VALUE separator ', ') FROM ATTRIBUTES_FOR_DESC);
+
+BEGIN
+DECLARE AID INT;
+DECLARE OBJID INT;
+DECLARE CNAME VARCHAR(500);
+
+DECLARE attribute_values CURSOR for 
+    SELECT ID, OID_VALUE, CLASS_NAME FROM ATTRIBUTES_FOR_DESC 
+	WHERE OID_VALUE is not null
+	AND CALL_CLASS = className_in
+	AND CALL_OID = objectID;
+
+SET done = 0;
+OPEN attribute_values;  
+
+WHILE done = 0 DO
+
+  FETCH NEXT FROM attribute_values INTO AID, OBJID, CNAME;
+   IF done = 0 THEN
+    CALL `GET_OBJECT_DESCRIPTION_RECURSE`(CNAME, OBJID, @objDesc);
+    UPDATE ATTRIBUTES_FOR_DESC SET STRING_VALUE = @objDesc WHERE ID = AID;
+    
+   END IF;
+
+END WHILE;
+
+CLOSE attribute_values;
+END;
+
+SET objectDesc = (SELECT group_concat(STRING_VALUE separator ', ') 
+	FROM ATTRIBUTES_FOR_DESC 
+	WHERE CALL_CLASS = className_in
+	AND CALL_OID = objectID);
 
 END
 $$
-
 DELIMITER $$
 
 CREATE PROCEDURE `GET_OBJECT`( className_in VARCHAR(500), objectID INT)

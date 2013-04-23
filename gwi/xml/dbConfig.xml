@@ -5,6 +5,6 @@
 	<host>localhost</host>
 	<port>3306</port>
 	<username>root</username>
-	<password>!s1s$RC</password>
+	<password></password>
 	<dbname>StudentSystem</dbname>
 </dbconnection>

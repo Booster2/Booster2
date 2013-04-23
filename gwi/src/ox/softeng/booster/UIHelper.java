@@ -27,7 +27,7 @@ public class UIHelper {
 		if(needToSignIn)
 		{
 			try{
-				String filename = "/Users/james/sync/eclipse/booster2/gwi/xml/dbConfig.xml"; 
+				String filename = "/Users/james/git/booster2/gwi/xml/dbConfig.xml"; 
 				client = SignIn.signIn(filename);
 				//String username = client.getMetaData().getUserName();
 				//String dbname = client.getMetaData().getDatabaseProductName();

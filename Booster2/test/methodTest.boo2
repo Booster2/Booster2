@@ -21,7 +21,7 @@ class Staff
 		lastName (ID) : STRING
 	methods
 	//	changeName { id' = id? & firstName' = firstName? & lastName' = lastName? }
-		create {  s! : Staff' ; (s!.id' = 3 & s!.firstName = f? )}
+		create {  s! : Staff' ; (s!.id' = 3 & s!.firstName' = firstName? & s!.lastName' = lastName? )}
 }
 
 

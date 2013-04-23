@@ -1,85 +1,127 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-		<script src="js/vendor/jquery-1.8.3.min.js"></script>
-		<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js" type="text/javascript"></script>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Booster</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,300' rel='stylesheet' type='text/css'>
 
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title data-bind="text: modelName()"></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
-		<script src="js/vendor/knockout-2.2.0.js" type="text/javascript"></script>
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
 
-		<link rel="stylesheet" href="http://view.jqueryui.com/selectmenu/themes/base/jquery.ui.all.css">
-        <link rel="stylesheet" href="css/normalize.min.css">
-        <link rel="stylesheet" href="css/main.css">
-		<!-- <link rel="stylesheet" href="css/jquery.dataTables_themeroller.css">-->
-		<link rel="stylesheet" href="css/jquery.dataTables.css">
-		<!-- <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" /> -->
-		<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/themes/cupertino/jquery-ui.css" type="text/css" media="all" />
-		<script src="js/vendor/sammy.js" type="text/javascript"></script>
-		<script src="js/vendor/jquery.ui.core.js"></script>
-		<script src="js/vendor/jquery.ui.widget.js"></script>
-		<script src="js/vendor/jquery.ui.position.js"></script>
-		<script src="js/vendor/jquery.ui.menu.js"></script>
-		<script src="js/vendor/jquery.ui.selectmenu.js"></script>
-		<script src="js/vendor/jquery.dataTables.min.js"></script>
-		<script src="js/main.js" type="text/javascript"></script>
-		<script src="js/interface.js" type="text/javascript"></script>
-        <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>		
-    </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-        <![endif]-->
-		<div class="full-container">
-        <div class="header-container">
-            <header class="wrapper clearfix">
-                <h1 class="title" data-bind="text: modelName()"></h1>
-                <nav>
-                    <ul>
-                        <li><a href="#classList">Search</a></li>
-                        <li><a href="#classList">Browse</a></li>
-                        <li><a href="#help">Help</a></li>
-                    </ul>
-                </nav>
-            </header>
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="css/main.css" rel="stylesheet">
+	
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="../assets/ico/favicon.png">
+
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Booster</a>
+          <div class="nav-collapse collapse">
+            <p class="navbar-text pull-right">
+              Logged in as <a href="#" class="navbar-link">Username</a>
+            </p>
+            <ul class="nav">
+              <li class="active"><a href="#classList">Class List</a></li>
+              <li><a href="#about">Queries</a></li>
+              <li><a href="#contact">Utilities</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
         </div>
+      </div>
+    </div>
+	<div id="bodyDiv">
+		<jsp:include page="components/classList.jsp" />
+		<jsp:include page="components/classSearch.jsp" />
+		<jsp:include page="components/objectView.jsp" />
+		<jsp:include page="components/connectionDetails.jsp" />
+		<jsp:include page="components/methodDialog.jsp" />
+      
 
-        <div class="main-container">
-            <div class="main wrapper clearfix">
+      
+<!--       <hr>
+      <footer>
+      	<span data-bind="text: methodReturnUrl()"></span>
+        <p>&copy; Company 2013</p>
+      </footer>  -->
 
-				<jsp:include page="components/classList.jsp" />
-				<jsp:include page="components/classSearch.jsp" />
-				<jsp:include page="components/objectView.jsp" />
-				<jsp:include page="components/connectionDetails.jsp" />
-				<jsp:include page="components/methodDialog.jsp" />
+    </div><!--/.fluid-container-->
+ 
+ 
+	<!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/vendor/jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="js/bootstrap.js" type="text/javascript"></script>
+    <script src="js/vendor/knockout-2.2.0.js" type="text/javascript"></script>
+    <script src="js/vendor/sammy.js" type="text/javascript"></script>
+	<script src="js/vendor/jquery-ui.js"></script>
+	<script src="js/vendor/jquery.dataTables.min.js"></script>
+	<script src="js/vendor/jquery.ui.selectmenu.js"></script>
+	<script src="js/main.js" type="text/javascript"></script>
+	<script src="js/vendor/paging.js" type="text/javascript"></script>
+	<script src="js/interface.js" type="text/javascript"></script>
 
+	
+    <!-- <script src="js/vendor/jquery.dataTables.plugins.js"></script> -->
+	<!-- <script src="js/vendor/knockout-datatables.js"></script> -->
+	<!-- <script src="js/vendor/jquery.tablesorter.min.js" type="text/javascript"></script> -->
+		
+<!-- 
+    <script src="../assets/js/bootstrap-alert.js"></script>
+    <script src="../assets/js/bootstrap-modal.js"></script>
+    <script src="../assets/js/bootstrap-dropdown.js"></script>
+    <script src="../assets/js/bootstrap-scrollspy.js"></script>
+    <script src="../assets/js/bootstrap-tab.js"></script>
+    <script src="../assets/js/bootstrap-tooltip.js"></script>
+    <script src="../assets/js/bootstrap-popover.js"></script>
+    <script src="../assets/js/bootstrap-button.js"></script>
+    <script src="../assets/js/bootstrap-collapse.js"></script>
+    <script src="../assets/js/bootstrap-carousel.js"></script>
+    <script src="../assets/js/bootstrap-typeahead.js"></script>
+ -->
 
-
-
-
-
-
-
-
-            </div> <!-- #main -->
-        </div> <!-- #main-container -->
-        </div> <!-- .full-container -->
-        <div class="footer-container">
-            <footer class="wrapper">
-                <h3>A Booster 2.0 System</h3>
-            </footer>
-        </div>
-        <!-- <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
-            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-            s.parentNode.insertBefore(g,s)}(document,'script'));
-        </script> -->
-    </body>
+  </body>
 </html>

@@ -84,13 +84,13 @@ function BoosterViewModel() {
             
         });
     	this.get('#objectmethod/:className/:objectID/:methodName', function() {
-    		resetObservables(self, 'methodview');
+    		//resetObservables(self, 'methodview');
 
     		self.methodName(this.params.methodName);
     		self.className(this.params.className);
     		self.methodThisType(this.params.className);
     		self.methodThisOid(this.params.objectID);
-    		self.methodReturnUrl('#object/' + this.params.className + '/' + this.params.objectID);
+    		//self.methodReturnUrl('#object/' + this.params.className + '/' + this.params.objectID);
             
     		$.getJSON('MethodView', 
 	            {
@@ -108,12 +108,10 @@ function BoosterViewModel() {
 
     	});
     	this.get('#classmethod/:className/:methodName', function() {
-    		resetObservables(self, 'methodview');
+    		//resetObservables(self, 'methodview');
 
     		self.methodName(this.params.methodName);
     		self.className(this.params.className);
-    		//self.methodThisType(this.params.className);
-    		//self.methodThisOid(this.params.objectID);
     		//self.methodReturnUrl('#' + this.params.className + '/' + this.params.objectID);
             
     		$.getJSON('MethodView', 
@@ -132,59 +130,30 @@ function BoosterViewModel() {
 
     	});
         this.get('#classList', function() {
+        	self.methodReturnUrl('#classList');
         	resetObservables(self, 'classlist');
             $.getJSON("ClassList", function(allData) {
                 var mappedClasses = $.map(allData, function(item) { return new Class(item); });
-                
                 self.classList(mappedClasses);
             });
-            
+             
         });
     }).run('#classList');    
 };
 
 $(function(){
-	ko.bindingHandlers.uibutton = {
-			init: function(element, valueAccessor) {
-				var $element = $(element); //, config = valueAccessor();
-				$element.button();
-			}
-	};
-
-	ko.bindingHandlers.uiselectmenu = {
-			init: function(element, valueAccessor) {
-				var $element = $(element); //, config = valueAccessor();
-				$element.selectmenu();
-			}
-	};
-
-	ko.bindingHandlers.uidatatable = {
-			init: function(element, valueAccessor) {
-				var $element = $(element); //, config = valueAccessor();
-				$element.dataTable({
-			        "bJQueryUI": true		
-				
-				});
-			}
-	};
 
 	ko.applyBindings(new BoosterViewModel());
-	
 	
 });
 
 function prepareMethod(self)
 {
+	
 	var d = $('#methodDialog');
-	d.dialog(
-			{
-			    show: "blind",
-			    hide: "explode",
-			    autoOpen: false,
-			    modal: true,
-			    width: '60%',
-			    buttons: {
-			        "Submit": function() {
+	d.modal();
+	$('#method-dialog-submit').on('click', 
+				function() {
 			        	var data = {};
 			        	$.each($('#methodCallForm').serializeArray(), function(i, field) {
 			        	    data[field.name] = field.value;
@@ -208,30 +177,33 @@ function prepareMethod(self)
 			        			  }
 			        		  }  
 			        		});  
-			        	$( this ).dialog( "close" );		  
+			        	$('#methodDialog').modal('hide');
+			        	//$( this ).dialog( "close" );		  
 			        	//unprepareMethod(self);
-			        },
-			        "Reset": function() {
-			        },
-			        "Cancel": function() {
-			            $( this ).dialog( "close" );
+	});
+	$('#method-dialog-reset').on('click',	
+			        function() {
+						$('#methodCallForm').each(function(){
+							this.reset();
+						});
+			        });
+	$('#method-dialog-cancel').on('click',
+			        function() {
+						$('#methodDialog').modal('hide');
+			            //$( this ).dialog( "close" );
 			            //unprepareMethod(self);
-			        }
-			    },
-			    close: function() {
-			    	//console.log("called this method");
-		            //$( this ).dialog( "close" );
-		            unprepareMethod(self);
-			    }
-			});
+			        });
+	
+    $('#methodDialog').on('hidden', function () {
+    		unprepareMethod(self);
+        });
 
-	d.dialog( "open" );
 }
 
 function unprepareMethod(self)
 {
-	//console.log(self);
-	//console.log('method return url: ' + self.methodReturnUrl());
+	console.log(self);
+	console.log('method return url: ' + self.methodReturnUrl());
 	window.location.hash = self.methodReturnUrl();
 }
 
@@ -243,7 +215,7 @@ function resetObservables(self, type)
 	
 	if(type != 'classlist')
 	{
-		self.classList(null);
+		self.classList([]);
 		
 	}
 	
@@ -260,14 +232,15 @@ function resetObservables(self, type)
 	{
 		self.methodName(null);
 		self.className(null);
-		self.methodParams(null);
+		self.methodParams([]);
   	  	self.methodThisType(null);
   	  	self.methodThisOid(null);
-  	  	self.methodReturnUrl(null);
+  	  	//self.methodReturnUrl(null);
 
 	}
 	
 }
+
 
 String.prototype.unCamelCase = function(){
 	return this
@@ -284,4 +257,5 @@ function callClassMethod(button){
 	var methodName = $(button).parent().children('select').val();
 	window.location.hash = 'classmethod/' + methodName;
 }
+
 
