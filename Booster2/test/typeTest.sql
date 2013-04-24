@@ -75,7 +75,7 @@ alter table mainClass_att16
 alter table mainClass_att15
 	add column mainClassId int     , add foreign key (mainClassId) references mainClass ( mainClassId);
 alter table mainClass_att15
-	add column att15 varchar(500)     ;
+	add column att15 varchar(1000)     ;
 
 alter table mainClass_att14_secondaryClass_attF
 	add column mainClass_att14 int     , add foreign key (mainClass_att14) references mainClass ( mainClassId);
@@ -108,10 +108,10 @@ alter table mainClass_att5_secondaryClass_attA
 	add column secondaryClass_attA int     , add foreign key (secondaryClass_attA) references secondaryClass ( secondaryClassId);
 
 alter table secondaryClass
-	add column name varchar(500)     ;
+	add column name varchar(1000)     ;
 
 alter table mainClass
-	add column att1 varchar(500)     ;
+	add column att1 varchar(1000)     ;
 alter table mainClass
 	add column att2 int     ;
 alter table mainClass
@@ -119,13 +119,15 @@ alter table mainClass
 alter table mainClass
 	add column att4 int     , add foreign key (att4) references secondaryClass ( secondaryClassId);
 alter table mainClass
-	add column att8 varchar(500) null default null   ;
+	add column att8 varchar(1000) null default null   ;
 alter table mainClass
 	add column att9 int null default null   ;
 alter table mainClass
 	add column att10 varchar(500) null default null   , add foreign key (att10) references DaysOfWeek ( DaysOfWeek);
 alter table mainClass
 	add column att11 int null default null   , add foreign key (att11) references secondaryClass ( secondaryClassId);
+alter table mainClass
+	add column att22 datetime     ;
 
 
 alter table _Meta_Method_Params
@@ -180,7 +182,7 @@ alter table _Meta_Classes
 
 drop procedure if exists mainClass_changeName;
 delimiter //
-create procedure mainClass_changeName ( )
+create procedure mainClass_changeName ( in a datetime, in this int)
   begin 
 	declare exit handler for not found rollback;
 	declare exit handler for sqlwarning rollback;
@@ -189,7 +191,7 @@ create procedure mainClass_changeName ( )
   
   if true and true and true and true and true and true
   then update  mainClass
-       set att1 = a
+       set att22 = a
        where this = mainClassId
        
         ;
@@ -358,10 +360,31 @@ values
  ;
 insert  
 into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('mainClass','att22','DateTime','Mandatory',null,'','','Uni','mainClass',0)
+ ;
+insert  
+into
 _Meta_Methods
 (class, methodName, isObjectMethod)
 values
-('mainClass','changeName',false)
+('mainClass','changeName',true)
+ ;
+insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('mainClass','changeName','a','DateTime','Mandatory','input','','')
+ ;
+insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('mainClass','changeName','this','ClassRef','Mandatory','input','mainClass','')
  ;
 insert  
 into
@@ -558,6 +581,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
     STRING_VALUE VARCHAR(500),
+    DATETIME_VALUE TIMESTAMP,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100)
@@ -606,6 +630,10 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
                                     (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
@@ -695,6 +723,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
     STRING_VALUE VARCHAR(500),
+    DATETIME_VALUE TIMESTAMP,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100),
@@ -722,6 +751,10 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
@@ -743,6 +776,10 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
 
     ELSEIF @primType = 'SetValue' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
@@ -824,4 +861,28 @@ CREATE PROCEDURE `METHOD_PARAMS` ( className_in VARCHAR(500),  methodName_in VAR
     SELECT * FROM _Meta_Method_Params WHERE class = className_in and methodName = methodName_in;
   END;
 $$
+
+DELIMITER ;
+drop procedure if exists `GET_OBJECT_BROWSE_LOCATION`;
+DELIMITER $$
+CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(500), Id_in INT)
+	BEGIN
+		
+		SET @tableName = (SELECT tableName FROM _Meta_Classes WHERE className = className_in);  
+		SET @idName = CONCAT(@tableName, "ID");
+		
+		SET @SQL_TXT = CONCAT("select ", 
+				"(select min(",@idName,") from ",@tableName," where ",@idName," > ", Id_in, ") as next,", 
+				"(select max(",@idName,") from ",@tableName," where ",@idName," < ", Id_in, ") as prev,",
+				"(select min(",@idName,") from ",@tableName,") as first,",
+				"(select max(",@idName,") from ",@tableName,") as last"); 
+    	
+		IF(@SQL_TXT is not null ) THEN
+        	PREPARE stmt_name FROM @SQL_TXT;
+        	EXECUTE stmt_name;
+        	DEALLOCATE PREPARE stmt_name;
+    	END IF;
+  	END;
+ $$
+
 

@@ -13,6 +13,7 @@ exports
     'true' -> ID {reject}
     'string' -> ID {reject}
     'int' -> ID {reject}
+    'datetime' -> ID {reject}
     'attributes' -> ID {reject}
     'system' -> ID {reject}
     'invariant' -> ID {reject}

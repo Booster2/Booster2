@@ -13,11 +13,11 @@ rules
 
 
 	output-to-booster-expression:
-		Integer(i) 
+		BasicValue(Integer(i)) 
 			-> $[[i]]
 
 	output-to-booster-expression:
-		String(s)
+		BasicValue(String(s))
 			-> $[[s]]
 			
 	output-to-booster-expression:

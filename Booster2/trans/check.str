@@ -1,7 +1,7 @@
 module check
 
 imports
-  include/booster2
+  include/Booster2
   library/strategy
 
 

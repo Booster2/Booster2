@@ -440,6 +440,7 @@ exports
     'true' -> ID {reject}
     'string' -> ID {reject}
     'int' -> ID {reject}
+    'datetime' -> ID {reject}
     'attributes' -> ID {reject}
     'system' -> ID {reject}
     'invariant' -> ID {reject}
@@ -538,8 +539,14 @@ exports
 	 'set' '(' PrimTypeDecl ')' '[' Multiplicity ']' ->  TypeDecl {cons("Set")}
 	 TypeDecl -> BoosterTerm
 	 
-	 'STRING' -> PrimTypeDecl {cons("String")}
-	 'INT' -> PrimTypeDecl {cons("Int")}
+	 BasicTypeDecl -> PrimTypeDecl {cons("BasicType")}
+	 
+	 
+	 
+	 'STRING' -> BasicTypeDecl {cons("String")}
+	 'INT' -> BasicTypeDecl {cons("Int")}
+	 'DATETIME' -> BasicTypeDecl {cons("DateTime")}
+	 
 	 ID -> PrimTypeDecl {cons("UniDirectional")}
 	 ID '.' ID -> PrimTypeDecl {cons("BiDirectional")}
 	 PrimTypeDecl -> BoosterTerm
@@ -585,11 +592,17 @@ exports
     Expression ':>>' Expression -> Relation {cons("SupersetEquals")}
     Relation -> BoosterTerm
     
-    INT 		-> ValueExpression {cons("Integer")}
-    STRING		-> ValueExpression {cons("String")}
+    
+    SpoofaxBasicValue -> ValueExpression {cons("BasicValue")}
+    
+    INT 		-> SpoofaxBasicValue {cons("Integer")}
+    STRING		-> SpoofaxBasicValue {cons("String")}
+
+
     Path		-> ValueExpression 
   	"STRING"	-> ValueExpression {cons("StringExtent"), prefer}
   	"INT"		-> ValueExpression {cons("IntExtent"), prefer}
+  	"DATETIME"	-> ValueExpression {cons("DateTimeExtent"), prefer}
   	'null'		-> ValueExpression {cons("Null"), prefer}
     "{" {Expression "," }* "}" -> ValueExpression {cons("SetExtent")}
     ValueExpression -> BoosterTerm

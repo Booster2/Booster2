@@ -3,7 +3,7 @@
 <project name="Booster-install" default="install-all">
  
  
-<property name="booster.system.name" value="classicCars"/> 
+<property name="booster.system.name" value="typeTest"/> 
  
  	<taskdef resource="net/sf/antcontrib/antlib.xml">
 	  <classpath>

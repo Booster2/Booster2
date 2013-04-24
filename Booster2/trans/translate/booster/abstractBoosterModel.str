@@ -4,6 +4,7 @@ imports
   include/Booster2
 
   library/abstractBoosterModel
+  library/basicTypes
   translate/booster/expression
   translate/booster/constraint
   translate/booster/relation
@@ -65,39 +66,21 @@ imports
 				
 	output-to-booster-attribute-type:
 		(classname, attname)
-			-> $[STRING]
+			-> <get-type-booster-notation> t
 		where
-			String() := <lookup-attribute-type>(classname, attname)
+			BasicType(t) := <lookup-attribute-type>(classname, attname)
 
 	output-to-booster-attribute-type:
 		(classname, attname)
-			-> ${[ STRING ]}
+			-> ${[ { <get-type-booster-notation> t } ]}
 		where
-			Optional(String()) := <lookup-attribute-type>(classname, attname)
+			Optional(BasicType(t)) := <lookup-attribute-type>(classname, attname)
 				
 	output-to-booster-attribute-type:
 		(classname, attname )
-			-> ${set ( STRING ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
+			-> ${set ( { <get-type-booster-notation> t } ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
 		where
-			Set(String()) := <lookup-attribute-type>(classname, attname)
-			
-	output-to-booster-attribute-type:
-		(classname, attname)
-			-> $[INT]
-		where
-			Int() := <lookup-attribute-type>(classname, attname)						
-	
-	output-to-booster-attribute-type:
-		(classname, attname)
-			-> ${[ INT ]}
-		where
-			Optional(Int()) := <lookup-attribute-type>(classname, attname)
-			
-	output-to-booster-attribute-type:
-		(classname, attname)
-			-> ${set ( INT ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
-		where
-			Set(Int()) := <lookup-attribute-type>(classname, attname)
+			Set(BasicType(t)) := <lookup-attribute-type>(classname, attname)
 			
 	output-to-booster-attribute-type:
 		(classname, attname)

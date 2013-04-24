@@ -519,6 +519,7 @@ exports
     'true'                             -> ID            {reject}
     'string'                           -> ID            {reject}
     'int'                              -> ID            {reject}
+    'datetime'                         -> ID            {reject}
     'attributes'                       -> ID            {reject}
     'system'                           -> ID            {reject}
     'invariant'                        -> ID            {reject}
@@ -559,112 +560,116 @@ exports
     System
 
   context-free syntax
-    'system' ID SystemComponent*                    -> System          {cons("System")}
-    System                                          -> BoosterTerm     
-    SetDef                                          -> SystemComponent 
-    Class                                           -> SystemComponent 
-    SystemComponent                                 -> BoosterTerm     
-    'class' ID '{' ClassComponents* '}'             -> Class           {cons("Class")}
-    Class                                           -> BoosterTerm     
-    'attributes' Attribute*                         -> ClassComponents {cons("Attributes")}
-    'methods' Method*                               -> ClassComponents {cons("Methods")}
-    'invariant' Constraint*                         -> ClassComponents {cons("Invariant")}
-    ClassComponents                                 -> BoosterTerm     
-    'set' ID '{' {ID ','}+ '}'                      -> SetDef          {cons("SetDef")}
-    SetDef                                          -> BoosterTerm     
-    ID ':' TypeDecl                                 -> Attribute       {cons("Attribute")}
-    ID Identity ':' TypeDecl                        -> Attribute       {cons("Attribute")}
-    ID ':' TypeDecl                                 -> Attribute       {cons("Attribute")}
-    Attribute                                       -> BoosterTerm     
-    '(' 'ID' ')'                                    -> Identity        {cons("Identity")}
-    ID '{' Constraint '}'                           -> Method          {cons("Method")}
-    ID '{' GuardedCommand '}'                       -> Method          {cons("Method")}
-    Method                                          -> BoosterTerm     
-    PrimTypeDecl                                    -> TypeDecl        
-    '[' PrimTypeDecl ']'                            -> TypeDecl        {cons("Optional")}
-    'set' '(' PrimTypeDecl ')' '[' Multiplicity ']' -> TypeDecl        {cons("Set")}
-    TypeDecl                                        -> BoosterTerm     
-    'STRING'                                        -> PrimTypeDecl    {cons("String")}
-    'INT'                                           -> PrimTypeDecl    {cons("Int")}
-    ID                                              -> PrimTypeDecl    {cons("UniDirectional")}
-    ID '.' ID                                       -> PrimTypeDecl    {cons("BiDirectional")}
-    PrimTypeDecl                                    -> BoosterTerm     
-    INT '..' INT                                    -> Multiplicity    {cons("MultMinAndMax")}
-    '..' INT                                        -> Multiplicity    {cons("MultJustMax")}
-    INT '..'                                        -> Multiplicity    {cons("MultJustMin")}
-    INT '..' '*'                                    -> Multiplicity    {cons("MultJustMin")}
-    INT                                             -> Multiplicity    {cons("MultSingle")}
-    '*'                                             -> Multiplicity    {cons("MultAny")}
-    Multiplicity                                    -> BoosterTerm     
-    'true'                                          -> Constraint      {cons("True")}
-    'false'                                         -> Constraint      {cons("False")}
-    Relation                                        -> Constraint      
-    'not' Constraint                                -> Constraint      {cons("Not"), prefer}
-    Constraint '&' Constraint                       -> Constraint      {cons("And"), left}
-    Constraint 'or' Constraint                      -> Constraint      {cons("Or"), left}
-    Constraint '=>' Constraint                      -> Constraint      {cons("Implies"), right}
-    Constraint ';' Constraint                       -> Constraint      {cons("Then"), left}
-    "(" Constraint ")"                              -> Constraint      {bracket}
-    MethodReference                                 -> Constraint      {cons("MethodRef")}
-    'exists' ID ":" Expression "@" Constraint       -> Constraint      {cons("Exists")}
-    'forall' ID ":" Expression "@" Constraint       -> Constraint      {cons("Forall")}
-    Constraint                                      -> BoosterTerm     
-    Expression '=' Expression                       -> Relation        {cons("Equal")}
-    Expression '/=' Expression                      -> Relation        {cons("NotEqual")}
-    Expression ':' Expression                       -> Relation        {cons("In")}
-    Expression '/:' Expression                      -> Relation        {cons("NotIn")}
-    Expression '<' Expression                       -> Relation        {cons("LessThan")}
-    Expression '>' Expression                       -> Relation        {cons("GreaterThan")}
-    Expression '<=' Expression                      -> Relation        {cons("LessThanEquals")}
-    Expression '>=' Expression                      -> Relation        {cons("GreaterThanEquals")}
-    Expression '<:' Expression                      -> Relation        {cons("Subset")}
-    Expression '<<:' Expression                     -> Relation        {cons("SubsetEquals")}
-    Expression ':>' Expression                      -> Relation        {cons("Superset")}
-    Expression ':>>' Expression                     -> Relation        {cons("SupersetEquals")}
-    Relation                                        -> BoosterTerm     
-    INT                                             -> ValueExpression {cons("Integer")}
-    STRING                                          -> ValueExpression {cons("String")}
-    Path                                            -> ValueExpression 
-    "STRING"                                        -> ValueExpression {cons("StringExtent"), prefer}
-    "INT"                                           -> ValueExpression {cons("IntExtent"), prefer}
-    'null'                                          -> ValueExpression {cons("Null"), prefer}
-    "{" {Expression ","}* "}"                       -> ValueExpression {cons("SetExtent")}
-    ValueExpression                                 -> BoosterTerm     
-    ValueExpression                                 -> Expression      
-    'head' Expression                               -> Expression      {cons("Head"), avoid}
-    'tail' Expression                               -> Expression      {cons("Tail"), avoid}
-    'card' Expression                               -> Expression      {cons("Cardinality"), avoid}
-    '-' Expression                                  -> Expression      {cons("Negative"), avoid}
-    "(" Expression ")"                              -> Expression      {bracket}
-    Expression "+" Expression                       -> Expression      {left, cons("Plus")}
-    Expression "-" Expression                       -> Expression      {left, cons("Minus")}
-    Expression "*" Expression                       -> Expression      {left, cons("Times")}
-    Expression "/" Expression                       -> Expression      {left, cons("Divide")}
-    Expression "max" Expression                     -> Expression      {left, cons("Maximum")}
-    Expression "min" Expression                     -> Expression      {left, cons("Minimum")}
-    Expression "/\\" Expression                     -> Expression      {left, cons("Intersection")}
-    Expression "\\/" Expression                     -> Expression      {left, cons("Union")}
-    Expression "++" Expression                      -> Expression      {left, cons("Concat")}
-    Expression                                      -> BoosterTerm     
-    Path '(' {( ID '?' '=' Expression ) ","}* ')'   -> MethodReference {cons("MethodReference")}
-    MethodReference                                 -> BoosterTerm     
-    PathStart                                       -> Path            
-    Path '.' PathComponent                          -> Path            {cons("Path")}
-    Path                                            -> BoosterTerm     
-    Input                                           -> PathStart       
-    Output                                          -> PathStart       
-    This                                            -> PathStart       
-    ThisPrimed                                      -> PathStart       
-    ID Decorator?                                   -> PathStart       {cons("PathStart")}
-    PathStart                                       -> BoosterTerm     
-    ID "?"                                          -> Input           {cons("Input")}
-    ID "!"                                          -> Output          {cons("Output")}
-    'this'                                          -> This            {cons("This")}
-    'this' "'"                                      -> ThisPrimed      {cons("ThisPrimed")}
-    "'"                                             -> Decorator       {cons("Primed")}
-    Decorator                                       -> BoosterTerm     
-    ID Decorator?                                   -> PathComponent   {cons("PathComponent")}
-    PathComponent                                   -> BoosterTerm     
+    'system' ID SystemComponent*                    -> System            {cons("System")}
+    System                                          -> BoosterTerm       
+    SetDef                                          -> SystemComponent   
+    Class                                           -> SystemComponent   
+    SystemComponent                                 -> BoosterTerm       
+    'class' ID '{' ClassComponents* '}'             -> Class             {cons("Class")}
+    Class                                           -> BoosterTerm       
+    'attributes' Attribute*                         -> ClassComponents   {cons("Attributes")}
+    'methods' Method*                               -> ClassComponents   {cons("Methods")}
+    'invariant' Constraint*                         -> ClassComponents   {cons("Invariant")}
+    ClassComponents                                 -> BoosterTerm       
+    'set' ID '{' {ID ','}+ '}'                      -> SetDef            {cons("SetDef")}
+    SetDef                                          -> BoosterTerm       
+    ID ':' TypeDecl                                 -> Attribute         {cons("Attribute")}
+    ID Identity ':' TypeDecl                        -> Attribute         {cons("Attribute")}
+    ID ':' TypeDecl                                 -> Attribute         {cons("Attribute")}
+    Attribute                                       -> BoosterTerm       
+    '(' 'ID' ')'                                    -> Identity          {cons("Identity")}
+    ID '{' Constraint '}'                           -> Method            {cons("Method")}
+    ID '{' GuardedCommand '}'                       -> Method            {cons("Method")}
+    Method                                          -> BoosterTerm       
+    PrimTypeDecl                                    -> TypeDecl          
+    '[' PrimTypeDecl ']'                            -> TypeDecl          {cons("Optional")}
+    'set' '(' PrimTypeDecl ')' '[' Multiplicity ']' -> TypeDecl          {cons("Set")}
+    TypeDecl                                        -> BoosterTerm       
+    BasicTypeDecl                                   -> PrimTypeDecl      {cons("BasicType")}
+    'STRING'                                        -> BasicTypeDecl     {cons("String")}
+    'INT'                                           -> BasicTypeDecl     {cons("Int")}
+    'DATETIME'                                      -> BasicTypeDecl     {cons("DateTime")}
+    ID                                              -> PrimTypeDecl      {cons("UniDirectional")}
+    ID '.' ID                                       -> PrimTypeDecl      {cons("BiDirectional")}
+    PrimTypeDecl                                    -> BoosterTerm       
+    INT '..' INT                                    -> Multiplicity      {cons("MultMinAndMax")}
+    '..' INT                                        -> Multiplicity      {cons("MultJustMax")}
+    INT '..'                                        -> Multiplicity      {cons("MultJustMin")}
+    INT '..' '*'                                    -> Multiplicity      {cons("MultJustMin")}
+    INT                                             -> Multiplicity      {cons("MultSingle")}
+    '*'                                             -> Multiplicity      {cons("MultAny")}
+    Multiplicity                                    -> BoosterTerm       
+    'true'                                          -> Constraint        {cons("True")}
+    'false'                                         -> Constraint        {cons("False")}
+    Relation                                        -> Constraint        
+    'not' Constraint                                -> Constraint        {cons("Not"), prefer}
+    Constraint '&' Constraint                       -> Constraint        {cons("And"), left}
+    Constraint 'or' Constraint                      -> Constraint        {cons("Or"), left}
+    Constraint '=>' Constraint                      -> Constraint        {cons("Implies"), right}
+    Constraint ';' Constraint                       -> Constraint        {cons("Then"), left}
+    "(" Constraint ")"                              -> Constraint        {bracket}
+    MethodReference                                 -> Constraint        {cons("MethodRef")}
+    'exists' ID ":" Expression "@" Constraint       -> Constraint        {cons("Exists")}
+    'forall' ID ":" Expression "@" Constraint       -> Constraint        {cons("Forall")}
+    Constraint                                      -> BoosterTerm       
+    Expression '=' Expression                       -> Relation          {cons("Equal")}
+    Expression '/=' Expression                      -> Relation          {cons("NotEqual")}
+    Expression ':' Expression                       -> Relation          {cons("In")}
+    Expression '/:' Expression                      -> Relation          {cons("NotIn")}
+    Expression '<' Expression                       -> Relation          {cons("LessThan")}
+    Expression '>' Expression                       -> Relation          {cons("GreaterThan")}
+    Expression '<=' Expression                      -> Relation          {cons("LessThanEquals")}
+    Expression '>=' Expression                      -> Relation          {cons("GreaterThanEquals")}
+    Expression '<:' Expression                      -> Relation          {cons("Subset")}
+    Expression '<<:' Expression                     -> Relation          {cons("SubsetEquals")}
+    Expression ':>' Expression                      -> Relation          {cons("Superset")}
+    Expression ':>>' Expression                     -> Relation          {cons("SupersetEquals")}
+    Relation                                        -> BoosterTerm       
+    SpoofaxBasicValue                               -> ValueExpression   {cons("BasicValue")}
+    INT                                             -> SpoofaxBasicValue {cons("Integer")}
+    STRING                                          -> SpoofaxBasicValue {cons("String")}
+    Path                                            -> ValueExpression   
+    "STRING"                                        -> ValueExpression   {cons("StringExtent"), prefer}
+    "INT"                                           -> ValueExpression   {cons("IntExtent"), prefer}
+    "DATETIME"                                      -> ValueExpression   {cons("DateTimeExtent"), prefer}
+    'null'                                          -> ValueExpression   {cons("Null"), prefer}
+    "{" {Expression ","}* "}"                       -> ValueExpression   {cons("SetExtent")}
+    ValueExpression                                 -> BoosterTerm       
+    ValueExpression                                 -> Expression        
+    'head' Expression                               -> Expression        {cons("Head"), avoid}
+    'tail' Expression                               -> Expression        {cons("Tail"), avoid}
+    'card' Expression                               -> Expression        {cons("Cardinality"), avoid}
+    '-' Expression                                  -> Expression        {cons("Negative"), avoid}
+    "(" Expression ")"                              -> Expression        {bracket}
+    Expression "+" Expression                       -> Expression        {left, cons("Plus")}
+    Expression "-" Expression                       -> Expression        {left, cons("Minus")}
+    Expression "*" Expression                       -> Expression        {left, cons("Times")}
+    Expression "/" Expression                       -> Expression        {left, cons("Divide")}
+    Expression "max" Expression                     -> Expression        {left, cons("Maximum")}
+    Expression "min" Expression                     -> Expression        {left, cons("Minimum")}
+    Expression "/\\" Expression                     -> Expression        {left, cons("Intersection")}
+    Expression "\\/" Expression                     -> Expression        {left, cons("Union")}
+    Expression "++" Expression                      -> Expression        {left, cons("Concat")}
+    Expression                                      -> BoosterTerm       
+    Path '(' {( ID '?' '=' Expression ) ","}* ')'   -> MethodReference   {cons("MethodReference")}
+    MethodReference                                 -> BoosterTerm       
+    PathStart                                       -> Path              
+    Path '.' PathComponent                          -> Path              {cons("Path")}
+    Path                                            -> BoosterTerm       
+    Input                                           -> PathStart         
+    Output                                          -> PathStart         
+    This                                            -> PathStart         
+    ThisPrimed                                      -> PathStart         
+    ID Decorator?                                   -> PathStart         {cons("PathStart")}
+    PathStart                                       -> BoosterTerm       
+    ID "?"                                          -> Input             {cons("Input")}
+    ID "!"                                          -> Output            {cons("Output")}
+    'this'                                          -> This              {cons("This")}
+    'this' "'"                                      -> ThisPrimed        {cons("ThisPrimed")}
+    "'"                                             -> Decorator         {cons("Primed")}
+    Decorator                                       -> BoosterTerm       
+    ID Decorator?                                   -> PathComponent     {cons("PathComponent")}
+    PathComponent                                   -> BoosterTerm       
 
 exports
   variables

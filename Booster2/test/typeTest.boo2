@@ -2,12 +2,9 @@ system TypeTest
 
 set DaysOfWeek {Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday}
 
-
-
-
 class mainClass{
 	methods
-		changeName{att1' = a?}
+		changeName{att22' = a?}
 	attributes
 		att1 (ID) : String
 		att2 : INT
@@ -32,6 +29,8 @@ class mainClass{
 		att19 : SET(secondaryClass . attG)[*] 
 		att20 : SET(secondaryClass . attH)[*]
 		att21 : SET(secondaryClass . attI)[*] 
+
+		att22 : DATETIME
 
 }
 

@@ -5,6 +5,8 @@ imports
   library/valueExpression
   library/abstractBoosterModel
   library/strategy
+
+  library/basicTypes
   
 
  rules
@@ -137,9 +139,11 @@ imports
 			-> ("Uni", Null())
 
 	attribute-type-metadata:
-		Int() -> ("Integer","Mandatory","","")
-	attribute-type-metadata:
-		String() -> ("String","Mandatory","","")
+		BasicType(t) -> 
+			(desc,"Mandatory","","")
+		where 
+			desc := <get-type-name-for-metadata> t 
+
 	attribute-type-metadata:
 		Class(name) -> ("ClassRef","Mandatory",name,"")
 		where 
@@ -150,9 +154,11 @@ imports
 			<equal>(name, <lookup-set-name> name)
 
 	attribute-type-metadata:
-		Optional(Int()) -> ("Integer","Optional","","")
-	attribute-type-metadata:
-		Optional(String()) -> ("String","Optional","","")
+		Optional(BasicType(t)) -> 
+			(desc,"Optional","","")
+				where 
+			desc := <get-type-name-for-metadata> t 
+
 	attribute-type-metadata:
 		Optional(Class(name)) -> ("ClassRef","Optional",name,"")
 		where 
@@ -163,9 +169,11 @@ imports
 			<equal>(name, <lookup-set-name> name)
 	
 	attribute-type-metadata:
-		Set(Int()) -> ("Integer","Set","","")
-	attribute-type-metadata:
-		Set(String()) -> ("String","Set","","")
+		Set(BasicType(t)) -> 
+			(desc,"Set","","")
+				where 
+			desc := <get-type-name-for-metadata> t 
+
 	attribute-type-metadata:
 		Set(Class(name)) -> ("ClassRef","Set",name,"")
 		where 
@@ -251,25 +259,15 @@ imports
 			
 	get-table-columns:
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(), None()), columns*]
+			-> [Column(attname1, "", False(), t', NoExtra(), NoKey(), None()), columns*]
 		where
-			String() := <lookup> ((name,attname1), types);
+			BasicType(t) := <lookup> ((name,attname1), types);
 			1 := <lookup>((name, attname1), maxmults);			
 			1 := <lookup>((name, attname1), minmults);
 			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults);
+			t' := <get-type-booster-to-sql> t
 
-
-
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "", False(), Int(), NoExtra(), NoKey(),None()), columns*]
-		where
-			Int() := <lookup> ((name,attname1), types);
-			1 := <lookup>((name, attname1), maxmults);			
-			1 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
 
 	get-table-columns:
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
@@ -298,23 +296,15 @@ imports
 	
 	get-table-columns:
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "null", True(), Varchar(500), NoExtra(), NoKey(), None()), columns*]
+			-> [Column(attname1, "null", True(), t', NoExtra(), NoKey(), None()), columns*]
 		where
-			Optional(String()) := <lookup> ((name,attname1), types);
+			Optional(BasicType(t)) := <lookup> ((name,attname1), types);
 			1 := <lookup>((name, attname1), maxmults);			
 			0 := <lookup>((name, attname1), minmults);
 			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults);
+			t' := <get-type-booster-to-sql> t
 
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "null", True(), Int(), NoExtra(), NoKey(), None()), columns*]
-		where
-			Optional(Int()) := <lookup> ((name,attname1), types);
-			1 := <lookup>((name, attname1), maxmults);			
-			0 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
 
 	get-table-columns:
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
@@ -416,16 +406,18 @@ imports
 			-> [Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
-				 Column(attname1, "", False(), Int(), NoExtra(), NoKey(),None())]), tables*]
+				 Column(attname1, "", False(), t', NoExtra(), NoKey(),None())]), tables*]
 		where
-			Set(Int()) := <lookup> ((name, attname1), types);
+			Set(BasicType(t)) := <lookup> ((name, attname1), types);
 			tablename := <concat-strings> [name, "_", attname1];
 			firstcolname := <concat-strings> [name, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
 			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite);
+			t' := <get-type-booster-to-sql> t
+			
 
-	get-table-assocs:
+/*	get-table-assocs:
 		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
 			-> [Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
@@ -438,7 +430,7 @@ imports
 			tableid := <concat-strings> [tablename, "Id"];
 			[] := <set-attribute-table-name> (name, attname1, tablename);
 			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
-
+*/
 	get-table-assocs:
 		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
 			-> [Table(tablename, 
@@ -529,10 +521,11 @@ imports
 		[] -> []
 		
 	convert-inputs:
-		[(name, String()), ins*]
-			-> [Input(name, Varchar(100)), inputs*]
+		[(name, BasicType(t)), ins*]
+			-> [Input(name, t'), inputs*]
 		where
-			[inputs*] := <convert-inputs> [ins*]
+			[inputs*] := <convert-inputs> [ins*];
+			t' := <get-type-booster-to-sql> t
 
 	convert-inputs:
 		[(name, Class(cname)), ins*]
@@ -717,6 +710,10 @@ imports
 		(classname, progname, In(expr1, IntExtent()))
 			-> True()
 
+	booster-to-relational-constraint:
+		(classname, progname, In(expr1, DateTimeExtent()))
+			-> True()
+
 
 
 	booster-to-relational-constraint:
@@ -771,11 +768,11 @@ imports
 			log(|Error(), "cannot convert constraint", constraint)
 
 	booster-to-relational-expression:
-		(String(str),cname)
+		(BasicValue(String(str)),cname)
 			-> String(str)
 
 	booster-to-relational-expression:
-		(Integer(i),cname)
+		(BasicValue(Integer(i)),cname)
 			-> Int(i)
 
 	booster-to-relational-expression:

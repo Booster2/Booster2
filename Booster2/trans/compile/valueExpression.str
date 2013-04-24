@@ -5,6 +5,7 @@ imports
     
   elaborate/valueExpression
   library/valueExpression
+  library/basicTypes
   
 rules
 	
@@ -14,13 +15,12 @@ rules
 */
 
 	is-defined:
-		 (classname, method, Integer(i))
-		 	-> In(Integer(i), IntExtent())
-		 	
-	is-defined:
-		 (classname, method, String(s))
-		 	-> In(String(s), StringExtent())
-		 	
+		 (classname, method, BasicValue(t))
+		 	-> In(BasicValue(t), typeExtent)
+		 where
+		 	t' := <get-corresponding-booster-type> t;
+		 	typeExtent := <get-type-extent> t'
+		 		 	
 	is-defined:
 		 (classname, method, IntExtent())
 		 	-> True()

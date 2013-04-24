@@ -13,11 +13,8 @@ imports
  */
  
 	get-max-mult: 
-		String() -> 1
-		
-	get-max-mult:
-		Int() -> 1
-		
+		BasicType(t) -> 1
+				
 	get-max-mult:
 		UniDirectional(name) -> 1
 	
@@ -36,10 +33,7 @@ imports
   */
  
 	get-min-mult: 
-		String() -> 1
-		
-	get-min-mult:
-		Int() -> 1
+		BasicType(t) -> 1
 		
 	get-min-mult:
 		UniDirectional(name) -> 1
@@ -59,11 +53,8 @@ imports
   */
  
 	get-opposite: 
-		String() -> ()
-		
-	get-opposite:
-		Int() -> ()
-		
+		BasicType(t) -> ()
+				
 	get-opposite:
 		UniDirectional(name) -> ()
 	

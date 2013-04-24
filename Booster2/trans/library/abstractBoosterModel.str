@@ -2,13 +2,11 @@ module library/abstractBoosterModel
 
 imports
   include/Booster2
-  
-
   library/setDef
- 
   library/constraint
   library/valueExpression
   library/strategy
+  library/basicTypes
  
  rules
  	
@@ -155,32 +153,29 @@ imports
 		
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(In(path, StringExtent()), constraint1 )
+			-> And(In(path, typeExtent), constraint1 )
 		where
-			String() := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-	
-	get-type-constraint:
-		([path, paths*], classname, methodname) 
-			-> And(In(path, IntExtent()), constraint1 )
-		where
-			Int() := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
+			BasicType(t) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname);
+			typeExtent := <get-type-extent> t
 
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(SubsetEquals(path, StringExtent()), constraint1 )
+			-> And(Or(In(path, typeExtent), Equal(path, Null())), constraint1 )
 		where
-			Set(String()) := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-	
+			Optional(BasicType(t)) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname);
+			typeExtent := <get-type-extent> t
+			
+
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(SubsetEquals(path, IntExtent()), constraint1 )
+			-> And(SubsetEquals(path, typeExtent), constraint1 )
 		where
-			Set(Int()) := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-
+			Set(BasicType(t)) := <resolve-path-type>(classname, path, (classname, methodname));
+			constraint1 := <get-type-constraint>([paths*], classname, methodname);
+			typeExtent := <get-type-extent> t
+	
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
 			-> And(In(path, PathStart(name1, None())), constraint1 )
@@ -201,13 +196,6 @@ imports
 		where
 			Class(name1) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-
-	/*get-type-constraint:
-		([path, paths*], classname, methodname, abm) 
-			-> True()
-		where
-			log(|Error(), "get-type-constraint nightmare", <resolve-path-type>(classname, path, methodname));
-			log(|Error(), "get-type-constraint nightmare", [paths*]) */ 
 			
 				
 										
@@ -258,50 +246,6 @@ imports
 			
 			
 			
-	get-type-constraint:
-		([], classname, methodname) -> True()
-		
-	get-type-constraint:
-		([path, paths*], classname, methodname) 
-			-> And(In(path, StringExtent()), constraint1 )
-		where
-			String() := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-	
-	get-type-constraint:
-		([path, paths*], classname, methodname) 
-			-> And(In(path, IntExtent()), constraint1 )
-		where
-			Int() := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-
-	get-type-constraint:
-		([path, paths*], classname, methodname) 
-			-> And(In(path, PathStart(name1, None())), constraint1 )
-		where
-			Optional(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-
-	get-type-constraint:
-		([path, paths*], classname, methodname) 
-			-> And(SubsetEquals(path, PathStart(name1, None())), constraint1 )
-		where
-			Set(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-
-	get-type-constraint:
-		([path, paths*], classname, methodname) 
-			-> And(In(path, PathStart(name1, None())), constraint1 )
-		where
-			Class(name1) := <resolve-path-type>(classname, path, (classname, methodname));
-			constraint1 := <get-type-constraint>([paths*], classname, methodname)
-
-	/*get-type-constraint:
-		([path, paths*], classname, methodname, abm) 
-			-> True()
-		where
-			log(|Error(), "get-type-constraint nightmare", <resolve-path-type>(classname, path, methodname));
-			log(|Error(), "get-type-constraint nightmare", [paths*]) */ 
 			
 			
 	lookup-invariants:
@@ -348,14 +292,14 @@ imports
 
 	get-mult-constraint:
 		(path, att)
-			-> GreaterThanEquals(Cardinality(path), Integer(min))
+			-> GreaterThanEquals(Cardinality(path), BasicValue(Integer(min)))
 		where
 			"*" := <lookup-max-mult> att ;
 			min := <lookup-min-mult> att
 
 	get-mult-constraint:
 		(path, att)
-			-> And(LessThanEquals(Cardinality(path), Integer(max)), GreaterThanEquals(Cardinality(path), Integer(min)))
+			-> And(LessThanEquals(Cardinality(path), BasicValue(Integer(max))), GreaterThanEquals(Cardinality(path), Integer(min)))
 		where
 			max := <lookup-max-mult> att;
 			min := <lookup-min-mult> att

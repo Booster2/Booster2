@@ -7,6 +7,7 @@ imports
   library/constraint
   library/relation
   library/expression
+  library/basicTypes
   
  rules
  	
@@ -17,12 +18,9 @@ imports
 		constrains.			
 */		
 	get-mentioned-attributes:
-		(name, maybename, Integer(i))
+		(name, maybename, BasicValue(t))
 			-> []
 			
-	get-mentioned-attributes:
-		(name, maybename, String(s))
-			-> []
 
 	get-mentioned-attributes:
 		(name, maybename, IntExtent())
@@ -30,6 +28,10 @@ imports
 
 	get-mentioned-attributes:
 		(name, maybename, StringExtent())
+			-> []
+
+	get-mentioned-attributes:
+		(name, maybename, DateTimeExtent())
 			-> []
 
 	get-mentioned-attributes:
@@ -115,11 +117,7 @@ imports
 
 
 	is-old:
-		Integer(i) 
-			-> True()
-
-	is-old:
-		String(s) 
+		BasicValue(t) 
 			-> True()
 			
 	is-old:
@@ -128,6 +126,10 @@ imports
 
 	is-old:
 		StringExtent()
+			-> True()
+
+	is-old:
+		DateTimeExtent()
 			-> True()
 			
 	is-old:
@@ -269,8 +271,8 @@ imports
 */
 
 	get-expression-type:
-		(Integer(i), classname, methodname)
-			-> Int()
+		(BasicValue(t), classname, methodname)
+			-> <get-corresponding-booster-type> t
 
 	get-expression-type:
 		(String(s), classname, methodname)
@@ -285,12 +287,8 @@ imports
 		(path, path, expression)
 		 	-> expression
 	substitute:
-		(Integer(i), path, expression)
-		 	-> Integer(i)
-
-	substitute:
-		(String(s), path, expression)
-		 	-> String(s)
+		(BasicValue(t), path, expression)
+		 	-> BasicValue(t)
 		 	
 	substitute:
 		(StringExtent(), path, expression)
@@ -299,6 +297,10 @@ imports
 	substitute:
 		(IntExtent(), path, expression)
 			-> IntExtent()
+
+	substitute:
+		(DateTimeExtent(), path, expression)
+			-> DateTimeExtent()
 			
 	substitute:
 		(Null(), path, expression)
@@ -430,14 +432,7 @@ imports
 	resolve-path-type:
 		(arg1, arg2, arg3)
 			-> <resolve-path-type> (arg1, arg2, arg3, [])
-			
-				
-/*	resolve-path-type:
-		somethingelse
-			-> Int()
-		where
-			log(|Error(), "cannot resolve path type", somethingelse)
-*/			
+					
 
 /* 	make-old:
 		Takes an expression, and returns its representation in the
@@ -445,12 +440,8 @@ imports
 */
 
 	make-old:
-		Integer(i) 
-			-> Integer(i)
-
-	make-old:
-		String(s) 
-			-> String(s)
+		BasicValue(t)
+			-> BasicValue(t)
 			
 	make-old:
 		IntExtent()
@@ -459,6 +450,10 @@ imports
 	make-old:
 		StringExtent()
 			-> StringExtent()
+
+	make-old:
+		DateTimeExtent()
+			-> DateTimeExtent()
 			
 	make-old:
 		Null()
@@ -521,12 +516,8 @@ imports
 */
 
 	make-post-state:
-		Integer(i) 
-			-> Integer(i)
-
-	make-post-state:
-		String(s) 
-			-> String(s)
+		BasicValue(t) 
+			-> BasicValue(t)
 			
 	make-post-state:
 		IntExtent()
@@ -535,6 +526,10 @@ imports
 	make-post-state:
 		StringExtent()
 			-> StringExtent()
+
+	make-post-state:
+		DateTimeExtent()
+			-> DateTimeExtent()
 			
 	make-post-state:
 		Null()

@@ -27,12 +27,8 @@ imports
 
 
 	insert-this:
-		(Integer(i), classname) 
-			-> Integer(i)
-
-	insert-this:
-		(String(s) , classname)
-			-> String(s)
+		(BasicValue(t), classname) 
+			-> BasicValue(t)
 			
 	insert-this:
 		(IntExtent(), classname)
@@ -97,12 +93,9 @@ imports
 	
 
 	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Integer(i))
-			-> (True(), Integer(i))
+		(thisclassname, otherclassname, attname, BasicValue(t))
+			-> (True(), BasicValue(t))
 			
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, String(s))
-			-> (True(), String(s))
 			
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, IntExtent())

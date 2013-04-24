@@ -8,6 +8,7 @@ imports
  
   library/abstractBoosterModel
   library/valueExpression
+  library/basicTypes
  
  rules
  	
@@ -78,20 +79,19 @@ imports
 			types1 := <deduce-types> (classname, methodname, expr1, alreadyknown );
 			types2 := <deduce-types> (classname, methodname, expr2, types1)
 
-
 	deduce-types:
 		(classname, methodname, Equal(expr1, expr2), alreadyknown)
 		 	-> types2
 		where
-			(Int(), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
-			(Int(), types2) := <deduce-types> (classname, methodname, expr2, types1)
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr2, types1)
 
-	deduce-types:
+deduce-types:
 		(classname, methodname, Equal(expr1, expr2), alreadyknown)
 		 	-> types2
 		where
-			(String(), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
-			types2 := <infer-type> (classname, methodname, expr2, String(), types1)
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			types2 := <infer-type> (classname, methodname, expr2, BasicType(t), types1)
 
 	
 	deduce-types:
@@ -108,14 +108,22 @@ imports
 			<equal>(a, <lookup-class-name>(a))
 
 	deduce-types:
+		(classname, methodname, This(), [alreadyknown*])
+			-> (Class(classname), [(Input("this"), Class(classname)), alreadyknown*])
+			
+			
+
+	deduce-types:
 		(classname, methodname, Output(name), alreadyknown)
 			-> (type, alreadyknown)
 		where
 			type := <lookup>(Output(name), alreadyknown)
 
 	deduce-types:
-		(classname, methodname, Integer(i), alreadyknown)
-			-> (Int(), alreadyknown)
+		(classname, methodname, BasicValue(t), alreadyknown)
+			-> (t', alreadyknown)
+			where
+				t' := <get-corresponding-booster-type> t
 
 
 	deduce-types:
@@ -146,7 +154,7 @@ imports
 			->[(Input(name), type1), alreadyknown*]
 			
 
-	deduce-types:
+/*	deduce-types:
 		something
 			-> []
 		where
@@ -157,7 +165,7 @@ imports
 			-> []
 		where
 			log(|Error(), "Error in infer-type", something)				
-			
+*/			
 		
 		 	
 		 	

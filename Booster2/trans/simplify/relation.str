@@ -15,15 +15,15 @@ rules
 			-> True()
 	
 	simplify:
-		LessThanEquals(Plus(a, Integer(i)), Integer(j))
-			-> LessThanEquals(a, Integer(k))
+		LessThanEquals(Plus(a, BasicValue(Integer(i))), BasicValue(Integer(j)))
+			-> LessThanEquals(a, BasicValue(Integer(k)))
 		where
 			k := <subt>(j,i)
 
 
 	simplify:
-		GreaterThanEquals(Plus(a, Integer(i)), Integer(j))
-			-> GreaterThanEquals(a, Integer(k))
+		GreaterThanEquals(Plus(a, BasicValue(Integer(i))), BasicValue(Integer(j)))
+			-> GreaterThanEquals(a, BasicValue(Integer(k)))
 		where
 			k := <subt>(j,i)
 
