@@ -1,0 +1,59 @@
+System(
+  "TypeTest"
+, [ SetDef(
+      "DaysOfWeek"
+    , ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    )
+  , Class(
+      "mainClass"
+    , [ Methods(
+          [Method(
+             "changeName"
+           , Equal(PathStart("att1", Some(Primed())), Input("a"))
+           )]
+        )
+      , Attributes(
+          [ Attribute("att1", Identity(), BasicType(String()))
+          , Attribute("att2", BasicType(Int()))
+          , Attribute("att3", UniDirectional("DaysOfWeek"))
+          , Attribute("att4", UniDirectional("secondaryClass"))
+          , Attribute("att5", BiDirectional("secondaryClass", "attA"))
+          , Attribute("att6", BiDirectional("secondaryClass", "attB"))
+          , Attribute("att7", BiDirectional("secondaryClass", "attC"))
+          , Attribute("att8", Optional(BasicType(String())))
+          , Attribute("att9", Optional(BasicType(Int())))
+          , Attribute("att10", Optional(UniDirectional("DaysOfWeek")))
+          , Attribute("att11", Optional(UniDirectional("secondaryClass")))
+          , Attribute("att12", Optional(BiDirectional("secondaryClass", "attD")))
+          , Attribute("att13", Optional(BiDirectional("secondaryClass", "attE")))
+          , Attribute("att14", Optional(BiDirectional("secondaryClass", "attF")))
+          , Attribute("att15", Set(BasicType(String()), MultAny()))
+          , Attribute("att16", Set(BasicType(Int()), MultAny()))
+          , Attribute("att17", Set(UniDirectional("DaysOfWeek"), MultAny()))
+          , Attribute("att18", Set(UniDirectional("secondaryClass"), MultAny()))
+          , Attribute("att19", Set(BiDirectional("secondaryClass", "attG"), MultAny()))
+          , Attribute("att20", Set(BiDirectional("secondaryClass", "attH"), MultAny()))
+          , Attribute("att21", Set(BiDirectional("secondaryClass", "attI"), MultAny()))
+          ]
+        )
+      ]
+    )
+  , Class(
+      "secondaryClass"
+    , [ Attributes(
+          [ Attribute("name", Identity(), BasicType(String()))
+          , Attribute("attA", BiDirectional("mainClass", "att5"))
+          , Attribute("attB", Optional(BiDirectional("mainClass", "att6")))
+          , Attribute("attC", Set(BiDirectional("mainClass", "att7"), MultAny()))
+          , Attribute("attD", BiDirectional("mainClass", "att12"))
+          , Attribute("attE", Optional(BiDirectional("mainClass", "att13")))
+          , Attribute("attF", Set(BiDirectional("mainClass", "att14"), MultAny()))
+          , Attribute("attG", BiDirectional("mainClass", "att19"))
+          , Attribute("attH", Optional(BiDirectional("mainClass", "att20")))
+          , Attribute("attI", Set(BiDirectional("mainClass", "att21"), MultAny()))
+          ]
+        )
+      ]
+    )
+  ]
+)

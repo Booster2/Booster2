@@ -1,0 +1,60 @@
+module library/basicTypes
+
+imports
+  include/Booster2
+    
+ 
+ rules
+
+/* Spoofax Basic Values */
+
+	get-corresponding-booster-type:
+		Integer(i) -> Int()
+
+	get-corresponding-booster-type:
+		String(s) -> String()
+
+
+/* Integer */
+
+	get-type-extent:
+		Int() -> IntExtent()
+		
+	get-type-booster-notation:
+		Int() -> $[INT]
+		
+	get-type-booster-to-sql:
+		Int() -> Int()	
+		
+	get-type-name-for-metadata:
+		Int() -> "Integer"	
+
+
+/* String */
+
+	get-type-extent:
+		String() -> StringExtent()
+		
+	get-type-booster-notation:
+		String() -> $[STRING]
+
+	get-type-booster-to-sql:
+		String() -> Varchar(1000)
+		
+	get-type-name-for-metadata:
+		String() -> "String"
+
+/* String */
+
+	get-type-extent:
+		DateTime() -> DateTimeExtent()
+		
+	get-type-booster-notation:
+		DateTime() -> $[DATETIME]
+
+	get-type-booster-to-sql:
+		DateTime() -> Datetime()
+		
+	get-type-name-for-metadata:
+		DateTime() -> "DateTime"
+		

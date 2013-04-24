@@ -89,7 +89,8 @@ public class ClassList extends HttpServlet {
 			}
 		}catch(Exception e)
 		{
-			System.err.print(e.getStackTrace());
+			e.printStackTrace(System.err);
+			//System.err.print(e.getStackTrace());
 			response.getOutputStream().println("Error in getting class list from database;");
 		}
 		

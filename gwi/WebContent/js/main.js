@@ -21,6 +21,7 @@ function Attribute(objectItem) {
     self.attTypeMult = ko.observable(objectItem.attTypeMult);
     self.stringValues = ko.observableArray(objectItem.stringValues);
     self.intValues = ko.observableArray(objectItem.intValues);
+    self.dateTimeValues = ko.observableArray(objectItem.dateTimeValues);
     self.setValues = ko.observableArray(objectItem.setValues);
     self.oidValues = ko.observableArray(objectItem.oidValues);
     self.objDescs = ko.observableArray(objectItem.objDescs);

@@ -119,6 +119,11 @@ public class ObjectView extends HttpServlet {
 						JSONArray intValues = (JSONArray) jsono.get("intValues");
 						intValues.add(rs.getInt("INT_VALUE"));
 					}
+					else if("DateTime".equalsIgnoreCase(attPrimType))
+					{
+						JSONArray dateTimeValues = (JSONArray) jsono.get("dateTimeValues");
+						dateTimeValues.add(rs.getTimestamp("DATETIME_VALUE"));
+					}
 					else if("SetValue".equalsIgnoreCase(attPrimType))
 					{
 						JSONArray setValues = (JSONArray) jsono.get("setValues");
@@ -137,6 +142,7 @@ public class ObjectView extends HttpServlet {
 					obj = new JSONObject();
 					JSONArray intValues = new JSONArray();
 					JSONArray stringValues = new JSONArray();
+					JSONArray dateTimeValues = new JSONArray();
 					JSONArray setValues = new JSONArray();
 					JSONArray oidValues = new JSONArray();
 					JSONArray objDescs = new JSONArray();
@@ -153,6 +159,10 @@ public class ObjectView extends HttpServlet {
 					{
 						stringValues.add(rs.getString("STRING_VALUE"));
 					}
+					else if("DateTime".equalsIgnoreCase(attPrimType))
+					{
+						dateTimeValues.add(rs.getString("DATETIME_VALUE"));
+					}
 					else if("SetValue".equalsIgnoreCase(attPrimType))
 					{
 						setValues.add(rs.getString("SET_VALUE"));
@@ -165,6 +175,7 @@ public class ObjectView extends HttpServlet {
 					
 					obj.put("intValues", intValues);
 					obj.put("stringValues", stringValues);
+					obj.put("dateTimeValues", dateTimeValues);
 					obj.put("setValues", setValues);
 					obj.put("oidValues", oidValues);
 					obj.put("objDescs", objDescs);

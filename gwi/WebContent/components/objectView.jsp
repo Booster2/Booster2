@@ -57,6 +57,14 @@
 							(No. of values: <span data-bind="text: intValues().length"></span>)
 						</span>
 					</span>
+					<span data-bind="if: attPrimType() == 'DateTime'">
+						<!-- ko foreach: dateTimeValues() -->
+							<span data-bind="text: $data"></span><br/>
+					    <!-- /ko -->
+						<span data-bind="if: attTypeMult()=='Set'" class="noValues">
+							(No. of values: <span data-bind="text: dateTimeValues().length"></span>)
+						</span>
+					</span>
 					<span data-bind="if: attPrimType() == 'SetValue'">
 						<!-- ko foreach: setValues() -->
 							<span data-bind="text: $data"></span><br/>
