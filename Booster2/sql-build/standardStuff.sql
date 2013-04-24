@@ -326,3 +326,27 @@ CREATE PROCEDURE `METHOD_PARAMS` ( className_in VARCHAR(500),  methodName_in VAR
   END;
 $$
 
+DELIMITER ;
+drop procedure if exists `GET_OBJECT_BROWSE_LOCATION`;
+DELIMITER $$
+CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(500), Id_in INT)
+	BEGIN
+		
+		SET @tableName = (SELECT tableName FROM _Meta_Classes WHERE className = className_in);  
+		SET @idName = CONCAT(@tableName, "ID");
+		
+		SET @SQL_TXT = CONCAT("select ", 
+				"(select min(",@idName,") from ",@tableName," where ",@idName," > ", Id_in, ") as next,", 
+				"(select max(",@idName,") from ",@tableName," where ",@idName," < ", Id_in, ") as prev,",
+				"(select min(",@idName,") from ",@tableName,") as first,",
+				"(select max(",@idName,") from ",@tableName,") as last"); 
+    	
+		IF(@SQL_TXT is not null ) THEN
+        	PREPARE stmt_name FROM @SQL_TXT;
+        	EXECUTE stmt_name;
+        	DEALLOCATE PREPARE stmt_name;
+    	END IF;
+  	END;
+ $$
+
+

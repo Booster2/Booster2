@@ -3,6 +3,7 @@ package ox.softeng.booster;
 import java.sql.Connection;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import ox.softeng.gwi.SignIn;
 
@@ -27,7 +28,7 @@ public class UIHelper {
 		if(needToSignIn)
 		{
 			try{
-				String filename = "/Users/james/git/booster2/gwi/xml/dbConfig.xml"; 
+				String filename = request.getServletContext().getRealPath("/WEB-INF/dbConfig.xml");
 				client = SignIn.signIn(filename);
 				//String username = client.getMetaData().getUserName();
 				//String dbname = client.getMetaData().getDatabaseProductName();

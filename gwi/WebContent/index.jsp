@@ -31,6 +31,7 @@
       }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
 	<link href="css/main.css" rel="stylesheet">
 	
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -72,7 +73,7 @@
         </div>
       </div>
     </div>
-	<div id="bodyDiv">
+	<div class="container">
 		<jsp:include page="components/classList.jsp" />
 		<jsp:include page="components/classSearch.jsp" />
 		<jsp:include page="components/objectView.jsp" />

@@ -2,10 +2,33 @@
 
 
 <div data-bind="if: showingClassName() != null && showingObjectID() != null">
-		<h3 style="float: left; " data-bind="text: objectDescription()"></h3>
-		<h3 style="float: right; color: #999999" data-bind="text: showingClassName().unCamelCase()"></h3>
 
+    <div class="navbar">
+    	<div class="navbar-inner">
+   			<table style="width: 100%;">
+   				<tr>
+   					<td style="width: 12em; text-align: left;">
+   						<button type="button" class="btn" data-bind="disable: objectFirst() == 0 || objectFirst() == showingObjectID(), click : function() { browse($root, 'first'); } "><i class="icon-fast-backward"></i></button>
+						&nbsp;
+						<button type="button" class="btn" data-bind="disable: objectPrev() == 0, click : function() { browse($root, 'prev'); } "><i class="icon-play icon-rotate180"></i></button>
+   					</td>
+   					<td style="text-align: center;">
+   						<h5 style="color: #999999">Browse : <span data-bind="text: showingClassName().unCamelCase()"></span></h5>
+						<h4 data-bind="text: objectDescription()"></h4>
+   					</td>
+   					<td style="width: 12em; text-align: right;">
+   						<button type="button" class="btn" data-bind="disable: objectNext() == 0, click : function() { browse($root, 'next'); } "><i class="icon-play"></i></button>
+						&nbsp;
+						<button type="button" class="btn" data-bind="disable: objectLast() == 0 || objectLast() == showingObjectID(), click : function() {browse($root, 'last');} "><i class="icon-fast-forward"></i></button>
+   					</td>
+ 				</tr>
+   			</table>
+     	</div>
+    </div>
 
+<!-- 	<h4 style="float: left; "></h4>
+	<h4 style="float: right; " ></h4> -->
+		
 		<ul class="methods" data-bind="foreach: objectMethods">
 			<li>
 				<a class="method-button" data-bind="text: methodName().unCamelCase(), attr: { href: '#objectmethod/' + $parent.showingClassName() + '/' + $parent.showingObjectID() + '/' + methodName() }"></a>

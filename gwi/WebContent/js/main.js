@@ -53,6 +53,10 @@ function BoosterViewModel() {
 	self.objectAttributes = ko.observableArray();
 	self.objectDescription = ko.observable();
 	self.objectMethods = ko.observableArray();
+	self.objectPrev = ko.observable();
+	self.objectNext = ko.observable();
+	self.objectLast = ko.observable();
+	self.objectFirst = ko.observable();
 	self.methodName = ko.observable();
 	self.className = ko.observable();
 	self.methodParams = ko.observableArray();
@@ -78,6 +82,10 @@ function BoosterViewModel() {
                 self.objectAttributes(mappedAttributes);
                 self.objectDescription(allData.description);
                 self.objectMethods(mappedMethods);
+                self.objectPrev(allData.prev);
+                self.objectNext(allData.next);
+                self.objectLast(allData.last);
+                self.objectFirst(allData.first);
             });
             self.showingClassName(this.params.className);
             self.showingObjectID(this.params.objectID);
@@ -138,7 +146,9 @@ function BoosterViewModel() {
             });
              
         });
-    }).run('#classList');    
+    }).run('#classList');  
+    
+
 };
 
 $(function(){
@@ -146,6 +156,25 @@ $(function(){
 	ko.applyBindings(new BoosterViewModel());
 	
 });
+
+function browse(self, move){
+	var oid = 0;
+	if(move=='first'){
+		oid = self.objectFirst();    		 
+	}
+	else if(move=='prev'){
+		oid = self.objectPrev();    		 
+	}
+	else if(move=='next'){
+		oid = self.objectNext();    		 
+	}
+	else if(move=='last'){
+		oid = self.objectLast();    		 
+	}
+	var url = '#object/' + self.showingClassName() + '/' + oid;
+	window.location.hash = url;
+}
+
 
 function prepareMethod(self)
 {
@@ -202,8 +231,8 @@ function prepareMethod(self)
 
 function unprepareMethod(self)
 {
-	console.log(self);
-	console.log('method return url: ' + self.methodReturnUrl());
+	//console.log(self);
+	//console.log('method return url: ' + self.methodReturnUrl());
 	window.location.hash = self.methodReturnUrl();
 }
 
@@ -226,6 +255,11 @@ function resetObservables(self, type)
 		self.objectAttributes(null);
 		self.objectDescription(null);
 		self.objectMethods(null);
+		self.objectPrev(null);
+		self.objectNext(null);
+		self.objectLast(null);
+		self.objectFirst(null);
+		
 	}
 	
 	if(type != 'methodview')

@@ -66,6 +66,27 @@ public class ObjectView extends HttpServlet {
 			e.printStackTrace(System.err);
 			response.getOutputStream().println("Error in getting object view (description / id) from database");
 		}
+		try{
+			PreparedStatement ps = client.prepareStatement("call `GET_OBJECT_BROWSE_LOCATION`(?,?)");
+			ps.setString(1, className);
+			ps.setInt(2, objectID);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+			{
+				result.put("prev",rs.getInt("prev"));
+				result.put("next",rs.getInt("next"));
+				result.put("first",rs.getInt("first"));
+				result.put("last",rs.getInt("last"));
+				
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace(System.err);
+			response.getOutputStream().println("Error in getting object browse location from database");
+		}
+		
+		
 		
 		JSONArray jsonArray = new JSONArray();
 		JSONObject obj = new JSONObject();
