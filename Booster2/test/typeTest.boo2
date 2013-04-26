@@ -31,6 +31,8 @@ class mainClass{
 		att21 : SET(secondaryClass . attI)[*] 
 
 		att22 : DATETIME
+		att23 : [DATETIME]
+		att24 : SET(DATETIME)[*]
 
 }
 

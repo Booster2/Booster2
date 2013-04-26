@@ -580,8 +580,8 @@ imports
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
 				Class(tablename) := <resolve-path-type>(classname, path', (classname, progname));
-				expr' := <booster-to-relational-expression> (expr, classname);
-				expr'' := <booster-path-to-where-clause> (path, classname)
+				expr' := <booster-to-relational-expression> (classname, progname, expr);
+				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(path, expr))
@@ -591,8 +591,8 @@ imports
 				attname := <get-path-attribute-name>(path);
 				path' := <get-path-initial-path>(path);
 				Optional(Class(tablename)) := <resolve-path-type>(classname, path', (classname, progname));
-				expr' := <booster-to-relational-expression> (expr, classname);
-				expr'' := <booster-path-to-where-clause> (path, classname)
+				expr' := <booster-to-relational-expression> (classname, progname, expr);
+				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
 	booster-to-relational-guarded-command:
 		(classname, progname, New(obj, cls))
@@ -601,13 +601,13 @@ imports
 		
 
 
-	booster-to-relational-guarded-command:
+/*	booster-to-relational-guarded-command:
 		(classname, progname, Guard(const, gc))
 			-> []
 		where
 			[] := <booster-to-relational-guarded-command> (classname, progname, gc);
 			expr' := <booster-to-relational-constraint> (classname, progname, const)
-
+*/
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Guard(const, gc))
@@ -689,70 +689,63 @@ imports
 			const2' := <booster-to-relational-constraint> (classname, progname, const2)
 
 	booster-to-relational-constraint:
-		(classname, progname, Equal(expr1, expr2))
+		(classname, progname, BinRel(expr1, Equal(), expr2))
 			-> Equal(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (expr1, classname);
-			expr2' := <booster-to-relational-expression> (expr2, classname)
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, NotEqual(expr1, expr2))
+		(classname, progname, BinRel(expr1, NotEqual(), expr2))
 			-> NotEqual(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (expr1, classname);
-			expr2' := <booster-to-relational-expression> (expr2, classname)
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
+			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, In(expr1, StringExtent()))
-			-> True()
-
-	booster-to-relational-constraint:
-		(classname, progname, In(expr1, IntExtent()))
-			-> True()
-
-	booster-to-relational-constraint:
-		(classname, progname, In(expr1, DateTimeExtent()))
+		(classname, progname, BinRel(expr1, In(), TypeExtent(t)))
 			-> True()
 
 
 
+
 	booster-to-relational-constraint:
-		(classname, progname, In(expr1, expr2))
+		(classname, progname, BinRel(expr1, In(), expr2))
 			-> InSet(expr1', None(), expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, NotIn(expr1, expr2))
+		(classname, progname, BinRel(expr1, NotIn(), expr2))
 			-> InSet(expr1', Not(), expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, LessThan(expr1, expr2))
+		(classname, progname, BinRel(expr1, LessThan(), expr2))
 			-> LessThan(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, GreaterThan(expr1, expr2))
+		(classname, progname, BinRel(expr1, GreaterThan(), expr2))
 			-> GreaterThan(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, LessThanEquals(expr1, expr2))
+		(classname, progname, BinRel(expr1, LessThanEquals(), expr2))
 			-> LessThanEqual(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-constraint:
-		(classname, progname, GreaterThanEquals(expr1, expr2))
+		(classname, progname, BinRel(expr1, GreaterThanEquals(), expr2))
 			-> GreaterThanEqual(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
@@ -768,47 +761,44 @@ imports
 			log(|Error(), "cannot convert constraint", constraint)
 
 	booster-to-relational-expression:
-		(BasicValue(String(str)),cname)
+		(classname, progname, BasicValue(String(str)))
 			-> String(str)
 
 	booster-to-relational-expression:
-		(BasicValue(Integer(i)),cname)
+		(classname, progname, BasicValue(Integer(i)))
 			-> Int(i)
 
 	booster-to-relational-expression:
-		(StringExtent(),cname)
+		(classname, progname, TypeExtent(t))
+			-> Null()
+
+
+	booster-to-relational-expression:
+		(classname, progname, Null())
 			-> Null()
 
 	booster-to-relational-expression:
-		(IntExtent(),cname)
-			-> Null()
-
-	booster-to-relational-expression:
-		(Null(),cname)
-			-> Null()
-
-	booster-to-relational-expression:
-		(SetExtent(exprs),cname)
+		(classname, progname, SetExtent(exprs))
 			-> SetExpression(exprs)
 
 	booster-to-relational-expression:
-		(Input(n), cname)
+		(classname, progname, Input(n))
 			-> SystemVariable(n)
 
 	booster-to-relational-expression:
-		(Output(n), cname)
+		(classname, progname, Output(n))
 			-> SystemVariable(n)
 
 	booster-to-relational-expression:
-		(This(), cname)
+		(classname, progname, This())
 			-> SystemVariable("this")
 
 	booster-to-relational-expression:
-		(ThisPrimed(), cname)
+		(classname, progname, ThisPrimed())
 			-> Null()
 			
 	booster-to-relational-expression:
-		(Path(p, PathComponent(name, maybePrimed)), cname)
+		(classname, progname, Path(p, PathComponent(name, maybePrimed)))
 		// select name from class where classId = expr
 			-> Select([], [ColumnName(name)], Some(FromPart([TableName(c)])), 
 						  Where(Equal(expr, ColumnName(<concat-strings>[c, "Id"]))), 
@@ -820,36 +810,36 @@ imports
 						  None(), 
 						  None())
 		where
-			Class(c) := <resolve-path-type> (cname, p, None());
-			expr :=  <booster-to-relational-expression> (p, cname)
+			Class(c) := <resolve-path-type> (classname, p, None());
+			expr :=  <booster-to-relational-expression> (classname, progname, p)
 				 				
 
 
 
 
 	booster-to-relational-expression:
-		(classname, progname, Plus(expr1, expr2))
+		(classname, progname, BinOp(expr1, Plus(), expr2))
 			-> Plus(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-expression:
-		(classname, progname, Minus(expr1, expr2))
+		(classname, progname, BinOp(expr1, Minus(), expr2))
 			-> Minus(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-expression:
-		(classname, progname, Times(expr1, expr2))
+		(classname, progname, BinOp(expr1, Times(), expr2))
 			-> Multiply(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
 
 	booster-to-relational-expression:
-		(classname, progname, Divide(expr1, expr2))
+		(classname, progname, BinOp(expr1, Divide(), expr2))
 			-> Divide(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
@@ -864,23 +854,23 @@ imports
 
 
 	booster-path-to-where-clause:
-		(Path(p, PathComponent(name, None())), classname)
+		(classname, progname, Path(p, PathComponent(name, None())))
 			-> Equal(expr, ColumnName(<concat-strings>[classname, "Id"]))
 		where 
-			expr := <booster-to-relational-expression> (p,classname)
+			expr := <booster-to-relational-expression> (classname, progname, p)
 	
 	
 	
 	booster-path-to-where-clause:
-		(Output(n), classname)
+		(classname, progname, Output(n))
 			-> True()
 
 	booster-path-to-where-clause:
-		(This(), classname)
+		(classname, progname, This())
 			-> True()
 
 	booster-path-to-where-clause:
-		(ThisPrimed(), classname)
+		(classname, progname, ThisPrimed())
 			-> True()
 	
 	

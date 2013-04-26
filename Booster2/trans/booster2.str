@@ -14,8 +14,8 @@ imports
   translate/sql/abstractBoosterModel
   translate/sql/sql
   
-  simplify/guardedCommand
-
+  simplify/main
+  
 rules // Main editor interface (defined by editor/Booster-Builders and -References.esv)
   
   // Analyzes the current program, returning a tuple with errors, warnings, and notes;
@@ -87,28 +87,29 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    	 with
    		filename := <guarantee-extension(|"expanded.booster")> path;
    		result :=  <output-to-booster>  
-   				   <innermost(simplify)>
-   				  
-   				  <compile>
-	 				<elaborate>
+   				  <simplify-main>
+   				  	<compile>
+	   				   
+		 				<elaborate>
    				          <parse> 
    				            selected
+   	   				
 
-	expand-booster:
+	/*expand-booster:
 		m -> <output-to-booster>
    				  <innermost(simplify)>
    				  
    				  <compile> 
 	 				<elaborate>
    				          <parse> 
-   				            m
+   				            m */
 
 
    booster-to-sql:
    	(selected, position, ast, path, project-path) -> (filename, result)
    	 with
    		filename := <guarantee-extension(|"sql")> path;
-		simplifiedCompiledModel := <innermost(simplify)>
+		simplifiedCompiledModel := <simplify-main>
    				  						<compile> 
    				  						  <elaborate>
    				          					<parse> 

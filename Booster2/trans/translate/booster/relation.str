@@ -3,6 +3,8 @@ module translate/booster/relation
 imports
   include/Booster2
   
+  library/binRel
+  
   translate/booster/expression
   translate/booster/valueExpression
  
@@ -12,86 +14,10 @@ imports
 */ 	
 
 	output-to-booster-constraint:
-		Equal(expr1, expr2)
-			-> $[[expr3] = [expr4]]
+		BinRel(expr1, rel, expr2)
+			-> $[[expr3] [rel'] [expr4]]
 		where
 			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
+			expr4 := <output-to-booster-expression> expr2;
+			rel' := <get-binrel-booster-notation> rel
 
-
-	output-to-booster-constraint:
-		NotEqual(expr1, expr2)
-			-> $[[expr3] /= [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		In(expr1, expr2)
-			-> $[[expr3] : [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		NotIn(expr1, expr2)
-			-> $[[expr3] /: [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		LessThan(expr1, expr2)
-			-> $[[expr3] < [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		GreaterThan(expr1, expr2)
-			-> $[[expr3] > [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		LessThanEquals(expr1, expr2)
-			-> $[[expr3] <= [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		GreaterThanEquals(expr1, expr2)
-			-> $[[expr3] >= [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		Subset(expr1, expr2)
-			-> $[[expr3] << [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		SubsetEquals(expr1, expr2)
-			-> $[[expr3] <<: [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		Superset(expr1, expr2)
-			-> $[[expr3] >> [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-constraint:
-		SupersetEquals(expr1, expr2)
-			-> $[[expr3] :>> [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2

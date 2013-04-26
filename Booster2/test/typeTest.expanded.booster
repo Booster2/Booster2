@@ -27,6 +27,8 @@ class mainClass {
 		att20 : set ( secondaryClass ) [ 0 .. * ]
 		att21 : set ( secondaryClass ) [ 0 .. * ]
 		att22 : DATETIME
+		att23 : [ DATETIME ]
+		att24 : set ( DATETIME ) [ 0 .. * ]
 		
 	invariant
 		true

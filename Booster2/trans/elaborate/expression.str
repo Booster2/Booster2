@@ -11,70 +11,20 @@ imports
 /* 	infer-type:
 		Description goes here	
 */
- 	
- 	infer-type:
- 		(classname, methodname, Plus(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+
+
+
 
  	infer-type:
- 		(classname, methodname, Minus(expr1, expr2), type, inorout)
+ 		(classname, methodname, BinOp(expr1, op, expr2), type, alreadyknown)
  			-> <union>(vars1, vars2)
  		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, alreadyknown);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, alreadyknown)
 
- 	infer-type:
- 		(classname, methodname, Times(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
 
- 	infer-type:
- 		(classname, methodname, Divide(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
 
- 	infer-type:
- 		(classname, methodname, Maximum(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
-
- 	infer-type:
- 		(classname, methodname, Minimum(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
-
- 	infer-type:
- 		(classname, methodname, Intersection(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
-
- 	infer-type:
- 		(classname, methodname, Union(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
-
- 	infer-type:
- 		(classname, methodname, Concat(expr1, expr2), type, inorout)
- 			-> <union>(vars1, vars2)
- 		with
- 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout);
- 			vars2 := <infer-type> (classname, methodname, expr2, type, inorout)
- 					
+  					
  	infer-type:
  		(classname, methodname, Head(expr1), type, inorout)
  			-> vars1
@@ -138,131 +88,21 @@ imports
 
 
 	insert-this:
-		(Plus(expr1, expr2), classname)
-			-> Plus(expr3, expr4)
+		(BinOp(expr1, op, expr2), classname)
+			-> BinOp(expr3, op, expr4)
 		where
 			expr3 := <insert-this> (expr1, classname);
 			expr4 := <insert-this> (expr2, classname)
 
-	insert-this:
-		(Minus(expr1, expr2), classname)
-			-> Minus(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Times(expr1, expr2), classname)
-			-> Times(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Divide(expr1, expr2), classname)
-			-> Divide(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Maximum(expr1, expr2), classname)
-			-> Maximum(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Minimum(expr1, expr2), classname)
-			-> Minimum(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Union(expr1, expr2), classname)
-			-> Union(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Intersection(expr1, expr2), classname)
-			-> Intersection(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Concat(expr1, expr2), classname)
-			-> Concat(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
 			
 
 	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Plus(expr1, expr2))
-			-> (And(constraint1, constraint2), Plus(expr3, expr4))
+		(thisclassname, otherclassname, attname, BinOp(expr1, op, expr2))
+			-> (And(constraint1, constraint2), BinOp(expr3, op, expr4))
 		where
 			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
 			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
 
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Minus(expr1, expr2))
-			-> (And(constraint1, constraint2), Minus(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Times(expr1, expr2))
-			-> (And(constraint1, constraint2), Times(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Divide(expr1, expr2))
-			-> (And(constraint1, constraint2), Divide(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Maximum(expr1, expr2))
-			-> (And(constraint1, constraint2), Maximum(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Minimum(expr1, expr2))
-			-> (And(constraint1, constraint2), Minimum(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Union(expr1, expr2))
-			-> (And(constraint1, constraint2), Union(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Intersection(expr1, expr2))
-			-> (And(constraint1, constraint2), Intersection(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Concat(expr1, expr2))
-			-> (And(constraint1, constraint2), Concat(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
 
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, Head(expr1))

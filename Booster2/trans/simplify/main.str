@@ -1,0 +1,20 @@
+module simplify/main
+
+imports
+  include/Booster2
+  
+  simplify/guardedCommand
+
+rules
+
+	simplify-main:
+		system -> system
+		with
+			simp-programs := <map(simp)> <ABM> "Programs"; 
+			rules(
+				ABM :+ "Programs" -> simp-programs
+			)
+			
+	simp:
+		((classname, progname), prog) 
+			-> ((classname, progname), <innermost(simplify)> prog)

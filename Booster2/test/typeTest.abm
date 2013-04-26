@@ -7,10 +7,11 @@ System(
   , Class(
       "mainClass"
     , [ Methods(
-          [Method(
-             "changeName"
-           , Equal(PathStart("att1", Some(Primed())), Input("a"))
-           )]
+          [ Method(
+              "changeName"
+            , BinRel(PathStart("att22", Some(Primed())), Equal(), Input("a"))
+            )
+          ]
         )
       , Attributes(
           [ Attribute("att1", Identity(), BasicType(String()))
@@ -34,6 +35,9 @@ System(
           , Attribute("att19", Set(BiDirectional("secondaryClass", "attG"), MultAny()))
           , Attribute("att20", Set(BiDirectional("secondaryClass", "attH"), MultAny()))
           , Attribute("att21", Set(BiDirectional("secondaryClass", "attI"), MultAny()))
+          , Attribute("att22", BasicType(DateTime()))
+          , Attribute("att23", Optional(BasicType(DateTime())))
+          , Attribute("att24", Set(BasicType(DateTime()), MultAny()))
           ]
         )
       ]

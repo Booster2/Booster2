@@ -1,0 +1,45 @@
+module library/binRel
+
+imports
+  include/Booster2
+    
+ 
+ rules
+
+	get-binrel-booster-notation:
+		Equal() -> $[=]
+		
+	get-binrel-booster-notation:
+		NotEqual() -> $[/=]
+
+	get-binrel-booster-notation:
+		In() -> $[:]
+		
+	get-binrel-booster-notation:
+		NotIn() -> $[/:]
+		
+	get-binrel-booster-notation:
+		LessThan() -> $[<]
+		
+	get-binrel-booster-notation:
+		GreaterThan() -> $[>]
+
+	get-binrel-booster-notation:
+		LessThanEquals() -> $[<=]
+
+	get-binrel-booster-notation:
+		GreaterThanEquals() -> $[>=]
+
+	get-binrel-booster-notation:
+		Subset() -> $[<<]
+
+	get-binrel-booster-notation:
+		SubsetEquals() -> $[<<:]
+
+	get-binrel-booster-notation:
+		Superset() -> $[>>]
+
+	get-binrel-booster-notation:
+		SupersetEquals() -> $[:>>]
+
+

@@ -2,6 +2,7 @@ module simplify/constraint
 
 imports
   include/Booster2
+
     
   	
 rules
@@ -69,30 +70,30 @@ rules
 			-> And(constraint1, constraint)
 			
 	simplify:
-		And(Equal(expression1, expression2), NotEqual(expression1, expression2))
+		And(BinRel(expression1, Equal(), expression2), BinRel(expression1, NotEqual(), expression2))
 			-> False()
 
 	simplify:
-		And(NotEqual(expression1, expression2), Equal(expression1, expression2))
+		And(BinRel(expression1, NotEqual(), expression2), BinRel(expression1, Equal(), expression2))
 			-> False()
 			
 	simplify:
 		Or(
 			And(
-				NotEqual(expression1, expression2),
-				NotEqual(expression1, expression3)),
-			Or(Equal(expression1, expression2),
-			   Equal(expression1, expression3)))
+				BinRel(expression1, NotEqual(), expression2),
+				BinRel(expression1, NotEqual(), expression3)),
+			Or(BinRel(expression1, Equal(), expression2),
+			   BinRel(expression1, Equal(), expression3)))
 		-> True()
 			
 	simplify:
 		Or(
 			And(
-				NotEqual(expression1, expression2),
-				NotEqual(expression1, expression3)),
+				BinRel(expression1, NotEqual(), expression2),
+				BinRel(expression1, NotEqual(), expression3)),
 			Or(
-				Equal(expression1, expression3),
-				Equal(expression1, expression2)))
+				BinRel(expression1, Equal(), expression3),
+				BinRel(expression1, Equal(), expression2)))
 		-> True()
 		
 	

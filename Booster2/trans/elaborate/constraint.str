@@ -2,6 +2,7 @@ module elaborate/constraint
 
 imports
   include/Booster2
+  
   elaborate/relation
   elaborate/expression
   elaborate/valueExpression
@@ -79,40 +80,77 @@ imports
 			types1 := <deduce-types> (classname, methodname, expr1, alreadyknown );
 			types2 := <deduce-types> (classname, methodname, expr2, types1)
 
+
 	deduce-types:
-		(classname, methodname, Equal(expr1, expr2), alreadyknown)
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
 		 	-> types2
 		where
 			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
 			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr2, types1)
 
-deduce-types:
-		(classname, methodname, Equal(expr1, expr2), alreadyknown)
+	deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr1, types1)
+
+
+    deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
 		 	-> types2
 		where
 			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
 			types2 := <infer-type> (classname, methodname, expr2, BasicType(t), types1)
 
-	
-	deduce-types:
-		(classname, methodname, In(expr1, expr2), alreadyknown)
+    deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
 		 	-> types2
 		where
-			(Set(type1), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown);
-			types2 := <infer-type> (classname, methodname, expr1, type1, types1)
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			types2 := <infer-type> (classname, methodname, expr1, BasicType(t), types1)
+	
 
+
+
+
+ 	deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr2, types1)
+
+ 	deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr1, types1)
+
+
+    deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			types2 := <infer-type> (classname, methodname, expr2, BasicType(t), types1)
+
+    deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			types2 := <infer-type> (classname, methodname, expr1, BasicType(t), types1)
+			
+			
 	deduce-types:
 		(classname, methodname, PathStart(a,maybeprimed), alreadyknown)
 			-> (Set(Class(a)), alreadyknown)
 		where
 			<equal>(a, <lookup-class-name>(a))
 
-	deduce-types:
-		(classname, methodname, This(), [alreadyknown*])
-			-> (Class(classname), [(Input("this"), Class(classname)), alreadyknown*])
-			
-			
-
+	
 	deduce-types:
 		(classname, methodname, Output(name), alreadyknown)
 			-> (type, alreadyknown)
@@ -121,9 +159,13 @@ deduce-types:
 
 	deduce-types:
 		(classname, methodname, BasicValue(t), alreadyknown)
-			-> (t', alreadyknown)
+			-> (BasicType(t'), alreadyknown)
 			where
 				t' := <get-corresponding-booster-type> t
+
+	deduce-types:
+		(classname, methodname, This(), alreadyknown)
+			->(Class(classname), <union>([(Input("this"), Class(classname))], alreadyknown))
 
 
 	deduce-types:
@@ -139,33 +181,15 @@ deduce-types:
 			-> (type2, newlyknown)
 		where
 			(type, newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
-			/*log(|Error(), "deduce-types-path", ((classname, Path(path,component), (classname, methodname), newlyknown)))
-			*/
 			type2 := <resolve-path-type>
 					(classname, Path(path,component), (classname, methodname), newlyknown)
+
 					
 
-	infer-type:
-		(classname, methodname, Output(name), type1, [alreadyknown*])
-			->[(Output(name), type1), alreadyknown*]
 
-	infer-type:
-		(classname, methodname, Input(name), type1, [alreadyknown*])
-			->[(Input(name), type1), alreadyknown*]
 			
 
-/*	deduce-types:
-		something
-			-> []
-		where
-			log(|Error(), "Error in deduce-types", something)				
-
-	infer-type:
-		something
-			-> []
-		where
-			log(|Error(), "Error in infer-type", something)				
-*/			
+			
 		
 		 	
 		 	

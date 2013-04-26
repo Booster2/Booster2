@@ -4,6 +4,7 @@ imports
   include/Booster2
   
   library/abstractBoosterModel
+  library/binOp
   
   translate/booster/valueExpression
   
@@ -39,64 +40,9 @@ imports
 
 
 	output-to-booster-expression:
-		Plus(expr1, expr2)
-			-> $[[expr3] + [expr4]]
+		BinOp(expr1, op, expr2)
+			-> $[[expr3] [op'] [expr4]]
 		where
 			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Minus(expr1, expr2)
-			-> $[[expr3] - [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Times(expr1, expr2)
-			-> $[[expr3] * [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Divide(expr1, expr2)
-			-> $[[expr3] / [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Maximum(expr1, expr2)
-			-> $[[expr3] max [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Minimum(expr1, expr2)
-			-> $[[expr3] min [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Union(expr1, expr2)
-			-> $[[expr3] \/ [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Intersection(expr1, expr2)
-			-> $[[expr3] /\ [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
-
-	output-to-booster-expression:
-		Concat(expr1, expr2)
-			-> $[[expr3] ++ [expr4]]
-		where
-			expr3 := <output-to-booster-expression> expr1;
-			expr4 := <output-to-booster-expression> expr2
+			expr4 := <output-to-booster-expression> expr2;
+			op' := <get-binop-booster-notation> op

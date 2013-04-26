@@ -2,10 +2,12 @@ module simplify/guardedCommand
 
 imports
   include/Booster2
-    
+
+  simplify/constraint
+  simplify/relation    
+  simplify/expression
   	
 rules
-
 
 	simplify:
 		Guard(e1, Guard(e2, p))

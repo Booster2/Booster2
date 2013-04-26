@@ -1,0 +1,593 @@
+Module(
+  "booster2"
+, [ Imports(
+      [ Import("libstratego-xtc")
+      , Import("lib/editor-common.generated")
+      , Import("check")
+      , Import("parse/main")
+      , Import("elaborate/main")
+      , Import("compile/main")
+      , Import("translate/booster/abstractBoosterModel")
+      , Import("translate/sql/abstractBoosterModel")
+      , Import("translate/sql/sql")
+      , Import("simplify/guardedCommand")
+      , Import("simplify/expression")
+      ]
+    )
+  , Rules(
+      [ SDefT(
+          "editor-analyze"{5321030}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple([Var("ast"{5321042}), Var("path"{5321043}), Var("project-path"{5321044})])
+              )
+            , NoAnnoList(
+                Tuple([Var("errors"{5321045}), Var("warnings"{5321046}), Var("notes"{5321047})])
+              )
+            , [ WithClause(
+                  Seq(
+                    CallT(SVar("editor-init"{5320845}), [], [])
+                  , Seq(
+                      CallT(SVar("analyze"{5320888}), [], [])
+                    , Seq(
+                        Assign(
+                          Var("errors"{5321045})
+                        , App(
+                            CallT(
+                              SVar("collect-all"{5319857})
+                            , [ CallT(SVar("constraint-error"{5320898}), [], [])
+                              , CallT(SVar("conc"{5320253}), [], [])
+                              ]
+                            , []
+                            )
+                          , Var("ast"{5321042})
+                          )
+                        )
+                      , Seq(
+                          Assign(
+                            Var("warnings"{5321046})
+                          , App(
+                              CallT(
+                                SVar("collect-all"{5319857})
+                              , [ CallT(SVar("constraint-warning"{5320904}), [], [])
+                                , CallT(SVar("conc"{5320253}), [], [])
+                                ]
+                              , []
+                              )
+                            , Var("ast"{5321042})
+                            )
+                          )
+                        , Assign(
+                            Var("notes"{5321047})
+                          , App(
+                              CallT(
+                                SVar("collect-all"{5319857})
+                              , [ CallT(SVar("constraint-note"{5320903}), [], [])
+                                , CallT(SVar("conc"{5320253}), [], [])
+                                ]
+                              , []
+                              )
+                            , Var("ast"{5321042})
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "generate-aterm"{5321031}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("selected"{5321048})
+                  , Var("position"{5321049})
+                  , Var("ast"{5321050})
+                  , Var("path"{5321051})
+                  , Var("project-path"{5321052})
+                  ]
+                )
+              )
+            , NoAnnoList(Tuple([Var("filename"{5321053}), Var("result"{5321054})]))
+            , [ WithClause(
+                  Seq(
+                    Assign(
+                      Var("filename"{5321053})
+                    , App(
+                        CallT(SVar("guarantee-extension"{5319671}), [], [NoAnnoList(Str("\"aterm\""))])
+                      , Var("path"{5321051})
+                      )
+                    )
+                  , Assign(Var("result"{5321054}), Var("selected"{5321048}))
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "editor-resolve"{5321032}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("node"{5321055})
+                  , Var("position"{5321056})
+                  , Var("ast"{5321057})
+                  , Var("path"{5321058})
+                  , Var("project-path"{5321059})
+                  ]
+                )
+              )
+            , Var("target"{5321061})
+            , [ WhereClause(
+                  Seq(
+                    BA(
+                      CallT(
+                        SVar("debug"{5319639})
+                      , [Build(NoAnnoList(Str("\"Resolve: \"")))]
+                      , []
+                      )
+                    , Var("node"{5321055})
+                    )
+                  , Seq(
+                      Assign(
+                        NoAnnoList(Op("Type"{5320878}, [Var("type"{5321060})]))
+                      , Var("node"{5321055})
+                      )
+                    , Assign(Var("target"{5321061}), Var("type"{5321060}))
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "editor-hover"{5321033}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("target"{5321062})
+                  , Var("position"{5321063})
+                  , Var("ast"{5321064})
+                  , Var("path"{5321065})
+                  , Var("project-path"{5321066})
+                  ]
+                )
+              )
+            , NoAnnoList(
+                StringQuotation1(
+                  "                                                     "
+                , [ QStr("Hover help: ")
+                  , StringEscape1(
+                      "                                                                 "
+                    , App(CallT(SVar("write-to-string"{5319631}), [], []), Var("target"{5321062}))
+                    )
+                  ]
+                )
+              )
+            , []
+            )
+          )
+        )
+      , SDefT(
+          "editor-complete"{5321034}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("node"{5321067})
+                  , Var("position"{5321068})
+                  , Var("ast"{5321069})
+                  , Var("path"{5321070})
+                  , Var("project-path"{5321071})
+                  ]
+                )
+              )
+            , NoAnnoList(
+                ListTail(
+                  [NoAnnoList(Str("\"String\"")), NoAnnoList(Str("\"Int\""))]
+                , NoAnnoList(List([]))
+                )
+              )
+            , []
+            )
+          )
+        )
+      , SDefT(
+          "generate-abstractBoosterMachine"{5321035}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("selected"{5321072})
+                  , Var("position"{5321073})
+                  , Var("ast"{5321074})
+                  , Var("path"{5321075})
+                  , Var("project-path"{5321076})
+                  ]
+                )
+              )
+            , NoAnnoList(Tuple([Var("filename"{5321077}), Var("result"{5321078})]))
+            , [ WhereClause(
+                  Seq(
+                    Assign(
+                      Var("filename"{5321077})
+                    , App(
+                        CallT(SVar("guarantee-extension"{5319671}), [], [NoAnnoList(Str("\"abm\""))])
+                      , Var("path"{5321075})
+                      )
+                    )
+                  , Assign(
+                      Var("result"{5321078})
+                    , App(
+                        CallT(SVar("compile"{5320929}), [], [])
+                      , App(
+                          CallT(SVar("elaborate"{5320907}), [], [])
+                        , App(CallT(SVar("parse"{5320905}), [], []), Var("selected"{5321072}))
+                        )
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "test-dynamic-rules"{5321036}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("selected"{5321079})
+                  , Var("position"{5321080})
+                  , Var("ast"{5321081})
+                  , Var("path"{5321082})
+                  , Var("project-path"{5321083})
+                  ]
+                )
+              )
+            , NoAnnoList(Tuple([Var("filename"{5321084}), Var("result"{5321085})]))
+            , [ WhereClause(
+                  Seq(
+                    Assign(
+                      Var("filename"{5321084})
+                    , App(
+                        CallT(SVar("guarantee-extension"{5319671}), [], [NoAnnoList(Str("\"test\""))])
+                      , Var("path"{5321082})
+                      )
+                    )
+                  , Seq(
+                      Assign(
+                        Var("result"{5321085})
+                      , App(
+                          CallT(SVar("elaborate"{5320907}), [], [])
+                        , App(CallT(SVar("parse"{5320905}), [], []), Var("selected"{5321079}))
+                        )
+                      )
+                    , CallT(
+                        SVar("log"{5319183})
+                      , []
+                      , [ NoAnnoList(Op("Error"{5318958}, []))
+                        , App(
+                            CallT(SVar("ABM"{5320906}), [], [])
+                          , NoAnnoList(Str("\"Invariants\""))
+                          )
+                        ]
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "expand-booster"{5321037}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("selected"{5321086})
+                  , Var("position"{5321087})
+                  , Var("ast"{5321088})
+                  , Var("path"{5321089})
+                  , Var("project-path"{5321090})
+                  ]
+                )
+              )
+            , NoAnnoList(Tuple([Var("filename"{5321091}), Var("result"{5321092})]))
+            , [ WithClause(
+                  Seq(
+                    Assign(
+                      Var("filename"{5321091})
+                    , App(
+                        CallT(SVar("guarantee-extension"{5319671}), [], [NoAnnoList(Str("\"expanded.booster\""))])
+                      , Var("path"{5321089})
+                      )
+                    )
+                  , Assign(
+                      Var("result"{5321092})
+                    , App(
+                        CallT(SVar("output-to-booster"{5320933}), [], [])
+                      , App(
+                          CallT(
+                            SVar("innermost"{5319711})
+                          , [CallT(SVar("simplify"{5321029}), [], [])]
+                          , []
+                          )
+                        , App(
+                            CallT(SVar("compile"{5320929}), [], [])
+                          , App(
+                              CallT(SVar("elaborate"{5320907}), [], [])
+                            , App(CallT(SVar("parse"{5320905}), [], []), Var("selected"{5321086}))
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "expand-booster"{5321037}
+        , []
+        , []
+        , SRule(
+            Rule(
+              Var("m"{5321093})
+            , App(
+                CallT(SVar("output-to-booster"{5320933}), [], [])
+              , App(
+                  CallT(
+                    SVar("innermost"{5319711})
+                  , [CallT(SVar("simplify"{5321029}), [], [])]
+                  , []
+                  )
+                , App(
+                    CallT(SVar("compile"{5320929}), [], [])
+                  , App(
+                      CallT(SVar("elaborate"{5320907}), [], [])
+                    , App(CallT(SVar("parse"{5320905}), [], []), Var("m"{5321093}))
+                    )
+                  )
+                )
+              )
+            , []
+            )
+          )
+        )
+      , SDefT(
+          "booster-to-sql"{5321038}
+        , []
+        , []
+        , SRule(
+            Rule(
+              NoAnnoList(
+                Tuple(
+                  [ Var("selected"{5321094})
+                  , Var("position"{5321095})
+                  , Var("ast"{5321096})
+                  , Var("path"{5321097})
+                  , Var("project-path"{5321098})
+                  ]
+                )
+              )
+            , NoAnnoList(Tuple([Var("filename"{5321099}), Var("result"{5321101})]))
+            , [ WithClause(
+                  Seq(
+                    Assign(
+                      Var("filename"{5321099})
+                    , App(
+                        CallT(SVar("guarantee-extension"{5319671}), [], [NoAnnoList(Str("\"sql\""))])
+                      , Var("path"{5321097})
+                      )
+                    )
+                  , Seq(
+                      Assign(
+                        Var("simplifiedCompiledModel"{5321100})
+                      , App(
+                          CallT(
+                            SVar("innermost"{5319711})
+                          , [CallT(SVar("simplify"{5321029}), [], [])]
+                          , []
+                          )
+                        , App(
+                            CallT(SVar("compile"{5320929}), [], [])
+                          , App(
+                              CallT(SVar("elaborate"{5320907}), [], [])
+                            , App(CallT(SVar("parse"{5320905}), [], []), Var("selected"{5321094}))
+                            )
+                          )
+                        )
+                      )
+                    , Assign(
+                        Var("result"{5321101})
+                      , App(
+                          CallT(SVar("pp-install"{5320970}), [], [])
+                        , App(CallT(SVar("booster-to-relational"{5320941}), [], []), Var("simplifiedCompiledModel"{5321100}))
+                        )
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "main-booster"{5321039}
+        , []
+        , []
+        , CallT(
+            SVar("xtc-input-wrap"{5320807})
+          , [ GuardedLChoice(
+                Seq(
+                  Match(NoAnnoList(Op("FILE"{5320743}, [Var("input"{5321102})])))
+                , Seq(
+                    PrimNoArgs("\"SSL_EXT_enable_origins\"")
+                  , Seq(
+                      Assign(
+                        Var("ast"{5321103})
+                      , App(CallT(SVar("parse-booster2-file"{5320829}), [], []), Var("input"{5321102}))
+                      )
+                    , Seq(
+                        Assign(
+                          NoAnnoList(
+                            Tuple(
+                              [Var("ast'"{5321104}), Var("errors"{5321105}), Var("warnings"{5321106}), Var("notes"{5321107})]
+                            )
+                          )
+                        , App(
+                            CallT(SVar("editor-analyze"{5321030}), [], [])
+                          , NoAnnoList(
+                              Tuple(
+                                [Var("ast"{5321103}), Var("input"{5321102}), NoAnnoList(Str("\".\""))]
+                              )
+                            )
+                          )
+                        )
+                      , Seq(
+                          Assign(
+                            NoAnnoList(Tuple([Var("output"{5321108}), Var("contents"{5321109})]))
+                          , App(
+                              CallT(SVar("booster-to-sql"{5321038}), [], [])
+                            , NoAnnoList(
+                                Tuple(
+                                  [ Var("ast'"{5321104})
+                                  , NoAnnoList(List([]))
+                                  , Var("ast"{5321103})
+                                  , Var("input"{5321102})
+                                  , NoAnnoList(Str("\".\""))
+                                  ]
+                                )
+                              )
+                            )
+                          )
+                        , Seq(
+                            Assign(
+                              Var("handle"{5321110})
+                            , App(
+                                CallT(SVar("fopen"{5319659}), [], [])
+                              , NoAnnoList(Tuple([Var("output"{5321108}), NoAnnoList(Str("\"w\""))]))
+                              )
+                            )
+                          , Seq(
+                              BA(
+                                CallT(SVar("fputs"{5319662}), [], [])
+                              , NoAnnoList(Tuple([Var("contents"{5321109}), Var("handle"{5321110})]))
+                              )
+                            , CallT(SVar("fclose"{5319660}), [], [])
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              , Id()
+              , Seq(PrimNoArgs("\"SSL_stacktrace_get_all_frame_names\""), CallT(SVar("report-failure"{5319312}), [], []))
+              )
+            ]
+          , []
+          )
+        )
+      , SDefT(
+          "test-store"{5321040}
+        , []
+        , []
+        , SRule(
+            Rule(
+              Var("x"{5321111})
+            , Var("x"{5321111})
+            , [ WhereClause(
+                  GenDynRules(
+                    [ AddDynRule(
+                        DynRuleId(RDecT("ABM"{5320906}, [], []))
+                      , Rule(NoAnnoList(Str("\"test\"")), Var("x"{5321111}), [])
+                      )
+                    ]
+                  )
+                )
+              ]
+            )
+          )
+        )
+      , SDefT(
+          "test-retrieve"{5321041}
+        , []
+        , []
+        , SRule(
+            Rule(
+              Var("x"{5321112})
+            , Var("y"{5321114})
+            , [ WhereClause(
+                  Seq(
+                    Assign(
+                      Var("something"{5321113})
+                    , App(
+                        CallT(SVar("ABM"{5320906}), [], [])
+                      , NoAnnoList(Str("\"test\""))
+                      )
+                    )
+                  , Seq(
+                      GenDynRules(
+                        [ AddDynRule(
+                            DynRuleId(RDecT("ABM"{5320906}, [], []))
+                          , Rule(
+                              NoAnnoList(Str("\"test\""))
+                            , App(
+                                CallT(SVar("add"{5319508}), [], [])
+                              , NoAnnoList(Tuple([Var("something"{5321113}), NoAnnoList(Int("2"))]))
+                              )
+                            , []
+                            )
+                          )
+                        ]
+                      )
+                    , Assign(
+                        Var("y"{5321114})
+                      , App(
+                          CallT(SVar("ABM"{5320906}), [], [])
+                        , NoAnnoList(Str("\"test\""))
+                        )
+                      )
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        )
+      ]
+    )
+  ]
+)

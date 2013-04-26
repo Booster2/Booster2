@@ -13,7 +13,7 @@ imports
 /*	deduce-types:
 		Description goes here
 */ 	
-
+	
 
 
 
@@ -23,175 +23,21 @@ imports
 */
 
 	insert-this:
-		(Equal(expr1, expr2), classname)
-			-> Equal(expr3, expr4)
+		(BinRel(expr1, binrel, expr2), classname)
+			-> BinRel(expr3, binrel, expr4)
 		where
 			expr3 := <insert-this> (expr1, classname);
 			expr4 := <insert-this> (expr2, classname)
 
 
-	insert-this:
-		(NotEqual(expr1, expr2), classname)
-			-> NotEqual(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(In(expr1, expr2), classname)
-			-> In(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(NotIn(expr1, expr2), classname)
-			-> NotIn(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(LessThan(expr1, expr2), classname)
-			-> LessThan(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(GreaterThan(expr1, expr2), classname)
-			-> GreaterThan(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(LessThanEquals(expr1, expr2), classname)
-			-> LessThanEquals(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(GreaterThanEquals(expr1, expr2), classname)
-			-> GreaterThanEquals(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Subset(expr1, expr2), classname)
-			-> Subset(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(SubsetEquals(expr1, expr2), classname)
-			-> SubsetEquals(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(Superset(expr1, expr2), classname)
-			-> Superset(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
-
-	insert-this:
-		(SupersetEquals(expr1, expr2), classname)
-			-> SupersetEquals(expr3, expr4)
-		where
-			expr3 := <insert-this> (expr1, classname);
-			expr4 := <insert-this> (expr2, classname)
 
 
 	
 	
 	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Equal(expr1, expr2))
-			-> (And(constraint1, constraint2), Equal(expr3, expr4))
+		(thisclassname, otherclassname, attname, BinRel(expr1, binrel, expr2))
+			-> (And(constraint1, constraint2), BinRel(expr3, binrel, expr4))
 		where
 			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
 			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, NotEqual(expr1, expr2))
-			-> (And(constraint1, constraint2), NotEqual(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, In(expr1, expr2))
-			-> (And(constraint1, constraint2), In(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, NotIn(expr1, expr2))
-			-> (And(constraint1, constraint2), NotIn(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, LessThan(expr1, expr2))
-			-> (And(constraint1, constraint2), LessThan(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, GreaterThan(expr1, expr2))
-			-> (And(constraint1, constraint2), GreaterThan(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, LessThanEquals(expr1, expr2))
-			-> (And(constraint1, constraint2), LessThanEquals(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, GreaterThanEquals(expr1, expr2))
-			-> (And(constraint1, constraint2), GreaterThanEquals(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Subset(expr1, expr2))
-			-> (And(constraint1, constraint2), Subset(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, SubsetEquals(expr1, expr2))
-			-> (And(constraint1, constraint2), SubsetEquals(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, Superset(expr1, expr2))
-			-> (And(constraint1, constraint2), Superset(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, SupersetEquals(expr1, expr2))
-			-> (And(constraint1, constraint2), SupersetEquals(expr3, expr4))
-		where
-			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
-			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
-
 

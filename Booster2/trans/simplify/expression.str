@@ -3,38 +3,39 @@ module simplify/expression
 imports
   include/Booster2
   
-  
+ 
   	
 rules
 
+	simplify:
+		(BinOp(BasicValue(Integer(i)), Times(), BasicValue(Integer(j))))
+			-> BasicValue(Integer( k ))
+		where
+			k := <mulS>(i, j)
+
 			
 	simplify:
-		(Plus(BasicValue(Integer(i)), BasicValue(Integer(j))))
+		(BinOp(BasicValue(Integer(i)), Plus(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
 			k := <addS>(i, j)
 
 	simplify:
-		(Minus(BasicValue(Integer(i)), BasicValue(Integer(j))))
+		(BinOp(BasicValue(Integer(i)), Minus(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
 			k := <subtS>(i, j)
 
 	simplify:
-		(Divide(BasicValue(Integer(i)), BasicValue(Integer(j))))
+		(BinOp(BasicValue(Integer(i)), Divide(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
 			k := <divS>(i, j)
 
-	simplify:
-		(Times(BasicValue(Integer(i)), BasicValue(Integer(j))))
-			-> BasicValue(Integer( k ))
-		where
-			k := <mulS>(i, j)
 			
 	simplify:
-		Cardinality(Union(a,b))
-			-> Plus(Cardinality(a), Cardinality(b))
+		Cardinality(BinOp(a,Union(), b))
+			-> BinOp(Cardinality(a), Plus(), Cardinality(b))
 	
 	simplify:
 		Cardinality(SetExtent([]))

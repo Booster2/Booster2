@@ -128,9 +128,10 @@ imports
 			
 	output-to-booster-methods:
 		(classname, [methodname, meths*])
-			-> $[ [methodname] {  }
+			-> $[ [methodname] { [gc'] }
 				  [<output-to-booster-methods> (classname, [meths*])] ]
-		/* Debug fix here... [<output-to-booster-guarded-command> ( <lookup>((classname, methodname), <ABM> "Programs"))] */
+			where
+			gc' := <output-to-booster-guarded-command> ( <lookup>((classname, methodname), <ABM> "Programs"))
 
 	output-to-booster-guarded-command:
 		Skip()

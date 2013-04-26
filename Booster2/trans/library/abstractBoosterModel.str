@@ -153,7 +153,7 @@ imports
 		
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(In(path, typeExtent), constraint1 )
+			-> And(BinRel(path, In(), typeExtent), constraint1 )
 		where
 			BasicType(t) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname);
@@ -161,7 +161,7 @@ imports
 
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(Or(In(path, typeExtent), Equal(path, Null())), constraint1 )
+			-> And(Or(BinRel(path, In(), typeExtent), BinRel(path, Equal(), Null())), constraint1 )
 		where
 			Optional(BasicType(t)) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname);
@@ -170,7 +170,7 @@ imports
 
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(SubsetEquals(path, typeExtent), constraint1 )
+			-> And(BinRel(path, SubsetEquals(), typeExtent), constraint1 )
 		where
 			Set(BasicType(t)) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname);
@@ -178,21 +178,21 @@ imports
 	
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(In(path, PathStart(name1, None())), constraint1 )
+			-> And(BinRel(path, In(), PathStart(name1, None())), constraint1 )
 		where
 			Optional(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname)
 
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(SubsetEquals(path, PathStart(name1, None())), constraint1 )
+			-> And(BinRel(path, SubsetEquals(), PathStart(name1, None())), constraint1 )
 		where
 			Set(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname)
 
 	get-type-constraint:
 		([path, paths*], classname, methodname) 
-			-> And(In(path, PathStart(name1, None())), constraint1 )
+			-> And(BinRel(path, In(), PathStart(name1, None())), constraint1 )
 		where
 			Class(name1) := <resolve-path-type>(classname, path, (classname, methodname));
 			constraint1 := <get-type-constraint>([paths*], classname, methodname)
@@ -292,14 +292,14 @@ imports
 
 	get-mult-constraint:
 		(path, att)
-			-> GreaterThanEquals(Cardinality(path), BasicValue(Integer(min)))
+			-> BinRel(Cardinality(path), GreaterThanEquals(), BasicValue(Integer(min)))
 		where
 			"*" := <lookup-max-mult> att ;
 			min := <lookup-min-mult> att
 
 	get-mult-constraint:
 		(path, att)
-			-> And(LessThanEquals(Cardinality(path), BasicValue(Integer(max))), GreaterThanEquals(Cardinality(path), Integer(min)))
+			-> And(BinRel(Cardinality(path), LessThanEquals(), BasicValue(Integer(max))), BinRel(Cardinality(path), GreaterThanEquals(), Integer(min)))
 		where
 			max := <lookup-max-mult> att;
 			min := <lookup-min-mult> att

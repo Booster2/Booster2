@@ -1,16 +1,42 @@
-system StudentSystem 
+system methodTest 
 
 
-class Staff {
+class class1 {
 	attributes
-		id : INT
-		firstName : STRING
-		lastName : STRING
+		att1 : INT
+		att2 : STRING
 		
 	invariant
 		true
 	methods
-		create {  }
+		m1 { 5 : INT 
+		               --> ( this.att1 := 5 ) }
+		m2 { this.att1 = 5 
+		               --> ( skip ) }
+		m3 { 5 = this.att1 
+		               --> ( skip ) }
+		m4 { 5 = this.att1 
+		               --> ( skip ) }
+		m5 { a? = this.att1 
+		               --> ( skip ) }
+		m6 { a? = this.att1 
+		               --> ( skip ) }
+		m7 { a? : INT 
+		               --> ( this.att1 := a? ) }
+		m8 { this.att1 = a? 
+		               --> ( skip ) }
+		m9 { 7 : INT 
+		               --> ( this.att1 := 7 ) }
+		m10 { this.att1 = 7 
+		               --> ( skip ) }
+		m11 { 7 = this.att1 
+		               --> ( skip ) }
+		m12 { 7 = this.att1 
+		               --> ( skip ) }
+		m13 { 126 : INT 
+		               --> ( this.att1 := 126 ) }
+		m14 { a? > 15 
+		               --> ( skip ) }
 		
 }
 

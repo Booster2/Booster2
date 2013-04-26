@@ -4,6 +4,7 @@ imports
   include/Booster2
   
   translate/booster/expression
+  library/basicTypes
   
 rules
 	
@@ -21,12 +22,8 @@ rules
 			-> $[[s]]
 			
 	output-to-booster-expression:
-		IntExtent()
-			-> $[INT]
-
-	output-to-booster-expression:
-		StringExtent()
-			-> $[STRING]
+		TypeExtent(t)
+			-> <get-type-booster-notation> t
 			
 	output-to-booster-expression:
 		Null()

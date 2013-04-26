@@ -6,7 +6,7 @@ imports
  
  rules
 
-/* Spoofax Basic Values */
+/* Basic Values */
 
 	get-corresponding-booster-type:
 		Integer(i) -> Int()
@@ -18,7 +18,7 @@ imports
 /* Integer */
 
 	get-type-extent:
-		Int() -> IntExtent()
+		Int() -> TypeExtent(Int())
 		
 	get-type-booster-notation:
 		Int() -> $[INT]
@@ -33,7 +33,7 @@ imports
 /* String */
 
 	get-type-extent:
-		String() -> StringExtent()
+		String() -> TypeExtent(String())
 		
 	get-type-booster-notation:
 		String() -> $[STRING]
@@ -44,10 +44,10 @@ imports
 	get-type-name-for-metadata:
 		String() -> "String"
 
-/* String */
+/* DateTime */
 
 	get-type-extent:
-		DateTime() -> DateTimeExtent()
+		DateTime() -> TypeExtent(DateTime())
 		
 	get-type-booster-notation:
 		DateTime() -> $[DATETIME]

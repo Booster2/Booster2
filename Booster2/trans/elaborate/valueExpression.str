@@ -5,7 +5,7 @@ imports
   include/Booster2
   library/abstractBoosterModel
   library/valueExpression
- 
+  library/basicTypes
     
   
   
@@ -14,9 +14,37 @@ imports
 /* 	infer-type:
 		Description goes here	
 */
+		
+	infer-type:
+		(classname, methodname, Output(name), type1, [alreadyknown*])
+			->[(Output(name), type1), alreadyknown*]
+
+	infer-type:
+		(classname, methodname, Input(name), type1, [alreadyknown*])
+			->[(Input(name), type1), alreadyknown*]
+
+	infer-type:
+		(classname, methodname, Input(name), type1, [alreadyknown*])
+			->[(Input(name), type1), alreadyknown*]
+
 			
 /*	deduce-types:
 		Description here
+*/
+
+
+/*	deduce-types:
+		something
+			-> []
+		where
+			log(|Error(), "Error in deduce-types", something)				
+
+
+	infer-type:
+		something
+			-> []
+		where
+			log(|Error(), "Error in infer-type", something)				
 */
 
 
@@ -31,12 +59,8 @@ imports
 			-> BasicValue(t)
 			
 	insert-this:
-		(IntExtent(), classname)
-			-> IntExtent()
-
-	insert-this:
-		(StringExtent(), classname)
-			-> StringExtent()
+		(TypeExtent(t), classname)
+			-> TypeExtent(t)
 			
 	insert-this:
 		(Null(), classname)
@@ -98,12 +122,9 @@ imports
 			
 			
 	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, IntExtent())
-			-> (True(), IntExtent())
+		(thisclassname, otherclassname, attname, TypeExtent(t))
+			-> (True(), TypeExtent(t))
 			
-	replace-this-for-attribute:
-		(thisclassname, otherclassname, attname, StringExtent())
-			-> (True(), StringExtent())
 			
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, Null())
@@ -126,7 +147,7 @@ imports
 
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, Path(a,b))
-			-> (NotEqual(Path(This(),PathComponent(attname3, None())), Null()), Path(This(),b))
+			-> (BinRel(Path(This(),PathComponent(attname3, None())),NotEqual(), Null()),  Path(This(),b))
 				
 		where
 			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
@@ -137,7 +158,7 @@ imports
 
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, Path(a,b))
-			-> (NotEqual(Path(This(),PathComponent(attname3, None())), SetExtent([])), Path(This(),b))
+			-> (BinRel(Path(This(),PathComponent(attname3, None())), NotEqual(), SetExtent([])), Path(This(),b))
 				
 		where
 			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
@@ -149,7 +170,7 @@ imports
 		(thisclassname, otherclassname, attname, Path(a,b))
 			-> (Exists("obj",
 						PathStart(thisclassname, None()),
-						Equal(This(), 
+						BinRel(This(), Equal(), 
 							  Path(PathStart("obj",None()),
 							  	   PathComponent(attname2, None())))), Path(This(),b))
 				

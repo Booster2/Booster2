@@ -2,48 +2,49 @@ module simplify/relation
 
 imports
   include/Booster2
+
    
   	
 rules
 
 	simplify:
-		NotEqual(expr, expr)
+		BinRel(expr, NotEqual(), expr)
 			-> False()
 
 	simplify:
-		Equal(expr, expr)
+		BinRel(expr, Equal(), expr)
 			-> True()
 	
 	simplify:
-		LessThanEquals(Plus(a, BasicValue(Integer(i))), BasicValue(Integer(j)))
-			-> LessThanEquals(a, BasicValue(Integer(k)))
+		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), LessThanEquals(), BasicValue(Integer(j)))
+			-> BinRel(a, LessThanEquals(), BasicValue(Integer(k)))
 		where
 			k := <subt>(j,i)
 
 
 	simplify:
-		GreaterThanEquals(Plus(a, BasicValue(Integer(i))), BasicValue(Integer(j)))
-			-> GreaterThanEquals(a, BasicValue(Integer(k)))
+		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), GreaterThanEquals(), BasicValue(Integer(j)))
+			-> BinRel(a, GreaterThanEquals(), BasicValue(Integer(k)))
 		where
 			k := <subt>(j,i)
 
 
 	simplify:
-		In(expression1, Union(expression2, SetExtent([expression1])))
+		BinRel(expression1, In(), BinOp(expression2, Union(), SetExtent([expression1])))
 			-> True()
 			
 
 	simplify:
-		SubsetEquals(Union(expression1, expression2), expression3)
-			-> And(SubsetEquals(expression1, expression3), 
-					SubsetEquals(expression2, expression3))
+		BinRel(BinOp(expression1, Union(), expression2), SubsetEquals(), expression3)
+			-> And(BinRel(expression1, SubsetEquals(), expression3), 
+					BinRel(expression2, SubsetEquals(), expression3))
 
 	
 
 	simplify:
-		SubsetEquals(SetExtent([]), expression2)
+		BinRel(SetExtent([]), SubsetEquals(), expression2)
 			-> True()		
 
 	simplify:
-		SubsetEquals(SetExtent([exp, exps*]), expression2)
-			-> And(In(exp, expression2), SubsetEquals(SetExtent([exps*]), expression2))		
+		BinRel(SetExtent([exp, exps*]), SubsetEquals(), expression2)
+			-> And(BinRel(exp, In(), expression2), BinRel(SetExtent([exps*]), SubsetEquals(), expression2))		

@@ -23,15 +23,7 @@ imports
 			
 
 	get-mentioned-attributes:
-		(name, maybename, IntExtent())
-			-> []
-
-	get-mentioned-attributes:
-		(name, maybename, StringExtent())
-			-> []
-
-	get-mentioned-attributes:
-		(name, maybename, DateTimeExtent())
+		(name, maybename, TypeExtent(t))
 			-> []
 
 	get-mentioned-attributes:
@@ -121,16 +113,9 @@ imports
 			-> True()
 			
 	is-old:
-		IntExtent()
+		TypeExtent(t)
 			-> True()
 
-	is-old:
-		StringExtent()
-			-> True()
-
-	is-old:
-		DateTimeExtent()
-			-> True()
 			
 	is-old:
 		Null()
@@ -274,13 +259,10 @@ imports
 		(BasicValue(t), classname, methodname)
 			-> <get-corresponding-booster-type> t
 
-	get-expression-type:
-		(String(s), classname, methodname)
-			-> String()
 
 	get-expression-type:
-		(IntExtent(), classname, methodname)
-			-> String()
+		(TypeExtent(t), classname, methodname)
+			-> Set(t)
 
 
 	substitute:
@@ -291,17 +273,9 @@ imports
 		 	-> BasicValue(t)
 		 	
 	substitute:
-		(StringExtent(), path, expression)
-			-> StringExtent()
+		(TypeExtent(t), path, expression)
+			-> TypeExtent(t)
 
-	substitute:
-		(IntExtent(), path, expression)
-			-> IntExtent()
-
-	substitute:
-		(DateTimeExtent(), path, expression)
-			-> DateTimeExtent()
-			
 	substitute:
 		(Null(), path, expression)
 			-> Null()
@@ -444,16 +418,8 @@ imports
 			-> BasicValue(t)
 			
 	make-old:
-		IntExtent()
-			-> IntExtent()
-
-	make-old:
-		StringExtent()
-			-> StringExtent()
-
-	make-old:
-		DateTimeExtent()
-			-> DateTimeExtent()
+		TypeExtent(t)
+			-> TypeExtent(t)
 			
 	make-old:
 		Null()
@@ -520,16 +486,8 @@ imports
 			-> BasicValue(t)
 			
 	make-post-state:
-		IntExtent()
-			-> IntExtent()
-
-	make-post-state:
-		StringExtent()
-			-> StringExtent()
-
-	make-post-state:
-		DateTimeExtent()
-			-> DateTimeExtent()
+		TypeExtent(t)
+			-> TypeExtent(t)
 			
 	make-post-state:
 		Null()

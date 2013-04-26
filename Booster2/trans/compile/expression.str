@@ -23,14 +23,14 @@ imports
 			
 	is-defined:
 		 (classname, method, Head(expr1))
-			-> And(constraint1, NotEqual(expr1, String("")))
+			-> And(constraint1, BinRel(expr1, NotEqual(), String("")))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			(String(), vars) := <deduce-types>(classname, method, expr1, "?",[])
 			
 	is-defined:
 		 (classname, method, Tail(expr1))
-			-> And(constraint1, NotEqual(expr1, String("")))
+			-> And(constraint1, BinRel(expr1, NotEqual(), String("")))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			(String(), vars) := <deduce-types>(classname, method, expr1, "?",[])		
@@ -44,24 +44,24 @@ imports
 			
 
 	is-defined:
-		 (classname, method, Plus(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Plus(expr1, expr2), IntExtent()))
+		 (classname, method, BinOp(expr1, Plus(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Plus(), expr2), In(), TypeExtent(Int())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Int(), vars) := <deduce-types>(classname, method, Plus(expr1, expr2), "?",[])
+			(Int(), vars) := <deduce-types>(classname, method, BinOp(expr1, Plus(), expr2), "?",[])
 
 
 	is-defined:
-		 (classname, method, Minus(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Minus(expr1, expr2), IntExtent()))
+		 (classname, method, BinOp(expr1, Minus(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Minus(), expr2), In(), TypeExtent(Int())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Int(), vars) := <deduce-types>(classname, method, Minus(expr1, expr2), "?",[])
+			(Int(), vars) := <deduce-types>(classname, method, BinOp(expr1, Minus(), expr2), "?",[])
 
 	is-defined:
-		 (classname, method, Minus(expr1, expr2))
+		 (classname, method, BinOp(expr1, Minus(), expr2))
 			-> And(constraint1,constraint2)
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
@@ -69,58 +69,58 @@ imports
 
 
 	is-defined:
-		 (classname, method, Times(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Times(expr1, expr2), IntExtent()))
+		 (classname, method, BinOp(expr1, Times(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Times(), expr2), In(), TypeExtent(Int())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Int(), vars) := <deduce-types>(classname, method, Times(expr1, expr2), "?",[])
+			(Int(), vars) := <deduce-types>(classname, method, BinOp(expr1, Times(), expr2), "?",[])
 
 	is-defined:
-		 (classname, method, Divide(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Divide(expr1, expr2), IntExtent()))
+		 (classname, method, BinOp(expr1, Divide(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Divide(), expr2), In(), TypeExtent(Int())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Int(), vars) := <deduce-types>(classname, method, Divide(expr1, expr2), "?",[])
+			(Int(), vars) := <deduce-types>(classname, method, BinOp(expr1, Divide(), expr2), "?",[])
 
 	is-defined:
-		 (classname, method, Maximum(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Maximum(expr1, expr2), IntExtent()))
+		 (classname, method, BinOp(expr1, Maximum(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Maximum(), expr2), In(), TypeExtent(Int())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Int(), vars) := <deduce-types>(classname, method, Maximum(expr1, expr2), "?",[])
+			(Int(), vars) := <deduce-types>(classname, method, BinOp(expr1, Maximum(), expr2), "?",[])
 
 	is-defined:
-		 (classname, method, Minimum(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Minimum(expr1, expr2), IntExtent()))
+		 (classname, method, BinOp(expr1, Minimum(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Minimum(), expr2), In(), TypeExtent(Int())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Int(), vars) := <deduce-types>(classname, method, Minimum(expr1, expr2), "?",[])
+			(Int(), vars) := <deduce-types>(classname, method, BinOp(expr1, Minimum(), expr2), "?",[])
 
 	is-defined:
-		 (classname, method, Union(expr1, expr2))
+		 (classname, method, BinOp(expr1, Union(), expr2))
 			-> And(constraint1,constraint2)
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Set(type), vars) := <deduce-types>(classname, method, Union(expr1, expr2), "?",[])
+			(Set(type), vars) := <deduce-types>(classname, method, BinOp(expr1, Union(), expr2), "?",[])
 
 	is-defined:
-		 (classname, method, Intersection(expr1, expr2))
+		 (classname, method, BinOp(expr1, Intersection(), expr2))
 			-> And(constraint1,constraint2)
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(Set(type), vars) := <deduce-types>(classname, method, Intersection(expr1, expr2), "?",[]) 
+			(Set(type), vars) := <deduce-types>(classname, method, BinOp(expr1, Intersection(), expr2), "?",[]) 
 
 	is-defined:
-		 (classname, method, Concat(expr1, expr2))
-			-> And(And(constraint1,constraint2), In(Concat(expr1, expr2), StringExtent()))
+		 (classname, method, BinOp(expr1, Concat(), expr2))
+			-> And(And(constraint1,constraint2), BinRel(BinOp(expr1, Concat(), expr2), In(), TypeExtent(String())))
 		where
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
-			(String(), vars) := <deduce-types>(classname, method, Concat(expr1, expr2), "?",[])
+			(String(), vars) := <deduce-types>(classname, method, BinOp(expr1, Concat(), expr2), "?",[])
 			

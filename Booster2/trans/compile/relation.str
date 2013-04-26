@@ -24,7 +24,7 @@ imports
 
 
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Assign(path1, expression)
 		where
 			path1 := <make-old> Path(a,b);
@@ -32,7 +32,7 @@ imports
 			BasicType(t) := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
 
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Assign(path1, expression)
 		where
 			path1 := <make-old> Path(a,b);
@@ -40,7 +40,7 @@ imports
 			Optional(BasicType(t)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname)) 
 
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Assign(path1, expression)
 		where
 			path1 := <make-old> Path(a,b);
@@ -49,7 +49,7 @@ imports
 
 
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Assign(path1, expression)
 		where
 			path1 := <make-old> Path(a,b);
@@ -59,7 +59,7 @@ imports
 			<equal>(name, name2) 
 
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Assign(path1, expression)
 		where
 			path1 := <make-old> Path(a,b);
@@ -70,7 +70,7 @@ imports
 			
 			
 	program:
-		(classname, methodname, In(Output(o), PathStart(cl,Some(Primed()))))
+		(classname, methodname, BinRel(Output(o), In(), PathStart(cl,Some(Primed()))))
 			-> New(o, cl) 
 		where
 			/*log(|Warning(), "Matching new"); */
@@ -84,11 +84,11 @@ imports
  
  /* Optional-to-Mandatory */
 	program:			
-		(classname, methodname, Equal(Path(a,b), Null()))
+		(classname, methodname, BinRel(Path(a,b), Equal(), Null()))
 			-> Parallel(Assign(path3, Null()),
-						Guard(NotEqual(path3, Null()),
+						Guard(BinRel(path3, NotEqual(), Null()),
 							  Assign(name2,
-							  		 Minus(name2,
+							  		 BinOp(name2, Minus(),
 							  		 	   SetExtent([path3])))))
 		where
 			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
@@ -105,9 +105,9 @@ imports
 
  /* Optional-to-Optional */
 	program:			
-		(classname, methodname, Equal(Path(a,b), Null()))
+		(classname, methodname, BinRel(Path(a,b), Equal(), Null()))
 			-> Parallel(Assign(path3, Null()),
-						Guard(NotEqual(path3, Null()),
+						Guard(BinRel(path3, NotEqual(), Null()),
 							  Assign(Path(path3, PathComponent(name6, None())),
 							  		 Null())))
 		where
@@ -125,13 +125,13 @@ imports
 	
  /* Optional-to-Set-valued */
 	program:			
-		(classname, methodname, Equal(Path(a,b), Null()))
+		(classname, methodname, BinRel(Path(a,b), Equal(), Null()))
 			-> Parallel(Assign(path3, Null()),
-						Guard(NotEqual(path3, Null()),
+						Guard(BinRel(path3, NotEqual(), Null()),
 							  Assign(Path(Path(path3, 
 							  		 			PathComponent(name6, None()))),
-							  		 Minus(Path(path3, 
-							  		 			PathComponent(name6, None())), 
+							  		 BinOp(Path(path3, 
+							  		 			PathComponent(name6, None())), Minus(),  
 							  		 	   SetExtent([path1])))))
 		where
 			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
@@ -148,10 +148,10 @@ imports
 
  /* Set-valued-to-Mandatory */
 	program:			
-		(classname, methodname, NotIn(expression, Path(a,b)))
-			-> Parallel(Assign(path3, Minus(path3, SetExtent([expression]))),
+		(classname, methodname, BinRel(expression, NotIn(), Path(a,b)))
+			-> Parallel(Assign(path3, BinOp(path3, Minus(), SetExtent([expression]))),
 					    Assign(PathStart(name2, None()),
-					    	   Minus(PathStart(name2, None()),
+					    	   BinOp(PathStart(name2, None()), Minus(), 
 					    	   		 SetExtent([path3]))))
 		where
 			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
@@ -168,9 +168,9 @@ imports
 			
  /* Set-valued-to-Optional */
 	program:			
-		(classname, methodname, NotIn(expression, Path(a,b)))
+		(classname, methodname, BinRel(expression, NotIn(), Path(a,b)))
 			-> Parallel(Assign(path3,
-							   Minus(path3, SetExtent([expression]))),
+							   BinOp(path3, Minus(), SetExtent([expression]))),
 						Assign(Path(expression, PathComponent(name6, None())),
 							   Null()))
 		where
@@ -189,11 +189,11 @@ imports
 
  /* Set-valued-to-Set-valued */
 	program:			
-		(classname, methodname, NotIn(expression, Path(a,b)))
+		(classname, methodname, BinRel(expression, NotIn(), Path(a,b)))
 			-> Parallel(Assign(path3,
-							   Minus(path3, SetExtent([expression]))),
+							   BinOp(path3, Minus(), SetExtent([expression]))),
 						Assign(Path(expression, PathComponent(name6, None())),
-							   Minus(Path(expression, PathComponent(name6, None())), 
+							   BinOp(Path(expression, PathComponent(name6, None())), Minus(),  
 							   		 SetExtent([path1]))))
 		where
 			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
@@ -210,8 +210,8 @@ imports
 
 /* Mandatory-to-Mandatory */
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
-			-> Guard(NotIn(expression, name2), 
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
+			-> Guard(BinRel(expression, NotIn(), name2), 
 				Parallel(Assign(path3, expression), 
 						 Assign(Path(expression,PathComponent(name6, None())),path1)))
 		where
@@ -229,7 +229,7 @@ imports
 			
 /* Mandatory-to-Optional */
 	program:
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Parallel(Parallel(Assign(path3, expression),
 								 Assign(Path(expression, name6), path1)),
 						Assign(Path(path3, PathComponent(name6, None())), Null()) )
@@ -248,14 +248,15 @@ imports
 			
 /* Mandatory-to-Set-valued */
 	program:			
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Parallel(Parallel(Assign(path3, expression),
 								 Assign(Path(Path(path1, PathComponent(name3, None())), 
 								 			 PathComponent(name6, None())),
-								 		Minus(Path(Path(path1, PathComponent(name3, None())), 
-								 	    	  PathComponent(name6, None())), SetExtent([path1])))),
+								 		BinOp(Path(Path(path1, PathComponent(name3, None())),  
+								 	    	  	PathComponent(name6, None())), Minus(), 
+								 	    	  SetExtent([path1])))),
 						Assign(Path(expression, PathComponent(name6, None())), 
-							   Union(Path(expression, PathComponent(name6, None())),
+							   BinOp(Path(expression, PathComponent(name6, None())), Union(),
 							   		 SetExtent([path1]))))
 								 
 		where
@@ -273,16 +274,16 @@ imports
 
 /* Optional-to-mandatory */
 	program:			
-		(classname, methodname, Equal(Path(a,b), expression))
-			-> Guard(NotIn(path3, name2),
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
+			-> Guard(BinRel(path3, NotEqual(), name2),
 					 Parallel(Parallel(Assign(path3, expression),
-					 		  		   Choice(Guard(And(NotEqual(path3, Null()),
-					 		  			                NotEqual(path3, expression)),
-					 		  				        Assign(name2, Minus(name2, 
+					 		  		   Choice(Guard(And(BinRel(path3, NotEqual(), Null()),
+					 		  			                BinRel(path3, NotEqual(), expression)),
+					 		  				        Assign(name2, BinOp(name2, Minus(), 
 					 		  							  		        SetExtent([Path(path1, 
 					 		  											                PathComponent(name3, None()))])))),
-					 		  			      Guard(Or(Equal(path3, Null()),
-					 		  			      		   Equal(path3, expression)),
+					 		  			      Guard(Or(BinRel(path3, Equal(), Null()),
+					 		  			      		   BinRel(path3, Equal(), expression)),
 					 		  			      		Skip()))),
 					 		  Assign(Path(expression, PathComponent(name6, None())),
 					 		  	     path1)))
@@ -301,27 +302,27 @@ imports
 			
 /* Optional-to-optional */
 	program:			
-		(classname, methodname, Equal(Path(a,b), expression))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
 			-> Parallel(Parallel(Assign(path3, expression),
-								 Choice(Guard(And(NotEqual(path3, Null()),
-								 				  NotEqual(path3, expression)),
+								 Choice(Guard(And(BinRel(path3, NotEqual(), Null()),
+								 				  BinRel(path3, NotEqual(), expression)),
 								 			  Assign(Path(Path(path1, PathComponent(name3, None())),
 								 			  			  PathComponent(name6, None())),
 								 			  		 Null())),
-								 		Guard(Or(Equal(path3, Null()),
-								 				 Equal(path3, expression)),
+								 		Guard(Or(BinRel(path3, Equal(), Null()),
+								 				 BinRel(path3, Equal(), expression)),
 								 			  Skip()))),
-						Parallel(Choice(Guard(And(NotEqual(Path(expression, PathComponent(name6, None())),
-														   Null()),
-												  NotEqual(Path(expression, PathComponent(name6, None())),
-														   path1)),
+						Parallel(Choice(Guard(And(BinRel(Path(expression, PathComponent(name6, None())),
+														   NotEqual(), Null()),
+												  BinRel(Path(expression, PathComponent(name6, None())),
+														   NotEqual(), path1)),
 											  Assign(Path(Path(expression, PathComponent(name6, None())),
 											  			  PathComponent(name3, None())),
 											  		 Null())),
-										Guard(Or(Equal(Path(expression, PathComponent(name6, None())),
-													   Null()),
-												 Equal(Path(expression, PathComponent(name6, None())),
-													   path1)),
+										Guard(Or(BinRel(Path(expression, PathComponent(name6, None())),
+													   Equal(), Null()),
+												 BinRel(Path(expression, PathComponent(name6, None())),
+													   Equal(), path1)),
 											  Skip())),
 								 Assign(Path(expression, PathComponent(name6, None())),
 								 		path1)))
@@ -340,23 +341,34 @@ imports
 	
 /* Optional-to-Set-valued */
 	program:			
-		(classname, methodname, Equal(Path(a,b), expression))
-			-> Parallel(Parallel(Assign(path3, expression),
-								 Choice(Guard(And(NotEqual(path3, Null()),
-								 				  NotEqual(path3, expression)),
-								 			  Assign(Path(Path(path1,
-								 			  				   PathComponent(name3,None())), 
-								 			  			  PathComponent(name6, None())),
-								 			  		 Minus(Path(Path(path1,
-								 			  				         PathComponent(name3,None())), 
-								 			  			        PathComponent(name6, None())),
-								 			  			   SetExtent([path1])))),
-								 		Guard(Or(Equal(path3, Null()),
-								 				 Equal(path3, expression)),
-								 			  Skip()))),
-						Assign(Path(expression, PathComponent(name6, None())),
-							   Union(Path(expression, PathComponent(name6, None())),
-							   		 SetExtent([path1]))))
+		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
+			-> 	Parallel(
+			  		Parallel(
+			  			Assign(path3, expression),
+						Choice(
+							Guard(
+								And(
+									BinRel(path3, NotEqual(), Null()),
+								 	BinRel(path3, NotEqual(), expression)),
+								Assign(
+									Path(
+										Path(path1, PathComponent(name3,None())), 
+								 		PathComponent(name6, None())),
+								 	BinOp(
+								 		Path(
+								 			Path(path1, PathComponent(name3,None())), 
+								 			PathComponent(name6, None())), Minus(), 
+								 	SetExtent([path1])))),
+							Guard(
+								Or(
+									BinRel(path3, Equal(), Null()),
+								 	BinRel(path3, Equal(), expression)),
+					  		    Skip()))),
+					Assign(
+						Path(expression, PathComponent(name6, None())),
+						BinOp(
+							Path(expression, PathComponent(name6, None())), Union(), 
+							SetExtent([path1]))))
 			
 		where
 			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
@@ -374,21 +386,21 @@ imports
 		
 /* Set-valued-to-Mandatory */
 	program:			
-		(classname, methodname, In(expression, Path(a,b)))
+		(classname, methodname, BinRel(expression, In(), Path(a,b)))
 			-> (Guard(
-					NotIn(expression, path3), 
+					BinRel(expression, NotIn(), path3), 
 					Parallel(
 							Parallel(
 									Assign(
 										path3,
-							  			Union(path3, SetExtent([expression]))),
+							  			BinOp(path3, Union(), SetExtent([expression]))), 
 									Assign(
 										Path(expression, PathComponent(name6, None())),
 							   			path1)),
 							Assign(Path(Path(expression, PathComponent(name6, None())),
 								 	   			   PathComponent(name3, None())),
-								 	   		  Minus(Path(Path(expression, PathComponent(name6, None())),
-								 	   			   	     PathComponent(name3, None())),
+								 	   		  BinOp(Path(Path(expression, PathComponent(name6, None())),
+								 	   			   	     PathComponent(name3, None())), Minus(), 
 								 	   			   	SetExtent([expression]))))))
 		where
 			Set(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname));
@@ -405,16 +417,17 @@ imports
 
 /* Set-valued-to-Optional */
 	program:			
-		(classname, methodname, In(expression, Path(a,b)))
+		(classname, methodname, BinRel(expression, In(), Path(a,b)))
 			-> Parallel(Parallel(Assign(path3,
-										Union(path3, SetExtent([expression]))),
-								 Guard(NotEqual(Path(expression, 
+										BinOp(path3, Union(), SetExtent([expression]))),
+								 Guard(BinRel(Path(expression, 
 								 					 PathComponent(name6, None())),
-								 				Null()),
+								 				NotEqual(), Null()),
 								 	   Assign(Path(Path(expression, PathComponent(name6, None())),
 								 	   			   PathComponent(name3, None())),
-								 	   		  Minus(Path(Path(expression, PathComponent(name6, None())),
+								 	   		  BinOp(Path(Path(expression, PathComponent(name6, None())),
 								 	   			   	     PathComponent(name3, None())),
+								 	   			   	Minus(), 
 								 	   			   	SetExtent([Path(expression, PathComponent(name6, None()))]))))),
 						Assign(Path(expression, PathComponent(name6, None())),
 							   path1))
@@ -433,12 +446,12 @@ imports
 		
 /* Set-valued-to-Set-valued */
 	program:			
-		(classname, methodname, In(expression, Path(a,b)))
+		(classname, methodname, BinRel(expression, In(), Path(a,b)))
 			-> Parallel(Assign(path3,
-							   Union(path3,
+							   BinOp(path3, Union(), 
 							   		 SetExtent([expression]))),
 						Assign(Path(expression, PathComponent(name6, None())),
-							   Union(Path(expression, PathComponent(name6, None())),
+							   BinOp(Path(expression, PathComponent(name6, None())), Union(), 
 							   		 SetExtent([path1]))))
 		where
 			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname));
@@ -472,85 +485,8 @@ imports
 */			
 			
 	is-defined:
-		(classname, method, Equal(expr1, expr2))
-			-> And(And(constraint1, constraint2), Equal(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, NotEqual(expr1, expr2))
-			-> And(And(constraint1, constraint2), NotEqual(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, In(expr1, expr2))
-			-> And(And(constraint1, constraint2), In(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, NotIn(expr1, expr2))
-			-> And(And(constraint1, constraint2), NotIn(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, LessThan(expr1, expr2))
-			-> And(And(constraint1, constraint2), LessThan(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, GreaterThan(expr1, expr2))
-			-> And(And(constraint1, constraint2), GreaterThan(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, LessThanEquals(expr1, expr2))
-			-> And(And(constraint1, constraint2), LessThanEquals(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, GreaterThanEquals(expr1, expr2))
-			-> And(And(constraint1, constraint2), GreaterThanEquals(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, Subset(expr1, expr2))
-			-> And(And(constraint1, constraint2), Subset(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, SubsetEquals(expr1, expr2))
-			-> And(And(constraint1, constraint2), SubsetEquals(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, Superset(expr1, expr2))
-			-> And(And(constraint1, constraint2), Superset(expr1, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1);
-			constraint2 := <is-defined> (classname, method, expr2)
-		
-	is-defined:
-		(classname, method, SupersetEquals(expr1, expr2))
-			-> And(And(constraint1, constraint2), SupersetEquals(expr1, expr2))
+		(classname, method, BinRel(expr1, binrel, expr2))
+			-> And(And(constraint1, constraint2), BinRel(expr1, binrel, expr2))
 		where
 			constraint1 := <is-defined> (classname, method, expr1);
 			constraint2 := <is-defined> (classname, method, expr2)
@@ -563,87 +499,9 @@ imports
 */
 
 	make-old:
-		Equal(expr1, expr2)
-			-> Equal(expr3, expr4)
+		BinRel(expr1, binrel, expr2)
+			-> BinRel(expr3, binrel, expr4)
 		where
 			expr3 := <make-old> expr1;
 			expr4 := <make-old> expr2
-
-
-	make-old:
-		NotEqual(expr1, expr2)
-			-> NotEqual(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		In(expr1, expr2)
-			-> In(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		NotIn(expr1, expr2)
-			-> NotIn(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		LessThan(expr1, expr2)
-			-> LessThan(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		GreaterThan(expr1, expr2)
-			-> GreaterThan(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		LessThanEquals(expr1, expr2)
-			-> LessThanEquals(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		GreaterThanEquals(expr1, expr2)
-			-> GreaterThanEquals(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		Subset(expr1, expr2)
-			-> Subset(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		SubsetEquals(expr1, expr2)
-			-> SubsetEquals(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		Superset(expr1, expr2)
-			-> Superset(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
-
-	make-old:
-		SupersetEquals(expr1, expr2)
-			-> SupersetEquals(expr3, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
 

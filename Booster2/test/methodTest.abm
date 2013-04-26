@@ -1,18 +1,20 @@
 System(
-  "StudentSystem"
+  "methodTest"
 , [ Class(
-      "Staff"
+      "class1"
     , [ Attributes(
-          [ Attribute("id", Int())
-          , Attribute("firstName", Identity(), String())
-          , Attribute("lastName", Identity(), String())
-          ]
+          [Attribute("att1", BasicType(Int())), Attribute("att2", BasicType(String()))]
         )
       , Methods(
-          [Method(
-             "create"
-           , In(Output("s"), PathStart("Staff", Some(Primed())))
-           )]
+          [ Method(
+              "m9"
+            , BinRel(
+                PathStart("att1", Some(Primed()))
+              , Equal()
+              , BinOp(BasicValue(Integer("5")), Plus(), BasicValue(Integer("2")))
+              )
+            )
+          ]
         )
       ]
     )

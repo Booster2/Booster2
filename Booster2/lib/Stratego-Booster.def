@@ -577,32 +577,34 @@ exports
        "@" Constraint		-> Constraint {cons("Forall")}
   	Constraint -> BoosterTerm 
   	 
+  	Expression BinRel Expression -> Relation {cons("BinRel"), left}
   	 
-  	Expression '=' Expression 	-> Relation {cons("Equal")}
-    Expression '/=' Expression 	-> Relation {cons("NotEqual")}
-    Expression ':' Expression 	-> Relation {cons("In")}
-    Expression '/:' Expression 	-> Relation {cons("NotIn")}
-    Expression '<' Expression 	-> Relation {cons("LessThan")}
-    Expression '>' Expression 	-> Relation {cons("GreaterThan")}
-    Expression '<=' Expression 	-> Relation {cons("LessThanEquals")}
-    Expression '>=' Expression 	-> Relation {cons("GreaterThanEquals")}
-    Expression '<:' Expression 	-> Relation {cons("Subset")}
-    Expression '<<:' Expression -> Relation {cons("SubsetEquals")}
-    Expression ':>' Expression 	-> Relation {cons("Superset")}
-    Expression ':>>' Expression -> Relation {cons("SupersetEquals")}
+  	'=' 	-> BinRel {cons("Equal")}
+    '/=' 	-> BinRel {cons("NotEqual")}
+    ':' 	-> BinRel {cons("In")}
+    '/:' 	-> BinRel {cons("NotIn")}
+    '<' 	-> BinRel {cons("LessThan")}
+    '>' 	-> BinRel {cons("GreaterThan")}
+    '<=' 	-> BinRel {cons("LessThanEquals")}
+    '>=' 	-> BinRel {cons("GreaterThanEquals")}
+    '<:' 	-> BinRel {cons("Subset")}
+    '<<:' 	-> BinRel {cons("SubsetEquals")}
+    ':>' 	-> BinRel {cons("Superset")}
+    ':>>' 	-> BinRel {cons("SupersetEquals")}
     Relation -> BoosterTerm
     
     
-    SpoofaxBasicValue -> ValueExpression {cons("BasicValue")}
     
-    INT 		-> SpoofaxBasicValue {cons("Integer")}
-    STRING		-> SpoofaxBasicValue {cons("String")}
+    BasicValue -> ValueExpression {cons("BasicValue")}
+    INT 		-> BasicValue {cons("Integer")}
+    STRING		-> BasicValue {cons("String")}
 
+    TypeExtent -> ValueExpression {cons("TypeExtent")}
+  	"STRING"	-> TypeExtent {cons("String"), prefer}
+  	"INT"		-> TypeExtent {cons("Int"), prefer}
+  	"DATETIME"	-> TypeExtent {cons("DateTime"), prefer}
 
     Path		-> ValueExpression 
-  	"STRING"	-> ValueExpression {cons("StringExtent"), prefer}
-  	"INT"		-> ValueExpression {cons("IntExtent"), prefer}
-  	"DATETIME"	-> ValueExpression {cons("DateTimeExtent"), prefer}
   	'null'		-> ValueExpression {cons("Null"), prefer}
     "{" {Expression "," }* "}" -> ValueExpression {cons("SetExtent")}
     ValueExpression -> BoosterTerm
@@ -613,15 +615,21 @@ exports
     'card' Expression 	-> Expression {cons("Cardinality"), avoid}
     '-' Expression 		-> Expression {cons("Negative"), avoid}
     "(" Expression ")" 	-> Expression {bracket}
-    Expression  "+"  Expression 	-> Expression {left, cons("Plus")}
-    Expression  "-"  Expression 	-> Expression {left, cons("Minus")}
-    Expression  "*"  Expression 	-> Expression {left, cons("Times")}
-    Expression  "/"  Expression 	-> Expression {left, cons("Divide")}
-    Expression "max" Expression 	-> Expression {left, cons("Maximum")}
-    Expression "min" Expression 	-> Expression {left, cons("Minimum")}
-    Expression "/\\" Expression 	-> Expression {left, cons("Intersection")}
-    Expression "\\/" Expression 	-> Expression {left, cons("Union")}
-    Expression  "++" Expression 	-> Expression {left, cons("Concat")}
+    
+    
+    Expression BinOp Expression -> Expression {left, cons("BinOp")}
+    
+    
+    "+"		-> BinOp {left, cons("Plus")}
+    "-" 	-> BinOp {left, cons("Minus")}
+    "*" 	-> BinOp {left, cons("Times")}
+    "/" 	-> BinOp {left, cons("Divide")}
+    "max" 	-> BinOp {left, cons("Maximum")}
+    "min" 	-> BinOp {left, cons("Minimum")}
+    "/\\" 	-> BinOp {left, cons("Intersection")}
+    "\\/" 	-> BinOp {left, cons("Union")}
+    "++" 	-> BinOp {left, cons("Concat")}
+    
     Expression -> BoosterTerm
     
     

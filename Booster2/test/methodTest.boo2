@@ -1,29 +1,25 @@
-system StudentSystem
+system methodTest
 
-/*class Student
-{
-	attributes
-		id : INT
-		firstName (ID) : STRING
-		lastName (ID) : STRING
-	methods
-		changeName { id' = id? & firstName' = firstName? & lastName' = lastName? }
-		setName { firstName' = "James" & lastName' = "Welch" } 
-		create {  s! : Student'  }
-		createSecondary {  s! : Student'  }
-} 
-*/
-class Staff
-{
-	attributes
-		id : INT
-		firstName (ID) : STRING
-		lastName (ID) : STRING
-	methods
-	//	changeName { id' = id? & firstName' = firstName? & lastName' = lastName? }
-		create {  s! : Staff' ; (s!.id' = 3 & s!.firstName' = firstName? & s!.lastName' = lastName? )}
-}
-
+   class class1 {
+   	  attributes
+   	  	att1 : INT
+   	  	att2 : STRING
+   	  methods
+  	  	m1 { att1' = 5 }	
+   	  	m2 { att1 = 5 }	
+   	  	m3 { 5 = att1' }	
+   	  	m4 { 5 = att1 }
+   	  	m5 { a? = att1  }	
+   	  	m6 { a? = att1' }	
+   	  	m7 { att1' = a? }	
+   	  	m8 { att1 = a? } 
+   	  	m9 { att1' = 5 + 2 } 	
+   	  	m10 { att1 = 5 + 2 } 	
+   	  	m11 { 5 + 2 = att1' } 	
+   	  	m12 { 5 + 2 = att1  }
+   	  	m13 { att1' = 5 + 3 * 15 + 6 }
+   	  	m14 { a? > 15} 	
+	}
 
 
 

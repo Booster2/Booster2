@@ -16,19 +16,15 @@ rules
 
 	is-defined:
 		 (classname, method, BasicValue(t))
-		 	-> In(BasicValue(t), typeExtent)
+		 	-> BinRel(BasicValue(t), In(), typeExtent)
 		 where
 		 	t' := <get-corresponding-booster-type> t;
 		 	typeExtent := <get-type-extent> t'
 		 		 	
 	is-defined:
-		 (classname, method, IntExtent())
+		 (classname, method, TypeExtent(t))
 		 	-> True()
 		 	
-	is-defined:
-		 (classname, method, StringExtent())
-		 	-> True()
-
 	is-defined:
 		 (classname, method, Null())
 		 	-> True()
@@ -51,7 +47,7 @@ rules
 
 	is-defined:
 		 (classname, method, Path(a,b))
-		 	-> And(constraint, NotEqual(a, Null()))
+		 	-> And(constraint, BinRel(a, NotEqual(), Null()))
 		 where
 		 	Optional(type) := <resolve-path-type>(classname, a, method);
 		 	constraint := <is-defined> (classname, method, a) 

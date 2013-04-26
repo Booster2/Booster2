@@ -1,0 +1,70 @@
+module library/binOp
+
+imports
+  include/Booster2
+    
+ 
+ rules
+
+	get-binop-booster-notation:
+		Plus() -> $[+]
+
+	get-binop-booster-notation:
+		Minus() -> $[-]
+
+	get-binop-booster-notation:
+		Times() -> $[*]
+
+	get-binop-booster-notation:
+		Divide() -> $[/]
+
+	get-binop-booster-notation:
+		Maximum() -> $[max]
+
+	get-binop-booster-notation:
+		Minimum() -> $[min]
+
+	get-binop-booster-notation:
+		Union() -> $[\/]
+
+	get-binop-booster-notation:
+		Intersection() -> $[/\]
+
+	get-binop-booster-notation:
+		Concat() -> $[++]
+		
+
+
+
+	binop-type-matching:
+		BinOp(BasicValue(Int()), Plus(), BasicValue(Int())) -> BasicValue(Int())
+
+	binop-type-matching:
+		BinOp(BasicValue(Int()), Minus(), BasicValue(Int())) -> BasicValue(Int())
+
+	binop-type-matching:
+		BinOp(BasicValue(Int()), Times(), BasicValue(Int())) -> BasicValue(Int())
+
+	binop-type-matching:
+		BinOp(BasicValue(Int()), Divide(), BasicValue(Int())) -> BasicValue(Int())
+
+	binop-type-matching:
+		BinOp(BasicValue(Int()), Maximum(), BasicValue(Int())) -> BasicValue(Int())
+
+	binop-type-matching:
+		BinOp(BasicValue(Int()), Minimum(), BasicValue(Int())) -> BasicValue(Int())
+
+	binop-type-matching:
+		BinOp(BasicValue(String()), Maximum(), BasicValue(String())) -> BasicValue(String())
+
+	binop-type-matching:
+		BinOp(BasicValue(String()), Minimum(), BasicValue(String())) -> BasicValue(String())
+
+	binop-type-matching:
+		BinOp(Set(t), Union(), Set(t)) -> Set(t)
+
+	binop-type-matching:
+		BinOp(Set(t), Intersection(), Set(t)) -> Set(t)
+
+	binop-type-matching:
+		BinOp(BasicValue(String()), Concat(), BasicValue(String())) -> BasicValue(String())

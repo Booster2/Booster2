@@ -82,8 +82,8 @@ rules
 			-> (And(constraint4, And(constraint3, constraint2)), New(o, cl))
 		where 
 			
-			constraint2 := <substitute> (constraint1, PathStart(cl, None()), Union(PathStart(cl, None()),Output(o)));
-			constraint3 := <is-defined> (classname, methname, Union(PathStart(cl, None()),Output(o)));
+			constraint2 := <substitute> (constraint1, PathStart(cl, None()), BinOp(PathStart(cl, None()),Union(), Output(o)));
+			constraint3 := <is-defined> (classname, methname, BinOp(PathStart(cl, None()),Union(),Output(o)));
 			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()))
 
 
