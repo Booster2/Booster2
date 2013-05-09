@@ -1,0 +1,67 @@
+System(
+  "Student"
+, [ SetDef("Status", ["Undergraduate", "PostGraduate"])
+  , Class(
+      "Student"
+    , [ Attributes(
+          [ Attribute("lastName", Identity(), BasicType(String()))
+          , Attribute("firstName", Identity(), BasicType(String()))
+          , Attribute("status", UniDirectional("Status"))
+          , Attribute("supervisors", Set(UniDirectional("Staff"), MultAny()))
+          ]
+        )
+      , Methods(
+          [ Method(
+              "Create"
+            , And(
+                And(
+                  BinRel(Output("s"), In(), PathStart("Student", Some(Primed())))
+                , BinRel(
+                    Path(Output("s"), PathComponent("lastName", Some(Primed())))
+                  , Equal()
+                  , Input("lastName")
+                  )
+                )
+              , BinRel(
+                  Path(Output("s"), PathComponent("firstName", Some(Primed())))
+                , Equal()
+                , Input("firstName")
+                )
+              )
+            )
+          ]
+        )
+      ]
+    )
+  , Class(
+      "Staff"
+    , [ Attributes(
+          [ Attribute("lastName", Identity(), BasicType(String()))
+          , Attribute("firstName", Identity(), BasicType(String()))
+          ]
+        )
+      , Methods(
+          [ Method(
+              "Create"
+            , And(
+                And(
+                  BinRel(Output("s"), In(), PathStart("Staff", Some(Primed())))
+                , BinRel(
+                    Path(Output("s"), PathComponent("lastName", Some(Primed())))
+                  , Equal()
+                  , Input("lastName")
+                  )
+                )
+              , BinRel(
+                  Path(Output("s"), PathComponent("firstName", Some(Primed())))
+                , Equal()
+                , Input("firstName")
+                )
+              )
+            )
+          ]
+        )
+      ]
+    )
+  ]
+)

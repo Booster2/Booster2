@@ -71,7 +71,7 @@ imports
 			
 	program:
 		(classname, methodname, BinRel(Output(o), In(), PathStart(cl,Some(Primed()))))
-			-> New(o, cl) 
+			-> New(Output(o), cl) 
 		where
 			/*log(|Warning(), "Matching new"); */
 			path1 := <make-old> PathStart(cl,Some(Primed()));

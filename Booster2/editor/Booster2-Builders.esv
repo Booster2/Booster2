@@ -21,6 +21,7 @@ builders
   builder                   : "Show abstract syntax" = generate-aterm (openeditor) (realtime) (meta) (source)  
   builder                   : "Generate Abstract Booster Machine" = generate-abstractBoosterMachine (openeditor) (realtime) (source)
   builder                   : "Expand into Booster notation" = expand-booster (openeditor) (realtime) (source)
+  builder                   : "Expand into Booster Terms" = expand-booster-without-printing (openeditor) (realtime) (source)
   //builder              		: "Generate installation SQL" = install-sql (openeditor) (realtime) (source)
   builder              		: "Generate SQL from Booster" = booster-to-sql (openeditor) (realtime) (source)
   builder                   : "Test Dynamic Rules" = test-dynamic-rules (openeditor) (realtime) (source)

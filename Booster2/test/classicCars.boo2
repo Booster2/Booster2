@@ -45,8 +45,6 @@ System ClassicCars
 	}
 	
 	class Customer {
-		methods
-			Create { c! : Customer' }
 		attributes
 			customerNumber (ID) : Int
 			customerName (ID) : String

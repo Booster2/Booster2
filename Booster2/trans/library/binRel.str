@@ -9,11 +9,37 @@ imports
 	get-binrel-booster-notation:
 		Equal() -> $[=]
 		
+		
+	get-binrel-type:
+		(type, Equal(), type) -> []
+		
+	get-binrel-type:
+		(type, Equal()) -> type
+		
+	get-binrel-type:
+		(Equal(), type) -> type
+	
+	
+	
+	
+		
 	get-binrel-booster-notation:
 		NotEqual() -> $[/=]
 
+
+
 	get-binrel-booster-notation:
-		In() -> $[:]
+		In() -> $[:]		
+		
+	get-binrel-type:
+		(type, In(), Set(type)) -> []
+		
+	get-binrel-type:
+		(type, In()) -> Set(type)
+		
+	get-binrel-type:
+		(In(), Set(type)) -> type
+	
 		
 	get-binrel-booster-notation:
 		NotIn() -> $[/:]
@@ -43,3 +69,11 @@ imports
 		SupersetEquals() -> $[:>>]
 
 
+	get-binrel-type:
+		(type, Equal(), type) -> []
+		
+	get-binrel-type:
+		(type, Equal()) -> []
+		
+	get-binrel-type:
+		(Equal(), type) -> []	

@@ -1,0 +1,14 @@
+/**
+* Unit tests for the Booster2 language.
+*/
+module basicSystem
+
+
+language Booster2
+
+
+
+test Basic system test [[
+  system S
+]] run expand-booster-for-testing to 
+System("S", [])

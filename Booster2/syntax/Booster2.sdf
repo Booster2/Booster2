@@ -70,11 +70,11 @@ exports
   	 'true' 			-> Constraint {cons("True")}
   	 'false' 			-> Constraint {cons("False")}
   	 Relation 			-> Constraint 
-  	 'not' Constraint		-> Constraint { cons("Not"), prefer}
-  	 Constraint '&' Constraint 	-> Constraint { cons("And"), left}
-  	 Constraint 'or' Constraint 	-> Constraint { cons("Or"), left}
- 	 Constraint '=>' Constraint 	-> Constraint { cons("Implies"), right}
- 	 Constraint ';' Constraint 	-> Constraint { cons("Then"), left}
+  	 'not' Constraint		-> Constraint { cons("Not")}
+  	 Constraint '&' Constraint 	-> Constraint { cons("And"), assoc}
+  	 Constraint 'or' Constraint 	-> Constraint { cons("Or"), assoc}
+ 	 Constraint '=>' Constraint 	-> Constraint { cons("Implies"), assoc}
+ 	 Constraint ';' Constraint 	-> Constraint { cons("Then"), assoc}
  	 "(" Constraint ")" 		-> Constraint { bracket}
   	 MethodReference -> Constraint {cons("MethodRef")}
     'exists' ID
@@ -85,7 +85,7 @@ exports
        "@" Constraint		-> Constraint {cons("Forall")}
   	Constraint -> BoosterTerm 
   	 
-  	Expression BinRel Expression -> Relation {cons("BinRel"), left}
+  	Expression BinRel Expression -> Relation {cons("BinRel")}
   	 
   	'=' 	-> BinRel {cons("Equal")}
     '/=' 	-> BinRel {cons("NotEqual")}
@@ -172,14 +172,14 @@ exports
   	  "Const"[0-9]* -> Constraint {prefer}
   	  "SystemComponents"[0-9]* "*" -> ( SystemComponent )* {prefer}
 
-priorities
+context-free priorities
 	 'not' Constraint		-> Constraint 
 	 > Constraint '&' Constraint 	-> Constraint 
   	 > Constraint 'or' Constraint 	-> Constraint
  	 > Constraint '=>' Constraint 	-> Constraint 
  	 > Constraint ';' Constraint 	-> Constraint 
 
-priorities
+context-free priorities
 	'head' Expression	-> Expression
     > 'tail' Expression 	-> Expression
     > 'card' Expression 	-> Expression

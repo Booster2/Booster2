@@ -1,0 +1,31 @@
+system Student 
+	
+	set Status { Undergraduate, Staff, Chancellor, Postgraduate, Congregation, ViceChancellor }
+	
+	class Student {
+		attributes
+			lastName (ID) : STRING
+			firstName (ID) : STRING
+			status : Status
+			supervisors : SET(Staff . supervisees)[*]
+		methods 
+			Create {s! : Student'
+					; s!.lastName' = lastName? 
+					& s!.firstName' = firstName?
+					& s!.status' = status?
+					& supervisor? : s!.supervisors' }	
+	}
+	
+	class Staff {
+		attributes
+			lastName (ID) : STRING
+			firstName (ID) : STRING
+			supervisees : SET ( Student . supervisors)[*] 
+		 methods
+			Create {s! : Staff' 
+					; s!.lastName' = lastName? 
+					& s!.firstName' = firstName?}	
+
+	}
+	
+	

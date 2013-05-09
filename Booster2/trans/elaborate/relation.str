@@ -6,6 +6,7 @@ imports
   elaborate/expression
   elaborate/valueExpression
   
+  library/binRel
  
  rules
  	
@@ -14,6 +15,38 @@ imports
 		Description goes here
 */ 	
 	
+	deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			(type2, types2) := <deduce-types> (classname, methodname, expr2, types1);
+			[] := <get-binrel-type> (type1, rel, type2)
+			
+	deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			(type2, types2) := <deduce-types> (classname, methodname, expr1, types1);
+			[] := <get-binrel-type> (type1, rel, type2)
+
+    deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			type2 := <get-binrel-type> (type1, rel);
+			types2 := <infer-type> (classname, methodname, expr2, type2, types1)
+
+    deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			type2 := <get-binrel-type> (rel, type1);
+			types2 := <infer-type> (classname, methodname, expr1, type2, types1)
+
 
 
 

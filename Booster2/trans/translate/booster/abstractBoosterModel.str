@@ -138,7 +138,7 @@ imports
 			-> $[skip]
 
 	output-to-booster-guarded-command:
-		New(o, cl)
+		New(Output(o), cl)
 			-> $[new [o]! : [cl]]
 
 			

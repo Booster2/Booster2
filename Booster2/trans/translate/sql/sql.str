@@ -18,6 +18,7 @@ rules
 	 		-> $[drop database if exists [name];
 				 create database [name];
 	 		     use [[name]];
+	 		     SET autocommit=0;
 	 		[<pp-install> tables]
 	 		[<pp-install> procedures]
 			[<proc-statements> statements]
@@ -64,11 +65,12 @@ rules
 	 		-> $[ drop procedure if exists [name];
 	 			  delimiter //
 	 			  create procedure [name] ( [<proc-params> inputs])
-	 			    begin 
-	 				declare exit handler for not found rollback;
-    				declare exit handler for sqlwarning rollback;
-    				declare exit handler for sqlexception rollback;
-	 			    start transaction;
+	 				begin
+	 				declare exit handler for sqlwarning, sqlexception, not found 
+	 				begin
+					rollback;
+					end; 
+					start transaction;
 	 			    [<declare-statements> declares]
 	 			    [<proc-statements> statements]
 	 			    commit;
@@ -137,31 +139,31 @@ rules
 
 	proc-params:
 		[Input(name, type)]
-			-> $[in [name] [<column-type> type]]
+			-> $[in [name]_in [<column-type> type]]
 		
 	proc-params:
 		[Input(name, type), params*]
-			-> $[in [name] [<column-type> type], [ins*]]
+			-> $[in [name]_in [<column-type> type], [ins*]]
 		where
 			[ins*] := <proc-params> [params*]
 
 	proc-params:
 		[Output(name, type)]
-			-> $[out [name] [<column-type> type]]
+			-> $[out [name]_out [<column-type> type]]
 		
 	proc-params:
 		[Output(name, type), params*]
-			-> $[out [name] [<column-type> type], [ins*]]
+			-> $[out [name]_out [<column-type> type], [ins*]]
 		where
 			[ins*] := <proc-params> [params*]
 
 	proc-params:
 		[InOut(name, type)]
-			-> $[inout [name] [<column-type> type]]
+			-> $[inout [name]_inout [<column-type> type]]
 		
 	proc-params:
 		[InOut(name, type), params*]
-			-> $[inout [name] [<column-type> type], [ins*]]
+			-> $[inout [name]_inout [<column-type> type], [ins*]]
 		where
 			[ins*] := <proc-params> [params*]
 
@@ -236,10 +238,16 @@ rules
 		
 	column-names:
 		[] -> $[]
+
+	column-names:
+		[Output(o)] -> $[[o]_out]
 		
 	column-names:
 		[cn] -> $[[cn]]
 		
+	column-names:
+		[Output(o), cns*] -> $[[o]_out, [<column-names> [cns*]]]
+
 	column-names:
 		[cn, cns*] -> $[[cn], [<column-names> [cns*]]]
 

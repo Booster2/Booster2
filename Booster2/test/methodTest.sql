@@ -16,6 +16,8 @@ alter table class1
 	add column att1 int     ;
 alter table class1
 	add column att2 varchar(1000)     ;
+alter table class1
+	add column att3 int     ;
 
 alter table _Meta_Method_Params
 	add column class varchar(500)     ;
@@ -411,6 +413,29 @@ create procedure class1_m14 ( in a int)
 	end //
 delimiter ;
 
+drop procedure if exists class1_m15;
+delimiter //
+create procedure class1_m15 ( in a int, in this int)
+  begin 
+	declare exit handler for not found rollback;
+	declare exit handler for sqlwarning rollback;
+	declare exit handler for sqlexception rollback;
+  start transaction;
+  
+  if a > 5 and true
+  then update  class1
+       set att3 = a
+       where this = class1Id
+       
+        ;
+       
+  
+  end if ;
+  
+  commit;
+	end //
+delimiter ;
+
 
 insert  
 into
@@ -432,6 +457,13 @@ _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
 ('class1','att2','String','Mandatory',null,'','','Uni','class1',0)
+ ;
+insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('class1','att3','Integer','Mandatory',null,'','','Uni','class1',0)
  ;
 insert  
 into
@@ -530,6 +562,13 @@ _Meta_Methods
 (class, methodName, isObjectMethod)
 values
 ('class1','m14',false)
+ ;
+insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('class1','m15',true)
  ;
 insert  
 into
@@ -656,5 +695,19 @@ _Meta_Method_Params
 (class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
 values
 ('class1','m14','a','Integer','Mandatory','input','','')
+ ;
+insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('class1','m15','a','Integer','Mandatory','input','','')
+ ;
+insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('class1','m15','this','ClassRef','Mandatory','input','class1','')
  ;
 

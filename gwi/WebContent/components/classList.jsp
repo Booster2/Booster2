@@ -1,4 +1,4 @@
-<div data-bind="if: classList().length > 0">
+<div data-bind="if: viewType() == 'classlist'">
 <h2>Class Browser</h2>
 <p style="float: left;">Choose a class, and either browse or search:</p>
 
@@ -20,16 +20,16 @@
                     
     <tbody data-bind="foreach: classList">
     	<tr class="form-horizontal">
-           	<td style="width: 20em;" >
+           	<td style="width: 20em; padding-top: 14px;">
 				<span data-bind="text: className().unCamelCase()"></span>
 			</td>
-			<td>
+			<td style="padding-top: 14px;">
 				<span data-bind="text: noObjects"></span>
 			</td>
-			<td>
+			<td style="padding-top: 14px;">
 				<a data-bind="if: noObjects() > 0,attr: { href: '#object/' + className() + '/' + minId()}">Browse...</a>
 			</td>
-			<td>
+			<td style="padding-top: 14px;">
 				<a data-bind="if: noObjects() > 0,attr: { href: '#class/' + className() }">Search...</a>
 			</td>
 <!-- 			<td>

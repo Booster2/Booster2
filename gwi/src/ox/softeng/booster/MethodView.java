@@ -66,9 +66,32 @@ public class MethodView extends HttpServlet {
 					String paramName = rs.getString("paramName");
 					String paramType = rs.getString("paramType");
 					String paramMultiplicity = rs.getString("paramMultiplicity");
+					String paramSetName = rs.getString("paramSetName");
+					
+					if("SetValue".equalsIgnoreCase(paramType) && 
+							!"".equalsIgnoreCase(paramSetName) &&
+							!result.containsKey(paramSetName))
+					{
+						PreparedStatement setvalueps = client.prepareStatement("call `GET_SET_VALUES`(?)");
+						setvalueps.setString(1, paramSetName);
+						ResultSet setValuesRS = setvalueps.executeQuery();
+						JSONArray valuesArray = new JSONArray();
+						while(setValuesRS.next())
+						{
+							
+							String value = setValuesRS.getString(1);
+							System.out.println("Value: " + value);
+							valuesArray.add(value);
+						}
+						obj.put("values", valuesArray);
+
+						
+						
+					}
 					
 					obj.put("paramName", paramName);
 					obj.put("paramType", paramType);
+					obj.put("paramSetName", paramSetName);
 					obj.put("paramMutiplicity", paramMultiplicity);
 					
 					jsonArray.add(obj);

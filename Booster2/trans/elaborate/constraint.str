@@ -81,34 +81,9 @@ imports
 			types2 := <deduce-types> (classname, methodname, expr2, types1)
 
 
-	deduce-types:
-		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
-		 	-> types2
-		where
-			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
-			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr2, types1)
-
-	deduce-types:
-		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
-		 	-> types2
-		where
-			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
-			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr1, types1)
 
 
-    deduce-types:
-		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
-		 	-> types2
-		where
-			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
-			types2 := <infer-type> (classname, methodname, expr2, BasicType(t), types1)
 
-    deduce-types:
-		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
-		 	-> types2
-		where
-			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
-			types2 := <infer-type> (classname, methodname, expr1, BasicType(t), types1)
 	
 
 
@@ -144,6 +119,7 @@ imports
 			types2 := <infer-type> (classname, methodname, expr1, BasicType(t), types1)
 			
 			
+
 	deduce-types:
 		(classname, methodname, PathStart(a,maybeprimed), alreadyknown)
 			-> (Set(Class(a)), alreadyknown)
@@ -169,23 +145,17 @@ imports
 
 
 	deduce-types:
-		(classname, methodname, Path(path, component), alreadyknown)
-			-> (type, newlyknown)
+		(classname, methodname, Path(path, PathComponent(att, maybeprimed)), alreadyknown)
+			-> (type, alreadyknown)
 		where
-			(type2, newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
-			type := <resolve-path-type>
-					(classname, Path(path,component), (classname, methodname), newlyknown)
+			(Class(c), newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
+			type := <lookup-attribute-type> (c, att)
+			/* type := <resolve-path-type>
+					(classname, Path(path,component), (classname, methodname), newlyknown) */
+			
 
-	deduce-types:
-		(classname, methodname, Path(path, component), alreadyknown)
-			-> (type2, newlyknown)
-		where
-			(type, newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
-			type2 := <resolve-path-type>
-					(classname, Path(path,component), (classname, methodname), newlyknown)
 
-					
-
+				
 
 			
 

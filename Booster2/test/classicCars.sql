@@ -85,112 +85,112 @@ alter table ProductLine_products_Product_productLine
 alter table Office
 	add column officeCode int     ;
 alter table Office
-	add column city varchar(500)     ;
+	add column city varchar(1000)     ;
 alter table Office
-	add column phone varchar(500)     ;
+	add column phone varchar(1000)     ;
 alter table Office
-	add column addressLine1 varchar(500)     ;
+	add column addressLine1 varchar(1000)     ;
 alter table Office
-	add column addressLine2 varchar(500)     ;
+	add column addressLine2 varchar(1000)     ;
 alter table Office
-	add column state varchar(500)     ;
+	add column state varchar(1000)     ;
 alter table Office
-	add column country varchar(500)     ;
+	add column country varchar(1000)     ;
 alter table Office
-	add column postalCode varchar(500)     ;
+	add column postalCode varchar(1000)     ;
 alter table Office
-	add column territory varchar(500)     ;
+	add column territory varchar(1000)     ;
 
 alter table Employee
 	add column employeeNumber int     ;
 alter table Employee
-	add column lastName varchar(500)     ;
+	add column lastName varchar(1000)     ;
 alter table Employee
-	add column firstName varchar(500)     ;
+	add column firstName varchar(1000)     ;
 alter table Employee
-	add column extension varchar(500)     ;
+	add column extension varchar(1000)     ;
 alter table Employee
-	add column email varchar(500)     ;
+	add column email varchar(1000)     ;
 alter table Employee
-	add column jobTitle varchar(500)     ;
+	add column jobTitle varchar(1000)     ;
 
 alter table Payment
-	add column checkNumber varchar(500)     ;
+	add column checkNumber varchar(1000)     ;
 alter table Payment
-	add column paymentDate varchar(500)     ;
+	add column paymentDate varchar(1000)     ;
 alter table Payment
-	add column amount varchar(500)     ;
+	add column amount varchar(1000)     ;
 
 alter table Customer
 	add column customerNumber int     ;
 alter table Customer
-	add column customerName varchar(500)     ;
+	add column customerName varchar(1000)     ;
 alter table Customer
-	add column contactLastName varchar(500)     ;
+	add column contactLastName varchar(1000)     ;
 alter table Customer
-	add column contactFirstName varchar(500)     ;
+	add column contactFirstName varchar(1000)     ;
 alter table Customer
-	add column phone varchar(500)     ;
+	add column phone varchar(1000)     ;
 alter table Customer
-	add column addressLine1 varchar(500)     ;
+	add column addressLine1 varchar(1000)     ;
 alter table Customer
-	add column addressLine2 varchar(500)     ;
+	add column addressLine2 varchar(1000)     ;
 alter table Customer
-	add column city varchar(500)     ;
+	add column city varchar(1000)     ;
 alter table Customer
-	add column state varchar(500)     ;
+	add column state varchar(1000)     ;
 alter table Customer
-	add column postalCode varchar(500)     ;
+	add column postalCode varchar(1000)     ;
 alter table Customer
-	add column country varchar(500)     ;
+	add column country varchar(1000)     ;
 alter table Customer
-	add column creditLimit varchar(500)     ;
+	add column creditLimit varchar(1000)     ;
 
 alter table PurchaseOrder
 	add column orderNumber int     ;
 alter table PurchaseOrder
-	add column orderDate varchar(500)     ;
+	add column orderDate varchar(1000)     ;
 alter table PurchaseOrder
-	add column requiredDate varchar(500)     ;
+	add column requiredDate varchar(1000)     ;
 alter table PurchaseOrder
-	add column shippedDate varchar(500)     ;
+	add column shippedDate varchar(1000)     ;
 alter table PurchaseOrder
-	add column status varchar(500)     ;
+	add column status varchar(1000)     ;
 alter table PurchaseOrder
-	add column comments varchar(500)     ;
+	add column comments varchar(1000)     ;
 
 alter table PurchaseOrderDetails
 	add column quantityOrdered int     ;
 alter table PurchaseOrderDetails
-	add column priceEach varchar(500)     ;
+	add column priceEach varchar(1000)     ;
 alter table PurchaseOrderDetails
 	add column orderLineNumber int     ;
 
 alter table Product
-	add column productName varchar(500)     ;
+	add column productName varchar(1000)     ;
 alter table Product
-	add column productCode varchar(500)     ;
+	add column productCode varchar(1000)     ;
 alter table Product
-	add column productScale varchar(500)     ;
+	add column productScale varchar(1000)     ;
 alter table Product
-	add column productVendor varchar(500)     ;
+	add column productVendor varchar(1000)     ;
 alter table Product
-	add column productDescription varchar(500)     ;
+	add column productDescription varchar(1000)     ;
 alter table Product
 	add column quantityInStock int     ;
 alter table Product
-	add column buyPrice varchar(500)     ;
+	add column buyPrice varchar(1000)     ;
 alter table Product
-	add column MSRP varchar(500)     ;
+	add column MSRP varchar(1000)     ;
 
 alter table ProductLine
-	add column productLine varchar(500)     ;
+	add column productLine varchar(1000)     ;
 alter table ProductLine
-	add column textDescription varchar(500)     ;
+	add column textDescription varchar(1000)     ;
 alter table ProductLine
-	add column htmlDescription varchar(500)     ;
+	add column htmlDescription varchar(1000)     ;
 alter table ProductLine
-	add column image varchar(500)     ;
+	add column image varchar(1000)     ;
 
 alter table _Meta_Method_Params
 	add column class varchar(500)     ;
@@ -241,40 +241,6 @@ alter table _Meta_Classes
 	add column className varchar(500)     ;
 alter table _Meta_Classes
 	add column tableName varchar(500)     ;
-
-drop procedure if exists Customer_Create;
-delimiter //
-create procedure Customer_Create ( out c int)
-  begin 
-	declare exit handler for not found rollback;
-	declare exit handler for sqlwarning rollback;
-	declare exit handler for sqlexception rollback;
-  start transaction;
-  
-  if true and true and true and true and true
-  then insert  
-       into
-       Customer
-       ()
-       values
-       ()
-        ;
-       (select  LAST_INSERT_ID()  
-       
-       
-       
-       
-       
-       
-       into c
-       ) ;
-       
-  
-  end if ;
-  
-  commit;
-	end //
-delimiter ;
 
 
 insert  
@@ -615,20 +581,6 @@ values
  ;
 insert  
 into
-_Meta_Methods
-(class, methodName, isObjectMethod)
-values
-('Customer','Create',false)
- ;
-insert  
-into
-_Meta_Method_Params
-(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
-values
-('Customer','Create','c','ClassRef','Mandatory','output','Customer','')
- ;
-insert  
-into
 _Meta_Classes
 (className, tablename)
 values
@@ -878,6 +830,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
     STRING_VALUE VARCHAR(500),
+    DATETIME_VALUE TIMESTAMP,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100)
@@ -926,6 +879,10 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
                                     (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
@@ -1015,6 +972,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
     STRING_VALUE VARCHAR(500),
+    DATETIME_VALUE TIMESTAMP,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100),
@@ -1042,6 +1000,10 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
@@ -1063,6 +1025,10 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
 
     ELSEIF @primType = 'SetValue' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
@@ -1168,4 +1134,205 @@ CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(500), Id_in
   	END;
  $$
 
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GET_OBJECT_DESCRIPTION_AS_TABLE`;
+
+DELIMITER $$
+
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_AS_TABLE`( className_in VARCHAR(500), orderBy_in VARCHAR(255), direction_in VARCHAR(10), start_in INT, limit_in INT)
+BEGIN
+DECLARE thisTableName CHAR(255);
+DECLARE idField CHAR(255);
+if orderBy_in is null or orderBy_in = '' then
+begin
+	set orderBy_in = 'ID';
+end;
+end if;
+set @thisTableName = (select tableName from _Meta_Classes where className = className_in);
+set @idField = CONCAT(@thisTableName, 'Id');
+
+
+DROP TABLE IF EXISTS ATTRIBUTES_FOR_DESC;
+CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC 
+  (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+	CALL_CLASS VARCHAR(500),
+	CALL_OID INT,
+    ATT_NAME VARCHAR(500),
+    ATT_PRIM_TYPE VARCHAR(500),
+    TYPE_MULT VARCHAR(500),
+    INT_VALUE INT,
+    STRING_VALUE VARCHAR(500),
+    SET_VALUE VARCHAR(500),
+    OID_VALUE INT,
+    CLASS_NAME VARCHAR(100)
+  ) ENGINE = MEMORY; 
+
+BEGIN
+
+
+DROP TABLE IF EXISTS OBJECT_IDS;
+CREATE TEMPORARY TABLE OBJECT_IDS 
+  (
+    ID INT PRIMARY KEY 
+  );
+
+SET @SQL_TEXT = CONCAT('INSERT INTO `OBJECT_IDS` SELECT ', @idField, ' FROM ', @thisTableName, '');
+
+PREPARE stmt_name FROM @SQL_TEXT;
+EXECUTE stmt_name;
+DEALLOCATE PREPARE stmt_name; 
+
+
+/*SELECT * FROM OBJECT_IDS;*/
+
+
+/*DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1; */
+	
+
+END;
+
+
+BEGIN
+DECLARE done INT DEFAULT 0;
+DECLARE OID INT ;
+
+DECLARE object_ids CURSOR for 
+    SELECT ID FROM OBJECT_IDS ;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+
+OPEN object_ids;   
+
+WHILE done = 0 DO
+	FETCH NEXT FROM object_ids INTO OID;
+		IF done = 0 THEN
+			SET @SQL_TEXT = CONCAT('CALL `GET_OBJECT_DESCRIPTION_RECURSE`( \'', className_in, '\',', OID, ',@objectDesc)');
+			PREPARE stmt_name5 FROM @SQL_TEXT;
+			EXECUTE stmt_name5;
+			DEALLOCATE PREPARE stmt_name5; 
+		END IF;
+END WHILE;
+
+END;
+/*SELECT * FROM ATTRIBUTES_FOR_DESC;
+SELECT DISTINCT ATT_NAME, ATT_PRIM_TYPE FROM ATTRIBUTES_FOR_DESC WHERE CALL_CLASS = className_in; */
+
+BEGIN
+
+DECLARE done INT DEFAULT 0;
+DECLARE ANAME CHAR(255);
+DECLARE APT CHAR(20);
+
+DECLARE attribute_names CURSOR for 
+    SELECT DISTINCT ATT_NAME, ATT_PRIM_TYPE FROM ATTRIBUTES_FOR_DESC WHERE CALL_CLASS = className_in;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+OPEN attribute_names;   
+
+WHILE done = 0 DO
+	FETCH NEXT FROM attribute_names INTO ANAME, APT;
+		IF done = 0 THEN
+			IF(APT = 'String') THEN
+				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` VARCHAR(1000);');
+			ELSEIF(APT = 'Integer') THEN
+				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` INT;');
+			END IF;
+			/* SELECT @SQL_TEXT1; */
+
+			IF(@SQL_TEXT1 is not null ) THEN
+				PREPARE stmt_name6 FROM @SQL_TEXT1;
+				EXECUTE stmt_name6;
+				DEALLOCATE PREPARE stmt_name6; 
+				
+			END IF;
+		END IF; 
+END WHILE;
+END;
+
+
+BEGIN
+
+DECLARE done INT DEFAULT 0;
+DECLARE ANAME CHAR(255);
+DECLARE OID INT;
+DECLARE APT CHAR(20);
+DECLARE STRV CHAR(255);
+DECLARE INTV INT;
+
+DECLARE attribute_rows CURSOR for 
+    SELECT CALL_OID, ATT_NAME, ATT_PRIM_TYPE, INT_VALUE, STRING_VALUE
+  FROM ATTRIBUTES_FOR_DESC WHERE CALL_CLASS = className_in;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+OPEN attribute_rows;   
+
+/*SELECT * FROM ATTRIBUTES_FOR_DESC;*/
+WHILE done = 0 DO
+	FETCH NEXT FROM attribute_rows INTO OID, ANAME, APT, INTV, STRV;
+		IF done = 0 THEN
+		/*SELECT ANAME; */		
+
+		SET @SQL_TEXT2 = null;
+			SET @SQL_TEXT2 = CONCAT('INSERT INTO `OBJECT_IDS` (ID, ',ANAME,' ) VALUES (?,?) ON DUPLICATE KEY UPDATE ',ANAME,' = ?');
+			/*SET @SQL_TEXT2 = CONCAT('INSERT INTO `OBJECT_IDS` (ID, ',ANAME, ') VALUES (',OID, ',', STRV, ') ON DUPLICATE KEY UPDATE ', ANAME, ' = ', STRV); */
+		IF(@SQL_TEXT2 is not null ) THEN
+			PREPARE stmt_name FROM @SQL_TEXT2;
+			SET @OIDV = OID;
+			SET @STRVV = STRV;
+			EXECUTE stmt_name USING @OIDV, @STRVV, @STRVV;
+			DEALLOCATE PREPARE stmt_name; 
+		END IF; 
+	END IF;
+END WHILE;
+
+CLOSE attribute_rows;
+END;
+
+SET @SQL_RESULT = CONCAT('SELECT * FROM OBJECT_IDS ORDER BY ', orderBy_in, ' ', direction_in, ' LIMIT ', start_in, ', ', limit_in, ';');
+
+PREPARE stmt_result FROM @SQL_RESULT;
+EXECUTE stmt_result;
+DEALLOCATE PREPARE stmt_result; 
+
+
+
+/*SELECT * FROM ATTRIBUTES_FOR_DESC; */
+END
+$$
+
+DELIMITER ;
+DROP PROCEDURE IF EXISTS `GET_NO_OBJECTS_FOR_CLASS` ;
+DELIMITER $$
+CREATE PROCEDURE `GET_NO_OBJECTS_FOR_CLASS`( className_in VARCHAR(100), out recordCount_out INT)
+BEGIN
+DECLARE done INT DEFAULT 0;
+
+
+SELECT tableName INTO @TNAME FROM _Meta_Classes where className = className_in;
+
+SET @SQL_TXT = CONCAT("SELECT COUNT(*) INTO @rc FROM ", @TNAME);
+
+PREPARE stmt_name FROM @SQL_TXT;
+EXECUTE stmt_name;
+DEALLOCATE PREPARE stmt_name; 
+SET recordCount_out = @rc;
+END
+$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `GET_OBJECT_DESCRIPTION_ATTRIBUTES`;
+DELIMITER $$
+
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_ATTRIBUTES`( className_in VARCHAR(500))
+BEGIN
+    SELECT * FROM _Meta_Attributes WHERE class = className_in and isId = 1;
+END 
+$$
+DELIMITER ;
 

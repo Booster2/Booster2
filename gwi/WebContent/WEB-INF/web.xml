@@ -49,4 +49,14 @@
     <servlet-name>callMethod</servlet-name>
     <url-pattern>/callMethod</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>ClassCardinality</display-name>
+    <servlet-name>ClassCardinality</servlet-name>
+    <servlet-class>ox.softeng.booster.ClassCardinality</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ClassCardinality</servlet-name>
+    <url-pattern>/ClassCardinality</url-pattern>
+  </servlet-mapping>
 </web-app>

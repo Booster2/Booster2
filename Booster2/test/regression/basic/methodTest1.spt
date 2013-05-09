@@ -1,3 +1,28 @@
+/**
+* Unit tests for the Booster2 language.
+*/
+module template
+
+
+language Booster2
+
+
+
+
+test Method test 1 [[
+  
+system methodTest
+
+   class class1 {
+   	  attributes
+   	  	att1 : INT
+   	  methods
+  	  	m1 { att1' = 5 }	
+	}
+  
+  
+]] run expand-booster-for-testing to 
+
 System(
   "methodTest"
 , [ Class(
@@ -9,7 +34,7 @@ System(
             , BinRel(
                 PathStart("att1", Some(Primed()))
               , Equal()
-              , BinOp(BasicValue(Integer("5")), Plus(), BasicValue(Integer("3")))
+              , BasicValue(Integer("5"))
               )
             )
           ]

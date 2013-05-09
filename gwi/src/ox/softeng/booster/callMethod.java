@@ -80,7 +80,7 @@ public class callMethod extends HttpServlet {
 				paramInOuts.put(paramName, inOut);
 				if(inOut.equalsIgnoreCase("input"))
 				{
-					if(paramType.equalsIgnoreCase("String"))
+					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
 					{
 						methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
 					}
@@ -106,7 +106,7 @@ public class callMethod extends HttpServlet {
 		        String paramType = paramTypes.get(pairs.getKey());
 		        if(paramInOuts.get(pairs.getKey()).equalsIgnoreCase("input"))
 		        {
-			        if(paramType.equalsIgnoreCase("String"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
 			        {
 			        	cs.setString(paramNo,(String)pairs.getValue());
 			        	System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
@@ -119,7 +119,7 @@ public class callMethod extends HttpServlet {
 		        }
 		        else if(paramInOuts.get(pairs.getKey()).equalsIgnoreCase("output"))
 		        {
-			        if(paramType.equalsIgnoreCase("String"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
 			        {
 			        	cs.registerOutParameter(paramNo, java.sql.Types.VARCHAR);
 			        	System.out.println("Registering: " + pairs.getKey() + "," + pairs.getValue());

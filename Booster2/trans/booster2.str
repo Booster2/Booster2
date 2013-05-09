@@ -93,6 +93,27 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 		 				<elaborate>
    				          <parse> 
    				            selected
+
+   expand-booster-without-printing:
+   	(selected, position, ast, path, project-path) -> (filename, result)
+   	 with
+   		filename := <guarantee-extension(|"expanded.booster")> path;
+   		result :=  <simplify-main>
+   				  	<compile>
+	   				   
+		 				<elaborate>
+   				          <parse> 
+   				            selected
+
+
+   expand-booster-for-testing:
+   	selected -> result
+   	 with
+   		result := <simplify-main>
+   				  	<compile>
+	   					<elaborate>
+   				        	<parse> 
+   				            	selected
    	   				
 
 	/*expand-booster:
@@ -151,6 +172,9 @@ main-booster =
     prim("SSL_stacktrace_get_all_frame_names"); report-failure
   )
 
+
+simple-test:
+	x -> x
 
 	test-store:
 		x -> x 

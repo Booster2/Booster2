@@ -59,7 +59,8 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Booster</a>
+          <a class="brand" href="#classList">
+          	<img src="images/rocket.png" style="height: 1em; margin-right: 0.5em;"/>Booster</a>
           <div class="nav-collapse collapse">
             <p class="navbar-text pull-right">
               Logged in as <a href="#" class="navbar-link">Username</a>
@@ -74,6 +75,10 @@
       </div>
     </div>
 	<div class="container">
+	
+		<div style="margin-top: 10em;" data-bind="visible: viewType() == 'loading'">
+			<p style="text-align: center;"><i class="icon-spinner icon-spin icon-large"></i><br/> Loading page... Please wait</p>
+		</div>
 		<jsp:include page="components/classList.jsp" />
 		<jsp:include page="components/classSearch.jsp" />
 		<jsp:include page="components/objectView.jsp" />

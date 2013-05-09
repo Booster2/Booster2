@@ -34,6 +34,7 @@ function Method(objectItem) {
     self.methodName = ko.observable(objectItem.methodName);
     self.methodThisOid = ko.observable(objectItem.methodThisOid);
     self.methodParams = ko.observableArray(objectItem.parameters);
+    self.objectItem = objectItem;
     
 }
 
@@ -41,12 +42,16 @@ function Method(objectItem) {
 function MethodParam(objectItem) {
     var self = this;
     self.paramName = ko.observable(objectItem.paramName);
+    self.paramType = ko.observable(objectItem.paramType);
+    self.values = ko.observable(objectItem.values);
 }
 
 
 function BoosterViewModel() {
     // Data
 	var self = this;
+	
+	self.viewType = ko.observable();
   
 	self.classList = ko.observableArray();
 	self.showingClassName = ko.observable();
@@ -64,12 +69,47 @@ function BoosterViewModel() {
   	self.methodThisType = ko.observable();
   	self.methodThisOid = ko.observable();
   	self.methodReturnUrl = ko.observable();
+    self.searchOrderBy = ko.observable();
+    self.searchDirection = ko.observable();
+    self.searchStart = ko.observable();
+    self.searchLimit = ko.observable();
+    self.searchTerm = ko.observable();
+	self.searchNoResults = ko.observable();
 
-	
+	self.searchTable = ko.computed(function(){
+		//console.log("calculating searchtable");
+		var dataRet = null;
+		if(self.showingClassName() != null && self.showingObjectID() == null
+			&& self.searchDirection() != null && self.searchStart() != null
+			&& self.searchLimit != null)
+		{
+			$.ajax({
+				dataType: "json",
+				async: false,
+				url: 'ClassSearch',
+				data: {
+	                className : self.showingClassName(),
+	                searchOrderBy : self.searchOrderBy(),
+	                searchDirection : self.searchDirection(),
+	                searchStart : self.searchStart(),
+	                searchLimit : self.searchLimit(),
+	                searchTerm : self.searchTerm()
+	            },
+				success: function(data) {
+	            		dataRet = data;
+	            		self.searchNoResults(dataRet.total);
+	            	}
+				});
+		}
+		//console.log("calculated searchtable");
+		return dataRet;
+	});
+
 	resetObservables(self, '');
     
     $.sammy(function() {
     	this.get('#object/:className/:objectID', function() {
+    		self.viewType('loading');
     		
     		resetObservables(self, 'objectview');
             $.getJSON("ObjectView", 
@@ -90,11 +130,25 @@ function BoosterViewModel() {
             });
             self.showingClassName(this.params.className);
             self.showingObjectID(this.params.objectID);
+            self.viewType('objectview'); 
+        });
+this.get('#class/:className', function() {
+			self.viewType('loading');		
+    		resetObservables(self, 'classview');
+    		
+            self.showingClassName(this.params.className);
+            self.searchOrderBy("");
+            self.searchStart(0);
+            self.searchLimit(10);
+            self.searchDirection("ASC");
+            self.searchTerm("");
+            //self.showingObjectID(this.params.objectID);
             
+            self.viewType('classview');
         });
     	this.get('#objectmethod/:className/:objectID/:methodName', function() {
     		//resetObservables(self, 'methodview');
-
+    		self.viewType('loading');
     		self.methodName(this.params.methodName);
     		self.className(this.params.className);
     		self.methodThisType(this.params.className);
@@ -110,19 +164,18 @@ function BoosterViewModel() {
 	            	var mappedMethodParams = $.map(data.parameters, function(item) { return new MethodParam(item); });
 	          	  	self.methodParams(mappedMethodParams);
 	          	  	
-	          	  
 	            }
 	        );
             prepareMethod(self);
-
+            self.viewType('methodview');
     	});
     	this.get('#classmethod/:className/:methodName', function() {
     		//resetObservables(self, 'methodview');
-
+    		self.viewType('loading');
     		self.methodName(this.params.methodName);
     		self.className(this.params.className);
     		//self.methodReturnUrl('#' + this.params.className + '/' + this.params.objectID);
-            
+    		            
     		$.getJSON('MethodView', 
 	            {
 	                className : this.params.className,
@@ -136,16 +189,17 @@ function BoosterViewModel() {
 	            }
 	        );
             prepareMethod(self);
-
+            self.viewType('methodview');
     	});
         this.get('#classList', function() {
         	self.methodReturnUrl('#classList');
+        	self.viewType('loading');
         	resetObservables(self, 'classlist');
             $.getJSON("ClassList", function(allData) {
                 var mappedClasses = $.map(allData, function(item) { return new Class(item); });
                 self.classList(mappedClasses);
             });
-             
+            self.viewType('classlist');
         });
     }).run('#classList');  
     

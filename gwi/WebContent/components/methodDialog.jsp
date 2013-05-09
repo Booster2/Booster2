@@ -9,19 +9,36 @@
 		<form id="methodCallForm" name="methodCallForm" action="" class="form-horizontal">
 
 <!-- ko foreach: methodParams() -->
-<div class="control-group" data-bind="if: paramName() != 'this'">
-	<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
-	<div class="controls">
-		<input type="text" data-bind="attr: { id: paramName, placeholder: paramName().unCamelCase(), name: paramName}">
+	<!-- ko if: paramName() != 'this' && (paramType() == 'Int' || paramType() == 'String') -->
+	<div class="control-group">
+		<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
+		<div class="controls">
+			<input type="text" data-bind="attr: { id: paramName, placeholder: paramName().unCamelCase(), name: paramName}">
+		</div>
 	</div>
-</div>
-
-<div class="control-group" data-bind="if: paramName() == 'this'" style="display: none">
-	<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
-	<div class="controls">
-		<input type="hidden" data-bind="attr: { name: paramName, value: $parent.methodThisOid()}"/>
+	<!-- /ko -->
+	<!-- ko if: paramName() != 'this' && paramType() == 'SetValue' -->
+	<div class="control-group">
+		<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
+		<div class="controls">
+			<select data-bind="foreach: values(), attr: { id: paramName, placeholder: paramName().unCamelCase(), name: paramName}" >
+				<!-- ko if : $data != 'unassigned' -->
+				<option data-bind="value: $data, text: $data.unCamelCase()"></option>
+				<!-- /ko -->
+				
+			</select>
+			<!-- <input type="text" data-bind="attr: { id: paramName, placeholder: paramName().unCamelCase(), name: paramName}"> -->
+		</div>
 	</div>
-</div>
+	<!-- /ko -->
+	<!-- ko if: paramName() == 'this' -->
+	<div class="control-group" style="display: none">
+		<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
+		<div class="controls">
+			<input type="hidden" data-bind="attr: { name: paramName, value: $parent.methodThisOid()}"/>
+		</div>
+	</div>
+	<!-- /ko -->
 
 <!-- /ko -->
 	</form>

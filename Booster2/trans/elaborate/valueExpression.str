@@ -23,9 +23,9 @@ imports
 		(classname, methodname, Input(name), type1, [alreadyknown*])
 			->[(Input(name), type1), alreadyknown*]
 
-	infer-type:
+/*	infer-type:
 		(classname, methodname, Input(name), type1, [alreadyknown*])
-			->[(Input(name), type1), alreadyknown*]
+			->[(Input(name), type1), alreadyknown*] */
 
 			
 /*	deduce-types:

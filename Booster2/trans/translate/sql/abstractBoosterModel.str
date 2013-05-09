@@ -24,6 +24,7 @@ imports
 	booster-to-metatables:
 		classes ->
 			[Table("_Meta_Classes", [idColumn, nameColumn, tableColumn]),
+			 Table("_Meta_Sets", [idColumn, setColumn, tableColumn, columnColumn]),
 			 Table("_Meta_Attributes", [idColumn, classColumn, attNameColumn, primTypeColumn, typeMultiplicityColumn, classNameColumn, setNameColumn, directionColumn, tableNameColumn, oppAttColumn, isIdColumn]),
 			 Table("_Meta_Methods", [idColumn, classColumn, methodNameColumn, isObjectMethodColumn]),
 			 Table("_Meta_Method_Params", [idColumn, classColumn, methodNameColumn, paramNameColumn, paramTypeColumn, paramMultiplicityColumn, paramInOutColumn, paramClassNameColumn, paramSetNameColumn])]
@@ -31,7 +32,9 @@ imports
 		where
 			idColumn := Column("id" , "", False(), Int(), AutoIncrement(), Primary(), None());
 			nameColumn := Column("className" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			setColumn := Column("setName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
 			tableColumn := Column("tableName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			columnColumn := Column("columnName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
 
 			classColumn := Column("class" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
 			attNameColumn := Column("attName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
@@ -55,9 +58,14 @@ imports
 
 	booster-to-metadata:
 		x ->
-			[classnames*]
+			[setnames*, classnames*]
 		where
+			[setnames*] := <flatten-list><map(booster-to-metadata-sets)> <ABM> "Sets";
 			[classnames*] := <flatten-list><map(booster-to-metadata-classes)> <ABM> "Classes"
+
+	booster-to-metadata-sets:
+		SetDef(setname, values) ->
+			[ Insert(None(), None(), Into(), "_Meta_Sets", ["setName","tablename","columnName"], [String(setname),String(setname),String(setname)], None())] 
 
 	booster-to-metadata-classes:
 		classname ->
@@ -529,15 +537,22 @@ imports
 
 	convert-inputs:
 		[(name, Class(cname)), ins*]
+			-> [Input(name, Varchar(1000)), inputs*]
+		where
+			<equal>(cname, <lookup-set-name> cname); 
+			[inputs*] := <convert-inputs> [ins*]
+
+	convert-inputs:
+		[(name, Class(cname)), ins*]
 			-> [Input(name, Int()), inputs*]
 		where
 			[inputs*] := <convert-inputs> [ins*]
 
-	convert-inputs:
+/*	convert-inputs:
 		[(name, Int()), ins*]
 			-> [Input(name, Int()), inputs*]
 		where
-			[inputs*] := <convert-inputs> [ins*]
+			[inputs*] := <convert-inputs> [ins*] */
 
 	convert-outputs:
 		[] -> []
@@ -595,9 +610,24 @@ imports
 				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
 	booster-to-relational-guarded-command:
-		(classname, progname, New(obj, cls))
+		(classname, progname, Assign(path, BinOp(path, Union(), expr)))
+			-> [Insert(None(), None(), Into(), tablename, [column1, column2], [/*expr1, expr2*/], None())]
+			where 
+				attname := <get-path-attribute-name> path;
+				path' := <get-path-initial-path> path;
+				Class(classname') := <resolve-path-type>(classname, path', (classname, progname));
+				tablename := <get-attribute-table-name>(classname', attname);
+				column1 := <concat-strings>[classname', "_", attname];
+				(classname'', attname'') := <lookup-opposite> (classname', attname);
+				column2 := <concat-strings>[classname'', "_", attname'']/*;
+				expr1 := <booster-to-relational-expression> (classname, progname, path);
+				expr2 := <booster-to-relational-expression> (classname, progname, expr)*/
+
+
+	booster-to-relational-guarded-command:
+		(classname, progname, New(Output(obj), cls))
 			-> [Insert(None(), None(), Into(), cls, [], [], None()),
-				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([obj])), None())]
+				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([Output(obj)])), None())]
 		
 
 
@@ -639,12 +669,12 @@ imports
 			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
 			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
 
-/*	booster-to-relational-guarded-command:
+	booster-to-relational-guarded-command:
 		(classname, progname, gc)
 			-> []
 		where
 			log(|Error(), "cannot convert guarded command", gc)
-*/
+
 
 	booster-to-relational-constraint:
 		(classname, progname, True())
@@ -783,11 +813,15 @@ imports
 
 	booster-to-relational-expression:
 		(classname, progname, Input(n))
-			-> SystemVariable(n)
+			-> SystemVariable(m)
+		where 
+			m := <concat-strings>[n, "_in"]
 
 	booster-to-relational-expression:
 		(classname, progname, Output(n))
-			-> SystemVariable(n)
+			-> SystemVariable(m)
+		where 
+			m := <concat-strings>[n, "_out"]
 
 	booster-to-relational-expression:
 		(classname, progname, This())

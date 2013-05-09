@@ -3,13 +3,13 @@
 <project name="Booster-install" default="install-all">
  
  
-<property name="booster.system.name" value="typeTest"/> 
+<property name="booster.system.name" value="Student"/> 
  
- 	<taskdef resource="net/sf/antcontrib/antlib.xml">
+<!-- 	<taskdef resource="net/sf/antcontrib/antlib.xml">
 	  <classpath>
 	    <pathelement location="../lib/ant-contrib-1.0b3.jar"/>
 	  </classpath>
-	</taskdef>
+	</taskdef> -->
 	
 	
 <target name="install-sql">
