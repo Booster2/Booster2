@@ -1,20 +1,15 @@
-System(
-  "methodTest"
-, [ Class(
-      "class1"
-    , [ Attributes([Attribute("att1", BasicType(Int()))])
-      , Methods(
-          [ Method(
-              "m1"
-            , BinRel(
-                PathStart("att1", Some(Primed()))
-              , Equal()
-              , BinOp(BasicValue(Integer("5")), Plus(), BasicValue(Integer("3")))
-              )
-            )
-          ]
-        )
-      ]
-    )
-  ]
-)
+system methodTest 
+
+
+class class1 {
+	attributes
+		att1 : INT
+		
+	invariant
+		true
+	methods
+		m1 { this.att1 + 5 : INT 
+		               --> ( this.att1 := this.att1 + 5 ) }
+		
+}
+

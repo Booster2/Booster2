@@ -95,7 +95,7 @@ imports
 			expr4 := <insert-this> (expr2, classname)
 
 			
-
+/*
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, BinOp(expr1, op, expr2))
 			-> (And(constraint1, constraint2), BinOp(expr3, op, expr4))
@@ -127,4 +127,5 @@ imports
 			-> (constraint1, Negative(expr2))
 		where
 			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
-			
+
+*/			

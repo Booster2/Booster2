@@ -7,33 +7,32 @@ imports
  rules
 
 	get-binop-booster-notation:
-		Plus() -> $[+]
+		Plus() -> "+"
 
 	get-binop-booster-notation:
-		Minus() -> $[-]
+		Minus() -> "-"
 
 	get-binop-booster-notation:
-		Times() -> $[*]
+		Times() -> "*"
 
 	get-binop-booster-notation:
-		Divide() -> $[/]
+		Divide() -> "/"
 
 	get-binop-booster-notation:
-		Maximum() -> $[max]
+		Maximum() -> "max"
 
 	get-binop-booster-notation:
-		Minimum() -> $[min]
+		Minimum() -> "min"
 
 	get-binop-booster-notation:
-		Union() -> $[\/]
+		Union() -> "\\/"
 
 	get-binop-booster-notation:
-		Intersection() -> $[/\]
+		Intersection() -> "/\\"
 
 	get-binop-booster-notation:
-		Concat() -> $[++]
+		Concat() -> "++"
 		
-
 
 
 	binop-type-matching:

@@ -26,6 +26,15 @@ imports
 	get-binrel-booster-notation:
 		NotEqual() -> $[/=]
 
+	get-binrel-type:
+		(type, NotEqual(), type) -> []
+		
+	get-binrel-type:
+		(type, NotEqual()) -> type
+		
+	get-binrel-type:
+		(NotEqual(), type) -> type
+
 
 
 	get-binrel-booster-notation:
@@ -40,6 +49,9 @@ imports
 	get-binrel-type:
 		(In(), Set(type)) -> type
 	
+		
+		
+		
 		
 	get-binrel-booster-notation:
 		NotIn() -> $[/:]

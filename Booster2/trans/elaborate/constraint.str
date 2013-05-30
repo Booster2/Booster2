@@ -167,7 +167,7 @@ imports
 
 
 
-
+/*
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, And(constraint1, constraint2))
 			-> (And(constraint3, constraint4), 
@@ -210,4 +210,4 @@ imports
 		where
 			(constraint2, constraint3) := <replace-this-for-attribute>(thisclassname, otherclassname, attname, constraint1)
 
-
+*/

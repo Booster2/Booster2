@@ -14,13 +14,76 @@ rules
 	elaborate:
 		system -> system
 	where
-				<combine-invariants>
+				/*<combine-invariants> 
    				<calculate-class-invariants> 
-   				<invert-invariant> 
+   				<create-constraint-for-each-attribute> 
+   				*/
    				< generate-inputs-and-outputs > 
    				<insert-this>
-  				system
+  				system;
+  				invariants := <ABM> "Invariants";
+  				invs-atts := <map(get-mentioned-attributes-in-invariant)> invariants;
+  				att-invs := <currymap(getattributes)> (invs-atts, <ABM> "Type");
+  				log(|Error(), "Development", att-invs);
+  				rules(			
+					ABM :+ "ClassBasedInvariants" -> att-invs
+				)
   
+ get-mentioned-attributes-in-invariant:
+ 	(classname, invariant)
+ 		-> (classname, invariant, atts)
+ 		where 
+ 			atts := <get-mentioned-attributes> (classname, None(), invariant)
+  
+  getattributes:
+  	(invs-atts, ((classname, attname), type)) 
+  		-> ((classname, attname), constraint) 
+  		where
+  			invs1 := <curryfilter(match-attributes)> ((classname, attname), invs-atts);
+  			invs2 := <currymap(create-constraint)> ((classname, attname), invs1) ;
+  			constraint := <conjoin-constraints> invs2;
+  			log(|Error(), "getattributes", invs1)
+
+ match-attributes:
+ 	((classname1, attname), (classname2, constraint, atts))
+ 		-> (classname2, constraint, atts)
+	where
+		<lookup>((classname1, attname), atts) 
+
+
+ match-attributes:
+ 	((classname1, attname), (classname2, constraint, atts))
+ 		-> None()
+ 		 
+
+create-constraint:
+	((classname1, attname1), (classname, constraint, []))
+		-> True()
+
+create-constraint:
+	((cname, aname), (classname, constraint, [((cname, aname), path), atts*]))
+		-> And( constraint1, constraint2)
+	where
+		constraint' := <substitute> (constraint, This(), PathStart("obj", None()));
+		path' := <substitute> (path, This(), PathStart("obj", None()));
+		constraint1 := Forall("obj", PathStart(classname, None()), Implies(BinRel(This(),Equal(), path'), constraint'));
+		constraint2 := <create-constraint> ((cname, aname), (classname, constraint, [atts*]))
+
+	
+
+create-constraint:
+	((cname', aname'), (classname, constraint, [((cname, aname), path), atts*]))
+		-> constraint2
+	where
+		constraint2 := <create-constraint> ((cname', aname'), (classname, constraint, [atts*]))
+ 
+conjoin-constraints:
+	[] -> True()			
+
+conjoin-constraints:
+	[c, cs*] -> And(c, <conjoin-constraints> [cs*])			
+
+			  
   /* 	insert-this:
 		Takes all the constraints, and the invariants, and puts 'this' at the 
 		front of any paths which need it.  
@@ -134,27 +197,35 @@ rules
 			-> (name, type)
 
 
-/* 	invert-invariant:
-		takes the invariant as a mapping from class names to constraints, and 
-		returns a mapping from attributes to constraints 
+/* 	create-constraint-for-each-attribute:
 */
 
-	invert-invariant:
+/*	create-constraint-for-each-attribute:
 		system -> system
-		where
+		where 
+*/
 			/*invariants' := <realign-invariants> <ABM> "Invariants"; */
-			inverted-invariants := <invert-invariants>(<ABM> "Attributes", []);
+/*			attribute-constraints := <map(create-constraint)>(<ABM> "Type");
 			rules(
-				ABM :+ "RealignedInvariants" ->  inverted-invariants
+				ABM :+ "RealignedInvariants" ->  attribute-constraints
 			) 
-
+*/
+/* create-constraint */
+	
+/*	create-constraint: 
+		((classname, attname), type)
+			-> ((classname, attname), True())
+*/
 /* 	realign-invariants:
 		takes a set of (class, invariant) pairs and returns a set of 
 		(class, invariant, atts) pairs where atts is a set of attributes mentioned in
 		the invariant.
 		I can't seem to curry this function, so map is built in.  
+
+		This function doesn't appear to be used any more.
+
 */
-	realign-invariants:
+/*	realign-invariants:
 		[] -> [] 
 
 	realign-invariants:
@@ -164,29 +235,28 @@ rules
 			log(|Error(), "realign-invariants", [(name, constraint), invs*]); 
 			invs2 := <realign-invariants>[invs*];
 			atts := <get-mentioned-attributes>(name, "" , constraint)
-
-/* 	invert-invariants:
-		takes a set of (classname, constraint, [attribute]) triples 
-		and returns a set of (attribute, invariant) pairs 
-		I can't seem to curry this function, so map is built in.  
 */
 
-	invert-invariants:
+
+/* 	create-attribute-constraints:
+*/
+
+
+	create-attribute-constraints:
 		([(classname, [attname, atts*]) , classes*], invs1)
-			-> <union>([((classname, attname), inv)], invs2)
+			-> <union>([((classname, attname), True())], invs2)
 		where
-			inv := <find-invariant> (classname, attname, invs1);
-			invs2 := <invert-invariants> ([(classname, [atts*]), classes*], invs1) 
+			invs2 := <create-attribute-constraints> ([(classname, [atts*]), classes*], invs1) 
 			
-	invert-invariants:
+	create-attribute-constraints:
 		([(Name,[]), classes*], invs)
-			-> <invert-invariants> ([classes*], invs)
+			-> <create-attribute-constraints> ([classes*], invs)
 			
-	invert-invariants:
+	create-attribute-constraints:
 		([], invs)
 			-> []
 			
-	invert-invariants:
+	create-attribute-constraints:
 		(classes, [])
 			-> []
 			
@@ -195,7 +265,7 @@ rules
 /* 	find-invariant:
 		I can't seem to curry this function, so map is built in.  
 */
-
+/*
 	find-invariant:
 		(classname, attname, [])
 			-> True()
@@ -215,30 +285,32 @@ rules
 			-> inv
 		where
 			inv := <find-invariant>(classname1, attname1, [(classname2, constraint, [atts*]), invs2*])
-
+*/
 
 /* calculate class-invariants:
 		rewrite the invariants so that they appear in terms of the other classes
 */
-	calculate-class-invariants:
+/*	calculate-class-invariants:
 		system -> system
 			where
 				cinvariants1 := <map(split-class-constraints)> <ABM> "Invariants";
 				cinvariants2 := <get-invariants-mentioned-attributes> (cinvariants1);
 				rules(			
 					ABM :+ "ClassBasedInvariants" -> cinvariants2
-				)
-			
+				);
+				log(|Error(), "Cinvariants1", cinvariants1);
+				log(|Error(), "Cinvariants2", cinvariants2)
+*/			
 
-	combine-invariants: 
+/*	combine-invariants: 
    		system -> system
 		where
 				cinvariants := <combine-invariants> (<ABM> "RealignedInvariants", <ABM> "ClassBasedInvariants");
 			rules(
 				ABM :+ "ClassBasedInvariants" -> cinvariants 
 			)
-			
-	split-class-constraints:
+*/			
+/*	split-class-constraints:
 		(classname, And(constraint1, constraint2))
 			-> (classname, [constraints1*, constraints2*])
 		where
@@ -248,13 +320,13 @@ rules
 	split-class-constraints:
 		(classname, constraint)
 			-> (classname, [constraint])
-			
+*/			
 
 /* 	get-invariants-mentioned-attributes:
 		curry, blah
 */	
 
-	get-invariants-mentioned-attributes:
+/*	get-invariants-mentioned-attributes:
 		[] -> []
 			
 
@@ -265,12 +337,12 @@ rules
 		where
 			inv1 := <get-invariant-mentioned-attributes>(classname, invs);
 			[invs3*] := <get-invariants-mentioned-attributes>[invs2*]
-			
+*/			
 /* 	get-invariant-mentioned-attributes:
 		curry, blah
 */	
 
-	get-invariant-mentioned-attributes:
+/*	get-invariant-mentioned-attributes:
 		(classname, [])
 			-> []
 	
@@ -284,10 +356,10 @@ rules
 			[invs2*] := <get-invariant-mentioned-attributes> (classname, [invs*]);
 			[triples*] := <apply-replace-this>(classname, classes, atts, inv)
 	
-		
+*/		
 		
 			
-	apply-replace-this:
+/*	apply-replace-this:
 		(classname, [], atts, constraint)
 			-> []
 
@@ -313,8 +385,8 @@ rules
 		where
 			[invs*]	:= <apply-replace-this> (classname, [cname1, cnames*], [atts*], constraint);
 			[invs2*] := <apply-replace-this> (classname, [cnames*], [(cname2, attname), atts*], constraint)
-
-	get-mentioned-classes:
+*/
+/*	get-mentioned-classes:
 		[] -> []
 		
 	get-mentioned-classes:
@@ -322,3 +394,4 @@ rules
 			-> <union>([classname],classes*)
 		where
 			classes* := <get-mentioned-classes>([atts*]) 	
+*/

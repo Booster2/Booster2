@@ -256,7 +256,7 @@ imports
 		[((classname, attname), path), atts*]
 			-> [invs*]
 		where
-			True() := <lookup>((classname, attname), <ABM> "ClassBasedInvariants");
+			True() := <get-attribute-constraint> (classname, attname);
 			[invs*] := <lookup-invariants>[atts*]
 
 
@@ -265,7 +265,7 @@ imports
 		[((classname, attname), path), atts*]
 			->  [inv2, invs*]
 		where
-			inv := <lookup>((classname, attname), <ABM> "ClassBasedInvariants");
+			inv := <get-attribute-constraint> (classname, attname);
 			inv2 := <substitute> (inv, This(), path);
 			[invs*] := <lookup-invariants>[atts*]
 	
@@ -388,3 +388,13 @@ imports
 			-> elems
 		where
 			elems := <ABM> "Ids"
+			
+	get-attribute-constraint:
+		(classname, attname) -> constraint
+			where		
+				constraint := <lookup>((classname, attname), <ABM> "ClassBasedInvariants")
+
+	get-attribute-constraint:
+		(classname, attname) -> True()
+				
+				

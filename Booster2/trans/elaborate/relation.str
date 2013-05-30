@@ -67,10 +67,11 @@ imports
 
 	
 	
-	replace-this-for-attribute:
+/*	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, BinRel(expr1, binrel, expr2))
 			-> (And(constraint1, constraint2), BinRel(expr3, binrel, expr4))
 		where
 			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
 			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
 
+*/

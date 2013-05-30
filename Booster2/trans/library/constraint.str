@@ -302,7 +302,7 @@ imports
 			-> ([invs1*],[invs2*])
 */
 
-
+/*
 	combine-invariants:
 		([], invs)
 			-> []
@@ -337,5 +337,5 @@ imports
 		((classname, attname), [])
 			-> True()
 		
-			
+*/			
 

@@ -67,6 +67,7 @@ public class MethodView extends HttpServlet {
 					String paramType = rs.getString("paramType");
 					String paramMultiplicity = rs.getString("paramMultiplicity");
 					String paramSetName = rs.getString("paramSetName");
+					String paramClassName = rs.getString("paramClassName");
 					
 					if("SetValue".equalsIgnoreCase(paramType) && 
 							!"".equalsIgnoreCase(paramSetName) &&
@@ -88,7 +89,29 @@ public class MethodView extends HttpServlet {
 						
 						
 					}
-					
+					if("ClassRef".equalsIgnoreCase(paramType) && 
+							!"".equalsIgnoreCase(paramClassName) &&
+							!result.containsKey(paramClassName))
+					{
+						PreparedStatement setvalueps = client.prepareStatement("call `GET_CLASS_VALUES`(?)");
+						setvalueps.setString(1, paramClassName);
+						ResultSet setValuesRS = setvalueps.executeQuery();
+						JSONArray valuesArray = new JSONArray();
+						while(setValuesRS.next())
+						{
+							int oid = setValuesRS.getInt("OBJECT_ID");
+							String desc = setValuesRS.getString("DESCRIPTION");
+							//System.out.println("Value: " + value);
+							JSONObject objvalue = new JSONObject();
+							objvalue.put("id", oid);
+							objvalue.put("desc", desc);
+							valuesArray.add(objvalue);
+						}
+						obj.put("values", valuesArray);
+
+						
+						
+					}
 					obj.put("paramName", paramName);
 					obj.put("paramType", paramType);
 					obj.put("paramSetName", paramSetName);

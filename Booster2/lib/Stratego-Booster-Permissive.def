@@ -303,6 +303,7 @@ exports
     Query                                                                                                                                                      -> Statement          
     Insert                                                                                                                                                     -> Statement          {cons("Insert")}
     'delete'                                                                                                                                                   -> Statement          {cons("Delete")}
+    '*'                                                                                                                                                        -> SQLExpression      {cons("Star")}
     'true'                                                                                                                                                     -> SQLExpression      {cons("True")}
     'false'                                                                                                                                                    -> SQLExpression      {cons("False")}
     'elseif' SQLExpression 'then' StatementList                                                                                                                -> ElseIf             {cons("ElseIf")}
@@ -571,7 +572,7 @@ exports
     Class                                           -> BoosterTerm     
     'attributes' Attribute*                         -> ClassComponents {cons("Attributes")}
     'methods' Method*                               -> ClassComponents {cons("Methods")}
-    'invariant' Constraint*                         -> ClassComponents {cons("Invariant")}
+    'invariants' Constraint*                        -> ClassComponents {cons("Invariant")}
     ClassComponents                                 -> BoosterTerm     
     'set' ID '{' {ID ','}+ '}'                      -> SetDef          {cons("SetDef")}
     SetDef                                          -> BoosterTerm     
@@ -640,21 +641,21 @@ exports
     "{" {Expression ","}* "}"                       -> ValueExpression {cons("SetExtent")}
     ValueExpression                                 -> BoosterTerm     
     ValueExpression                                 -> Expression      
-    'head' Expression                               -> Expression      {cons("Head"), avoid}
-    'tail' Expression                               -> Expression      {cons("Tail"), avoid}
-    'card' Expression                               -> Expression      {cons("Cardinality"), avoid}
-    '-' Expression                                  -> Expression      {cons("Negative"), avoid}
+    'head' Expression                               -> Expression      {cons("Head")}
+    'tail' Expression                               -> Expression      {cons("Tail")}
+    'card' Expression                               -> Expression      {cons("Cardinality")}
+    '-' Expression                                  -> Expression      {cons("Negative")}
     "(" Expression ")"                              -> Expression      {bracket}
-    Expression BinOp Expression                     -> Expression      {left, cons("BinOp")}
-    "+"                                             -> BinOp           {left, cons("Plus")}
-    "-"                                             -> BinOp           {left, cons("Minus")}
-    "*"                                             -> BinOp           {left, cons("Times")}
-    "/"                                             -> BinOp           {left, cons("Divide")}
-    "max"                                           -> BinOp           {left, cons("Maximum")}
-    "min"                                           -> BinOp           {left, cons("Minimum")}
-    "/\\"                                           -> BinOp           {left, cons("Intersection")}
-    "\\/"                                           -> BinOp           {left, cons("Union")}
-    "++"                                            -> BinOp           {left, cons("Concat")}
+    Expression BinOp Expression                     -> Expression      {cons("BinOp")}
+    "+"                                             -> BinOp           {cons("Plus")}
+    "-"                                             -> BinOp           {cons("Minus")}
+    "*"                                             -> BinOp           {cons("Times")}
+    "/"                                             -> BinOp           {cons("Divide")}
+    "max"                                           -> BinOp           {cons("Maximum")}
+    "min"                                           -> BinOp           {cons("Minimum")}
+    "/\\"                                           -> BinOp           {cons("Intersection")}
+    "\\/"                                           -> BinOp           {cons("Union")}
+    "++"                                            -> BinOp           {cons("Concat")}
     Expression                                      -> BoosterTerm     
     Path '(' {( ID '?' '=' Expression ) ","}* ')'   -> MethodReference {cons("MethodReference")}
     MethodReference                                 -> BoosterTerm     
@@ -688,21 +689,6 @@ exports
     Constraint 'or' Constraint -> Constraint >
     Constraint '=>' Constraint -> Constraint >
     Constraint ';' Constraint -> Constraint
-
-  context-free priorities
-    'head' Expression -> Expression >
-    'tail' Expression -> Expression >
-    'card' Expression -> Expression >
-    '-' Expression -> Expression >
-    Expression "max" Expression -> Expression >
-    Expression "min" Expression -> Expression >
-    Expression "*" Expression -> Expression >
-    Expression "/" Expression -> Expression >
-    Expression "+" Expression -> Expression >
-    Expression "-" Expression -> Expression >
-    Expression "/\\" Expression -> Expression >
-    Expression "\\/" Expression -> Expression >
-    Expression "++" Expression -> Expression
 
 module Stratego-Sugar-Overlays
 imports Stratego-Core-Identifiers Stratego-Sugar-Terms

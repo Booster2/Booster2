@@ -4,6 +4,6 @@ system methodTest
    	  attributes
    	  	att1 : INT
    	  methods
-  	  	m1 { att1' = 5 + 3 }	
+  	  	m1 { att1' = att1 + 5 }	
 	}
 

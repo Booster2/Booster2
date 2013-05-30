@@ -38,11 +38,10 @@ imports
 		where
 			expr2 := <output-to-booster-expression> expr1
 
-
 	output-to-booster-expression:
 		BinOp(expr1, op, expr2)
 			-> $[[expr3] [op'] [expr4]]
-		where
+		where 
 			expr3 := <output-to-booster-expression> expr1;
 			expr4 := <output-to-booster-expression> expr2;
 			op' := <get-binop-booster-notation> op

@@ -60,6 +60,7 @@ exports
 	Insert -> Statement {cons("Insert")}
 	'delete' -> Statement {cons("Delete")}
 
+	'*' -> SQLExpression {cons("Star")}
 	
 	'true' -> SQLExpression {cons("True")}
 	'false' -> SQLExpression {cons("False")}

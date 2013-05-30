@@ -59,21 +59,22 @@ imports
 			
 	get-mentioned-attributes:
 		(classname, maybename, PathStart(attname, maybeprimed))
-			-> [(classname, attname)]
+			-> [((classname, attname), This())]
 		where
 			type := <lookup-attribute-type> ((classname, attname))
 		// i.e. the attribute does exist
 		
-	get-mentioned-attributes:
+/*	get-mentioned-attributes:
 		(classname, maybename, PathComponent(attname, maybeprimed))
 			-> [(classname, attname)]
 		where
 			type := <lookup-attribute-type> ((classname, attname))
 		// i.e. the attribute does exist
+*/
 
 	get-mentioned-attributes:
 		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)))
-			-> <union>(atts1, [(otherclassname, attname)])
+			-> <union>(atts1, [((otherclassname, attname), path)])
 		where
 			atts1 := <get-mentioned-attributes>(classname, maybename, path);
 			Class(otherclassname) := <resolve-path-type>(classname, path, maybename);
@@ -81,7 +82,7 @@ imports
 			
 	get-mentioned-attributes:
 		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)))
-			-> <union>(atts1, [(otherclassname, attname)])
+			-> <union>(atts1, [((otherclassname, attname), path)])
 		where
 			atts1 := <get-mentioned-attributes>(classname, maybename, path);
 			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename);
@@ -406,6 +407,7 @@ imports
 	resolve-path-type:
 		(arg1, arg2, arg3)
 			-> <resolve-path-type> (arg1, arg2, arg3, [])
+
 					
 
 /* 	make-old:

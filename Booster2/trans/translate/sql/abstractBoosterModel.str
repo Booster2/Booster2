@@ -610,8 +610,26 @@ imports
 				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(path, BinOp(path, Union(), expr)))
-			-> [Insert(None(), None(), Into(), tablename, [column1, column2], [/*expr1, expr2*/], None())]
+		(classname, progname, Assign(path, BinOp(path, Union(), SetExtent([expr]))))
+			-> [IfThen(	Equal( Select(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName(tablename)])), 
+											Where(And(	Equal(ColumnName(column1), expr1), 
+													  	Equal(ColumnName(column2), expr2))), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None()), 
+								  Int(0)), 
+						StatementList([Insert(None(), None(), Into(), tablename, [column1, column2], [expr1, expr2], None())]),
+						[],
+						None()
+					)]
+				
+				
 			where 
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
@@ -619,9 +637,11 @@ imports
 				tablename := <get-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
-				column2 := <concat-strings>[classname'', "_", attname'']/*;
-				expr1 := <booster-to-relational-expression> (classname, progname, path);
-				expr2 := <booster-to-relational-expression> (classname, progname, expr)*/
+				column2 := <concat-strings>[classname'', "_", attname''];
+				log(|Error(), "Error lies here...", <booster-to-relational-expression> (classname, progname, path'));
+				log(|Error(), "Error lies here...", expr);
+				expr1 := <booster-to-relational-expression> (classname, progname, path');
+				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
 
 
 	booster-to-relational-guarded-command:
@@ -669,12 +689,12 @@ imports
 			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
 			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
 
-	booster-to-relational-guarded-command:
+/*	booster-to-relational-guarded-command:
 		(classname, progname, gc)
 			-> []
 		where
 			log(|Error(), "cannot convert guarded command", gc)
-
+*/
 
 	booster-to-relational-constraint:
 		(classname, progname, True())

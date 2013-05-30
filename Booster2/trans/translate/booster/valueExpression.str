@@ -23,7 +23,7 @@ rules
 			
 	output-to-booster-expression:
 		TypeExtent(t)
-			-> <get-type-booster-notation> t
+			-> <get-type-booster-notation> t 
 			
 	output-to-booster-expression:
 		Null()
@@ -49,8 +49,9 @@ rules
 		Path(a,b)
 			-> $[[c].[d]]
 		where 
-			c := <output-to-booster-expression> (a);
-			d := <output-to-booster-expression> (b)
+			c := <output-to-booster-expression> a;
+			d := <output-to-booster-expression> b
+
 			
 	output-to-booster-expression:
 		PathComponent(name, None())
@@ -61,19 +62,41 @@ rules
 			-> $[[name]']
 
 	output-to-booster-expression:
-		PathStart(name, None())
-			-> $[[name]]
+		PathStart(st, None())
+			-> $[[st]]
+
 			
 	output-to-booster-expression:
-		PathStart(name, Some(Primed()))
-			-> $[[name]']
+		PathStart(st, Some(Primed()))
+			-> $[[st]']
+
+
+
+	output-to-booster-expression:
+		PathStart(st, None())
+			-> $[[start]]
+		where 
+			start := <output-to-booster-expression> st
+			
+	output-to-booster-expression:
+		PathStart(st, Some(Primed()))
+			-> $[[start]']
+		where 
+			start := <output-to-booster-expression> st
+
+
 			
 	output-to-booster-expression:
 		SetExtent([exprs*])
 			-> $[{[exprs2*]}]
 		where
 			exprs2* := <output-to-booster-list-expressions> [exprs*]
-
+			
+/*	output-to-booster-expression:
+		Something -> $[ ]
+		where
+			log(|Error(), "Cannot output booster expression", Something)  
+*/
 	output-to-booster-list-expressions:
 		[] 
 			-> $[]

@@ -33,7 +33,7 @@ imports
 		And(constraint1, constraint2)
 			-> $[([constraint3] 
 				  & [constraint4])]
-		with 
+		where 
 			constraint3 := <output-to-booster-constraint> constraint1;
 			constraint4 := <output-to-booster-constraint> constraint2
 
@@ -41,7 +41,7 @@ imports
 		Or(constraint1, constraint2)
 			-> $[([constraint3] 
 				  or [constraint4])]
-		with 
+		where 
 			constraint3 := <output-to-booster-constraint> constraint1;
 			constraint4 := <output-to-booster-constraint> constraint2
 
@@ -49,7 +49,7 @@ imports
 		Then(constraint1, constraint2)
 			-> $[([constraint3] 
 				  ; [constraint4])]
-		with 
+		where 
 			constraint3 := <output-to-booster-constraint> constraint1;
 			constraint4 := <output-to-booster-constraint> constraint2
 
@@ -57,7 +57,7 @@ imports
 		Implies(constraint1, constraint2)
 			-> $[([constraint3]
 					=> [constraint4])]
-		with 
+		where 
 			constraint3 := <output-to-booster-constraint> constraint1;
 			constraint4 := <output-to-booster-constraint> constraint2
 
@@ -66,15 +66,15 @@ imports
 		Exists(name, expr, constraint)
 			-> $[(exists [name] : [expression]
 					@ ([constraint2]))]
-		with 
+		where 
 			expression := <output-to-booster-expression> expr;
 			constraint2 := <output-to-booster-constraint> constraint
-
 
 	output-to-booster-constraint: 
 		Forall(name, expr, constraint)
 			-> $[(forall [name] : [expression]
 					@ ([constraint2]))]
-		with 
+		where 
 			expression := <output-to-booster-expression> expr;
-			constraint2 := <output-to-booster-constraint> constraint
+			constraint2 := <output-to-booster-constraint> constraint;
+			log(|Error(), "forall", (expr, constraint))

@@ -1,31 +1,48 @@
 System(
   "Student"
-, [ SetDef("Status", ["Undergraduate", "PostGraduate"])
+, [ SetDef(
+      "Status"
+    , ["Undergraduate", "Staff", "Chancellor", "Postgraduate", "Congregation", "ViceChancellor"]
+    )
   , Class(
       "Student"
     , [ Attributes(
           [ Attribute("lastName", Identity(), BasicType(String()))
           , Attribute("firstName", Identity(), BasicType(String()))
           , Attribute("status", UniDirectional("Status"))
-          , Attribute("supervisors", Set(UniDirectional("Staff"), MultAny()))
+          , Attribute("supervisors", Set(BiDirectional("Staff", "supervisees"), MultAny()))
           ]
         )
       , Methods(
           [ Method(
               "Create"
-            , And(
-                And(
-                  BinRel(Output("s"), In(), PathStart("Student", Some(Primed())))
-                , BinRel(
-                    Path(Output("s"), PathComponent("lastName", Some(Primed())))
-                  , Equal()
-                  , Input("lastName")
+            , Then(
+                BinRel(Output("s"), In(), PathStart("Student", Some(Primed())))
+              , And(
+                  And(
+                    And(
+                      BinRel(
+                        Path(Output("s"), PathComponent("lastName", Some(Primed())))
+                      , Equal()
+                      , Input("lastName")
+                      )
+                    , BinRel(
+                        Path(Output("s"), PathComponent("firstName", Some(Primed())))
+                      , Equal()
+                      , Input("firstName")
+                      )
+                    )
+                  , BinRel(
+                      Path(Output("s"), PathComponent("status", Some(Primed())))
+                    , Equal()
+                    , Input("status")
+                    )
                   )
-                )
-              , BinRel(
-                  Path(Output("s"), PathComponent("firstName", Some(Primed())))
-                , Equal()
-                , Input("firstName")
+                , BinRel(
+                    Input("supervisor")
+                  , In()
+                  , Path(Output("s"), PathComponent("supervisors", Some(Primed())))
+                  )
                 )
               )
             )
@@ -38,24 +55,25 @@ System(
     , [ Attributes(
           [ Attribute("lastName", Identity(), BasicType(String()))
           , Attribute("firstName", Identity(), BasicType(String()))
+          , Attribute("supervisees", Set(BiDirectional("Student", "supervisors"), MultAny()))
           ]
         )
       , Methods(
           [ Method(
               "Create"
-            , And(
-                And(
-                  BinRel(Output("s"), In(), PathStart("Staff", Some(Primed())))
-                , BinRel(
+            , Then(
+                BinRel(Output("s"), In(), PathStart("Staff", Some(Primed())))
+              , And(
+                  BinRel(
                     Path(Output("s"), PathComponent("lastName", Some(Primed())))
                   , Equal()
                   , Input("lastName")
                   )
-                )
-              , BinRel(
-                  Path(Output("s"), PathComponent("firstName", Some(Primed())))
-                , Equal()
-                , Input("firstName")
+                , BinRel(
+                    Path(Output("s"), PathComponent("firstName", Some(Primed())))
+                  , Equal()
+                  , Input("firstName")
+                  )
                 )
               )
             )

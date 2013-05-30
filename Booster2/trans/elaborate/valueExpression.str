@@ -116,7 +116,7 @@ imports
 			SetExtent([exprs2*]) := <insert-this> SetExtent([exprs1*])
 	
 
-	replace-this-for-attribute:
+/*	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, BasicValue(t))
 			-> (True(), BasicValue(t))
 			
@@ -138,9 +138,9 @@ imports
 		(thisclassname, otherclassname, attname, Path(a,b))
 			-> (True(), Path(This(),b))
 				
-		where
+		where */
 			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
-			attname2 := <get-path-attribute-name>(a);
+/*			attname2 := <get-path-attribute-name>(a);
 			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
 			Class(thisclassname) := <lookup-attribute-type> ((otherclassname, attname3))
 
@@ -149,9 +149,9 @@ imports
 		(thisclassname, otherclassname, attname, Path(a,b))
 			-> (BinRel(Path(This(),PathComponent(attname3, None())),NotEqual(), Null()),  Path(This(),b))
 				
-		where
+		where */
 			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
-			attname2 := <get-path-attribute-name>(a);
+/*			attname2 := <get-path-attribute-name>(a);
 			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
 			Optional(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
 
@@ -160,9 +160,9 @@ imports
 		(thisclassname, otherclassname, attname, Path(a,b))
 			-> (BinRel(Path(This(),PathComponent(attname3, None())), NotEqual(), SetExtent([])), Path(This(),b))
 				
-		where
+		where */
 			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
-			attname2 := <get-path-attribute-name>(a);
+/*			attname2 := <get-path-attribute-name>(a);
 			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
 			Set(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
 
@@ -174,9 +174,10 @@ imports
 							  Path(PathStart("obj",None()),
 							  	   PathComponent(attname2, None())))), Path(This(),b))
 				
-		where
+		where */
 			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
-			not(<equal>(thisclassname, otherclassname));
+/*			not(<equal>(thisclassname, otherclassname));
+			log(|Error(), "get-path-attribute-name", (thisclassname, otherclassname, attname, Path(a,b)));
 			attname2 := <get-path-attribute-name>(a)
 			
 	
@@ -186,5 +187,7 @@ imports
 		
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, PathStart(a,b))
-			-> (True(), PathStart(a,b))		
+			-> (True(), PathStart(a,b))	
+			
+*/	
 	

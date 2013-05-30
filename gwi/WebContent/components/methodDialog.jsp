@@ -31,6 +31,20 @@
 		</div>
 	</div>
 	<!-- /ko -->
+	<!-- ko if: paramName() != 'this' && paramType() == 'ClassRef' -->
+	<div class="control-group">
+		<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
+		<div class="controls">
+			<select data-bind="foreach: values(), attr: { id: paramName, placeholder: paramName().unCamelCase(), name: paramName}" >
+				<!-- ko if : $data != 'unassigned' -->
+				<option data-bind="value: $data.id, text: $data.desc"></option>
+				<!-- /ko -->
+				
+			</select>
+			<!-- <input type="text" data-bind="attr: { id: paramName, placeholder: paramName().unCamelCase(), name: paramName}"> -->
+		</div>
+	</div>
+	<!-- /ko -->
 	<!-- ko if: paramName() == 'this' -->
 	<div class="control-group" style="display: none">
 		<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
