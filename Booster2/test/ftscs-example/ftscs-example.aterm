@@ -8,9 +8,7 @@ System(
           ]
         )
       , Invariant(
-          [ BinRel(PathStart("m", None()), LessThanEquals(), BasicValue(Integer("10")))
-          , BinRel(PathStart("m", None()), GreaterThanEquals(), BasicValue(Integer("0")))
-          ]
+          [BinRel(PathStart("m", None()), LessThan(), BasicValue(Integer("10")))]
         )
       , Methods(
           [ Method(
@@ -18,7 +16,7 @@ System(
             , BinRel(
                 PathStart("m", Some(Primed()))
               , Equal()
-              , PathStart("m", None())
+              , BinOp(PathStart("m", None()), Plus(), BasicValue(Integer("1")))
               )
             )
           ]
@@ -34,18 +32,22 @@ System(
           , Attribute("cq", Set(BiDirectional("C", "bq"), MultAny()))
           ]
         )
+      , Invariant(
+          [ BinRel(
+              Path(PathStart("a", None()), PathComponent("m", None()))
+            , LessThan()
+            , PathStart("n", None())
+            )
+          ]
+        )
       , Methods(
           [ Method(
               "increment"
             , BinRel(
                 PathStart("n", Some(Primed()))
               , Equal()
-              , PathStart("n", None())
+              , BinOp(PathStart("n", None()), Plus(), BasicValue(Integer("1")))
               )
-            )
-          , Method(
-              "addQ"
-            , BinRel(Input("c"), In(), PathStart("cq", Some(Primed())))
             )
           ]
         )
@@ -54,7 +56,8 @@ System(
   , Class(
       "C"
     , [ Attributes(
-          [ Attribute("bp", BiDirectional("B", "cp"))
+          [ Attribute("o", BasicType(Int()))
+          , Attribute("bp", BiDirectional("B", "cp"))
           , Attribute("bq", Optional(BiDirectional("B", "cq")))
           ]
         )

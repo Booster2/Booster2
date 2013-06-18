@@ -11,15 +11,15 @@ imports
 
  rules
  		booster-to-relational:	
-		x -> Schema(<ABM> "Name", [ metatables*, settables*, tables*, tables'* ], [procedures*], StatementList([metaStatements*, statements*]))
+		x -> Schema(<LookupTable> "Name", [ metatables*, settables*, tables*, tables'* ], [procedures*], StatementList([metaStatements*, statements*]))
 		 where
-			[metatables*] := <booster-to-metatables> <ABM> "Classes"; 
-			[tables*] := <booster-to-relational-classes> <ABM> "Classes" ;
+			[metatables*] := <booster-to-metatables> <LookupTable> "Classes"; 
+			[tables*] := <booster-to-relational-classes> <LookupTable> "Classes" ;
 			[tables'*] := <booster-to-relational-assocs> x   ;
-			[settables*] := <booster-to-relational-enumerations> <ABM> "Sets" ;
-			[procedures*] := <booster-to-relational-procedures> <ABM> "Programs" ;
+			[settables*] := <booster-to-relational-enumerations> <LookupTable> "Sets" ;
+			[procedures*] := <booster-to-relational-procedures> <LookupTable> "Programs" ;
 			[metaStatements*] := <booster-to-metadata> x;
-			[statements*] := <booster-to-data-inserts> <ABM> "Sets" 
+			[statements*] := <booster-to-data-inserts> <LookupTable> "Sets" 
 			 
 	booster-to-metatables:
 		classes ->
@@ -60,8 +60,8 @@ imports
 		x ->
 			[setnames*, classnames*]
 		where
-			[setnames*] := <flatten-list><map(booster-to-metadata-sets)> <ABM> "Sets";
-			[classnames*] := <flatten-list><map(booster-to-metadata-classes)> <ABM> "Classes"
+			[setnames*] := <flatten-list><map(booster-to-metadata-sets)> <LookupTable> "Sets";
+			[classnames*] := <flatten-list><map(booster-to-metadata-classes)> <LookupTable> "Classes"
 
 	booster-to-metadata-sets:
 		SetDef(setname, values) ->
@@ -97,7 +97,7 @@ imports
 						["class","methodName","isObjectMethod"], 
 						[String(classname),String(methodname),True()], None())
 		where
-			<elem>(("this", Class(classname)), <lookup>((classname, methodname), <ABM> "Inputs"))
+			<elem>(("this", Class(classname)), <lookup>((classname, methodname), <LookupTable> "Inputs"))
 
 	booster-to-metadata-method:
 		(classname, methodname) ->
@@ -110,9 +110,9 @@ imports
 		(classname, methodname) ->
 			[istmts*,ostmts*]
 		where
-			i* := <lookup>((classname, methodname), <ABM> "Inputs");
+			i* := <lookup>((classname, methodname), <LookupTable> "Inputs");
 			[istmts*] := <currymap(booster-to-metadata-param)> (((classname, methodname),"input"), [i*]);
-			o* := <lookup>((classname, methodname), <ABM> "Outputs");
+			o* := <lookup>((classname, methodname), <LookupTable> "Outputs");
 			[ostmts*] := <currymap(booster-to-metadata-param)> (((classname, methodname),"output"), [o*])
 			/*log(|Error(),i*) */			
 
@@ -130,7 +130,7 @@ imports
 	get-attribute-is-id:
 			(classname, attname) -> 1
 				where
-			<elem>(attname, <lookup> (classname, <ABM> "Ids"))
+			<elem>(attname, <lookup> (classname, <LookupTable> "Ids"))
 
 	get-attribute-is-id:
 			(classname, attname) -> 0
@@ -204,7 +204,7 @@ imports
 			-> [Table(name, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*]), tables*]
 		where 
 			tables* := <booster-to-relational-classes> [names*];
-			[columns*] := <get-table-columns>(name, <ABM> "Attributes", <ABM> "Type", <ABM> "MaxMults", <ABM> "MinMults"); 
+			[columns*] := <get-table-columns>(name, <LookupTable> "Attributes", <LookupTable> "Type", <LookupTable> "MaxMults", <LookupTable> "MinMults"); 
 			identity := <concat-strings> [name, "Id"]
 
 	booster-to-relational-enumerations:
@@ -228,8 +228,8 @@ imports
 		where
 			ps* := <booster-to-relational-procedures> [programs*];
 			name := <concat-strings> [classname, "_", procname];
-			[procinputs*] := <booster-to-relational-inputs> (classname, procname, <ABM> "Inputs");
-			[procoutputs*] := <booster-to-relational-outputs> (classname, procname, <ABM> "Outputs");
+			[procinputs*] := <booster-to-relational-inputs> (classname, procname, <LookupTable> "Inputs");
+			[procoutputs*] := <booster-to-relational-outputs> (classname, procname, <LookupTable> "Outputs");
 			statements := <booster-to-relational-guarded-command> (classname, procname, gc);
 			p := Procedure(name, [procinputs*, procoutputs*], DeclareList([]), StatementList(statements))
 
@@ -352,7 +352,7 @@ imports
 			
 	booster-to-relational-assocs:
 		x
-			-> <get-table-assocs> (<ABM> "Attributes", <ABM> "Type", <ABM> "MaxMults", <ABM> "MinMults", <ABM> "Opposites")
+			-> <get-table-assocs> (<LookupTable> "Attributes", <LookupTable> "Type", <LookupTable> "MaxMults", <LookupTable> "MinMults", <LookupTable> "Opposites")
 
 
 	get-table-assocs:

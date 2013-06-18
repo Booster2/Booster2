@@ -10,9 +10,9 @@ rules
 	simplify-main:
 		system -> system
 		with
-			simp-programs := <map(simp)> <ABM> "Programs"; 
+			simp-programs := <map(simp)> <LookupTable> "Programs"; 
 			rules(
-				ABM :+ "Programs" -> simp-programs
+				LookupTable :+ "Programs" -> simp-programs
 			)
 			
 	simp:

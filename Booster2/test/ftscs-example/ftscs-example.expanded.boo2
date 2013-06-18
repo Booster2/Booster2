@@ -1,0 +1,50 @@
+system fstcsExample 
+
+
+class A {
+	attributes
+		m : INT
+		b : [ B . a ]
+		
+	invariants
+		this.m < 10
+	methods
+		increment { (((forall obj : A
+		                 	@ ((this = obj
+		                 	   	=> obj.m < 10))) 
+		                 & (forall obj : B
+		                   	@ ((this = obj.a
+		                   	   	=> obj.a.m < obj.n)))) 
+		                & this.m + 1 : INT) 
+		               --> ( this.m := this.m + 1 ) }
+		
+}
+class B {
+	attributes
+		a : [ A . b ]
+		n : INT
+		cp : set ( C . bp  ) [ 0 .. * ]
+		cq : set ( C . bq  ) [ 0 .. * ]
+		
+	invariants
+		this.a.m < this.n
+	methods
+		increment { ((forall obj : B
+		                	@ ((this = obj
+		                	   	=> obj.a.m < obj.n))) 
+		                & this.n + 1 : INT) 
+		               --> ( this.n := this.n + 1 ) }
+		
+}
+class C {
+	attributes
+		o : INT
+		bp : B . cp
+		bq : [ B . cq ]
+		
+	invariants
+		this.bp /= this.bq
+	methods
+		
+}
+

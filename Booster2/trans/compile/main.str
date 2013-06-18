@@ -27,9 +27,9 @@ rules
 	program-main:
 		system -> system
 		with
-			programs := <map(run-program)>(<ABM> "Constraints");
+			programs := <map(run-program)>(<LookupTable> "Constraints");
 			rules(
-				ABM :+ "Programs" -> programs
+				LookupTable :+ "Programs" -> programs
 			)
 			
 		

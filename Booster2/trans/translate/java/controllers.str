@@ -17,8 +17,8 @@ rules
 	build-java-controller:
 		x -> None()
 	where
-		filename := <concat-strings>[ "output/java/",<ABM> "Name",".java"];
-		classDefs := <map(class-java)> <ABM> "Classes";
+		filename := <concat-strings>[ "output/java/",<LookupTable> "Name",".java"];
+		classDefs := <map(class-java)> <LookupTable> "Classes";
 		contents := <concat-strings>["package ox.softeng.booster",
 			 ";\n\n",
 			"import java.sql.Connection;\n",
@@ -27,7 +27,7 @@ rules
 			"import java.sql.PreparedStatement;\n  ",
 			"import java.util.Vector;\n  ",
 			 "public class ",
-			 <ABM> "Name",
+			 <LookupTable> "Name",
 			 "{\n",
 			<concat-strings> classDefs, 
 			"\n}"];

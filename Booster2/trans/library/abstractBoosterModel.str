@@ -18,7 +18,7 @@ imports
 	lookup-set-name:
 		setname -> setname
 		where
-			<elem>(setname, <map(get-setdef-name)> <ABM> "Sets")
+			<elem>(setname, <map(get-setdef-name)> <LookupTable> "Sets")
 
 /* 	lookup-set-value:
 		Takes an identifier, and a model, and returns the 
@@ -28,7 +28,7 @@ imports
 	lookup-set-value:
 		setvalue -> setname
 		where
-			setname := <lookup-value-in-sets> (setvalue, <ABM> "Sets") 
+			setname := <lookup-value-in-sets> (setvalue, <LookupTable> "Sets") 
 			
 /* 	lookup-class-name:
 		Takes an identifier, and a model, and returns it back again
@@ -39,7 +39,7 @@ imports
 		classname
 			-> classname
 		where
-			<elem>(classname, <ABM> "Classes")
+			<elem>(classname, <LookupTable> "Classes")
 			
 /* 	lookup-attribute-type:
 		Takes a class name, and an attribute name, and a model, 
@@ -50,7 +50,7 @@ imports
 		(classname, attname)
 			-> type
 		where
-			type := <lookup>((classname, attname), <ABM> "Type" )
+			type := <lookup>((classname, attname), <LookupTable> "Type" )
 			
 /* 	lookup-input-type:
 		Takes a class name, and a method name, and an input name,
@@ -62,7 +62,7 @@ imports
 		((classname, methname), inputname)
 			-> type
 		where
-			type := <lookup>(inputname,<lookup>((classname, methname), <ABM> "Inputs"))
+			type := <lookup>(inputname,<lookup>((classname, methname), <LookupTable> "Inputs"))
 			
 	lookup-input-type:
 			e -> String()
@@ -80,7 +80,7 @@ imports
 		(((classname, methname), outputname))
 			-> type
 		where
-			type := <lookup>(outputname,<lookup>((classname, methname), <ABM> "Outputs"))
+			type := <lookup>(outputname,<lookup>((classname, methname), <LookupTable> "Outputs"))
 			
 			
 /* 	lookup-opposite:
@@ -92,7 +92,7 @@ imports
 		((classname, attname))
 			-> (classname1, attname1)
 		where
-			(classname1, attname1) := <lookup>((classname, attname), <ABM> "Opposites")
+			(classname1, attname1) := <lookup>((classname, attname), <LookupTable> "Opposites")
 			
 			
 
@@ -309,13 +309,13 @@ imports
 		(classname, attname)
 			-> n
 		where
-			n := <lookup>((classname, attname), <ABM> "MaxMults")
+			n := <lookup>((classname, attname), <LookupTable> "MaxMults")
 
 	lookup-min-mult:
 		(classname, attname)
 			-> n
 		where
-			n := <lookup>((classname, attname), <ABM> "MinMults")
+			n := <lookup>((classname, attname), <LookupTable> "MinMults")
 
 
 /*	lookup-invariants:
@@ -327,27 +327,27 @@ imports
 	lookup-class-attributes:
 		classname
 		->
-			<lookup>(classname, <ABM> "Attributes")
+			<lookup>(classname, <LookupTable> "Attributes")
 
 	lookup-class-methods:
 		classname
 		->
-			<lookup>(classname, <ABM> "Operations")
+			<lookup>(classname, <LookupTable> "Operations")
 
 	lookup-system-name:
-		x -> <ABM> "Name"
+		x -> <LookupTable> "Name"
 
 	lookup-classes:
-		x -> <ABM> "Classes"
+		x -> <LookupTable> "Classes"
 
 	set-attribute-table-name:
 		(classname, attname, tablename) ->
 			[]
 		where
-			tableNames := (<ABM> "TableNames");
+			tableNames := (<LookupTable> "TableNames");
 			tableNames' := <union>(tableNames, [((classname, attname), tablename)]);
 			rules(
-				ABM :+ "TableNames" -> tableNames'
+				LookupTable :+ "TableNames" -> tableNames'
 			)
 
 	set-attribute-table-name:
@@ -355,24 +355,24 @@ imports
 			[]
 		where
 			rules(
-				ABM :+ "TableNames" -> [((classname, attname), tablename)]
+				LookupTable :+ "TableNames" -> [((classname, attname), tablename)]
 			)
 
 	get-attribute-table-name:
 		(classname, attname)
 			-> elem
 		where
-			elem := <lookup>((classname, attname), <ABM> "TableNames")
+			elem := <lookup>((classname, attname), <LookupTable> "TableNames")
 
 
 	add-class-id:
 		(classname, attname) ->
 			[]
 		where
-			ids := (<ABM> "IDs");
+			ids := (<LookupTable> "IDs");
 			ids' := <union>(ids, [(classname, attname)]);
 			rules(
-				ABM :+ "IDs" -> ids'
+				LookupTable :+ "IDs" -> ids'
 			)
 
 	add-class-id:
@@ -380,19 +380,19 @@ imports
 			[]
 		where
 			rules(
-				ABM :+ "IDs" -> [(classname, attname)]
+				LookupTable :+ "IDs" -> [(classname, attname)]
 			)
 
 	get-class-ids:
 		x
 			-> elems
 		where
-			elems := <ABM> "Ids"
+			elems := <LookupTable> "Ids"
 			
 	get-attribute-constraint:
 		(classname, attname) -> constraint
 			where		
-				constraint := <lookup>((classname, attname), <ABM> "ClassBasedInvariants")
+				constraint := <lookup>((classname, attname), <LookupTable> "ClassBasedInvariants")
 
 	get-attribute-constraint:
 		(classname, attname) -> True()

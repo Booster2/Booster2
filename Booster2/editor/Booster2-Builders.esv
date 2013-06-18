@@ -12,19 +12,24 @@ builders
 builders
 
   provider 					: include/booster2.ctree                                                                                         
-  provider 					: include/booster2-java.jar                                                                                      
+  //provider 					: include/booster2-java.jar                                                                                      
                                                             
                                                                                                                
   observer                  : editor-analyze                                                                   
                                                                                                                
   // builder                   : "Generate Java code"   = generate-java (openeditor) (realtime)                   
   builder                   : "Show abstract syntax" = generate-aterm (openeditor) (realtime) (meta) (source)  
-  builder                   : "Generate Abstract Booster Machine" = generate-abstractBoosterMachine (openeditor) (realtime) (source)
-  builder                   : "Expand into Booster notation" = expand-booster (openeditor) (realtime) (source)
-  builder                   : "Expand into Booster Terms" = expand-booster-without-printing (openeditor) (realtime) (source)
+  builder                   : "Parse" = builder-parse (openeditor) (realtime) (source)
+  builder                   : "Elaborate" = builder-elaborate (openeditor) (realtime) (source)
+  builder                   : "Compile" = builder-compile (openeditor) (realtime) (source)
+  builder                   : "Simplify" = builder-simplify (openeditor) (realtime) (source)
+  builder                   : "Translate Booster" = builder-translate-booster (openeditor) (realtime) (source)
+  builder                   : "Translate SQL" = builder-translate-sql (openeditor) (realtime) (source)
+  //builder                   : "Expand into Booster notation" = expand-booster (openeditor) (realtime) (source)
+  //builder                   : "Expand into Booster Terms" = expand-booster-without-printing (openeditor) (realtime) (source)
   //builder              		: "Generate installation SQL" = install-sql (openeditor) (realtime) (source)
-  builder              		: "Generate SQL from Booster" = booster-to-sql (openeditor) (realtime) (source)
-  builder                   : "Test Dynamic Rules" = test-dynamic-rules (openeditor) (realtime) (source)
+  //builder              		: "Generate SQL from Booster" = booster-to-sql (openeditor) (realtime) (source)
+  //builder                   : "Test Dynamic Rules" = test-dynamic-rules (openeditor) (realtime) (source)
                                  
                                                    
   // on save: generate-abstractBoosterMachine                                                                                   

@@ -1,0 +1,40 @@
+module translate/booster/lookupTable
+
+imports
+  include/Booster2
+
+  library/abstractBoosterModel
+  library/basicTypes
+  translate/booster/expression
+  translate/booster/constraint
+  translate/booster/relation
+  translate/booster/valueExpression
+ 
+
+ rules
+ 	
+
+	output-lookup-table:
+		system ->
+			(
+				("Constraints",  <LookupTable> "Constraints",
+				
+				"Programs",  <LookupTable> "Programs",
+				"Invariants",  <LookupTable> "Invariants",
+				"Type",  <LookupTable> "Type",
+				"Inputs",  <LookupTable> "Inputs",
+				"Outputs",  <LookupTable> "Outputs",
+				"ClassBasedInvariants",  <LookupTable> "ClassBasedInvariants",
+				"RealignedInvariants",  <LookupTable> "RealignedInvariants",
+				"Sets",  <LookupTable> "Sets"),
+				("Classes",  <LookupTable> "Classes",
+				"Opposites",  <LookupTable> "Opposites",
+				"MinMults",  <LookupTable> "MinMults",
+				"MaxMults",  <LookupTable> "MaxMults",
+				"Attributes",  <LookupTable> "Attributes",
+				"Operations",  <LookupTable> "Operations",
+				"Name",  <LookupTable> "Name",
+				"TableNames",  <LookupTable> "TableNames",
+				"IDs",  <LookupTable> "IDs" )
+			)			
+					

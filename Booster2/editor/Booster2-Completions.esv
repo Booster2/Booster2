@@ -13,14 +13,14 @@ completions
                                              
   // Syntax completion:                      
                                              
-  completion template Start :
-    "module " <m> (blank)  
+  completion template :
+    "system " <systemname> "\n\n" (blank)  
                                              
-  completion template Definition :
-    "entity " <e> " {" (cursor) "}" (blank)  
+  completion template :
+    "class " <classname> " {\n" "\tattributes \n\t\t\n"  "\tinvariants \n\t\t\n" "\tmethods \n\t\t\n"  "}\n" (blank)  
                                              
-  completion template Property : "property : Type" =
-    <x> " : " <T> (blank)  
+  completion template : 
+    "set " <setname> " { " <elem> " }\n" (blank)  
                                              
 
 completions

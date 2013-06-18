@@ -21,12 +21,12 @@ rules
    				< generate-inputs-and-outputs > 
    				<insert-this>
   				system;
-  				invariants := <ABM> "Invariants";
+  				invariants := <LookupTable> "Invariants";
   				invs-atts := <map(get-mentioned-attributes-in-invariant)> invariants;
-  				att-invs := <currymap(getattributes)> (invs-atts, <ABM> "Type");
+  				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
   				log(|Error(), "Development", att-invs);
   				rules(			
-					ABM :+ "ClassBasedInvariants" -> att-invs
+					LookupTable :+ "ClassBasedInvariants" -> att-invs
 				)
   
  get-mentioned-attributes-in-invariant:
@@ -66,10 +66,21 @@ create-constraint:
 	where
 		constraint' := <substitute> (constraint, This(), PathStart("obj", None()));
 		path' := <substitute> (path, This(), PathStart("obj", None()));
-		constraint1 := Forall("obj", PathStart(classname, None()), Implies(BinRel(This(),Equal(), path'), constraint'));
+		constraint1 := <make-constraint> (classname, aname, "obj", path', constraint'); 
 		constraint2 := <create-constraint> ((cname, aname), (classname, constraint, [atts*]))
 
+
+/* make-constraint:
+	(classname, attname, dummyvar, path, constraint)
+		-> Forall("obj", PathStart(classname, None()), Implies(BinRel(This(),Equal(), path), constraint))	
+	where
+		Class(cname) = 	
+*/
 	
+make-constraint:
+	(classname, attname, dummyvar, path, constraint)
+		-> Forall("obj", PathStart(classname, None()), Implies(BinRel(This(),Equal(), path), constraint))	
+		
 
 create-constraint:
 	((cname', aname'), (classname, constraint, [((cname, aname), path), atts*]))
@@ -92,11 +103,11 @@ conjoin-constraints:
 	insert-this:
 		x -> x
 		with
-			invs := <insert-this-invariants> <ABM> "Invariants";
-			consts := <insert-this-constraints> <ABM> "Constraints";
+			invs := <insert-this-invariants> <LookupTable> "Invariants";
+			consts := <insert-this-constraints> <LookupTable> "Constraints";
 			rules(
-				ABM :+ "Invariants" -> invs
-			    ABM :+ "Constraints" -> consts
+				LookupTable :+ "Invariants" -> invs
+			    LookupTable :+ "Constraints" -> consts
 			)
 
 /* 	insert-this-invariants:
@@ -142,11 +153,11 @@ conjoin-constraints:
 	generate-inputs-and-outputs:
 		system -> system 
 		with 
-			(inputs, outputs) := <generate-method-inputs-and-outputs> <ABM> "Constraints";
+			(inputs, outputs) := <generate-method-inputs-and-outputs> <LookupTable> "Constraints";
 
 			rules(
-				ABM :+ "Inputs" -> inputs
-				ABM :+ "Outputs" -> outputs
+				LookupTable :+ "Inputs" -> inputs
+				LookupTable :+ "Outputs" -> outputs
 			)
 
 			
@@ -204,10 +215,10 @@ conjoin-constraints:
 		system -> system
 		where 
 */
-			/*invariants' := <realign-invariants> <ABM> "Invariants"; */
-/*			attribute-constraints := <map(create-constraint)>(<ABM> "Type");
+			/*invariants' := <realign-invariants> <LookupTable> "Invariants"; */
+/*			attribute-constraints := <map(create-constraint)>(<LookupTable> "Type");
 			rules(
-				ABM :+ "RealignedInvariants" ->  attribute-constraints
+				LookupTable :+ "RealignedInvariants" ->  attribute-constraints
 			) 
 */
 /* create-constraint */
@@ -293,10 +304,10 @@ conjoin-constraints:
 /*	calculate-class-invariants:
 		system -> system
 			where
-				cinvariants1 := <map(split-class-constraints)> <ABM> "Invariants";
+				cinvariants1 := <map(split-class-constraints)> <LookupTable> "Invariants";
 				cinvariants2 := <get-invariants-mentioned-attributes> (cinvariants1);
 				rules(			
-					ABM :+ "ClassBasedInvariants" -> cinvariants2
+					LookupTable :+ "ClassBasedInvariants" -> cinvariants2
 				);
 				log(|Error(), "Cinvariants1", cinvariants1);
 				log(|Error(), "Cinvariants2", cinvariants2)
@@ -305,9 +316,9 @@ conjoin-constraints:
 /*	combine-invariants: 
    		system -> system
 		where
-				cinvariants := <combine-invariants> (<ABM> "RealignedInvariants", <ABM> "ClassBasedInvariants");
+				cinvariants := <combine-invariants> (<LookupTable> "RealignedInvariants", <LookupTable> "ClassBasedInvariants");
 			rules(
-				ABM :+ "ClassBasedInvariants" -> cinvariants 
+				LookupTable :+ "ClassBasedInvariants" -> cinvariants 
 			)
 */			
 /*	split-class-constraints:

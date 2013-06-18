@@ -74,15 +74,15 @@ rules
 
 	output-to-booster-expression:
 		PathStart(st, None())
-			-> $[[start]]
+			-> $[[st']]
 		where 
-			start := <output-to-booster-expression> st
+			st' := <output-to-booster-expression> st
 			
 	output-to-booster-expression:
 		PathStart(st, Some(Primed()))
-			-> $[[start]']
+			-> $[[st']']
 		where 
-			start := <output-to-booster-expression> st
+			st' := <output-to-booster-expression> st
 
 
 			

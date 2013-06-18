@@ -17,9 +17,9 @@ rules
 	build-xml-file:
 		x -> None()
 	where
-		systemname := <ABM> "Name";
+		systemname := <LookupTable> "Name";
 		filename := <concat-strings>[ "output/xml/",systemname,"-ObjectModel.xml"];
-		classes := <ABM> "Classes";
+		classes := <LookupTable> "Classes";
 		classDefs := <map(class-xml)> classes;
 		contents := <concat-strings>["<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
 									"<objectModel xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"",
@@ -46,7 +46,7 @@ rules
 		where 
 			classAtts := <lookup-class-attributes> classname; 
 			attDefs := <currymap(attribute-xml)> (classname, classAtts);
-			systemname := <ABM> "Name"
+			systemname := <LookupTable> "Name"
 
 	attribute-xml:
 		(classname, attname)
@@ -72,7 +72,7 @@ rules
 		where 
 			attType := <lookup-attribute-type> (classname, attname);
 			(primType, typeMultiplicity,className,setName) := <type-xml> attType;
-			systemname := <ABM> "Name"
+			systemname := <LookupTable> "Name"
 			
 	type-xml:
 		Int() -> ("Integer","Mandatory","","")

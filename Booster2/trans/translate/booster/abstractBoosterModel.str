@@ -18,10 +18,10 @@ imports
 
 	output-to-booster:
 	 	system
-	 		-> $[system [<ABM> "Name"] 
+	 		-> $[system [<LookupTable> "Name"] 
 	 			 
-	 			 [<output-to-booster-sets> <ABM> "Sets"]
-	 			 [<output-to-booster-classes> (<ABM> "Classes")]
+	 			 [<output-to-booster-sets> <LookupTable> "Sets"]
+	 			 [<output-to-booster-classes> (<LookupTable> "Classes")]
 	 			 ]
 
 	output-to-booster-sets:
@@ -47,11 +47,11 @@ imports
 		[classname, classes*]
 			-> $[class [classname] {
 					attributes
-						[<output-to-booster-attributes>(classname, <lookup>(classname, <ABM> "Attributes" ))]
-					invariant
-						[<output-to-booster-constraint>(<lookup>(classname, <ABM> "Invariants"))]
+						[<output-to-booster-attributes>(classname, <lookup>(classname, <LookupTable> "Attributes" ))]
+					invariants
+						[<output-to-booster-constraint>(<lookup>(classname, <LookupTable> "Invariants"))]
 					methods
-						[<output-to-booster-methods>(classname, <lookup>(classname, <ABM> "Operations")) ]
+						[<output-to-booster-methods>(classname, <lookup>(classname, <LookupTable> "Operations")) ]
 				 }
 				 [<output-to-booster-classes>[classes*]]]	
 				
@@ -78,7 +78,7 @@ imports
 				
 	output-to-booster-attribute-type:
 		(classname, attname )
-			-> ${set ( { <get-type-booster-notation> t } ) [ {<lookup>((classname, attname), <ABM> "MinMults")} .. {<lookup>((classname, attname), <ABM> "MaxMults")} ]}
+			-> ${set ( { <get-type-booster-notation> t } ) [ {<lookup>((classname, attname), <LookupTable> "MinMults")} .. {<lookup>((classname, attname), <LookupTable> "MaxMults")} ]}
 		where
 			Set(BasicType(t)) := <lookup-attribute-type>(classname, attname)
 			
@@ -87,7 +87,7 @@ imports
 			-> $[ [name] . [attname2] ]
 		where
 			Class(name) := <lookup-attribute-type>(classname, attname);
-			(name, attname2) := <lookup>((classname, attname), <ABM> "Opposites")
+			(name, attname2) := <lookup>((classname, attname), <LookupTable> "Opposites")
 
 	output-to-booster-attribute-type:
 		(classname, attname)
@@ -100,7 +100,7 @@ imports
 			-> ${[ {name} . {attname2} ]}
 		where
 			Optional(Class(name)) := <lookup-attribute-type>(classname, attname);
-			(name, attname2) := <lookup>((classname, attname), <ABM> "Opposites") 
+			(name, attname2) := <lookup>((classname, attname), <LookupTable> "Opposites") 
 
 	output-to-booster-attribute-type:
 		(classname, attname)
@@ -132,7 +132,7 @@ imports
 			-> $[ [methodname] { [gc'] }
 				  [<output-to-booster-methods> (classname, [meths*])] ]
 			where
-			gc' := <output-to-booster-guarded-command> ( <lookup>((classname, methodname), <ABM> "Programs"))
+			gc' := <output-to-booster-guarded-command> ( <lookup>((classname, methodname), <LookupTable> "Programs"))
 
 	output-to-booster-guarded-command:
 		Skip()

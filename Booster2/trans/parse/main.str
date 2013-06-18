@@ -9,33 +9,62 @@ imports
 rules
 	
 	/* parse: 
-		Takes a system and produces its abm representation
+		Takes a system and produces a lookup table with all the information in it
 	 parse : System
 */
 	parse: 
    		system -> 
-   			system
+   				system
 	with
+   		<initialize-lookup-table> system; 
 		constraints := <concat><map(get-class-method-constraints)><get-classes-from-system> system;
 		operations := <map(get-class-method-names)> <get-classes-from-system> system;
 		rules(
-			ABM :+ "Name" -> <get-system-name> system
-			ABM :+ "Sets" -> <get-sets> system 
-			ABM :+ "Classes" -> <map(get-class-name)> <get-classes-from-system> system
-			ABM :+ "Invariants" -> <zip>
+			LookupTable :+ "Name" -> <get-system-name> system
+			LookupTable :+ "Sets" -> <get-sets> system 
+			LookupTable :+ "Classes" -> <map(get-class-name)> <get-classes-from-system> system
+			LookupTable :+ "Invariants" -> <zip>
 						(<map(get-class-name)> 
 							(<get-classes-from-system> system),
 						(<map(get-class-invariant)>
 							(<get-classes-from-system> system)))
-			ABM :+ "Attributes" -> <map(get-class-attribute-names)> <get-classes-from-system> system
-			ABM :+ "Ids" -> <zip>( <map(get-class-name)><get-classes-from-system> system,<map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))><get-classes-from-system> system)
-			ABM :+ "Type" -> <concat><map(get-class-attribute-types)><get-classes-from-system> system
-			ABM :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)><get-classes-from-system> system
-			ABM :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)><get-classes-from-system> system
-			ABM :+ "Opposites" -> <concat><map(get-class-attribute-opposites)><get-classes-from-system> system
-			ABM :+ "Operations" -> operations 
-			ABM :+ "Constraints" -> constraints
+			LookupTable :+ "Attributes" -> <map(get-class-attribute-names)> <get-classes-from-system> system
+			LookupTable :+ "Ids" -> <zip>( <map(get-class-name)><get-classes-from-system> system,<map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))><get-classes-from-system> system)
+			LookupTable :+ "Type" -> <concat><map(get-class-attribute-types)><get-classes-from-system> system
+			LookupTable :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)><get-classes-from-system> system
+			LookupTable :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)><get-classes-from-system> system
+			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites)><get-classes-from-system> system
+			LookupTable :+ "Operations" -> operations 
+			LookupTable :+ "Constraints" -> constraints
 			
 		)
 
+
+	initialize-lookup-table:
+		system -> 
+			system
+		where 
+			rules(
+				LookupTable :+ "Constraints" -> []
+				LookupTable :+ "Programs" -> []
+				LookupTable :+ "Invariants" -> []
+				LookupTable :+ "Type" -> []
+				LookupTable :+ "Inputs" -> []
+				LookupTable :+ "Outputs" -> []
+				LookupTable :+ "ClassBasedInvariants" -> []
+				LookupTable :+ "RealignedInvariants" -> []
+				LookupTable :+ "Sets" -> []
+				LookupTable :+ "Classes" -> []
+				LookupTable :+ "Opposites" -> []
+				LookupTable :+ "MinMults" -> []
+				LookupTable :+ "MaxMults" -> []
+				LookupTable :+ "Attributes" -> []
+				LookupTable :+ "Operations" -> []
+				LookupTable :+ "Name" -> []
+				LookupTable :+ "TableNames" -> []
+				LookupTable :+ "IDs" -> []
+			)
+				
+		
+		
 

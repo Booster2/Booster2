@@ -13,6 +13,7 @@ imports
   translate/booster/abstractBoosterModel
   translate/sql/abstractBoosterModel
   translate/sql/sql
+  translate/lookupTable
   
   simplify/main
   
@@ -44,7 +45,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
   editor-resolve:
     (node, position, ast, path, project-path) -> target
     where
-      <debug(!"Resolve: ")> node; 
+      /*<debug(!"Resolve: ")> node; */ 
       Type(type) := node; 
       target     :=  type 
 
@@ -64,90 +65,76 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
         proposals := []
       end */
       
-   generate-abstractBoosterMachine:
-   	(selected, position, ast, path, project-path) -> (filename, result)
+   
+   
+   /*** These are the actual transformations that are available from the editor ***/
+   
+   builder-parse: 
+   		(selected, position, ast, path, project-path) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"abm")> path;
-   		result :=   <compile> 
+   		filename := <guarantee-extension(|"1")> path;
+   		result :=   <output-lookup-table>
+   				          <parse> 
+   				            selected   
+
+   builder-elaborate: 
+   		(selected, position, ast, path, project-path) -> (filename, result)
+   	 where
+   		filename := <guarantee-extension(|"2")> path;
+   		result :=   <output-lookup-table>
    						<elaborate>
    				          <parse> 
-   				            selected
-
-   test-dynamic-rules:
-   	(selected, position, ast, path, project-path) -> (filename, result)
+   				            selected   
+   
+   builder-compile: 
+   		(selected, position, ast, path, project-path) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"test")> path;
-   	    result :=  <elaborate> <parse> selected;
-					log(|Error(), <ABM> "Invariants")  
-		 /* result := <test-retrieve> <test-store> 5 */   
-		
-      
-   expand-booster:
+   		filename := <guarantee-extension(|"3")> path;
+   		result :=   <output-lookup-table>
+   						<compile>
+	   						<elaborate>
+	   				          <parse> 
+	   				            selected   
+
+   builder-simplify: 
+   		(selected, position, ast, path, project-path) -> (filename, result)
+   	 where
+   		filename := <guarantee-extension(|"4")> path;
+   		result :=   <output-lookup-table>
+   						<simplify-main>
+	   						<compile>
+		   						<elaborate>
+		   				          <parse> 
+		   				            selected   
+   
+
+   builder-translate-sql:
+   	(selected, position, ast, path, project-path) -> (filename, result')
+   	 with
+   		filename := <guarantee-extension(|"sql")> path;
+		result := <pp-install>
+   				  	<booster-to-relational>
+   				  		<simplify-main>
+	  						<compile> 
+	  						  <elaborate>
+	          					<parse> 
+	            					selected;
+   		stdtxtfile := <concat-strings>[project-path, "/sql-build/standardStuff.sql"];		            
+   		standard-text := <read-text-file> stdtxtfile;
+   		result' := <concat-strings>[result, standard-text]   
+   		
+   		
+   builder-translate-booster:
    	(selected, position, ast, path, project-path) -> (filename, result)
    	 with
-   		filename := <guarantee-extension(|"expanded.booster")> path;
+   		filename := <guarantee-extension(|"expanded.boo2")> path;
    		result :=  <output-to-booster>  
    				  <simplify-main>
    				  	<compile>
-	   				   
 		 				<elaborate>
    				          <parse> 
    				            selected
 
-   expand-booster-without-printing:
-   	(selected, position, ast, path, project-path) -> (filename, result)
-   	 with
-   		filename := <guarantee-extension(|"expanded.booster")> path;
-   		result :=  <simplify-main>
-   				  	<compile>
-	   				   
-		 				<elaborate>
-   				          <parse> 
-   				            selected
-
-
-   expand-booster-for-testing:
-   	selected -> result
-   	 with
-   		result := <simplify-main>
-   				  	<compile>
-	   					<elaborate>
-   				        	<parse> 
-   				            	selected
-   	   				
-
-	/*expand-booster:
-		m -> <output-to-booster>
-   				  <innermost(simplify)>
-   				  
-   				  <compile> 
-	 				<elaborate>
-   				          <parse> 
-   				            m */
-
-
-   booster-to-sql:
-   	(selected, position, ast, path, project-path) -> (filename, result)
-   	 with
-   		filename := <guarantee-extension(|"sql")> path;
-		simplifiedCompiledModel := <simplify-main>
-   				  						<compile> 
-   				  						  <elaborate>
-   				          					<parse> 
-   				            					selected;
-   		result := <pp-install>
-   				  	<booster-to-relational>
-   				  		simplifiedCompiledModel
-		/*;
-   		None() := <build-xml-file> simplifiedCompiledModel;
-		None() := <build-java-controller> simplifiedCompiledModel */ 
-
-/*      
-   install-sql:
-   	(selected, position, ast, path, project-path) -> (filename, result)
-   	 with
-   		filename := <guarantee-extension(|"sql")> path;
-   		result :=   <pp-install> selected */
 
 main-booster =
   xtc-input-wrap(
@@ -161,7 +148,7 @@ main-booster =
     // ...
     
     // Compile
-    (output, contents)              := <booster-to-sql> (ast', [], ast, input, ".");
+    (output, contents)              := <builder-translate-sql> (ast', [], ast, input, ".");
     
     // Write to disk
     handle := <fopen> (output, "w");
@@ -172,22 +159,3 @@ main-booster =
     prim("SSL_stacktrace_get_all_frame_names"); report-failure
   )
 
-
-simple-test:
-	x -> x
-
-	test-store:
-		x -> x 
-	 	where
-  		rules(
-  			ABM :+ "test" -> x 
-  		)
-
-	test-retrieve:
-		x -> y
-		where
-			something := <ABM> "test";
-			rules(
-				ABM :+ "test" -> <add>(something, 2)
-			);
-			y := <ABM> "test" 

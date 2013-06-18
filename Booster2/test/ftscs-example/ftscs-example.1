@@ -1,0 +1,101 @@
+( ( "Constraints"
+  , [ ( ("A", "increment")
+      , BinRel(
+          PathStart("m", Some(Primed()))
+        , Equal()
+        , BinOp(PathStart("m", None()), Plus(), BasicValue(Integer("1")))
+        )
+      )
+    , ( ("B", "increment")
+      , BinRel(
+          PathStart("n", Some(Primed()))
+        , Equal()
+        , BinOp(PathStart("n", None()), Plus(), BasicValue(Integer("1")))
+        )
+      )
+    ]
+  , "Programs"
+  , []
+  , "Invariants"
+  , [ ("A", BinRel(PathStart("m", None()), LessThan(), BasicValue(Integer("10"))))
+    , ( "B"
+      , BinRel(
+          Path(PathStart("a", None()), PathComponent("m", None()))
+        , LessThan()
+        , PathStart("n", None())
+        )
+      )
+    , ("C", BinRel(PathStart("bp", None()), NotEqual(), PathStart("bq", None())))
+    ]
+  , "Type"
+  , [ (("A", "m"), BasicType(Int()))
+    , (("A", "b"), Optional(Class("B")))
+    , (("B", "a"), Optional(Class("A")))
+    , (("B", "n"), BasicType(Int()))
+    , (("B", "cp"), Set(Class("C")))
+    , (("B", "cq"), Set(Class("C")))
+    , (("C", "o"), BasicType(Int()))
+    , (("C", "bp"), Class("B"))
+    , (("C", "bq"), Optional(Class("B")))
+    ]
+  , "Inputs"
+  , []
+  , "Outputs"
+  , []
+  , "ClassBasedInvariants"
+  , []
+  , "RealignedInvariants"
+  , []
+  , "Sets"
+  , []
+  )
+, ( "Classes"
+  , ["A", "B", "C"]
+  , "Opposites"
+  , [ (("A", "b"), ("B", "a"))
+    , (("B", "a"), ("A", "b"))
+    , (("B", "cp"), ("C", "bp"))
+    , (("B", "cq"), ("C", "bq"))
+    , (("C", "bp"), ("B", "cp"))
+    , (("C", "bq"), ("B", "cq"))
+    ]
+  , "MinMults"
+  , [ (("A", "m"), 1)
+    , (("A", "b"), 0)
+    , (("B", "a"), 0)
+    , (("B", "n"), 1)
+    , (("B", "cp"), 0)
+    , (("B", "cq"), 0)
+    , (("C", "o"), 1)
+    , (("C", "bp"), 1)
+    , (("C", "bq"), 0)
+    ]
+  , "MaxMults"
+  , [ (("A", "m"), 1)
+    , (("A", "b"), 1)
+    , (("B", "a"), 1)
+    , (("B", "n"), 1)
+    , (("B", "cp"), "*")
+    , (("B", "cq"), "*")
+    , (("C", "o"), 1)
+    , (("C", "bp"), 1)
+    , (("C", "bq"), 1)
+    ]
+  , "Attributes"
+  , [ ("A", ["m", "b"])
+    , ("B", ["a", "n", "cp", "cq"])
+    , ("C", ["o", "bp", "bq"])
+    ]
+  , "Operations"
+  , [ ("A", ["increment"])
+    , ("B", ["increment"])
+    , ("C", [])
+    ]
+  , "Name"
+  , "fstcsExample"
+  , "TableNames"
+  , []
+  , "IDs"
+  , []
+  )
+)
