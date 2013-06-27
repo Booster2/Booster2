@@ -9,11 +9,10 @@ imports
 
   library/typeDecl
 
-  booster
 
 rules   
 
-		
+/*		
 	build-xml-file:
 		x -> None()
 	where
@@ -113,4 +112,4 @@ rules
 		where 
 			<equal>(name, <lookup-set-name> name)
 	
-	
+	*/

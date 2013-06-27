@@ -27,3 +27,34 @@ strategies
   	where
   		<equal>(None(),  <rule> (value, v));
 		[rs*] := <curryfilter(rule)> (value, [vs*])
+		
+		
+// Subsets: gets all subsets of a list
+
+	subsets:
+		[] -> [[]]
+		
+	subsets:
+		[xs*] -> <subsets-int>([xs*], <length>[xs*])
+		
+		
+		
+	subsets-int:
+		(x, 0) -> [[]]
+		
+	subsets-int:
+		([], n) -> []
+		
+	subsets-int:
+		([w, ws*], n) -> 
+			<union> (yss, zss)
+	where
+		xss := <subsets-int> ([ws*], (<subt>(n, 1)));
+		yss := <currymap(subset-append)>(w, xss); 	
+		zss := <subsets-int> ([ws*], (<subt>(n, 1)))		
+		
+			
+	subset-append:
+		(w, xs) -> <union>([w], xs)
+	
+		

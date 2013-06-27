@@ -76,5 +76,9 @@ imports
 					@ ([constraint2]))]
 		where 
 			expression := <output-to-booster-expression> expr;
-			constraint2 := <output-to-booster-constraint> constraint;
-			log(|Error(), "forall", (expr, constraint))
+			constraint2 := <output-to-booster-constraint> constraint
+
+	output-to-booster-constraint:
+		something -> $[true]
+			where
+				log(|Error(), "Output to Booster Constraint Error", something)

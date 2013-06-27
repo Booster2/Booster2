@@ -18,36 +18,35 @@ rules
 */
 
  	get-mentioned-attributes:
-		(name, maybename, Head(expr))
+		(name, maybename, Head(expr), env)
 			-> atts
 		with
-			atts := <get-mentioned-attributes> (name, maybename, expr)
+			atts := <get-mentioned-attributes> (name, maybename, expr, env)
  
  	get-mentioned-attributes:
-		(name, maybename, Tail(expr))
+		(name, maybename, Tail(expr), env)
 			-> atts
 		with
-			atts := <get-mentioned-attributes> (name, maybename, expr)
+			atts := <get-mentioned-attributes> (name, maybename, expr, env)
  
  	get-mentioned-attributes:
-		(name, maybename, Negative(expr))
+		(name, maybename, Negative(expr), env)
 			-> atts
 		with
-			atts := <get-mentioned-attributes> (name, maybename, expr)
+			atts := <get-mentioned-attributes> (name, maybename, expr, env)
  
  	get-mentioned-attributes:
-		(name, maybename, Cardinality(expr))
+		(name, maybename, Cardinality(expr), env)
 			-> atts
 		with
-			atts := <get-mentioned-attributes> (name, maybename, expr)
+			atts := <get-mentioned-attributes> (name, maybename, expr, env)
  
  	get-mentioned-attributes:
-		(name, maybename, BinOp(expr1, op, expr2))
+		(name, maybename, BinOp(expr1, op, expr2), env)
 			-> <union> (atts1, atts2)
 		with
-			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
-			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
-	
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1, env);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2, env)
 
 
 /* 	is-old:
@@ -92,85 +91,85 @@ rules
 */
 
 	get-expression-type:
-		(Head(expr1), classname, methodname)
+		(Head(expr1), classname, methodname, env)
 			-> String()
 		where
-			String() := <get-expression-type> (expr1, classname, methodname)
+			String() := <get-expression-type> (expr1, classname, methodname, env)
 			
 	get-expression-type:
-		(Head(expr1), classname, methodname)
+		(Head(expr1), classname, methodname, env)
 			-> type1
 		where
-			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
 				
 	get-expression-type:
-		(Tail(expr1), classname, methodname)
+		(Tail(expr1), classname, methodname, env)
 			-> String()
 		where
-			String() := <get-expression-type> (expr1, classname, methodname)
+			String() := <get-expression-type> (expr1, classname, methodname, env)
 			
 	get-expression-type:
-		(Tail(expr1), classname, methodname)
+		(Tail(expr1), classname, methodname, env)
 			-> type1
 		where
-			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(Negative(expr1), classname, methodname)
+		(Negative(expr1), classname, methodname, env)
 			-> Int()
 		where
-			Int() := <get-expression-type> (expr1, classname, methodname)
+			Int() := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(Cardinality(expr1), classname, methodname)
+		(Cardinality(expr1), classname, methodname, env)
 			-> Int()
 		where
-			String() := <get-expression-type> (expr1, classname, methodname)
+			String() := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(Cardinality(expr1), classname, methodname)
+		(Cardinality(expr1), classname, methodname, env)
 			-> Int()
 		where
-			Set(type1) := <get-expression-type> (expr1, classname, methodname)
+			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(BinOp(expr1, op, expr2), classname, methodname)
+		(BinOp(expr1, op, expr2), classname, methodname, env)
 			-> t3
 		where
-			t1 := <get-expression-type> (expr1, classname, methodname);
-			t2 := <get-expression-type> (expr1, classname, methodname);
+			t1 := <get-expression-type> (expr1, classname, methodname, env);
+			t2 := <get-expression-type> (expr1, classname, methodname, env);
 			t3 := <binop-type-matching> (t1, op, t2)
 
-	substitute:
-		 (Head(expression1), path, expression)
+	literal-substitute:
+		 (classname, methodname, Head(expression1), paths, expression, env)
 		 	-> Head(expression2)
 		 where
-		 	expression2 := <substitute>	(expression1, path, expression)
+		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
 
-	substitute:
-		 (Tail(expression1), path, expression)
+	literal-substitute:
+		 (classname, methodname, Tail(expression1), paths, expression, env)
 		 	-> Tail(expression2)
 		 where
-		 	expression2 := <substitute>	(expression1, path, expression)
+		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
 
-	substitute:
-		 (Cardinality(expression1), path, expression)
+	literal-substitute:
+		 (classname, methodname, Cardinality(expression1), paths, expression, env)
 		 	-> Cardinality(expression2)
 		 where
-		 	expression2 := <substitute>	(expression1, path, expression)
+		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
 
-	substitute:
-		 (Negative(expression1), path, expression)
+	literal-substitute:
+		 (classname, methodname, Negative(expression1), paths, expression, env)
 		 	-> Negative(expression2)
 		 where
-		 	expression2 := <substitute>	(expression1, path, expression)
+		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
 
-	substitute:
-		 (BinOp(expression1, op, expression2), path, expression)
+	literal-substitute:
+		 (classname, methodname, BinOp(expression1, op, expression2), paths, expression, env)
 		 	-> BinOp(expression3, op, expression4)
 		 where
-		 	expression3 := <substitute>	(expression1, path, expression);
-		 	expression4 := <substitute>	(expression2, path, expression)
+		 	expression3 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env);
+		 	expression4 := <literal-substitute>	(classname, methodname, expression2, paths, expression, env)
 			 	
 
 /* 	make-old:
@@ -249,3 +248,40 @@ rules
 			expr3 := <make-post-state> (expr1);
 			expr4 := <make-post-state> (expr2)
 
+
+/* 	get-mentioned-paths:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/
+
+ 	get-mentioned-paths:
+		(name, maybename, Head(expr), env)
+			-> atts
+		with
+			atts := <get-mentioned-paths> (name, maybename, expr, env)
+ 
+ 	get-mentioned-paths:
+		(name, maybename, Tail(expr), env)
+			-> atts
+		with
+			atts := <get-mentioned-paths> (name, maybename, expr, env)
+ 
+ 	get-mentioned-paths:
+		(name, maybename, Negative(expr), env)
+			-> atts
+		with
+			atts := <get-mentioned-paths> (name, maybename, expr, env)
+ 
+ 	get-mentioned-paths:
+		(name, maybename, Cardinality(expr), env)
+			-> atts
+		with
+			atts := <get-mentioned-paths> (name, maybename, expr, env)
+ 
+ 	get-mentioned-paths:
+		(name, maybename, BinOp(expr1, op, expr2), env)
+			-> <union> (atts1, atts2)
+		with
+			atts1 := <get-mentioned-paths> (name, maybename, expr1, env);
+			atts2 := <get-mentioned-paths> (name, maybename, expr2, env)

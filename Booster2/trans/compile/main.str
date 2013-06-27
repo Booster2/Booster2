@@ -12,6 +12,7 @@ imports
   compile/relation
   compile/constraint
   compile/guardedCommand
+  library/environment
 
 rules
 
@@ -43,17 +44,14 @@ rules
 				-> ((classname, methname), Guard(constraint7, program2))
 			with
 				program := <program> (classname, methname, constraint);
-				
-				// Copied in:
 				[paths*] := <get-modified-paths>(program);
-				constraint2a :=  <get-type-constraint> ([paths*], classname, methname);
-				constraint2b :=  <get-multiplicity-constraint> ([paths*], classname, methname);
+				constraint2a :=  <get-type-constraint> ([paths*], classname, methname, <new-environment>[]);
+				constraint2b :=  <get-multiplicity-constraint> ([paths*], classname, methname, <new-environment>[]);
 				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
 				
-				[atts*] := <get-modified-attributes>(program, classname, methname);
+				[atts*] := <get-modified-attributes>(program, classname, methname, <new-environment>[]);
 				invs := <lookup-invariants>([atts*]);
-				constraint4 := <make-post-state><combine-constraints>(invs);
-				// End Copy
+				constraint4 := <make-post-state><conjoin-constraints>(invs);
 				
 				constraint5 := And(constraint4, constraint3);
 				
@@ -73,18 +71,19 @@ rules
 		where 
 			
 			path1 := <make-post-state> path;
-			constraint2 := <substitute> (constraint1, path1, expression);
-			constraint3 := <is-defined> (classname, methname, expression);
-			constraint4 := <is-defined> (classname, methname, path)
+			constraint2 := <aliasing-substitute> (classname, methname, constraint1, path1, expression, <new-environment>[]);
+			constraint3 := <is-defined> (classname, methname, expression, <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, path, <new-environment>[])
+			
 
 	calculate-wp:
 		(New(o, cl), constraint1, classname, methname)
 			-> (And(constraint4, And(constraint3, constraint2)), New(o, cl))
 		where 
 			
-			constraint2 := <substitute> (constraint1, PathStart(cl, None()), BinOp(PathStart(cl, None()),Union(), Output(o)));
-			constraint3 := <is-defined> (classname, methname, BinOp(PathStart(cl, None()),Union(),Output(o)));
-			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()))
+			constraint2 := <aliasing-substitute> (classname, methname, constraint1, PathStart(cl, None()), BinOp(PathStart(cl, None()),Union(), Output(o)), <new-environment>[]);
+			constraint3 := <is-defined> (classname, methname, BinOp(PathStart(cl, None()),Union(),Output(o)), <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()), <new-environment>[])
 
 
 				
@@ -93,7 +92,7 @@ rules
 			-> (And(constraint4, constraint3), Guard(constraint1, program2))
 		where
 			(constraint3, program2) := <calculate-wp> (program1, constraint2, classname, methname);
-			constraint4 := <is-defined>(classname, methname, constraint3)
+			constraint4 := <is-defined>(classname, methname, constraint3, <new-environment>[])
 	calculate-wp:
 		(Sequence(program1, program2), constraint1, classname, methname)
 			-> (constraint3, Sequence(program4, program3))

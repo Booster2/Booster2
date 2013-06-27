@@ -42,13 +42,6 @@
         , Path(This(), PathComponent("n", None()))
         )
       )
-    , ( "C"
-      , BinRel(
-          Path(This(), PathComponent("bp", None()))
-        , NotEqual()
-        , Path(This(), PathComponent("bq", None()))
-        )
-      )
     ]
   , "Type"
   , [ (("A", "m"), BasicType(Int()))
@@ -57,9 +50,6 @@
     , (("B", "n"), BasicType(Int()))
     , (("B", "cp"), Set(Class("C")))
     , (("B", "cq"), Set(Class("C")))
-    , (("C", "o"), BasicType(Int()))
-    , (("C", "bp"), Class("B"))
-    , (("C", "bq"), Optional(Class("B")))
     ]
   , "Inputs"
   , [ (("A", "increment"), [])
@@ -72,43 +62,27 @@
   , "ClassBasedInvariants"
   , [ ( ("A", "m")
       , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("A", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(PathStart("obj", None()), PathComponent("m", None()))
-                , LessThan()
-                , BasicValue(Integer("10"))
-                )
-              )
+          Forall(
+            "obj"
+          , PathStart("A", None())
+          , BinRel(
+              Path(PathStart("obj", None()), PathComponent("m", None()))
+            , LessThan()
+            , BasicValue(Integer("10"))
             )
-          , True()
           )
         , And(
-            And(
-              Forall(
-                "obj"
-              , PathStart("B", None())
-              , Implies(
-                  BinRel(
-                    This()
-                  , Equal()
-                  , Path(PathStart("obj", None()), PathComponent("a", None()))
-                  )
-                , BinRel(
-                    Path(
-                      Path(PathStart("obj", None()), PathComponent("a", None()))
-                    , PathComponent("m", None())
-                    )
-                  , LessThan()
-                  , Path(PathStart("obj", None()), PathComponent("n", None()))
-                  )
+            Forall(
+              "obj"
+            , PathStart("B", None())
+            , BinRel(
+                Path(
+                  Path(PathStart("obj", None()), PathComponent("a", None()))
+                , PathComponent("m", None())
                 )
+              , LessThan()
+              , Path(PathStart("obj", None()), PathComponent("n", None()))
               )
-            , True()
             )
           , True()
           )
@@ -117,93 +91,40 @@
     , (("A", "b"), True())
     , ( ("B", "a")
       , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("B", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(
-                    Path(PathStart("obj", None()), PathComponent("a", None()))
-                  , PathComponent("m", None())
-                  )
-                , LessThan()
-                , Path(PathStart("obj", None()), PathComponent("n", None()))
-                )
+          Forall(
+            "obj"
+          , PathStart("B", None())
+          , BinRel(
+              Path(
+                Path(PathStart("obj", None()), PathComponent("a", None()))
+              , PathComponent("m", None())
               )
+            , LessThan()
+            , Path(PathStart("obj", None()), PathComponent("n", None()))
             )
-          , True()
           )
         , True()
         )
       )
     , ( ("B", "n")
       , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("B", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(
-                    Path(PathStart("obj", None()), PathComponent("a", None()))
-                  , PathComponent("m", None())
-                  )
-                , LessThan()
-                , Path(PathStart("obj", None()), PathComponent("n", None()))
-                )
+          Forall(
+            "obj"
+          , PathStart("B", None())
+          , BinRel(
+              Path(
+                Path(PathStart("obj", None()), PathComponent("a", None()))
+              , PathComponent("m", None())
               )
+            , LessThan()
+            , Path(PathStart("obj", None()), PathComponent("n", None()))
             )
-          , True()
           )
         , True()
         )
       )
     , (("B", "cp"), True())
     , (("B", "cq"), True())
-    , (("C", "o"), True())
-    , ( ("C", "bp")
-      , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("C", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(PathStart("obj", None()), PathComponent("bp", None()))
-                , NotEqual()
-                , Path(PathStart("obj", None()), PathComponent("bq", None()))
-                )
-              )
-            )
-          , True()
-          )
-        , True()
-        )
-      )
-    , ( ("C", "bq")
-      , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("C", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(PathStart("obj", None()), PathComponent("bp", None()))
-                , NotEqual()
-                , Path(PathStart("obj", None()), PathComponent("bq", None()))
-                )
-              )
-            )
-          , True()
-          )
-        , True()
-        )
-      )
     ]
   , "RealignedInvariants"
   , []
@@ -211,14 +132,12 @@
   , []
   )
 , ( "Classes"
-  , ["A", "B", "C"]
+  , ["A", "B"]
   , "Opposites"
   , [ (("A", "b"), ("B", "a"))
     , (("B", "a"), ("A", "b"))
     , (("B", "cp"), ("C", "bp"))
     , (("B", "cq"), ("C", "bq"))
-    , (("C", "bp"), ("B", "cp"))
-    , (("C", "bq"), ("B", "cq"))
     ]
   , "MinMults"
   , [ (("A", "m"), 1)
@@ -227,9 +146,6 @@
     , (("B", "n"), 1)
     , (("B", "cp"), 0)
     , (("B", "cq"), 0)
-    , (("C", "o"), 1)
-    , (("C", "bp"), 1)
-    , (("C", "bq"), 0)
     ]
   , "MaxMults"
   , [ (("A", "m"), 1)
@@ -238,20 +154,13 @@
     , (("B", "n"), 1)
     , (("B", "cp"), "*")
     , (("B", "cq"), "*")
-    , (("C", "o"), 1)
-    , (("C", "bp"), 1)
-    , (("C", "bq"), 1)
     ]
   , "Attributes"
   , [ ("A", ["m", "b"])
     , ("B", ["a", "n", "cp", "cq"])
-    , ("C", ["o", "bp", "bq"])
     ]
   , "Operations"
-  , [ ("A", ["increment"])
-    , ("B", ["increment"])
-    , ("C", [])
-    ]
+  , [("A", ["increment"]), ("B", ["increment"])]
   , "Name"
   , "fstcsExample"
   , "TableNames"

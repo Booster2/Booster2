@@ -20,12 +20,12 @@ imports
 
 	is-defined:
 		something -> True()	
-			
+/*			
 	is-defined:
-		 (classname, method, Head(expr1))
+		 (classname, method, Head(expr1), env)
 			-> And(constraint1, BinRel(expr1, NotEqual(), String("")))
 		where
-			constraint1 := <is-defined>(classname, method, expr1);
+			constraint1 := <is-defined>(classname, method, expr1, env);
 			(String(), vars) := <deduce-types>(classname, method, expr1, "?",[])
 			
 	is-defined:
@@ -123,4 +123,6 @@ imports
 			constraint1 := <is-defined>(classname, method, expr1);
 			constraint2 := <is-defined>(classname, method, expr2);
 			(String(), vars) := <deduce-types>(classname, method, BinOp(expr1, Concat(), expr2), "?",[])
+			
+*/
 			

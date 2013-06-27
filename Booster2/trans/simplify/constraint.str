@@ -35,6 +35,26 @@ rules
 	simplify:
 		Implies(True(), constraint)
 			-> constraint
+
+	simplify:
+		Implies(False(), constraint)
+			-> True()
+
+	simplify:
+		Implies(
+			BinRel(a, Equal(), b),
+			Implies(
+				BinRel(a, NotEqual(), b),
+				constraint
+		)) -> Implies(False(), constraint)
+
+	simplify:
+		Implies(
+			BinRel(a, NotEqual(), b),
+			Implies(
+				BinRel(a, Equal(), b),
+				constraint
+		)) -> Implies(False(), constraint)
 	
 	simplify:
 		Guard(True(), program)
@@ -96,6 +116,13 @@ rules
 				BinRel(expression1, Equal(), expression2)))
 		-> True()
 		
+	simplify:
+		Forall(name, expr, True())
+			-> True()
+			
+	simplify:
+		Implies(p, Implies(p, constraint))
+			-> Implies(p, constraint)
 	
 			
 			

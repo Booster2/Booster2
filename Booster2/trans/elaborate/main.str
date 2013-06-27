@@ -6,6 +6,7 @@ imports
   
   library/constraint
   library/strategy
+  library/environment
 
  
 
@@ -22,33 +23,45 @@ rules
    				<insert-this>
   				system;
   				invariants := <LookupTable> "Invariants";
-  				invs-atts := <map(get-mentioned-attributes-in-invariant)> invariants;
-  				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
-  				log(|Error(), "Development", att-invs);
+  				qualified-invariants := <map(qualify-invariant)> invariants;
+ 				invs-atts := <map(get-mentioned-attributes-in-invariant)> qualified-invariants;
+ 				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
   				rules(			
 					LookupTable :+ "ClassBasedInvariants" -> att-invs
-				)
+				) 
+  
+ qualify-invariant:
+ 	(classname, True())
+ 		-> (classname, True())
+
+
+ qualify-invariant:
+ 	(classname, invariant)
+ 		-> (classname, Forall(varname, PathStart(classname, None()), invariant'))
+ 	where
+ 		varname := <environment-get-new-name><new-environment>[];
+ 		invariant' := <literal-substitute> (classname, None(), invariant, [This()], PathStart(varname, None()), <new-environment>[])
   
  get-mentioned-attributes-in-invariant:
  	(classname, invariant)
  		-> (classname, invariant, atts)
  		where 
- 			atts := <get-mentioned-attributes> (classname, None(), invariant)
+ 			atts := <get-mentioned-attributes> (classname, None(), invariant, <new-environment> [])
+  
+  
   
   getattributes:
   	(invs-atts, ((classname, attname), type)) 
   		-> ((classname, attname), constraint) 
   		where
   			invs1 := <curryfilter(match-attributes)> ((classname, attname), invs-atts);
-  			invs2 := <currymap(create-constraint)> ((classname, attname), invs1) ;
-  			constraint := <conjoin-constraints> invs2;
-  			log(|Error(), "getattributes", invs1)
+  			constraint := <combine-constraints> invs1
 
  match-attributes:
  	((classname1, attname), (classname2, constraint, atts))
  		-> (classname2, constraint, atts)
 	where
-		<lookup>((classname1, attname), atts) 
+		<elem>((classname1, attname), atts) 
 
 
  match-attributes:
@@ -56,44 +69,12 @@ rules
  		-> None()
  		 
 
-create-constraint:
-	((classname1, attname1), (classname, constraint, []))
-		-> True()
-
-create-constraint:
-	((cname, aname), (classname, constraint, [((cname, aname), path), atts*]))
-		-> And( constraint1, constraint2)
-	where
-		constraint' := <substitute> (constraint, This(), PathStart("obj", None()));
-		path' := <substitute> (path, This(), PathStart("obj", None()));
-		constraint1 := <make-constraint> (classname, aname, "obj", path', constraint'); 
-		constraint2 := <create-constraint> ((cname, aname), (classname, constraint, [atts*]))
-
-
-/* make-constraint:
-	(classname, attname, dummyvar, path, constraint)
-		-> Forall("obj", PathStart(classname, None()), Implies(BinRel(This(),Equal(), path), constraint))	
-	where
-		Class(cname) = 	
-*/
-	
-make-constraint:
-	(classname, attname, dummyvar, path, constraint)
-		-> Forall("obj", PathStart(classname, None()), Implies(BinRel(This(),Equal(), path), constraint))	
-		
-
-create-constraint:
-	((cname', aname'), (classname, constraint, [((cname, aname), path), atts*]))
-		-> constraint2
-	where
-		constraint2 := <create-constraint> ((cname', aname'), (classname, constraint, [atts*]))
- 
-conjoin-constraints:
+combine-constraints:
 	[] -> True()			
 
-conjoin-constraints:
-	[c, cs*] -> And(c, <conjoin-constraints> [cs*])			
-
+combine-constraints:
+	[(cname, c, atts), cs*] -> And(c, <combine-constraints> [cs*])			
+ 
 			  
   /* 	insert-this:
 		Takes all the constraints, and the invariants, and puts 'this' at the 

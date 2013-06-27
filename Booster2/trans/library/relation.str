@@ -5,6 +5,9 @@ imports
    
   library/expression
   library/valueExpression
+  
+  library/strategy
+  library/constraint
  
  rules
  	 
@@ -29,21 +32,91 @@ imports
 		constrains.			
 */
 	get-mentioned-attributes:
-		(name, maybename, BinRel(expr1, binrel, expr2))
+		(name, maybename, BinRel(expr1, binrel, expr2), env)
 			-> <union> (atts1, atts2)
 		with
-			atts1 := <get-mentioned-attributes> (name, maybename, expr1);
-			atts2 := <get-mentioned-attributes> (name, maybename, expr2)
+			atts1 := <get-mentioned-attributes> (name, maybename, expr1, env);
+			atts2 := <get-mentioned-attributes> (name, maybename, expr2, env)
+
+	literal-substitute:
+		 (classname, methodname, BinRel(expression1, binrel, expression2), paths, expression, env)
+		 	-> BinRel(expression1', binrel, expression2')
+		 where
+		 	expression1' := <literal-substitute> (classname, methodname, expression1, paths, expression, env);
+		 	expression2' := <literal-substitute> (classname, methodname, expression2, paths, expression, env)
 
 
 
 	
-	substitute:
-		 (BinRel(expression1, binrel, expression2), path, expression)
-		 	-> BinRel(expression3, binrel, expression4)
+	aliasing-substitute:
+		 (classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env)
+		 	-> constraint
 		 where
-		 	expression3 := <substitute>	(expression1, path, expression);
-		 	expression4 := <substitute>	(expression2, path, expression)
+		 	//log(|Error(), "Aliasing Subst - classname, methodname:", (classname, methodname));
+		 	//log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
+		 	log(|Error(), "Aliasing Subst - path", Path(ps, pc));
+		 	//log(|Error(), "Aliasing Subst - expression", expression);
+		 	paths1 := <get-mentioned-paths> (classname, methodname, expression1, env);
+		 	log(|Error(), "Aliasing Subst - paths1", paths1);
+		 	paths2 := <get-mentioned-paths> (classname, methodname, expression2, env);
+		 	log(|Error(), "Aliasing Subst - paths2", paths2);
+		 	paths := <union>(paths1, paths2);
+		 	//log(|Error(), "Aliasing Subst - paths", paths);
+		 	type := <resolve-path-type>(classname, ps, (classname, methodname), env);
+		 	log(|Error(), "Aliasing Subst - type", type);
+		 	filtered-paths := <curryfilter(is-correct-type)> ((type, classname, methodname, env), paths);
+		 	log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
+		 	subsets := <subsets> filtered-paths;
+		 	//log(|Error(), "Aliasing Subst - subset",subsets);
+		 	/* log(|Error(), "subsets", subsets); */
+			constraint := <conjoin-constraints><currymap(generate-aliasing-constraint)> ((classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env, filtered-paths), subsets) //; 
+			//log(|Error(), "Aliasing Subst - constraint", constraint)
+		 	
+
+	generate-aliasing-constraint:
+		((classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env,all-paths), paths)
+			-> Implies(And(ant1,ant2), con2)
+		where
+			ant1 := <conjoin-constraints><currymap(make-equal)>(ps, paths);
+			paths2 := <diff>(all-paths, paths); 
+			ant2 := <conjoin-constraints><currymap(make-unequal)>(ps, paths2);	
+			con := <literal-substitute> (classname, methodname, BinRel(expression1, binrel, expression2), paths, ps, env);
+			con2 := <literal-substitute> (classname, methodname, con, [Path(ps, pc)], expression, env)
+			
+	make-equal:
+		(path1, path2)
+			-> BinRel(path1, Equal(), path2)		
+
+	make-unequal:
+		(path1, path2)
+			-> BinRel(path1, NotEqual(), path2)		
+			
+
+	is-correct-type:
+		((type, classname, methodname, env), path)
+			-> path
+		where 
+			type' := <resolve-path-type> (classname, path, (classname, methodname), env);
+			<equal>(type', type)
+
+	is-correct-type:
+		((type, classname, methodname, env), path)
+			-> path
+		where 
+			type' := <resolve-path-type> (classname, path, (classname, methodname), env);
+			<equal>(type', Optional(type))
+
+	is-correct-type:
+		((type, classname, methodname, env), path)
+			-> path
+		where 
+			type' := <resolve-path-type> (classname, path, (classname, methodname), env);
+			<equal>(Optional(type'), type)
+			
+	is-correct-type:
+		((type, classname, methodname, env), path)
+			-> None()
+		
 		 	
 			 	
 /* 	make-post-state:

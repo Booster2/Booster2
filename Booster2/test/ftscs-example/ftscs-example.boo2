@@ -7,7 +7,7 @@ class A {
 	invariants
 		m < 10
 	methods
-		increment { m' = m + 1} 
+		increment { m' = m + 1 } 
 }
 
 class B {
@@ -23,10 +23,11 @@ class B {
 		increment {n' = n + 1}
 
 /*** Method temporarily removed because it's not parsing! */
-/***	addQ { c? : cq'}*/
+/*	addQ { c? : cq'} */
 
 }
 
+/*
 class C {
 	attributes
 		o : Int
@@ -35,4 +36,4 @@ class C {
 	invariants
 		bp /= bq
 	
-}
+}*/

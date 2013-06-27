@@ -7,12 +7,11 @@ imports
   library/abstractBoosterModel
   library/file
 
-  booster
 
 rules   
 
 
-
+/*
 		
 	build-java-controller:
 		x -> None()
@@ -400,3 +399,4 @@ rules
 		where 
 			Set(Class(name)) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-set-name> name)
+*/

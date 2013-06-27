@@ -53,18 +53,5 @@ System(
         )
       ]
     )
-  , Class(
-      "C"
-    , [ Attributes(
-          [ Attribute("o", BasicType(Int()))
-          , Attribute("bp", BiDirectional("B", "cp"))
-          , Attribute("bq", Optional(BiDirectional("B", "cq")))
-          ]
-        )
-      , Invariant(
-          [BinRel(PathStart("bp", None()), NotEqual(), PathStart("bq", None()))]
-        )
-      ]
-    )
   ]
 )

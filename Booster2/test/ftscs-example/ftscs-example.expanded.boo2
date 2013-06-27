@@ -9,12 +9,17 @@ class A {
 	invariants
 		this.m < 10
 	methods
-		increment { (((forall obj : A
-		                 	@ ((this = obj
-		                 	   	=> obj.m < 10))) 
+		increment { ((((forall obj : A
+		                  	@ ((obj = this
+		                  	   	=> this.m + 1 < 10))) 
+		                  & (forall obj : A
+		                    	@ ((obj /= this
+		                    	   	=> obj.m < 10)))) 
 		                 & (forall obj : B
-		                   	@ ((this = obj.a
-		                   	   	=> obj.a.m < obj.n)))) 
+		                   	@ (((this = obj.a
+		                   	    	=> this.m + 1 < obj.n) 
+		                   	    & (this /= obj.a
+		                   	      	=> obj.a.m < obj.n))))) 
 		                & this.m + 1 : INT) 
 		               --> ( this.m := this.m + 1 ) }
 		
@@ -29,22 +34,14 @@ class B {
 	invariants
 		this.a.m < this.n
 	methods
-		increment { ((forall obj : B
-		                	@ ((this = obj
-		                	   	=> obj.a.m < obj.n))) 
+		increment { (((forall obj : B
+		                 	@ ((obj = this
+		                 	   	=> this.a.m < this.n + 1))) 
+		                 & (forall obj : B
+		                   	@ ((obj /= this
+		                   	   	=> obj.a.m < obj.n)))) 
 		                & this.n + 1 : INT) 
 		               --> ( this.n := this.n + 1 ) }
-		
-}
-class C {
-	attributes
-		o : INT
-		bp : B . cp
-		bq : [ B . cq ]
-		
-	invariants
-		this.bp /= this.bq
-	methods
 		
 }
 

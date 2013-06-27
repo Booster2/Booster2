@@ -38,10 +38,10 @@ rules
   		);
   		<currymap(build-lookup-table-class-component)> (name, [cs*])    
   	
-  build-lookup-table:
+  /*build-lookup-table:
   	x -> x
   		with
-  		log(|Error(), "build-lookup-table", x )
+  		log(|Error(), "build-lookup-table", x ) */
 
 	build-lookup-table-setvalue:
 		(name, value) -> (name, value)

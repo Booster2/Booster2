@@ -6,6 +6,7 @@ imports
   library/relation
   library/expression
   library/valueExpression
+  library/environment
  
  
  rules
@@ -19,94 +20,107 @@ imports
 */
 
 	get-mentioned-attributes:
-		(name, maybename, True())
+		(name, maybename, True(), env)
 			-> []
 			
 	get-mentioned-attributes:
-		(name, maybename, False())
+		(name, maybename, False(), env)
 			-> []
 			
 	get-mentioned-attributes:
-		(name, maybename, Not(constraint))
+		(name, maybename, Not(constraint), env)
 			-> atts
 		with
-			atts := <get-mentioned-attributes> (name, maybename, constraint)
+			atts := <get-mentioned-attributes> (name, maybename, constraint, env)
 			
 	get-mentioned-attributes:
-		(name, maybename, And(constraint1, constraint2))
+		(name, maybename, And(constraint1, constraint2), env)
 			-> <union> (atts1, atts2)
 		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
 
 	get-mentioned-attributes:
-		(name, maybename, Or(constraint1, constraint2))
+		(name, maybename, Or(constraint1, constraint2), env)
 			-> <union> (atts1, atts2)
 		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
 
 	get-mentioned-attributes:
-		(name, maybename, Implies(constraint1, constraint2))
+		(name, maybename, Implies(constraint1, constraint2), env)
 			-> <union> (atts1, atts2)
 		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
 
 	get-mentioned-attributes:
-		(name, maybename, Then(constraint1, constraint2))
+		(name, maybename, Then(constraint1, constraint2), env)
 			-> <union> (atts1, atts2)
 		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2)
+			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
+			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
+
+	get-mentioned-attributes:
+		(classname, maybename, Forall(varname, expression, constraint), env)
+			-> <union> (atts1, atts2)
+		with
+			env' := <add-var-to-environment> (varname, (classname, maybename, expression), env);
+			atts1 := <get-mentioned-attributes> (classname, maybename, expression, env');
+			atts2 := <get-mentioned-attributes> (classname, maybename, constraint, env')
 		
+	get-mentioned-attributes:
+		(classname, maybename, Exists(varname, expression, constraint), env)
+			-> <union> (atts1, atts2)
+		with
+			env' := <add-var-to-environment> (varname, (classname, maybename, expression), env);
+			atts1 := <get-mentioned-attributes> (classname, maybename, expression, env');
+			atts2 := <get-mentioned-attributes> (classname, maybename, constraint, env')
 			
 /*	is-defined:
-		Takes a constraint, and returns it with any paths transformed so that
-		they have 'this' at the front, if applicable 
 */ 	
 
 	is-defined:
-		(classname, method, True())
+		(classname, method, True(), env)
 			-> True()
 
 	is-defined:
-		(classname, method, False())
+		(classname, method, False(), env)
 			-> True()
 	
 	is-defined:
-		(classname, method, Not(constraint1))
+		(classname, method, Not(constraint1), env)
 			-> Not(constraint2)
 		where
-			constraint2 := <is-defined>(classname, method, constraint1)
+			constraint2 := <is-defined>(classname, method, constraint1, env)
 			
 	is-defined:
-		(classname, method, And(constraint1, constraint2))
+		(classname, method, And(constraint1, constraint2), env)
 			-> And(constraint3, constraint4)
 		where
-			constraint3 := <is-defined>(classname, method, constraint1);
-			constraint4 := <is-defined>(classname, method, constraint2)
+			constraint3 := <is-defined>(classname, method, constraint1, env);
+			constraint4 := <is-defined>(classname, method, constraint2, env)
 			
 	is-defined:
-		(classname, method, Or(constraint1, constraint2))
+		(classname, method, Or(constraint1, constraint2), env)
 			-> Or(And(constraint1, constraint3), And(constraint2, constraint4))
 		where
-			constraint3 := <is-defined>(classname, method, constraint1);
-			constraint4 := <is-defined>(classname, method, constraint2)
+			constraint3 := <is-defined>(classname, method, constraint1, env);
+			constraint4 := <is-defined>(classname, method, constraint2, env)
 	
 	is-defined:
-		(classname, method, Implies(constraint1, constraint2))
+		(classname, method, Implies(constraint1, constraint2), env)
 			-> Implies(And(constraint1, constraint3), And(constraint2, constraint4))
 		where
-			constraint3 := <is-defined>(classname, method, constraint1);
-			constraint4 := <is-defined>(classname, method, constraint2)
+			constraint3 := <is-defined>(classname, method, constraint1, env);
+			constraint4 := <is-defined>(classname, method, constraint2, env)
 		
 	is-defined:
-		(classname, method, Then(constraint1, constraint2))
+		(classname, method, Then(constraint1, constraint2), env)
 			-> Then(constraint3, constraint4)
 		where
-			constraint3 := <is-defined>(classname, method, constraint1);
-			constraint4 := <is-defined>(classname, method, constraint2)
+			constraint3 := <is-defined>(classname, method, constraint1, env);
+			constraint4 := <is-defined>(classname, method, constraint2, env)
 			
 			
 	make-old:
@@ -222,78 +236,244 @@ imports
 /* 	substitute:
 		takes a constraint, and replaces all instances of the path with the given expression
 */			
-	substitute:
-		 (True(), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, True(), path, expression, env)
 		 	-> True()		
 
-	substitute:
-		 (False(), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, False(), path, expression, env)
 		 	-> False()
 		 	
-	substitute:
-		 (Not(constraint), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, Not(constraint), path, expression, env)
 		 	-> Not(constraint2)
 		 where
-		 	constraint2 := <substitute>	(constraint, path, expression)
+		 	constraint2 := <aliasing-substitute>	(classname, methodname, constraint, path, expression, env)
 		 	
-	substitute:
-		 (And(constraint1, constraint2), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, And(constraint1, constraint2), path, expression, env)
 		 	-> And(constraint3, constraint4)
 		 where
 		 	/*log(|Error(), <substitute>	(constraint1, path, expression), <substitute>	(constraint2, path, expression));*/
-		 	constraint3 := <substitute>	(constraint1, path, expression);
-		 	constraint4 := <substitute>	(constraint2, path, expression)
+		 	constraint3 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env);
+		 	constraint4 := <aliasing-substitute>	(classname, methodname, constraint2, path, expression, env)
 	
-	substitute:
-		 (Or(constraint1, constraint2), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, Or(constraint1, constraint2), path, expression, env)
 		 	-> Or(constraint3, constraint4)
 		 where
-		 	constraint3 := <substitute>	(constraint1, path, expression);
-		 	constraint4 := <substitute>	(constraint2, path, expression)
+		 	constraint3 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env);
+		 	constraint4 := <aliasing-substitute>	(classname, methodname, constraint2, path, expression, env)
 	
-	substitute:
-		 (Implies(constraint1, constraint2), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, Implies(constraint1, constraint2), path, expression, env)
 		 	-> Implies(constraint3, constraint4)
 		 where
-		 	constraint3 := <substitute>	(constraint1, path, expression);
-		 	constraint4 := <substitute>	(constraint2, path, expression)
+		 	constraint3 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env);
+		 	constraint4 := <aliasing-substitute>	(classname, methodname, constraint2, path, expression, env)
 	
-	substitute:
-		 (Then(constraint1, constraint2), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, Then(constraint1, constraint2), path, expression, env)
 		 	-> Then(constraint3, constraint4)
 		 where
-		 	constraint3 := <substitute>	(constraint1, path, expression);
-		 	constraint4 := <substitute>	(constraint2, path, expression)
+		 	constraint3 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env);
+		 	constraint4 := <aliasing-substitute>	(classname, methodname, constraint2, path, expression, env)
 
-	substitute:
-		 (Exists(name, expr1, constraint1), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, Exists(name, expr1, constraint1), Path(ps, pc), expression, env)
+		 	-> And(
+		 		Exists(name, expr1, 
+		 			Implies(
+			 				BinRel(
+			 					PathStart(name, None()),
+			 					Equal(),
+			 					ps),
+			 					constraint3)),
+	 			Exists(name, expr1, 
+	 				Implies(
+	 					BinRel(
+		 					PathStart(name, None()),
+		 					NotEqual(),
+		 					ps),
+		 					constraint1)))
+		 where
+		 	//log(|Error(), "Aliasing Substitute", (Forall(name, expr1, constraint1), Path(ps, pc), expression));
+		 	Set(type1) := <get-expression-type>(expr1, classname, methodname, env);
+		 	type2 := <get-expression-type>(ps, classname, methodname, env);
+		 	<equal>(type1, type2);
+			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, [PathStart(name, Some(Primed()))], ps, env');
+			//log(|Error(), "Constraint3", (constraint2, [Path(ps, pc)], expression));
+			constraint3 := <aliasing-substitute>	(classname, methodname, constraint2, Path(ps, pc), expression, env')
+		 	
+
+	aliasing-substitute:
+		 (classname, methodname, Exists(name, expr1, constraint1), path, expression, env)
 		 	-> Exists(name, expr2, constraint2)
 		 where
-		 	expr2 := <substitute>	(expr1, path, expression);
-		 	constraint2 := <substitute>	(constraint1, path, expression)
+		 	expr2 := <literal-substitute>	(classname, methodname, expr1, [path], expression, env);
+		 	env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env')
 
-	substitute:
-		 (Forall(name, expr1, constraint1), path, expression)
+	aliasing-substitute:
+		 (classname, methodname, Forall(name, expr1, constraint1), Path(ps, pc), expression, env)
+		 	-> And(
+		 		Forall(name, expr1, 
+		 			Implies(
+			 				BinRel(
+			 					PathStart(name, None()),
+			 					Equal(),
+			 					ps),
+			 					constraint3)),
+	 			Forall(name, expr1, 
+	 				Implies(
+	 					BinRel(
+		 					PathStart(name, None()),
+		 					NotEqual(),
+		 					ps),
+		 					constraint1)))
+		 where
+		 	//log(|Error(), "Aliasing Substitute", (Forall(name, expr1, constraint1), Path(ps, pc), expression));
+		 	Set(type1) := <get-expression-type>(expr1, classname, methodname, env);
+		 	type2 := <get-expression-type>(ps, classname, methodname, env);
+		 	<equal>(type1, type2);
+			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, [PathStart(name, Some(Primed()))], ps, env');
+			//log(|Error(), "Constraint3", (constraint2, [Path(ps, pc)], expression));
+			constraint3 := <aliasing-substitute>	(classname, methodname, constraint2, Path(ps, pc), expression, env')
+		 	
+
+	aliasing-substitute:
+		 (classname, methodname, Forall(name, expr1, constraint1), path, expression, env)
 		 	-> Forall(name, expr2, constraint2)
 		 where
-		 	expr2 := <substitute>	(expr1, path, expression);
-		 	constraint2 := <substitute>	(constraint1, path, expression)
+		 	expr2 := <literal-substitute>	(classname, methodname, expr1, [path], expression, env);
+			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env')
+			
+	literal-substitute:
+		 (classname, methodname, True(), paths, expression, env)
+		 	-> True()		
+
+	literal-substitute:
+		 (classname, methodname, False(), paths, expression, env)
+		 	-> False()
+		 	
+	literal-substitute:
+		 (classname, methodname, Not(constraint), paths, expression, env)
+		 	-> Not(constraint2)
+		 where
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint, paths, expression, env)
+		 	
+	literal-substitute:
+		 (classname, methodname, And(constraint1, constraint2), paths, expression, env)
+		 	-> And(constraint3, constraint4)
+		 where
+		 	/*log(|Error(), <substitute>	(constraint1, path, expression), <substitute>	(constraint2, path, expression));*/
+		 	constraint3 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env);
+		 	constraint4 := <literal-substitute>	(classname, methodname, constraint2, paths, expression, env)
+	
+	literal-substitute:
+		 (classname, methodname, Or(constraint1, constraint2), paths, expression, env)
+		 	-> Or(constraint3, constraint4)
+		 where
+		 	constraint3 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env);
+		 	constraint4 := <literal-substitute>	(classname, methodname, constraint2, paths, expression, env)
+	
+	literal-substitute:
+		 (classname, methodname, Implies(constraint1, constraint2), paths, expression, env)
+		 	-> Implies(constraint3, constraint4)
+		 where
+		 	constraint3 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env);
+		 	constraint4 := <literal-substitute>	(classname, methodname, constraint2, paths, expression, env)
+	
+	literal-substitute:
+		 (classname, methodname, Then(constraint1, constraint2), paths, expression, env)
+		 	-> Then(constraint3, constraint4)
+		 where
+		 	constraint3 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env);
+		 	constraint4 := <literal-substitute>	(classname, methodname, constraint2, paths, expression, env)
+
+	literal-substitute:
+		 (classname, methodname, Exists(name, expr1, constraint1), [Path(ps, pc)], expression, env)
+		 	-> And(
+		 		Exists(name, expr1, 
+		 			Implies(
+			 				BinRel(
+			 					PathStart(name, None()),
+			 					Equal(),
+			 					ps),
+			 					constraint2)),
+	 			Exists(name, expr1, 
+	 				Implies(
+	 					BinRel(
+		 					PathStart(name, None()),
+		 					NotEqual(),
+		 					ps),
+		 					constraint1)))
+		 where
+		 	Set(type1) := <get-expression-type>(expr1, classname, methodname, env);
+		 	type2 := <get-expression-type>(ps, classname, methodname, env);
+		 	<equal>(type1, type2);
+		 	/*expr2 := <substitute> (expr1, path, expression); */
+		 	env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, [Path(PathStart(name, Some(Primed())), pc)], expression, env') 
+
+	literal-substitute:
+		 (classname, methodname, Exists(name, expr1, constraint1), paths, expression, env)
+		 	-> Exists(name, expr2, constraint2)
+		 where
+		 	expr2 := <literal-substitute>	(classname, methodname, expr1, paths, expression, env);
+		 	env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env')
+
+	literal-substitute:
+		 (classname, methodname, Forall(name, expr1, constraint1), [Path(ps, pc)], expression, env)
+		 	-> And(
+		 		Forall(name, expr1, 
+		 			Implies(
+			 				BinRel(
+			 					PathStart(name, None()),
+			 					Equal(),
+			 					ps),
+			 					constraint2)),
+	 			Forall(name, expr1, 
+	 				Implies(
+	 					BinRel(
+		 					PathStart(name, None()),
+		 					NotEqual(),
+		 					ps),
+		 					constraint1)))
+		 where
+		 	Set(type1) := <get-expression-type>(expr1, classname, methodname, env);
+		 	type2 := <get-expression-type>(ps, classname, methodname, env);
+		 	<equal>(type1, type2);
+			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, [Path(PathStart(name, Some(Primed())), pc)], expression, env')
+
+	literal-substitute:
+		 (classname, methodname, Forall(name, expr1, constraint1), paths, expression, env)
+		 	-> Forall(name, expr2, constraint2)
+		 where
+		 	expr2 := <literal-substitute>	(classname, methodname, expr1, paths, expression, env);
+			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env')
+			
 
 		 	
-		 	
-	combine-constraints:
+	conjoin-constraints:
 		[] 
 			-> True()
 			
-	combine-constraints:
+	conjoin-constraints:
 		[constraint]
 			-> constraint
 			
-	combine-constraints:
+	conjoin-constraints:
 		[constraint, constraints*]
 			-> And(constraint, constraint1)
 		where
-			constraint1 := <combine-constraints>[constraints*]
+			constraint1 := <conjoin-constraints>[constraints*]
 			
 			
 	

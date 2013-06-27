@@ -15,65 +15,65 @@ rules
 */
 
 	is-defined:
-		 (classname, method, BasicValue(t))
+		 (classname, method, BasicValue(t), env)
 		 	-> BinRel(BasicValue(t), In(), typeExtent)
 		 where
 		 	t' := <get-corresponding-booster-type> t;
 		 	typeExtent := <get-type-extent> t'
 		 		 	
 	is-defined:
-		 (classname, method, TypeExtent(t))
+		 (classname, method, TypeExtent(t), env)
 		 	-> True()
 		 	
 	is-defined:
-		 (classname, method, Null())
+		 (classname, method, Null(), env)
 		 	-> True()
 		 	
 	is-defined:
-		 (classname, method, Input(i))
+		 (classname, method, Input(i), env)
 		 	-> True()
 		 	
 	is-defined:
-		 (classname, method, Output(i))
+		 (classname, method, Output(i), env)
 		 	-> True()
 		 	
 	is-defined:
-		 (classname, method, This())
+		 (classname, method, This(), env)
 		 	-> True()
 		 	
 	is-defined:
-		 (classname, method, ThisPrimed())
+		 (classname, method, ThisPrimed(), env)
 		 	-> True()
 
 	is-defined:
-		 (classname, method, Path(a,b))
+		 (classname, method, Path(a,b), env)
 		 	-> And(constraint, BinRel(a, NotEqual(), Null()))
 		 where
-		 	Optional(type) := <resolve-path-type>(classname, a, method);
-		 	constraint := <is-defined> (classname, method, a) 
+		 	Optional(type) := <resolve-path-type>(classname, a, method, env);
+		 	constraint := <is-defined> (classname, method, a, env) 
 
 	is-defined:
-		 (classname, method, Path(a,b))
-		 	-> <is-defined> (classname, method, a)
+		 (classname, method, Path(a,b), env)
+		 	-> <is-defined> (classname, method, a, env)
 
 	is-defined:
-		 (classname, method, PathStart(a,maybeprimed))
+		 (classname, method, PathStart(a,maybeprimed), env)
 		 	-> True()
 
 	is-defined:
-		 (classname, method, PathComponent(a,maybeprimed))
-		 	-> <is-defined> (classname, method, a) 
+		 (classname, method, PathComponent(a,maybeprimed), env)
+		 	-> <is-defined> (classname, method, a, env) 
 		 	
 	is-defined:
-		 (classname, method, SetExtent([]))
+		 (classname, method, SetExtent([]), env)
 		 	-> True()
 	
 	is-defined:
-		 (classname, method, SetExtent([elem, elems*]))
+		 (classname, method, SetExtent([elem, elems*]), env)
 		 	-> And(constraint1, constraint2)
 		 where
-		 	constraint1 := <is-defined> (classname, method, elem);
-		 	constraint2 := <is-defined> (classname, method, SetExtent([elems*])) 
+		 	constraint1 := <is-defined> (classname, method, elem, env);
+		 	constraint2 := <is-defined> (classname, method, SetExtent([elems*]), env) 
 	
 	/* is-defined:
 		(classname, method, expr) -> 

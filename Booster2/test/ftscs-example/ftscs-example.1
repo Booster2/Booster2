@@ -13,6 +13,9 @@
         , BinOp(PathStart("n", None()), Plus(), BasicValue(Integer("1")))
         )
       )
+    , ( ("B", "addQ")
+      , BinRel(Input("c"), In(), PathStart("cq", Some(Primed())))
+      )
     ]
   , "Programs"
   , []
@@ -88,7 +91,7 @@
     ]
   , "Operations"
   , [ ("A", ["increment"])
-    , ("B", ["increment"])
+    , ("B", ["increment", "addQ"])
     , ("C", [])
     ]
   , "Name"

@@ -7,6 +7,7 @@ imports
   library/strategy
 
   library/basicTypes
+  library/environment
   
 
  rules
@@ -594,7 +595,7 @@ imports
 			where 
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
-				Class(tablename) := <resolve-path-type>(classname, path', (classname, progname));
+				Class(tablename) := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
@@ -605,7 +606,7 @@ imports
 			where 
 				attname := <get-path-attribute-name>(path);
 				path' := <get-path-initial-path>(path);
-				Optional(Class(tablename)) := <resolve-path-type>(classname, path', (classname, progname));
+				Optional(Class(tablename)) := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
@@ -633,13 +634,11 @@ imports
 			where 
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
-				Class(classname') := <resolve-path-type>(classname, path', (classname, progname));
+				Class(classname') := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
 				tablename := <get-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
 				column2 := <concat-strings>[classname'', "_", attname''];
-				log(|Error(), "Error lies here...", <booster-to-relational-expression> (classname, progname, path'));
-				log(|Error(), "Error lies here...", expr);
 				expr1 := <booster-to-relational-expression> (classname, progname, path');
 				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
 
@@ -864,7 +863,7 @@ imports
 						  None(), 
 						  None())
 		where
-			Class(c) := <resolve-path-type> (classname, p, None());
+			Class(c) := <resolve-path-type> (classname, p, None(), <new-environment> []);
 			expr :=  <booster-to-relational-expression> (classname, progname, p)
 				 				
 

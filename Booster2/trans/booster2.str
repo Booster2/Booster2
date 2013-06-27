@@ -17,6 +17,8 @@ imports
   
   simplify/main
   
+  library/strategy
+  
 rules // Main editor interface (defined by editor/Booster-Builders and -References.esv)
   
   // Analyzes the current program, returning a tuple with errors, warnings, and notes;
@@ -135,6 +137,14 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    				          <parse> 
    				            selected
 
+
+   builder-test: 
+   		(selected, position, ast, path, project-path) -> (filename, result)
+   		with
+	   		filename := <guarantee-extension(|"test")> path;
+	   		result :=  (<subsets> [1,2,3],<subsets> [3,2,1])   
+   		
+   		
 
 main-booster =
   xtc-input-wrap(

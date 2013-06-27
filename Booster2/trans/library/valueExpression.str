@@ -8,6 +8,7 @@ imports
   library/relation
   library/expression
   library/basicTypes
+  library/environment
   
  rules
  	
@@ -18,54 +19,54 @@ imports
 		constrains.			
 */		
 	get-mentioned-attributes:
-		(name, maybename, BasicValue(t))
+		(name, maybename, BasicValue(t), env)
 			-> []
 			
 
 	get-mentioned-attributes:
-		(name, maybename, TypeExtent(t))
+		(name, maybename, TypeExtent(t), env)
 			-> []
 
 	get-mentioned-attributes:
-		(name, maybename, Null())
+		(name, maybename, Null(), env)
 			-> []
 
 	get-mentioned-attributes:
-		(name, maybename, This())
+		(name, maybename, This(), env)
 			-> []
 
 	get-mentioned-attributes:
-		(name, maybename, ThisPrimed())
+		(name, maybename, ThisPrimed(), env)
 			-> []
 					
 	get-mentioned-attributes:
-		(name, maybename, Input(i))
+		(name, maybename, Input(i), env)
 			-> []
 					
 	get-mentioned-attributes:
-		(name, maybename, Output(o))
+		(name, maybename, Output(o), env)
 			-> []
 					
 	get-mentioned-attributes:
-		(name, maybename, SetExtent([]))
+		(name, maybename, SetExtent([]), env)
 			-> []
 
 	get-mentioned-attributes:
-		(name, maybename, SetExtent([expr, exprs*]))
+		(name, maybename, SetExtent([expr, exprs*]), env)
 			-> <union>(atts1, atts2)
 		where
-			atts1 := <get-mentioned-attributes>(name, maybename, expr);
-			atts2 := <get-mentioned-attributes>(name, maybename, SetExtent([exprs*]))
+			atts1 := <get-mentioned-attributes>(name, maybename, expr, env);
+			atts2 := <get-mentioned-attributes>(name, maybename, SetExtent([exprs*]), env)
 			
 	get-mentioned-attributes:
-		(classname, maybename, PathStart(attname, maybeprimed))
-			-> [((classname, attname), This())]
+		(classname, maybename, PathStart(attname, maybeprimed), env)
+			-> [(classname, attname)]
 		where
 			type := <lookup-attribute-type> ((classname, attname))
 		// i.e. the attribute does exist
 		
 /*	get-mentioned-attributes:
-		(classname, maybename, PathComponent(attname, maybeprimed))
+		(classname, maybename, PathComponent(attname, maybeprimed), env)
 			-> [(classname, attname)]
 		where
 			type := <lookup-attribute-type> ((classname, attname))
@@ -73,33 +74,39 @@ imports
 */
 
 	get-mentioned-attributes:
-		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)))
-			-> <union>(atts1, [((otherclassname, attname), path)])
+		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> <union>(atts1, [(otherclassname, attname)])
 		where
-			atts1 := <get-mentioned-attributes>(classname, maybename, path);
-			Class(otherclassname) := <resolve-path-type>(classname, path, maybename);
+			atts1 := <get-mentioned-attributes>(classname, maybename, path, env);
+			Class(otherclassname) := <resolve-path-type>(classname, path, maybename, env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 			
 	get-mentioned-attributes:
-		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)))
-			-> <union>(atts1, [((otherclassname, attname), path)])
+		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> <union>(atts1, [(otherclassname, attname)])
 		where
-			atts1 := <get-mentioned-attributes>(classname, maybename, path);
-			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename);
+			atts1 := <get-mentioned-attributes>(classname, maybename, path, env);
+			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename, env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 	
 	get-mentioned-attributes:
-		(classname, maybename, PathStart(name, maybeprimed))
+		(classname, maybename, PathStart(name, maybeprimed), env)
 			-> []
 		where
 			setname := <lookup-set-name> name;
 			<equal>(setname, name)
 
 	get-mentioned-attributes:
-		(classname, maybename, PathStart(name, maybeprimed))
+		(classname, maybename, PathStart(name, maybeprimed), env)
 			-> []
 		where
 			setname := <lookup-set-value> name
+
+	get-mentioned-attributes:
+		(classname, maybename, PathStart(varname, maybeprimed), env)
+			-> atts
+		where
+			atts := <lookup-environment-mentioned-attributes> (varname, env)
 			
 	
 /* 	is-old:
@@ -232,94 +239,121 @@ imports
 		
 */
 	get-path-attribute:
-		(classname, methodname, Output(name))
+		(classname, methodname, Output(name), env)
 			-> []
 
 	get-path-attribute:
-		(classname, methodname, Input(name))
+		(classname, methodname, Input(name), env)
 			-> []
 
 	get-path-attribute:
-		(classname, methodname, Path(a,b))
+		(classname, methodname, Path(a,b), env)
 			-> [(classname2, attname)]
 		where
-			Class(classname2) := <resolve-path-type> (classname, a, (classname, methodname));
+			Class(classname2) := <resolve-path-type> (classname, a, (classname, methodname), env);
 			attname := <get-path-attribute-name> (Path(a,b))
 
 	get-path-attribute:
-		(classname, methodname, Path(a,b))
+		(classname, methodname, Path(a,b), env)
 			-> [(classname2, attname)]
 		where
-			Optional(Class(classname2)) := <resolve-path-type> (classname, a, (classname, methodname));
+			Optional(Class(classname2)) := <resolve-path-type> (classname, a, (classname, methodname), env);
 			attname := <get-path-attribute-name> (Path(a,b))
 			
 /* 	get-expression-type
 */
 
 	get-expression-type:
-		(BasicValue(t), classname, methodname)
+		(BasicValue(t), classname, methodname, env)
 			-> <get-corresponding-booster-type> t
 
 
 	get-expression-type:
-		(TypeExtent(t), classname, methodname)
+		(TypeExtent(t), classname, methodname, env)
 			-> Set(t)
 
+	get-expression-type:
+		(PathStart(name, maybePrimed), classname, methodname, env)
+			-> Set(Class(name))
+			where
+				<equal>(name, <lookup-class-name> name)
 
-	substitute:
-		(path, path, expression)
+	get-expression-type:
+		(This(), classname, methodname, env)
+			-> Class(classname)
+
+
+
+	get-expression-type:
+		something -> BasicValue(Int())
+			where
+				log(|Error(), "Get Expression Type", something)
+
+	/*literal-substitute:
+		(classname, methodname, path, paths, expression, env)
 		 	-> expression
-	substitute:
-		(BasicValue(t), path, expression)
+		 where
+		 	log(|Error(), "literal-subst", (path, paths)) */
+
+	literal-substitute:
+		(classname, methodname, path, paths, expression, env)
+		 	-> expression
+		 where
+		 	<elem>(path, paths)
+
+
+
+	literal-substitute:
+		(classname, methodname, BasicValue(t), paths, expression, env)
 		 	-> BasicValue(t)
 		 	
-	substitute:
-		(TypeExtent(t), path, expression)
+	literal-substitute:
+		(classname, methodname, TypeExtent(t), paths, expression, env)
 			-> TypeExtent(t)
 
-	substitute:
-		(Null(), path, expression)
+	literal-substitute:
+		(classname, methodname, Null(), paths, expression, env)
 			-> Null()
 
-	substitute:
-		(This(), path, expression)
+	literal-substitute:
+		(classname, methodname, This(), paths, expression, env)
 			-> This()
 
-	substitute:
-		(PathStart(a, b), path, expression)
+	literal-substitute:
+		(classname, methodname, PathStart(a, b), paths, expression, env)
 			-> PathStart(a,b)
 
 
-	substitute:
-		(Path(a, b), path, expression)
+	literal-substitute:
+		(classname, methodname, Path(a, b), paths, expression, env)
 			-> Path(path1,b)
 		where 
-			path1 := <substitute>(a,path, expression)
+			path1 := <literal-substitute>(classname, methodname, a, paths, expression, env)
 			
-	substitute:
-		(Input(i), path, expression)
+	literal-substitute:
+		(classname, methodname, Input(i), paths, expression)
 			-> Input(i)
 
-	substitute:
-		(Output(i), path, expression)
+	literal-substitute:
+		(classname, methodname, Output(i), paths, expression, env)
 			-> Output(i)
 
-	substitute:
-		(SetExtent([]), path, expression)
+	literal-substitute:
+		(classname, methodname, SetExtent([]), paths, expression, env)
 			-> SetExtent([])
 
-	substitute:
-		(SetExtent([exp, exps*]), path, expression)
+	literal-substitute:
+		(classname, methodname, SetExtent([exp, exps*]), paths, expression, env)
 			-> SetExtent([exp1, exps1*])
 		where
-			exp1 := <substitute>(exp, path, expression);
-			SetExtent([exps1*]) := <substitute>(SetExtent([exps*]), path, expression)
+			exp1 := <literal-substitute>(classname, methodname, exp, paths, expression, env);
+			SetExtent([exps1*]) := <literal-substitute>(classname, methodname, SetExtent([exps*]), paths, expression, env)
 						
-	substitute:
-		(expression1, path, expression2)
+	literal-substitute:
+		(classname, methodname, expression1, paths, expression2, env)
 			-> expression1
 		where
-			log(|Error(), "Substitute nightmare", (expression1, path, expression2))
+			log(|Error(), "Literal Substitute nightmare", (classname, methodname, expression1, paths, expression2, env))
 			
 			
 			
@@ -329,34 +363,21 @@ imports
 */
 
 	resolve-path-type:
-		(classname, This(), method, inouts) 
+		(classname, This(), method, env) 
 			-> Class(classname)
 
 	resolve-path-type:
-		(classname, ThisPrimed(), method, inouts) 
+		(classname, ThisPrimed(), method, env) 
 			-> Class(classname)
-
-	resolve-path-type:
-		(classname, Input(name), (classname, methname), inouts)
-			-> type
-		where
-			type := <lookup>(Input(name),inouts)
-
-	resolve-path-type:
-		(classname, Output(name), (classname, methname), inouts)
-			-> type
-		where
-			type := <lookup>(Output(name),inouts)
-
 			
 	resolve-path-type:
-		(classname, Input(attname), (classname, methname), inouts)
+		(classname, Input(attname), (classname, methname), env)
 			-> type
 		where
-			type := <lookup-input-type>(((classname, methname), attname))
+			type := <lookup-input-type>(((classname, methname), attname), env)
 			
 	resolve-path-type:
-		(classname, Output(attname), (classname, methname), inouts)
+		(classname, Output(attname), (classname, methname), env)
 			-> type
 		where
 			type := <lookup-output-type>(((classname, methname), attname))
@@ -364,50 +385,56 @@ imports
 
 	
 	resolve-path-type:
-		(classname, PathStart(attname, None()), method, inouts)
+		(classname, PathStart(attname, None()), method, env)
 			-> (Class(attname))
 		where
 			<equal>(attname, <lookup-set-name>attname)
 
 	resolve-path-type:
-		(classname, PathStart(attname, None()), method, inouts)
+		(classname, PathStart(attname, None()), method, env)
 			-> Class(setname)
 		where
 			setname := <lookup-set-value> (attname);
 			not(<equal>(setname, ()))
 
 	resolve-path-type:
-		(classname, PathStart(attname, maybeprimed), method, inouts)
+		(classname, PathStart(attname, maybeprimed), method, env)
 			-> Set(Class(attname))
 		where
 			<equal>(attname, <lookup-class-name>(attname))
 						
 	resolve-path-type:
-		(classname, PathStart(attname, maybeprimed), method)
+		(classname, PathStart(attname, maybeprimed), method, env)
 			-> type
 		where
-			type := <lookup-attribute-type>((classname, attname))
+			type := <lookup-attribute-type>(classname, attname)
+
+	resolve-path-type:
+		(classname, PathStart(varname, maybeprimed), method, env)
+			-> type
+		where
+			type := <lookup-environment-type>(varname, env)
 
 
 	resolve-path-type:
-		(classname, Path(path, PathComponent(attname, maybeprimed)), method, inouts)
+		(classname, Path(path, PathComponent(attname, maybeprimed)), method, env)
 			->  type
 		where
-			Optional(Class(classname2)) := <resolve-path-type> (classname, path, method, inouts);
+			Optional(Class(classname2)) := <resolve-path-type> (classname, path, method, env);
 			type := <lookup-attribute-type>((classname2, attname))
 
 	resolve-path-type:
-		(classname, Path(path, PathComponent(attname, maybeprimed)), method, inouts)
+		(classname, Path(path, PathComponent(attname, maybeprimed)), method, env)
 			-> type
 		where
-			Class(classname2) := <resolve-path-type> (classname, path, method, inouts);
+			Class(classname2) := <resolve-path-type> (classname, path, method, env);
 			type := <lookup-attribute-type>((classname2, attname))
 		
 		
-	resolve-path-type:
+/*	resolve-path-type:
 		(arg1, arg2, arg3)
 			-> <resolve-path-type> (arg1, arg2, arg3, [])
-
+*/
 					
 
 /* 	make-old:
@@ -477,6 +504,12 @@ imports
 			expr2 := <make-old> expr1;
 			SetExtent([exprs2*]) := <make-old> SetExtent([exprs1*])
 
+/*	make-old:
+		something -> True()
+		 		where
+ 			log(|Error(),"make-old", something) 
+*/
+			
 
 /* 	make-post-state:
 		Takes an expression, and returns its representation in the
@@ -552,4 +585,114 @@ imports
  		where
  			log(|Error(),"make-post-state", x) */ 
  
+ 
+/* 	get-mentioned-paths:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/		
+	get-mentioned-paths:
+		(name, maybename, BasicValue(t), env)
+			-> []
+			
+
+	get-mentioned-paths:
+		(name, maybename, TypeExtent(t), env)
+			-> []
+
+	get-mentioned-paths:
+		(name, maybename, Null(), env)
+			-> []
+
+	get-mentioned-paths:
+		(name, maybename, This(), env)
+			-> [This()]
+
+	get-mentioned-paths:
+		(name, maybename, ThisPrimed(), env)
+			-> [This()]
+					
+	get-mentioned-paths:
+		(name, maybename, Input(i), env)
+			-> [Input(i)]
+					
+	get-mentioned-paths:
+		(name, maybename, Output(o), env)
+			-> [Output(o)]
+					
+	get-mentioned-paths:
+		(name, maybename, SetExtent([]), env)
+			-> []
+
+	get-mentioned-paths:
+		(name, maybename, SetExtent([expr, exprs*]), env)
+			-> <union>(atts1, atts2)
+		where
+			atts1 := <get-mentioned-paths>(name, maybename, expr, env);
+			atts2 := <get-mentioned-paths>(name, maybename, SetExtent([exprs*]), env)
+			
+	get-mentioned-paths:
+		(classname, maybename, PathStart(attname, maybeprimed), env)
+			-> [PathStart(attname, maybeprimed)]
+		where
+			type := <lookup-attribute-type> ((classname, attname))
+		// i.e. the attribute does exist
+		
+/*	get-mentioned-attributes:
+		(classname, maybename, PathComponent(attname, maybeprimed), env)
+			-> [(classname, attname)]
+		where
+			type := <lookup-attribute-type> ((classname, attname))
+		// i.e. the attribute does exist
+*/
+
+	get-mentioned-paths:
+		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> <union>(paths1, [Path(path, PathComponent(attname, maybeprimed))])
+		where
+			paths1 := <get-mentioned-paths>(classname, maybename, path, env);
+			Class(otherclassname) := <resolve-path-type>(classname, path, maybename, env);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+			
+	get-mentioned-paths:
+		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> <union>(paths1, [Path(path, PathComponent(attname, maybeprimed))])
+		where
+			paths1 := <get-mentioned-paths>(classname, maybename, path, env);
+			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename, env);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+	
+	get-mentioned-paths:
+		(classname, maybename, PathStart(name, maybeprimed), env)
+			-> []
+		where
+			setname := <lookup-set-name> name;
+			<equal>(setname, name)
+
+	get-mentioned-paths:
+		(classname, maybename, PathStart(name, maybeprimed), env)
+			-> []
+		where
+			setname := <lookup-set-value> name
+
+	get-mentioned-paths:
+		(classname, maybename, PathStart(varname, maybeprimed), env)
+			-> paths
+		where
+			paths := <lookup-environment-mentioned-paths> (varname, env)
+ 
+/* 	get-mentioned-paths:
+ 		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> [] *//* 
+			
+			<union>(paths1, [Path(path, PathComponent(attname, maybeprimed))])
+		where
+			paths1 := <get-mentioned-paths>(classname, maybename, path, env);
+			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename, env);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+
+ 		something -> []
+*/ 		
+/* 		where log(|Error(), "get-mentioned-paths Error", (classname, path, maybename, env)) */
+ 		
 		
