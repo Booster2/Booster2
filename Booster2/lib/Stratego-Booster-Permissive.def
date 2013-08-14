@@ -79,9 +79,9 @@ exports
     "|#BackSlashChar|"             -> BackSlashChar       {completion}
     "|#SQLSTRING|"                 -> SQLSTRING           {completion}
     "|#SQLStringChar|"             -> SQLStringChar       {completion}
+    "|#Extends|"                   -> Extends             {completion}
     "|#SetDef|"                    -> SetDef              {completion}
     "|#Constraint|"                -> Constraint          {completion}
-    "|#TypeExtent|"                -> TypeExtent          {completion}
     "|#ValueExpression|"           -> ValueExpression     {completion}
     "|#Expression|"                -> Expression          {completion}
     "|#BinOp|"                     -> BinOp               {completion}
@@ -523,11 +523,13 @@ exports
     'string'                           -> ID            {reject}
     'int'                              -> ID            {reject}
     'datetime'                         -> ID            {reject}
+    'boolean'                          -> ID            {reject}
     'attributes'                       -> ID            {reject}
+    'extends'                          -> ID            {reject}
     'system'                           -> ID            {reject}
     'invariant'                        -> ID            {reject}
     'methods'                          -> ID            {reject}
-    "-"? [0-9]+                        -> INT           
+    [0-9]+                             -> INT           
     "\"" StringChar* "\""              -> STRING        
     ~[\"\n]                            -> StringChar    
     "\\\""                             -> StringChar    
@@ -568,8 +570,11 @@ exports
     SetDef                                          -> SystemComponent 
     Class                                           -> SystemComponent 
     SystemComponent                                 -> BoosterTerm     
-    'class' ID '{' ClassComponents* '}'             -> Class           {cons("Class")}
+    'class' ID Extends? '{' ClassComponents* '}'    -> Class           {cons("Class")}
     Class                                           -> BoosterTerm     
+    'extends' {Extension ','}+                      -> Extends         {cons("Extend")}
+    Extends                                         -> BoosterTerm     
+    ID                                              -> Extension       {cons("Extension")}
     'attributes' Attribute*                         -> ClassComponents {cons("Attributes")}
     'methods' Method*                               -> ClassComponents {cons("Methods")}
     'invariants' Constraint*                        -> ClassComponents {cons("Invariant")}
@@ -582,6 +587,7 @@ exports
     Attribute                                       -> BoosterTerm     
     '(' 'ID' ')'                                    -> Identity        {cons("Identity")}
     ID '{' Constraint '}'                           -> Method          {cons("Method")}
+    ID '{' Expression '}'                           -> Method          {cons("Method"), deprecated}
     ID '{' GuardedCommand '}'                       -> Method          {cons("Method")}
     Method                                          -> BoosterTerm     
     PrimTypeDecl                                    -> TypeDecl        
@@ -592,6 +598,7 @@ exports
     'STRING'                                        -> BasicTypeDecl   {cons("String")}
     'INT'                                           -> BasicTypeDecl   {cons("Int")}
     'DATETIME'                                      -> BasicTypeDecl   {cons("DateTime")}
+    'BOOLEAN'                                       -> BasicTypeDecl   {cons("Boolean")}
     ID                                              -> PrimTypeDecl    {cons("UniDirectional")}
     ID '.' ID                                       -> PrimTypeDecl    {cons("BiDirectional")}
     PrimTypeDecl                                    -> BoosterTerm     
@@ -633,9 +640,10 @@ exports
     INT                                             -> BasicValue      {cons("Integer")}
     STRING                                          -> BasicValue      {cons("String")}
     TypeExtent                                      -> ValueExpression {cons("TypeExtent")}
-    "STRING"                                        -> TypeExtent      {cons("String"), prefer}
-    "INT"                                           -> TypeExtent      {cons("Int"), prefer}
-    "DATETIME"                                      -> TypeExtent      {cons("DateTime"), prefer}
+    'string'                                        -> TypeExtent      {cons("String"), prefer}
+    'int'                                           -> TypeExtent      {cons("Int"), prefer}
+    'datetime'                                      -> TypeExtent      {cons("DateTime"), prefer}
+    'boolean'                                       -> TypeExtent      {cons("Boolean"), prefer}
     Path                                            -> ValueExpression 
     'null'                                          -> ValueExpression {cons("Null"), prefer}
     "{" {Expression ","}* "}"                       -> ValueExpression {cons("SetExtent")}
@@ -646,7 +654,7 @@ exports
     'card' Expression                               -> Expression      {cons("Cardinality")}
     '-' Expression                                  -> Expression      {cons("Negative")}
     "(" Expression ")"                              -> Expression      {bracket}
-    Expression BinOp Expression                     -> Expression      {cons("BinOp")}
+    Expression BinOp Expression                     -> Expression      {cons("BinOp"), left}
     "+"                                             -> BinOp           {cons("Plus")}
     "-"                                             -> BinOp           {cons("Minus")}
     "*"                                             -> BinOp           {cons("Times")}
@@ -660,7 +668,7 @@ exports
     Path '(' {( ID '?' '=' Expression ) ","}* ')'   -> MethodReference {cons("MethodReference")}
     MethodReference                                 -> BoosterTerm     
     PathStart                                       -> Path            
-    Path '.' PathComponent                          -> Path            {cons("Path")}
+    Path '.' PathComponent                          -> Path            {cons("Path"), prefer}
     Path                                            -> BoosterTerm     
     Input                                           -> PathStart       
     Output                                          -> PathStart       
@@ -674,6 +682,7 @@ exports
     'this' "'"                                      -> ThisPrimed      {cons("ThisPrimed")}
     "'"                                             -> Decorator       {cons("Primed")}
     Decorator                                       -> BoosterTerm     
+                                                    -> PathComponent   {cons("PathComponent"), deprecated}
     ID Decorator?                                   -> PathComponent   {cons("PathComponent")}
     PathComponent                                   -> BoosterTerm     
 

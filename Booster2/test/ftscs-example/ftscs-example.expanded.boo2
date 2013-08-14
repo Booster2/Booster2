@@ -9,12 +9,7 @@ class A {
 	invariants
 		this.m < 10
 	methods
-		increment { ((((forall obj : A
-		                  	@ ((obj = this
-		                  	   	=> this.m + 1 < 10))) 
-		                  & (forall obj : A
-		                    	@ ((obj /= this
-		                    	   	=> obj.m < 10)))) 
+		increment { ((this.m + 1 < 10 
 		                 & (forall obj : B
 		                   	@ (((this = obj.a
 		                   	    	=> this.m + 1 < obj.n) 
@@ -34,14 +29,55 @@ class B {
 	invariants
 		this.a.m < this.n
 	methods
-		increment { (((forall obj : B
-		                 	@ ((obj = this
-		                 	   	=> this.a.m < this.n + 1))) 
-		                 & (forall obj : B
-		                   	@ ((obj /= this
-		                   	   	=> obj.a.m < obj.n)))) 
+		increment { (this.a.m < this.n + 1 
 		                & this.n + 1 : INT) 
 		               --> ( this.n := this.n + 1 ) }
+		addQ { (((((this /= c?.bq
+		                   	=> c?.bq = this)
+		                  	=> ((this = c?.bq
+		                  	    	=> this : B) 
+		                  	    & (this /= c?.bq
+		                  	      	=> c?.bq : B))) 
+		                  & ((this /= c?.bq 
+		                      & (this /= c?.bq
+		                        	=> c?.bq /= this))
+		                    	=> this : B)) 
+		                 & (((this /= c?.bq
+		                     	=> c?.bq = this)
+		                    	=> ((this = c?.bq
+		                    	    	=> this.cq - {this} <<: C) 
+		                    	    & (this /= c?.bq
+		                    	      	=> c?.bq.cq - {c?.bq} <<: C))) 
+		                    & ((this /= c?.bq 
+		                        & (this /= c?.bq
+		                          	=> c?.bq /= this))
+		                      	=> (this.cq <<: C 
+		                      	    & c? : C)))) 
+		                & (((this /= c?.bq
+		                    	=> c?.bq = this)
+		                   	=> ((this = c?.bq
+		                   	    	=> card(this.cq - {this}) >= 0) 
+		                   	    & (this /= c?.bq
+		                   	      	=> card(c?.bq.cq - {c?.bq}) >= 0))) 
+		                   & ((this /= c?.bq 
+		                       & (this /= c?.bq
+		                         	=> c?.bq /= this))
+		                     	=> card(this.cq) >= -1))) 
+		               --> ( (c?.bq := this) 
+		                       || ((c?.bq /= null 
+		                            --> ( c?.bq.cq := c?.bq.cq - {c?.bq} )) 
+		                             || (this.cq := this.cq \/ {c?})) ) }
+		
+}
+class C {
+	attributes
+		o : INT
+		bp : B . cp
+		bq : [ B . cq ]
+		
+	invariants
+		true
+	methods
 		
 }
 

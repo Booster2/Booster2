@@ -17,23 +17,23 @@ rules
    				system
 	with
    		<initialize-lookup-table> system; 
-		constraints := <concat><map(get-class-method-constraints)><get-classes-from-system> system;
-		operations := <map(get-class-method-names)> <get-classes-from-system> system;
+   		classes := <get-classes-from-system> system;
+		constraints := <concat><map(get-class-method-constraints)> classes;
+		operations := <map(get-class-method-names)> classes;
 		rules(
 			LookupTable :+ "Name" -> <get-system-name> system
 			LookupTable :+ "Sets" -> <get-sets> system 
-			LookupTable :+ "Classes" -> <map(get-class-name)> <get-classes-from-system> system
+			LookupTable :+ "Classes" -> <map(get-class-name)> classes
 			LookupTable :+ "Invariants" -> <zip>
-						(<map(get-class-name)> 
-							(<get-classes-from-system> system),
-						(<map(get-class-invariant)>
-							(<get-classes-from-system> system)))
-			LookupTable :+ "Attributes" -> <map(get-class-attribute-names)> <get-classes-from-system> system
-			LookupTable :+ "Ids" -> <zip>( <map(get-class-name)><get-classes-from-system> system,<map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))><get-classes-from-system> system)
-			LookupTable :+ "Type" -> <concat><map(get-class-attribute-types)><get-classes-from-system> system
-			LookupTable :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)><get-classes-from-system> system
-			LookupTable :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)><get-classes-from-system> system
-			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites)><get-classes-from-system> system
+						(<map(get-class-name)> classes,
+						<map(get-class-invariant)> classes)
+			LookupTable :+ "Attributes" -> <map(get-class-attribute-names)> classes
+			LookupTable :+ "Ids" -> <zip>( <map(get-class-name)> classes, 
+										   <map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))> classes)
+			LookupTable :+ "Type" -> <concat><map(get-class-attribute-types)> classes
+			LookupTable :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)> classes
+			LookupTable :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)> classes
+			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites) >classes
 			LookupTable :+ "Operations" -> operations 
 			LookupTable :+ "Constraints" -> constraints
 			
@@ -48,6 +48,7 @@ rules
 				LookupTable :+ "Constraints" -> []
 				LookupTable :+ "Programs" -> []
 				LookupTable :+ "Invariants" -> []
+				LookupTable :+ "QualifiedInvariants" -> []
 				LookupTable :+ "Type" -> []
 				LookupTable :+ "Inputs" -> []
 				LookupTable :+ "Outputs" -> []

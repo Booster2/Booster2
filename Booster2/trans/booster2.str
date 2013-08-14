@@ -2,11 +2,18 @@ module booster2
 
 imports
 
+  include/Booster2
+
   libstratego-xtc
   lib/editor-common.generated
   check
   
   parse/main
+  
+  parse/class
+  parse/system
+  
+  
   elaborate/main
   compile/main
  
@@ -18,6 +25,9 @@ imports
   simplify/main
   
   library/strategy
+  library/environment
+  library/abstractBoosterModel
+  library/valueExpression
   
 rules // Main editor interface (defined by editor/Booster-Builders and -References.esv)
   
@@ -56,13 +66,68 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
   editor-hover:
     (target, position, ast, path, project-path) -> $[Hover help: [<write-to-string> target]]
 
+
   // Completes an identifier when the user presses control-space
   // (the completion identifier in the AST provides additional context information)
    editor-complete:
     (node, position, ast, path, project-path) ->
-    ["String", "Int" | []]
-    /*where
-      <debug(!"Complete: ")> node;
+    	proposals
+    where
+
+		model := <elaborate> <parse> ast;
+    	if !node => UniDirectional(COMPLETION(prefix)) then
+        	proposals := <union>(<union>(["String","Int","DateTime", "Boolean"],<LookupTable> "Classes"), <LookupTable> "Sets")
+      	end;
+    	if !node => Extension(COMPLETION(prefix)) then
+        	log(|Error(), "Completion", <parent-at-position(|position)> ast);
+        	proposals := <LookupTable> "Classes"
+      	end;
+    	if !node => BiDirectional(classname,COMPLETION("")) then
+        	proposals := <lookup>(classname, <LookupTable> "Attributes" )
+      	end;
+      	if !node => PathComponent(COMPLETION(""), None()) then
+        	classname := <collect-one(get-completion-class)> ast;
+        	methodname := <collect-one(get-completion-method)> ast;
+        	proposals :=  <get-potential-attributes> (classname, methodname, <parent-at-position(|position)> ast)
+      	end;
+      	if !node => PathStart(COMPLETION(""),None()) then
+        	classname := <collect-one(get-completion-class)> ast;
+        	methodname := <collect-one(get-completion-method)> ast;
+        	proposals := <union>(["this"], <lookup-class-attributes> classname)
+      	end
+      	
+    get-completion-method:
+    	Method (name, something) -> 
+    		name
+    		where
+    		<collect-one(get-completion)> something 
+
+    get-completion-class:
+    	Class (name, extends, something) -> 
+    		name
+    		where
+    		<collect-one(get-completion)> something 
+
+	get-completion:
+		 COMPLETION("") -> COMPLETION("")
+		 
+    get-potential-attributes:
+    	(cname, mname, Path (pathStart, something)) -> 
+			attnames
+			where
+				Class(c) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
+		      	attnames := <lookup-class-attributes> c
+
+    get-potential-attributes:
+    	(cname, mname, Path (pathStart, something)) -> 
+			attnames
+			where
+				Optional(Class(c)) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
+		      	attnames := <lookup-class-attributes> c
+		      	
+		      	
+      /* <debug(!"Complete: ")> (<get-classes-from-system> ast) */
+      /*;
       if !node => Type(COMPLETION(prefix)) then
         proposals := []
       end */

@@ -7,6 +7,9 @@ imports
   	
 rules
 
+
+
+
 	simplify:
 		BinRel(expr, NotEqual(), expr)
 			-> False()
@@ -47,4 +50,24 @@ rules
 
 	simplify:
 		BinRel(SetExtent([exp, exps*]), SubsetEquals(), expression2)
-			-> And(BinRel(exp, In(), expression2), BinRel(SetExtent([exps*]), SubsetEquals(), expression2))		
+			-> And(BinRel(exp, In(), expression2), BinRel(SetExtent([exps*]), SubsetEquals(), expression2))
+
+			
+	simplify:
+		Not(BinRel(e1, Equal(), e2))
+		 	-> BinRel(e1, NotEqual(), e2)		
+
+	simplify:
+		Not(BinRel(e1, NotEqual(), e2))
+		 	-> BinRel(e1, Equal(), e2)		
+		 	
+	simplify:
+		Not(BinRel(e1, In(), e2))
+		 	-> BinRel(e1, NotIn(), e2)		
+
+	simplify:
+		Not(BinRel(e1, NotIn(), e2))
+		 	-> BinRel(e1, In(), e2)	
+		 	
+	
+

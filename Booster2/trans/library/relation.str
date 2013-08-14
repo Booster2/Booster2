@@ -47,6 +47,7 @@ imports
 
 
 
+
 	
 	aliasing-substitute:
 		 (classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env)
@@ -54,18 +55,18 @@ imports
 		 where
 		 	//log(|Error(), "Aliasing Subst - classname, methodname:", (classname, methodname));
 		 	//log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
-		 	log(|Error(), "Aliasing Subst - path", Path(ps, pc));
+		 	//log(|Error(), "Aliasing Subst - path", Path(ps, pc));
 		 	//log(|Error(), "Aliasing Subst - expression", expression);
 		 	paths1 := <get-mentioned-paths> (classname, methodname, expression1, env);
-		 	log(|Error(), "Aliasing Subst - paths1", paths1);
+		 	//log(|Error(), "Aliasing Subst - paths1", paths1);
 		 	paths2 := <get-mentioned-paths> (classname, methodname, expression2, env);
-		 	log(|Error(), "Aliasing Subst - paths2", paths2);
+		 	//log(|Error(), "Aliasing Subst - paths2", paths2);
 		 	paths := <union>(paths1, paths2);
 		 	//log(|Error(), "Aliasing Subst - paths", paths);
 		 	type := <resolve-path-type>(classname, ps, (classname, methodname), env);
-		 	log(|Error(), "Aliasing Subst - type", type);
+		 	//log(|Error(), "Aliasing Subst - type", type);
 		 	filtered-paths := <curryfilter(is-correct-type)> ((type, classname, methodname, env), paths);
-		 	log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
+		 	//log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
 		 	subsets := <subsets> filtered-paths;
 		 	//log(|Error(), "Aliasing Subst - subset",subsets);
 		 	/* log(|Error(), "subsets", subsets); */

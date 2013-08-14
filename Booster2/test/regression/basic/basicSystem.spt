@@ -10,7 +10,7 @@ language Booster2
 
 test Basic system test [[
   system S
-]] run expand-booster-for-testing to 
+]] run parse to 
 System("S", [])
 
 

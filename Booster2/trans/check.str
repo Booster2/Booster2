@@ -31,7 +31,15 @@ rules
   		<currymap(build-lookup-table-setvalue)> (name, [vs*])    
 
   build-lookup-table:
-  	Class(name, [cs*]) -> Class(name, [cs*])
+  	Class(name, extends, [cs*]) -> Class(name, extends, [cs*])
+  		with
+  		rules(
+  			Classes :+ name -> name
+  		);
+  		<currymap(build-lookup-table-class-component)> (name, [cs*])    
+
+  build-lookup-table:
+  	Class(name, extends, [cs*]) -> Class(name, extends, [cs*])
   		with
   		rules(
   			Classes :+ name -> name
@@ -137,7 +145,7 @@ rules
 		[es*] := <currymap(constraint-error-setvalue)> (name, [vs*])
 
 	constraint-error:
-		Class(name, [cs*]) -> [es*]
+		Class(name, extends, [cs*]) -> [es*]
 	where
 		[es*] := <currymap(constraint-error-components)> (name, [cs*])
 
@@ -243,11 +251,11 @@ rules
   
   
    constraint-note:
-    Class("Test", _) -> ("Test", $[This is just an example program in the "entities" language
+    Class("Test", extends, _) -> ("Test", $[This is just an example program in the "entities" language
                                       (this note is defined in trans/check.str) ])
                                       
    constraint-warning:
-  	Class(name, []) -> (name, $[Empty class [name]])
+  	Class(name, extends, []) -> (name, $[Empty class [name]])
                                       
   constraint-error:
   	x -> (x, $[True is equal to False])

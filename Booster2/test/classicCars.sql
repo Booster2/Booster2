@@ -1,8 +1,11 @@
 drop database if exists ClassicCars;
 create database ClassicCars;
  use ClassicCars;
+ SET autocommit=0;
 drop table if exists _Meta_Classes;
 create table _Meta_Classes (id int   auto_increment primary key );
+drop table if exists _Meta_Sets;
+create table _Meta_Sets (id int   auto_increment primary key );
 drop table if exists _Meta_Attributes;
 create table _Meta_Attributes (id int   auto_increment primary key );
 drop table if exists _Meta_Methods;
@@ -237,10 +240,41 @@ alter table _Meta_Attributes
 alter table _Meta_Attributes
 	add column isId bit     ;
 
+alter table _Meta_Sets
+	add column setName varchar(500)     ;
+alter table _Meta_Sets
+	add column tableName varchar(500)     ;
+alter table _Meta_Sets
+	add column columnName varchar(500)     ;
+
 alter table _Meta_Classes
 	add column className varchar(500)     ;
 alter table _Meta_Classes
 	add column tableName varchar(500)     ;
+
+drop procedure if exists ProductLine_updateText;
+delimiter //
+create procedure ProductLine_updateText ( in t_in varchar(1000))
+	begin
+	declare exit handler for sqlwarning, sqlexception, not found 
+	begin
+	rollback;
+	end; 
+	start transaction;
+  
+  if true
+  then update  ProductLine
+       set textDescription = t_in
+       where this = ProductLineId
+       
+        ;
+       
+  
+  end if ;
+  
+  commit;
+	end //
+delimiter ;
 
 
 insert  
@@ -284,6 +318,20 @@ _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
 ('ProductLine','products','ClassRef','Set','productLine','Product','','Bi','ProductLine_products_Product_productLine',0)
+ ;
+insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine','updateText',false)
+ ;
+insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine','updateText','t','String','Mandatory','input','','')
  ;
 insert  
 into
@@ -1140,7 +1188,7 @@ DROP PROCEDURE IF EXISTS `GET_OBJECT_DESCRIPTION_AS_TABLE`;
 
 DELIMITER $$
 
-CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_AS_TABLE`( className_in VARCHAR(500), orderBy_in VARCHAR(255), direction_in VARCHAR(10), start_in INT, limit_in INT)
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_AS_TABLE`( className_in VARCHAR(500), orderBy_in VARCHAR(255), direction_in VARCHAR(10), start_in INT, limit_in INT, searchTerm_in VARCHAR(100), out total_out INT)
 BEGIN
 DECLARE thisTableName CHAR(255);
 DECLARE idField CHAR(255);
@@ -1226,12 +1274,16 @@ DECLARE done INT DEFAULT 0;
 DECLARE ANAME CHAR(255);
 DECLARE APT CHAR(20);
 
+DECLARE WHERE_CLAUSE TEXT;
+
+
 DECLARE attribute_names CURSOR for 
     SELECT DISTINCT ATT_NAME, ATT_PRIM_TYPE FROM ATTRIBUTES_FOR_DESC WHERE CALL_CLASS = className_in;
 
 DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
 OPEN attribute_names;   
+SET @WHERE_CLAUSE = '';
 
 WHILE done = 0 DO
 	FETCH NEXT FROM attribute_names INTO ANAME, APT;
@@ -1242,13 +1294,14 @@ WHILE done = 0 DO
 				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` INT;');
 			END IF;
 			/* SELECT @SQL_TEXT1; */
-
+			
 			IF(@SQL_TEXT1 is not null ) THEN
 				PREPARE stmt_name6 FROM @SQL_TEXT1;
 				EXECUTE stmt_name6;
 				DEALLOCATE PREPARE stmt_name6; 
 				
 			END IF;
+			SET @WHERE_CLAUSE = CONCAT(@WHERE_CLAUSE, 'OR CAST(', ANAME, ' AS CHAR) LIKE "%', searchTerm_in, '%" ');
 		END IF; 
 END WHILE;
 END;
@@ -1293,17 +1346,29 @@ END WHILE;
 CLOSE attribute_rows;
 END;
 
-SET @SQL_RESULT = CONCAT('SELECT * FROM OBJECT_IDS ORDER BY ', orderBy_in, ' ', direction_in, ' LIMIT ', start_in, ', ', limit_in, ';');
+SET @SQL_RESULT1 = CONCAT('SELECT * FROM OBJECT_IDS ',
+							'WHERE false ', @WHERE_CLAUSE,
+							'ORDER BY ', orderBy_in, ' ', direction_in, ' LIMIT ', start_in, ', ', limit_in, 
+							';');
+SET @SQL_RESULT2 = CONCAT('SELECT COUNT(*) INTO @total_rows FROM OBJECT_IDS ', 
+							'WHERE false ', @WHERE_CLAUSE,
+							';');
 
-PREPARE stmt_result FROM @SQL_RESULT;
+PREPARE stmt_result FROM @SQL_RESULT1;
 EXECUTE stmt_result;
 DEALLOCATE PREPARE stmt_result; 
 
+PREPARE stmt_result FROM @SQL_RESULT2;
+EXECUTE stmt_result;
+DEALLOCATE PREPARE stmt_result; 
 
-
+/* SELECT @WHERE_CLAUSE; */
+SET total_out = @total_rows ;
 /*SELECT * FROM ATTRIBUTES_FOR_DESC; */
 END
 $$
+
+DELIMITER ;
 
 DELIMITER ;
 DROP PROCEDURE IF EXISTS `GET_NO_OBJECTS_FOR_CLASS` ;
@@ -1334,5 +1399,77 @@ BEGIN
     SELECT * FROM _Meta_Attributes WHERE class = className_in and isId = 1;
 END 
 $$
-DELIMITER ;
 
+DELIMITER ;
+DROP PROCEDURE IF EXISTS `GET_SET_VALUES`;
+DELIMITER $$
+
+CREATE PROCEDURE `GET_SET_VALUES`( setName_in VARCHAR(500))
+BEGIN
+	DECLARE setTableName TEXT; 
+	DECLARE setColumnName TEXT; 
+    SELECT tableName, columnName  into @setTableName, @setColumnName 
+		FROM _Meta_Sets WHERE setName = setName_in;
+
+	SET @SQL_TXT = CONCAT('SELECT ',  @setColumnName, ' from ', @setTableName);
+	PREPARE stmt_name FROM @SQL_TXT;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name; 
+END 
+$$
+
+DELIMITER ;
+DROP PROCEDURE IF EXISTS `GET_CLASS_VALUES`;
+DELIMITER $$
+
+CREATE PROCEDURE `GET_CLASS_VALUES`( className_in VARCHAR(500))
+BEGIN
+
+DECLARE classTableName TEXT; 
+
+
+
+DROP TABLE IF EXISTS CLASS_DESCS;
+CREATE TEMPORARY TABLE CLASS_DESCS 
+  (
+    OBJECT_ID INT PRIMARY KEY,
+	DESCRIPTION VARCHAR(500)
+  ) ENGINE = MEMORY; 
+
+
+	SELECT tableName  into @classTableName 
+		FROM _Meta_Classes WHERE className = className_in;
+
+	SET @SQL_TXT = CONCAT('INSERT INTO CLASS_DESCS (OBJECT_ID)  SELECT ',  @classTableName, 'Id from ', @classTableName, ';');
+	PREPARE stmt_name FROM @SQL_TXT;
+	EXECUTE stmt_name;
+	DEALLOCATE PREPARE stmt_name; 
+
+BEGIN
+	DECLARE done INT DEFAULT 0;
+	DECLARE OID INT;
+
+	DECLARE object_ids CURSOR for 
+		SELECT OBJECT_ID FROM CLASS_DESCS;
+
+
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+	OPEN object_ids;   
+
+
+
+	WHILE done = 0 DO
+		FETCH NEXT FROM object_ids INTO OID;
+		IF done = 0 THEN
+			CALL `GET_OBJECT_DESCRIPTION`(className_in, OID, @objDesc);
+			UPDATE CLASS_DESCS SET DESCRIPTION = @objDesc WHERE OBJECT_ID = OID;    
+		END IF;
+
+	END WHILE;
+END;
+
+	SELECT * FROM CLASS_DESCS;
+END 
+$$
+DELIMITER ;

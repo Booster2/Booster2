@@ -6,6 +6,8 @@ System ClassicCars
 			htmlDescription : String
 			image : String
 			products : SET ( Product . productLine )[*]
+		methods
+			updateText{textDescription' = t?}
 	} 
 	
 	class Product {

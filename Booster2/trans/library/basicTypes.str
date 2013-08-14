@@ -57,4 +57,18 @@ imports
 		
 	get-type-name-for-metadata:
 		DateTime() -> "DateTime"
+
+/* Boolean */
+
+	get-type-extent:
+		Boolean() -> TypeExtent(Boolean())
+		
+	get-type-booster-notation:
+		Boolean() -> $[BOOLEAN]
+
+	get-type-booster-to-sql:
+		Boolean() -> Bit()
+		
+	get-type-name-for-metadata:
+		Boolean() -> "Boolean"
 		

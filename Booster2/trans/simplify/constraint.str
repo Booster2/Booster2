@@ -3,9 +3,29 @@ module simplify/constraint
 imports
   include/Booster2
 
-    
+  library/abstractBoosterModel
   	
 rules
+
+// Some normalisation rules?
+/*	simplify:
+		BinRel(expr, Equal(), This())
+			-> BinRel(This(), Equal(), expr)
+		where
+			<not(eq)>(This(), expr)
+
+	simplify:
+		BinRel(expr, NotEqual(), This())
+			-> BinRel(This(), NotEqual(), expr)
+		where
+			<not(eq)>(This(), expr)
+*/
+
+	simplify:
+		Forall(name, PathStart(classname, None()), Implies(constraint1, constraint2))
+			-> True()		
+		where
+			<elem>((classname, Forall(name, PathStart(classname, None()), constraint2)), <LookupTable> "QualifiedInvariants")  
 
 
 	simplify:
@@ -39,6 +59,20 @@ rules
 	simplify:
 		Implies(False(), constraint)
 			-> True()
+
+	simplify:
+		Implies(constraint, True())
+			-> True()
+			
+	simplify:
+		Implies(constraint, False())
+			-> Not(constraint)
+			
+	simplify:
+		Implies(p, Implies(p, constraint))
+			-> Implies(p, constraint)
+
+
 
 	simplify:
 		Implies(
@@ -98,6 +132,14 @@ rules
 			-> False()
 			
 	simplify:
+		Implies(And(BinRel(e1, Equal(), e2), BinRel(e3, Equal(), e4)), BinRel(e3, NotEqual(), e4))
+			-> Or(BinRel(e1, NotEqual(), e2),BinRel(e3,NotEqual(), e4)) 
+
+	simplify:
+		Implies(And(BinRel(e1, Equal(), e2), BinRel(e3, NotEqual(), e4)), BinRel(e3, Equal(), e4))
+			-> Or(BinRel(e1, NotEqual(), e2),BinRel(e3, Equal(), e4)) 
+			
+	simplify:
 		Or(
 			And(
 				BinRel(expression1, NotEqual(), expression2),
@@ -120,10 +162,33 @@ rules
 		Forall(name, expr, True())
 			-> True()
 			
+	/* here we should really do a literal substitute - name for expr2 */
 	simplify:
-		Implies(p, Implies(p, constraint))
-			-> Implies(p, constraint)
-	
+		Forall(name, expr, Implies(BinRel(PathStart(name, None()), Equal(), expr2), constraint))
+			-> constraint
+					
+			
+	simplify:
+		Not(And(a, b))
+			-> Or(Not(a), Not(b))
+
+	simplify:
+		Not(Or(a, b))
+			-> And(Not(a), Not(b))
+			
+	simplify:
+		Not(Implies(a,b))
+			-> And(a, Not(b))		
 			
 			
+/*	simplify:
+		And(Implies(a,c),Implies(b,c))
+			->
+				Implies(Or(a,b),c) */
+				
+/*	simplify:
+		Implies(p, q)
+			-> Or(Not(p), q)
+*/
+
 	

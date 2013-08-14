@@ -33,8 +33,9 @@ imports
 				"MaxMults",  <LookupTable> "MaxMults",
 				"Attributes",  <LookupTable> "Attributes",
 				"Operations",  <LookupTable> "Operations",
+				("QualifiedInvariants",  <LookupTable> "QualifiedInvariants",
 				"Name",  <LookupTable> "Name",
 				"TableNames",  <LookupTable> "TableNames",
-				"IDs",  <LookupTable> "IDs" )
+				"IDs",  <LookupTable> "IDs" ))
 			)			
 				

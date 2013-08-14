@@ -15,6 +15,11 @@ imports
  		Method(methName, methConstraint)
  		 	-> methName
 
+/*	get-method-name:
+		something -> ""
+		where 
+			log(|Error(), "get-method-name error", something) */
+
 /* get-method-constraint: 
 		Takes a method and returns its name.
 */

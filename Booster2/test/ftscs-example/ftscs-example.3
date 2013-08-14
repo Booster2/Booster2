@@ -21,6 +21,13 @@
           )
         )
       )
+    , ( ("B", "addQ")
+      , BinRel(
+          Input("c")
+        , In()
+        , Path(This(), PathComponent("cq", Some(Primed())))
+        )
+      )
     ]
   , "Programs"
   , [ ( ("A", "increment")
@@ -79,15 +86,43 @@
                   Forall(
                     "obj"
                   , PathStart("B", None())
-                  , Implies(
-                      And(True(), True())
-                    , BinRel(
-                        Path(
-                          Path(PathStart("obj", None()), PathComponent("a", None()))
-                        , PathComponent("m", None())
+                  , And(
+                      Implies(
+                        And(
+                          BinRel(
+                            This()
+                          , Equal()
+                          , Path(PathStart("obj", None()), PathComponent("a", None()))
+                          )
+                        , True()
                         )
-                      , LessThan()
-                      , Path(PathStart("obj", None()), PathComponent("n", None()))
+                      , BinRel(
+                          BinOp(
+                            Path(This(), PathComponent("m", None()))
+                          , Plus()
+                          , BasicValue(Integer("1"))
+                          )
+                        , LessThan()
+                        , Path(PathStart("obj", None()), PathComponent("n", None()))
+                        )
+                      )
+                    , Implies(
+                        And(
+                          True()
+                        , BinRel(
+                            This()
+                          , NotEqual()
+                          , Path(PathStart("obj", None()), PathComponent("a", None()))
+                          )
+                        )
+                      , BinRel(
+                          Path(
+                            Path(PathStart("obj", None()), PathComponent("a", None()))
+                          , PathComponent("m", None())
+                          )
+                        , LessThan()
+                        , Path(PathStart("obj", None()), PathComponent("n", None()))
+                        )
                       )
                     )
                   )
@@ -247,6 +282,1791 @@
           )
         )
       )
+    , ( ("B", "addQ")
+      , Guard(
+          And(
+            And(
+              True()
+            , And(
+                And(
+                  And(
+                    True()
+                  , And(
+                      And(
+                        Implies(
+                          And(True(), True())
+                        , And(
+                            Implies(
+                              And(
+                                And(
+                                  Implies(
+                                    And(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , True()
+                                    )
+                                  , BinRel(This(), Equal(), This())
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , BinRel(This(), Equal(), This())
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(
+                                          BinRel(This(), Equal(), This())
+                                        , BinRel(
+                                            This()
+                                          , NotEqual()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , Equal()
+                                        , This()
+                                        )
+                                      )
+                                    , Implies(
+                                        And(
+                                          True()
+                                        , And(
+                                            BinRel(
+                                              This()
+                                            , NotEqual()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , Equal()
+                                        , This()
+                                        )
+                                      )
+                                    )
+                                  )
+                                )
+                              , True()
+                              )
+                            , And(
+                                Implies(
+                                  And(
+                                    BinRel(
+                                      This()
+                                    , Equal()
+                                    , Path(Input("c"), PathComponent("bq", None()))
+                                    )
+                                  , True()
+                                  )
+                                , BinRel(
+                                    BinOp(
+                                      Path(This(), PathComponent("cq", None()))
+                                    , Minus()
+                                    , SetExtent([This()])
+                                    )
+                                  , SubsetEquals()
+                                  , PathStart("C", None())
+                                  )
+                                )
+                              , Implies(
+                                  And(
+                                    True()
+                                  , BinRel(
+                                      This()
+                                    , NotEqual()
+                                    , Path(Input("c"), PathComponent("bq", None()))
+                                    )
+                                  )
+                                , BinRel(
+                                    BinOp(
+                                      Path(
+                                        Path(Input("c"), PathComponent("bq", None()))
+                                      , PathComponent("cq", None())
+                                      )
+                                    , Minus()
+                                    , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                                    )
+                                  , SubsetEquals()
+                                  , PathStart("C", None())
+                                  )
+                                )
+                              )
+                            )
+                          , Implies(
+                              And(
+                                True()
+                              , And(
+                                  Implies(
+                                    And(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , True()
+                                    )
+                                  , BinRel(This(), NotEqual(), This())
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , BinRel(This(), NotEqual(), This())
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(
+                                          BinRel(This(), Equal(), This())
+                                        , BinRel(
+                                            This()
+                                          , NotEqual()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , NotEqual()
+                                        , This()
+                                        )
+                                      )
+                                    , Implies(
+                                        And(
+                                          True()
+                                        , And(
+                                            BinRel(
+                                              This()
+                                            , NotEqual()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , NotEqual()
+                                        , This()
+                                        )
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            , And(
+                                Implies(
+                                  And(BinRel(This(), Equal(), This()), True())
+                                , BinRel(
+                                    BinOp(
+                                      Path(This(), PathComponent("cq", None()))
+                                    , Union()
+                                    , SetExtent([Input("c")])
+                                    )
+                                  , SubsetEquals()
+                                  , PathStart("C", None())
+                                  )
+                                )
+                              , Implies(
+                                  And(True(), BinRel(This(), NotEqual(), This()))
+                                , BinRel(
+                                    BinOp(
+                                      Path(This(), PathComponent("cq", None()))
+                                    , Union()
+                                    , SetExtent([Input("c")])
+                                    )
+                                  , SubsetEquals()
+                                  , PathStart("C", None())
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        )
+                      , And(
+                          And(
+                            Implies(
+                              And(
+                                Implies(
+                                  And(True(), True())
+                                , Implies(
+                                    And(True(), True())
+                                  , BinRel(Input("c"), Equal(), Input("c"))
+                                  )
+                                )
+                              , True()
+                              )
+                            , And(
+                                Implies(
+                                  And(
+                                    And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), Equal(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  , True()
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , True()
+                                      )
+                                    , BinRel(
+                                        BinOp(
+                                          Path(This(), PathComponent("cq", None()))
+                                        , Minus()
+                                        , SetExtent([This()])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  , Implies(
+                                      And(
+                                        True()
+                                      , BinRel(
+                                          This()
+                                        , NotEqual()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      )
+                                    , BinRel(
+                                        BinOp(
+                                          Path(
+                                            Path(Input("c"), PathComponent("bq", None()))
+                                          , PathComponent("cq", None())
+                                          )
+                                        , Minus()
+                                        , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  )
+                                )
+                              , Implies(
+                                  And(
+                                    True()
+                                  , And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), NotEqual(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  )
+                                , And(
+                                    Implies(
+                                      And(BinRel(This(), Equal(), This()), True())
+                                    , BinRel(
+                                        BinOp(
+                                          Path(This(), PathComponent("cq", None()))
+                                        , Union()
+                                        , SetExtent([Input("c")])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  , Implies(
+                                      And(True(), BinRel(This(), NotEqual(), This()))
+                                    , BinRel(
+                                        BinOp(
+                                          Path(This(), PathComponent("cq", None()))
+                                        , Union()
+                                        , SetExtent([Input("c")])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          , Implies(
+                              And(
+                                True()
+                              , Implies(
+                                  And(True(), True())
+                                , Implies(
+                                    And(True(), True())
+                                  , BinRel(Input("c"), NotEqual(), Input("c"))
+                                  )
+                                )
+                              )
+                            , And(
+                                Implies(
+                                  And(
+                                    And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), Equal(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  , True()
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , True()
+                                      )
+                                    , BinRel(
+                                        BinOp(
+                                          Path(This(), PathComponent("cq", None()))
+                                        , Minus()
+                                        , SetExtent([This()])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  , Implies(
+                                      And(
+                                        True()
+                                      , BinRel(
+                                          This()
+                                        , NotEqual()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      )
+                                    , BinRel(
+                                        BinOp(
+                                          Path(
+                                            Path(Input("c"), PathComponent("bq", None()))
+                                          , PathComponent("cq", None())
+                                          )
+                                        , Minus()
+                                        , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  )
+                                )
+                              , Implies(
+                                  And(
+                                    True()
+                                  , And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), NotEqual(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  )
+                                , And(
+                                    Implies(
+                                      And(BinRel(This(), Equal(), This()), True())
+                                    , BinRel(
+                                        BinOp(
+                                          Path(This(), PathComponent("cq", None()))
+                                        , Union()
+                                        , SetExtent([Input("c")])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  , Implies(
+                                      And(True(), BinRel(This(), NotEqual(), This()))
+                                    , BinRel(
+                                        BinOp(
+                                          Path(This(), PathComponent("cq", None()))
+                                        , Union()
+                                        , SetExtent([Input("c")])
+                                        )
+                                      , SubsetEquals()
+                                      , PathStart("C", None())
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        , And(
+                            And(
+                              Implies(
+                                And(
+                                  Implies(
+                                    And(True(), True())
+                                  , Implies(
+                                      And(True(), True())
+                                    , BinRel(Input("c"), Equal(), Input("c"))
+                                    )
+                                  )
+                                , True()
+                                )
+                              , And(
+                                  Implies(
+                                    And(
+                                      And(
+                                        Implies(
+                                          And(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), Equal(), This())
+                                            )
+                                          , True()
+                                          )
+                                        , BinRel(This(), Equal(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), NotEqual(), This())
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , And(
+                                            Implies(
+                                              And(
+                                                BinRel(This(), Equal(), This())
+                                              , BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , Equal()
+                                              , This()
+                                              )
+                                            )
+                                          , Implies(
+                                              And(
+                                                True()
+                                              , And(
+                                                  BinRel(
+                                                    This()
+                                                  , NotEqual()
+                                                  , Path(Input("c"), PathComponent("bq", None()))
+                                                  )
+                                                , BinRel(This(), NotEqual(), This())
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , Equal()
+                                              , This()
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    , True()
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(
+                                          BinRel(
+                                            This()
+                                          , Equal()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), In(), PathStart("B", None()))
+                                      )
+                                    , Implies(
+                                        And(
+                                          True()
+                                        , BinRel(
+                                            This()
+                                          , NotEqual()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , In()
+                                        , PathStart("B", None())
+                                        )
+                                      )
+                                    )
+                                  )
+                                , Implies(
+                                    And(
+                                      True()
+                                    , And(
+                                        Implies(
+                                          And(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), Equal(), This())
+                                            )
+                                          , True()
+                                          )
+                                        , BinRel(This(), NotEqual(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), NotEqual(), This())
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , And(
+                                            Implies(
+                                              And(
+                                                BinRel(This(), Equal(), This())
+                                              , BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , NotEqual()
+                                              , This()
+                                              )
+                                            )
+                                          , Implies(
+                                              And(
+                                                True()
+                                              , And(
+                                                  BinRel(
+                                                    This()
+                                                  , NotEqual()
+                                                  , Path(Input("c"), PathComponent("bq", None()))
+                                                  )
+                                                , BinRel(This(), NotEqual(), This())
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , NotEqual()
+                                              , This()
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(BinRel(This(), Equal(), This()), True())
+                                      , BinRel(This(), In(), PathStart("B", None()))
+                                      )
+                                    , Implies(
+                                        And(True(), BinRel(This(), NotEqual(), This()))
+                                      , BinRel(This(), In(), PathStart("B", None()))
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            , Implies(
+                                And(
+                                  True()
+                                , Implies(
+                                    And(True(), True())
+                                  , Implies(
+                                      And(True(), True())
+                                    , BinRel(Input("c"), NotEqual(), Input("c"))
+                                    )
+                                  )
+                                )
+                              , And(
+                                  Implies(
+                                    And(
+                                      And(
+                                        Implies(
+                                          And(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), Equal(), This())
+                                            )
+                                          , True()
+                                          )
+                                        , BinRel(This(), Equal(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), NotEqual(), This())
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , And(
+                                            Implies(
+                                              And(
+                                                BinRel(This(), Equal(), This())
+                                              , BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , Equal()
+                                              , This()
+                                              )
+                                            )
+                                          , Implies(
+                                              And(
+                                                True()
+                                              , And(
+                                                  BinRel(
+                                                    This()
+                                                  , NotEqual()
+                                                  , Path(Input("c"), PathComponent("bq", None()))
+                                                  )
+                                                , BinRel(This(), NotEqual(), This())
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , Equal()
+                                              , This()
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    , True()
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(
+                                          BinRel(
+                                            This()
+                                          , Equal()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), In(), PathStart("B", None()))
+                                      )
+                                    , Implies(
+                                        And(
+                                          True()
+                                        , BinRel(
+                                            This()
+                                          , NotEqual()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , In()
+                                        , PathStart("B", None())
+                                        )
+                                      )
+                                    )
+                                  )
+                                , Implies(
+                                    And(
+                                      True()
+                                    , And(
+                                        Implies(
+                                          And(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), Equal(), This())
+                                            )
+                                          , True()
+                                          )
+                                        , BinRel(This(), NotEqual(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(
+                                                This()
+                                              , Equal()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            , BinRel(This(), NotEqual(), This())
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , And(
+                                            Implies(
+                                              And(
+                                                BinRel(This(), Equal(), This())
+                                              , BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , NotEqual()
+                                              , This()
+                                              )
+                                            )
+                                          , Implies(
+                                              And(
+                                                True()
+                                              , And(
+                                                  BinRel(
+                                                    This()
+                                                  , NotEqual()
+                                                  , Path(Input("c"), PathComponent("bq", None()))
+                                                  )
+                                                , BinRel(This(), NotEqual(), This())
+                                                )
+                                              )
+                                            , BinRel(
+                                                Path(Input("c"), PathComponent("bq", None()))
+                                              , NotEqual()
+                                              , This()
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(BinRel(This(), Equal(), This()), True())
+                                      , BinRel(This(), In(), PathStart("B", None()))
+                                      )
+                                    , Implies(
+                                        And(True(), BinRel(This(), NotEqual(), This()))
+                                      , BinRel(This(), In(), PathStart("B", None()))
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          , True()
+                          )
+                        )
+                      )
+                    , And(
+                        Implies(
+                          And(True(), True())
+                        , And(
+                            Implies(
+                              And(
+                                And(
+                                  Implies(
+                                    And(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , True()
+                                    )
+                                  , BinRel(This(), Equal(), This())
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , BinRel(This(), Equal(), This())
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(
+                                          BinRel(This(), Equal(), This())
+                                        , BinRel(
+                                            This()
+                                          , NotEqual()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , Equal()
+                                        , This()
+                                        )
+                                      )
+                                    , Implies(
+                                        And(
+                                          True()
+                                        , And(
+                                            BinRel(
+                                              This()
+                                            , NotEqual()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , Equal()
+                                        , This()
+                                        )
+                                      )
+                                    )
+                                  )
+                                )
+                              , True()
+                              )
+                            , And(
+                                Implies(
+                                  And(
+                                    BinRel(
+                                      This()
+                                    , Equal()
+                                    , Path(Input("c"), PathComponent("bq", None()))
+                                    )
+                                  , True()
+                                  )
+                                , BinRel(
+                                    Cardinality(
+                                      BinOp(
+                                        Path(This(), PathComponent("cq", None()))
+                                      , Minus()
+                                      , SetExtent([This()])
+                                      )
+                                    )
+                                  , GreaterThanEquals()
+                                  , BasicValue(Integer(0))
+                                  )
+                                )
+                              , Implies(
+                                  And(
+                                    True()
+                                  , BinRel(
+                                      This()
+                                    , NotEqual()
+                                    , Path(Input("c"), PathComponent("bq", None()))
+                                    )
+                                  )
+                                , BinRel(
+                                    Cardinality(
+                                      BinOp(
+                                        Path(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , PathComponent("cq", None())
+                                        )
+                                      , Minus()
+                                      , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                                      )
+                                    )
+                                  , GreaterThanEquals()
+                                  , BasicValue(Integer(0))
+                                  )
+                                )
+                              )
+                            )
+                          , Implies(
+                              And(
+                                True()
+                              , And(
+                                  Implies(
+                                    And(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , True()
+                                    )
+                                  , BinRel(This(), NotEqual(), This())
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , BinRel(This(), NotEqual(), This())
+                                    )
+                                  , And(
+                                      Implies(
+                                        And(
+                                          BinRel(This(), Equal(), This())
+                                        , BinRel(
+                                            This()
+                                          , NotEqual()
+                                          , Path(Input("c"), PathComponent("bq", None()))
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , NotEqual()
+                                        , This()
+                                        )
+                                      )
+                                    , Implies(
+                                        And(
+                                          True()
+                                        , And(
+                                            BinRel(
+                                              This()
+                                            , NotEqual()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        )
+                                      , BinRel(
+                                          Path(Input("c"), PathComponent("bq", None()))
+                                        , NotEqual()
+                                        , This()
+                                        )
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            , And(
+                                Implies(
+                                  And(BinRel(This(), Equal(), This()), True())
+                                , BinRel(
+                                    Cardinality(
+                                      BinOp(
+                                        Path(This(), PathComponent("cq", None()))
+                                      , Union()
+                                      , SetExtent([Input("c")])
+                                      )
+                                    )
+                                  , GreaterThanEquals()
+                                  , BasicValue(Integer(0))
+                                  )
+                                )
+                              , Implies(
+                                  And(True(), BinRel(This(), NotEqual(), This()))
+                                , BinRel(
+                                    Cardinality(
+                                      BinOp(
+                                        Path(This(), PathComponent("cq", None()))
+                                      , Union()
+                                      , SetExtent([Input("c")])
+                                      )
+                                    )
+                                  , GreaterThanEquals()
+                                  , BasicValue(Integer(0))
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        )
+                      , And(
+                          And(
+                            Implies(
+                              And(
+                                Implies(
+                                  And(True(), True())
+                                , Implies(
+                                    And(True(), True())
+                                  , BinRel(Input("c"), Equal(), Input("c"))
+                                  )
+                                )
+                              , True()
+                              )
+                            , And(
+                                Implies(
+                                  And(
+                                    And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), Equal(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  , True()
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , True()
+                                      )
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(This(), PathComponent("cq", None()))
+                                          , Minus()
+                                          , SetExtent([This()])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  , Implies(
+                                      And(
+                                        True()
+                                      , BinRel(
+                                          This()
+                                        , NotEqual()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      )
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , PathComponent("cq", None())
+                                            )
+                                          , Minus()
+                                          , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  )
+                                )
+                              , Implies(
+                                  And(
+                                    True()
+                                  , And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), NotEqual(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  )
+                                , And(
+                                    Implies(
+                                      And(BinRel(This(), Equal(), This()), True())
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(This(), PathComponent("cq", None()))
+                                          , Union()
+                                          , SetExtent([Input("c")])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  , Implies(
+                                      And(True(), BinRel(This(), NotEqual(), This()))
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(This(), PathComponent("cq", None()))
+                                          , Union()
+                                          , SetExtent([Input("c")])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          , Implies(
+                              And(
+                                True()
+                              , Implies(
+                                  And(True(), True())
+                                , Implies(
+                                    And(True(), True())
+                                  , BinRel(Input("c"), NotEqual(), Input("c"))
+                                  )
+                                )
+                              )
+                            , And(
+                                Implies(
+                                  And(
+                                    And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), Equal(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), Equal(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , Equal()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  , True()
+                                  )
+                                , And(
+                                    Implies(
+                                      And(
+                                        BinRel(
+                                          This()
+                                        , Equal()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      , True()
+                                      )
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(This(), PathComponent("cq", None()))
+                                          , Minus()
+                                          , SetExtent([This()])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  , Implies(
+                                      And(
+                                        True()
+                                      , BinRel(
+                                          This()
+                                        , NotEqual()
+                                        , Path(Input("c"), PathComponent("bq", None()))
+                                        )
+                                      )
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , PathComponent("cq", None())
+                                            )
+                                          , Minus()
+                                          , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  )
+                                )
+                              , Implies(
+                                  And(
+                                    True()
+                                  , And(
+                                      Implies(
+                                        And(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), Equal(), This())
+                                          )
+                                        , True()
+                                        )
+                                      , BinRel(This(), NotEqual(), This())
+                                      )
+                                    , And(
+                                        Implies(
+                                          And(
+                                            BinRel(
+                                              This()
+                                            , Equal()
+                                            , Path(Input("c"), PathComponent("bq", None()))
+                                            )
+                                          , BinRel(This(), NotEqual(), This())
+                                          )
+                                        , BinRel(This(), NotEqual(), This())
+                                        )
+                                      , And(
+                                          Implies(
+                                            And(
+                                              BinRel(This(), Equal(), This())
+                                            , BinRel(
+                                                This()
+                                              , NotEqual()
+                                              , Path(Input("c"), PathComponent("bq", None()))
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        , Implies(
+                                            And(
+                                              True()
+                                            , And(
+                                                BinRel(
+                                                  This()
+                                                , NotEqual()
+                                                , Path(Input("c"), PathComponent("bq", None()))
+                                                )
+                                              , BinRel(This(), NotEqual(), This())
+                                              )
+                                            )
+                                          , BinRel(
+                                              Path(Input("c"), PathComponent("bq", None()))
+                                            , NotEqual()
+                                            , This()
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+                                  )
+                                , And(
+                                    Implies(
+                                      And(BinRel(This(), Equal(), This()), True())
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(This(), PathComponent("cq", None()))
+                                          , Union()
+                                          , SetExtent([Input("c")])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  , Implies(
+                                      And(True(), BinRel(This(), NotEqual(), This()))
+                                    , BinRel(
+                                        Cardinality(
+                                          BinOp(
+                                            Path(This(), PathComponent("cq", None()))
+                                          , Union()
+                                          , SetExtent([Input("c")])
+                                          )
+                                        )
+                                      , GreaterThanEquals()
+                                      , BasicValue(Integer(0))
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        , True()
+                        )
+                      )
+                    )
+                  )
+                , And(True(), True())
+                )
+              , And(True(), True())
+              )
+            )
+          , And(True(), True())
+          )
+        , Parallel(
+            Assign(Path(Input("c"), PathComponent("bq", None())), This())
+          , Parallel(
+              Guard(
+                BinRel(
+                  Path(Input("c"), PathComponent("bq", None()))
+                , NotEqual()
+                , Null()
+                )
+              , Assign(
+                  Path(
+                    Path(Input("c"), PathComponent("bq", None()))
+                  , PathComponent("cq", None())
+                  )
+                , BinOp(
+                    Path(
+                      Path(Input("c"), PathComponent("bq", None()))
+                    , PathComponent("cq", None())
+                    )
+                  , Minus()
+                  , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                  )
+                )
+              )
+            , Assign(
+                Path(This(), PathComponent("cq", None()))
+              , BinOp(
+                  Path(This(), PathComponent("cq", None()))
+                , Union()
+                , SetExtent([Input("c")])
+                )
+              )
+            )
+          )
+        )
+      )
     ]
   , "Invariants"
   , [ ( "A"
@@ -266,6 +2086,7 @@
         , Path(This(), PathComponent("n", None()))
         )
       )
+    , ("C", True())
     ]
   , "Type"
   , [ (("A", "m"), BasicType(Int()))
@@ -274,14 +2095,19 @@
     , (("B", "n"), BasicType(Int()))
     , (("B", "cp"), Set(Class("C")))
     , (("B", "cq"), Set(Class("C")))
+    , (("C", "o"), BasicType(Int()))
+    , (("C", "bp"), Class("B"))
+    , (("C", "bq"), Optional(Class("B")))
     ]
   , "Inputs"
   , [ (("A", "increment"), [])
     , (("B", "increment"), [])
+    , (("B", "addQ"), [("c", Class("C"))])
     ]
   , "Outputs"
   , [ (("A", "increment"), [])
     , (("B", "increment"), [])
+    , (("B", "addQ"), [])
     ]
   , "ClassBasedInvariants"
   , [ ( ("A", "m")
@@ -349,6 +2175,9 @@
       )
     , (("B", "cp"), True())
     , (("B", "cq"), True())
+    , (("C", "o"), True())
+    , (("C", "bp"), True())
+    , (("C", "bq"), True())
     ]
   , "RealignedInvariants"
   , []
@@ -356,12 +2185,14 @@
   , []
   )
 , ( "Classes"
-  , ["A", "B"]
+  , ["A", "B", "C"]
   , "Opposites"
   , [ (("A", "b"), ("B", "a"))
     , (("B", "a"), ("A", "b"))
     , (("B", "cp"), ("C", "bp"))
     , (("B", "cq"), ("C", "bq"))
+    , (("C", "bp"), ("B", "cp"))
+    , (("C", "bq"), ("B", "cq"))
     ]
   , "MinMults"
   , [ (("A", "m"), 1)
@@ -370,6 +2201,9 @@
     , (("B", "n"), 1)
     , (("B", "cp"), 0)
     , (("B", "cq"), 0)
+    , (("C", "o"), 1)
+    , (("C", "bp"), 1)
+    , (("C", "bq"), 0)
     ]
   , "MaxMults"
   , [ (("A", "m"), 1)
@@ -378,18 +2212,54 @@
     , (("B", "n"), 1)
     , (("B", "cp"), "*")
     , (("B", "cq"), "*")
+    , (("C", "o"), 1)
+    , (("C", "bp"), 1)
+    , (("C", "bq"), 1)
     ]
   , "Attributes"
   , [ ("A", ["m", "b"])
     , ("B", ["a", "n", "cp", "cq"])
+    , ("C", ["o", "bp", "bq"])
     ]
   , "Operations"
-  , [("A", ["increment"]), ("B", ["increment"])]
-  , "Name"
-  , "fstcsExample"
-  , "TableNames"
-  , []
-  , "IDs"
-  , []
+  , [ ("A", ["increment"])
+    , ("B", ["increment", "addQ"])
+    , ("C", [])
+    ]
+  , ( "QualifiedInvariants"
+    , [ ( "A"
+        , Forall(
+            "obj"
+          , PathStart("A", None())
+          , BinRel(
+              Path(PathStart("obj", None()), PathComponent("m", None()))
+            , LessThan()
+            , BasicValue(Integer("10"))
+            )
+          )
+        )
+      , ( "B"
+        , Forall(
+            "obj"
+          , PathStart("B", None())
+          , BinRel(
+              Path(
+                Path(PathStart("obj", None()), PathComponent("a", None()))
+              , PathComponent("m", None())
+              )
+            , LessThan()
+            , Path(PathStart("obj", None()), PathComponent("n", None()))
+            )
+          )
+        )
+      , ("C", True())
+      ]
+    , "Name"
+    , "fstcsExample"
+    , "TableNames"
+    , []
+    , "IDs"
+    , []
+    )
   )
 )

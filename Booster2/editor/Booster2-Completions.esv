@@ -13,19 +13,20 @@ completions
                                              
   // Syntax completion:                      
                                              
-  completion template :
+  completion template System:
     "system " <systemname> "\n\n" (blank)  
                                              
-  completion template :
+  completion template SystemComponent:
     "class " <classname> " {\n" "\tattributes \n\t\t\n"  "\tinvariants \n\t\t\n" "\tmethods \n\t\t\n"  "}\n" (blank)  
                                              
-  completion template : 
+  completion template SystemComponent: 
     "set " <setname> " { " <elem> " }\n" (blank)  
                                              
 
 completions
   // Semantic (identifier) completion:   
                                          
-  completion proposer                  : editor-complete
-                                         
-  completion trigger                   : ":"
+  completion proposer                  : editor-complete                                         
+  //completion trigger                   : "."
+
+

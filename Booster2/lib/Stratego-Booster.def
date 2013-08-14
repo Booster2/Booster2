@@ -442,12 +442,14 @@ exports
     'string' -> ID {reject}
     'int' -> ID {reject}
     'datetime' -> ID {reject}
+    'boolean' -> ID {reject}
     'attributes' -> ID {reject}
+    'extends' -> ID {reject}
     'system' -> ID {reject}
     'invariant' -> ID {reject}
     'methods' -> ID {reject}
     
-    "-"? [0-9]+            -> INT
+    [0-9]+            -> INT
     
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar
@@ -504,7 +506,6 @@ exports
   	  	
   context-free syntax
     
-  
 	'system' ID ( SystemComponent )* -> System {cons("System")}
 	System -> BoosterTerm
 
@@ -513,8 +514,13 @@ exports
 	Class -> SystemComponent
 	SystemComponent -> BoosterTerm
 
-	'class' ID '{' ClassComponents * '}' -> Class  {cons("Class")}
+	'class' ID Extends? '{' ClassComponents * '}' -> Class  {cons("Class")}
 	Class -> BoosterTerm
+	
+	'extends' {Extension ','}+ -> Extends {cons("Extend")}
+	Extends -> BoosterTerm
+	
+	ID -> Extension {cons("Extension")}
 	 
 	'attributes' Attribute*  -> ClassComponents {cons("Attributes")}
 	'methods' Method*  -> ClassComponents {cons("Methods")}
@@ -532,6 +538,7 @@ exports
 	 '(' 'ID' ')' -> Identity {cons("Identity")}
   
 	 ID '{' Constraint '}' -> Method {cons("Method")}
+	 ID '{' Expression '}' -> Method {cons("Method"), deprecated}
 	 ID '{' GuardedCommand '}' -> Method {cons("Method")}
 	 Method -> BoosterTerm
 	 
@@ -547,6 +554,7 @@ exports
 	 'STRING' -> BasicTypeDecl {cons("String")}
 	 'INT' -> BasicTypeDecl {cons("Int")}
 	 'DATETIME' -> BasicTypeDecl {cons("DateTime")}
+	 'BOOLEAN' -> BasicTypeDecl {cons("Boolean")}
 	 
 	 ID -> PrimTypeDecl {cons("UniDirectional")}
 	 ID '.' ID -> PrimTypeDecl {cons("BiDirectional")}
@@ -601,11 +609,12 @@ exports
     STRING		-> BasicValue {cons("String")}
 
     TypeExtent -> ValueExpression {cons("TypeExtent")}
-  	"STRING"	-> TypeExtent {cons("String"), prefer}
-  	"INT"		-> TypeExtent {cons("Int"), prefer}
-  	"DATETIME"	-> TypeExtent {cons("DateTime"), prefer}
+  	'string'	-> TypeExtent {cons("String"), prefer}
+  	'int'		-> TypeExtent {cons("Int"), prefer}
+  	'datetime'	-> TypeExtent {cons("DateTime"), prefer}
+  	'boolean'	-> TypeExtent {cons("Boolean"), prefer}
 
-    Path		-> ValueExpression 
+	Path		-> ValueExpression {} 
   	'null'		-> ValueExpression {cons("Null"), prefer}
     "{" {Expression "," }* "}" -> ValueExpression {cons("SetExtent")}
     ValueExpression -> BoosterTerm
@@ -618,7 +627,7 @@ exports
     "(" Expression ")" 	-> Expression {bracket}
   
     
-    Expression BinOp Expression -> Expression {cons("BinOp")}
+    Expression BinOp Expression -> Expression {cons("BinOp"), left}
     
     
     "+"		-> BinOp {cons("Plus")}
@@ -638,8 +647,12 @@ exports
     MethodReference -> BoosterTerm
    
     PathStart -> Path
-    Path '.' PathComponent -> Path {cons("Path")}
+%%    PathStart '.' {PathComponent '.'}+  -> Path {cons("PathError"), prefer}    
+    
+    Path '.' PathComponent -> Path {cons("Path"), prefer}
     Path -> BoosterTerm
+    
+    
     
     Input -> PathStart
     Output -> PathStart
@@ -655,6 +668,8 @@ exports
 
     "'" -> Decorator {cons("Primed")}
 	Decorator -> BoosterTerm
+	
+	 -> PathComponent {cons("PathComponent"), deprecated}
 	
   	ID Decorator? -> PathComponent {cons("PathComponent")}
   	PathComponent -> BoosterTerm

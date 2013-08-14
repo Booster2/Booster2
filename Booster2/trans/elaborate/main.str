@@ -24,6 +24,9 @@ rules
   				system;
   				invariants := <LookupTable> "Invariants";
   				qualified-invariants := <map(qualify-invariant)> invariants;
+  				rules(			
+					LookupTable :+ "QualifiedInvariants" -> qualified-invariants
+				);
  				invs-atts := <map(get-mentioned-attributes-in-invariant)> qualified-invariants;
  				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
   				rules(			

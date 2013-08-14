@@ -21,7 +21,7 @@ system methodTest
 	}
 
   
-]] run expand-booster-for-testing to 
+]] run parse to 
 
 System(
   "methodTest"

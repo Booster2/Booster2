@@ -14,12 +14,14 @@ exports
     'string' -> ID {reject}
     'int' -> ID {reject}
     'datetime' -> ID {reject}
+    'boolean' -> ID {reject}
     'attributes' -> ID {reject}
+    'extends' -> ID {reject}
     'system' -> ID {reject}
     'invariant' -> ID {reject}
     'methods' -> ID {reject}
     
-    "-"? [0-9]+            -> INT
+    [0-9]+            -> INT
     
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar

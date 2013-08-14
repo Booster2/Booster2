@@ -17,19 +17,14 @@ rules
 		Takes a System and returns the sets
 */
 	get-sets:
-  		System(sysname,[SetDef(name,elems),systemComponents*]) 
-  			-> <union>([SetDef(name,elems)],sets)
-  	with
-  		sets := <get-sets> System(sysname, systemComponents*)
-
-	get-sets:
-  		System(sysname, []) -> [] 
-  	
-	get-sets:
-  		System(sysname, [ Class(name,classComponents),systemComponents*]) 
+  		System(sysname,systemComponents) 
   			-> sets
-  	with
-  		sets := <get-sets> System(sysname, systemComponents*)
+  		where 
+  			sets := <filter(isSet)> systemComponents 
+
+	isSet:
+		SetDef(name, values)
+			-> SetDef (name, values)
   		
  
 /* get-classes-from-system: 
@@ -38,16 +33,12 @@ rules
 */
 
 	get-classes-from-system:
-  		System(sysname, [SetDef(name,elems),systemComponents*]) 
-  			-> classes
-  	with
-  		classes := <get-classes-from-system> System(sysname, [systemComponents*])
+  		System(sysname, syscomponents) ->
+  			classes
+  		where 
+  			classes := <filter(isClass)> syscomponents 
 
-	get-classes-from-system:
-  		System(sysname,[]) -> [] 
-  	
-	get-classes-from-system:
-  		System(sysname,[Class(name,classComponents),systemComponents*])  
-  			-> <union>([Class(name,classComponents)],classes)
-  	with
-  		classes := <get-classes-from-system> System(name, [systemComponents*])
+	isClass:
+		Class(name, extends, classcomponents)
+			-> Class (name, extends, classcomponents)
+			

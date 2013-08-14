@@ -21,40 +21,76 @@
           )
         )
       )
+    , ( ("B", "addQ")
+      , BinRel(
+          Input("c")
+        , In()
+        , Path(This(), PathComponent("cq", Some(Primed())))
+        )
+      )
     ]
   , "Programs"
   , [ ( ("A", "increment")
       , Guard(
           And(
             And(
-              Forall(
-                "obj"
-              , PathStart("A", None())
-              , Implies(
-                  BinRel(This(), Equal(), PathStart("obj", None()))
-                , BinRel(
-                    Path(PathStart("obj", None()), PathComponent("m", None()))
-                  , LessThan()
-                  , BasicValue(Integer("10"))
+              And(
+                BinRel(
+                  BinOp(
+                    Path(This(), PathComponent("m", None()))
+                  , Plus()
+                  , BasicValue(Integer("1"))
+                  )
+                , LessThan()
+                , BasicValue(Integer("10"))
+                )
+              , Forall(
+                  "obj"
+                , PathStart("A", None())
+                , Implies(
+                    BinRel(PathStart("obj", None()), NotEqual(), This())
+                  , BinRel(
+                      Path(PathStart("obj", None()), PathComponent("m", None()))
+                    , LessThan()
+                    , BasicValue(Integer("10"))
+                    )
                   )
                 )
               )
             , Forall(
                 "obj"
               , PathStart("B", None())
-              , Implies(
-                  BinRel(
-                    This()
-                  , Equal()
-                  , Path(PathStart("obj", None()), PathComponent("a", None()))
-                  )
-                , BinRel(
-                    Path(
-                      Path(PathStart("obj", None()), PathComponent("a", None()))
-                    , PathComponent("m", None())
+              , And(
+                  Implies(
+                    BinRel(
+                      This()
+                    , Equal()
+                    , Path(PathStart("obj", None()), PathComponent("a", None()))
                     )
-                  , LessThan()
-                  , Path(PathStart("obj", None()), PathComponent("n", None()))
+                  , BinRel(
+                      BinOp(
+                        Path(This(), PathComponent("m", None()))
+                      , Plus()
+                      , BasicValue(Integer("1"))
+                      )
+                    , LessThan()
+                    , Path(PathStart("obj", None()), PathComponent("n", None()))
+                    )
+                  )
+                , Implies(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(PathStart("obj", None()), PathComponent("a", None()))
+                    )
+                  , BinRel(
+                      Path(
+                        Path(PathStart("obj", None()), PathComponent("a", None()))
+                      , PathComponent("m", None())
+                      )
+                    , LessThan()
+                    , Path(PathStart("obj", None()), PathComponent("n", None()))
+                    )
                   )
                 )
               )
@@ -82,18 +118,32 @@
     , ( ("B", "increment")
       , Guard(
           And(
-            Forall(
-              "obj"
-            , PathStart("B", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(
-                    Path(PathStart("obj", None()), PathComponent("a", None()))
-                  , PathComponent("m", None())
+            And(
+              BinRel(
+                Path(
+                  Path(This(), PathComponent("a", None()))
+                , PathComponent("m", None())
+                )
+              , LessThan()
+              , BinOp(
+                  Path(This(), PathComponent("n", None()))
+                , Plus()
+                , BasicValue(Integer("1"))
+                )
+              )
+            , Forall(
+                "obj"
+              , PathStart("B", None())
+              , Implies(
+                  BinRel(PathStart("obj", None()), NotEqual(), This())
+                , BinRel(
+                    Path(
+                      Path(PathStart("obj", None()), PathComponent("a", None()))
+                    , PathComponent("m", None())
+                    )
+                  , LessThan()
+                  , Path(PathStart("obj", None()), PathComponent("n", None()))
                   )
-                , LessThan()
-                , Path(PathStart("obj", None()), PathComponent("n", None()))
                 )
               )
             )
@@ -117,6 +167,273 @@
           )
         )
       )
+    , ( ("B", "addQ")
+      , Guard(
+          And(
+            And(
+              And(
+                Implies(
+                  Implies(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , BinRel(
+                      Path(Input("c"), PathComponent("bq", None()))
+                    , Equal()
+                    , This()
+                    )
+                  )
+                , And(
+                    Implies(
+                      BinRel(
+                        This()
+                      , Equal()
+                      , Path(Input("c"), PathComponent("bq", None()))
+                      )
+                    , BinRel(This(), In(), PathStart("B", None()))
+                    )
+                  , Implies(
+                      BinRel(
+                        This()
+                      , NotEqual()
+                      , Path(Input("c"), PathComponent("bq", None()))
+                      )
+                    , BinRel(
+                        Path(Input("c"), PathComponent("bq", None()))
+                      , In()
+                      , PathStart("B", None())
+                      )
+                    )
+                  )
+                )
+              , Implies(
+                  And(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , Implies(
+                      BinRel(
+                        This()
+                      , NotEqual()
+                      , Path(Input("c"), PathComponent("bq", None()))
+                      )
+                    , BinRel(
+                        Path(Input("c"), PathComponent("bq", None()))
+                      , NotEqual()
+                      , This()
+                      )
+                    )
+                  )
+                , BinRel(This(), In(), PathStart("B", None()))
+                )
+              )
+            , And(
+                Implies(
+                  Implies(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , BinRel(
+                      Path(Input("c"), PathComponent("bq", None()))
+                    , Equal()
+                    , This()
+                    )
+                  )
+                , And(
+                    Implies(
+                      BinRel(
+                        This()
+                      , Equal()
+                      , Path(Input("c"), PathComponent("bq", None()))
+                      )
+                    , BinRel(
+                        BinOp(
+                          Path(This(), PathComponent("cq", None()))
+                        , Minus()
+                        , SetExtent([This()])
+                        )
+                      , SubsetEquals()
+                      , PathStart("C", None())
+                      )
+                    )
+                  , Implies(
+                      BinRel(
+                        This()
+                      , NotEqual()
+                      , Path(Input("c"), PathComponent("bq", None()))
+                      )
+                    , BinRel(
+                        BinOp(
+                          Path(
+                            Path(Input("c"), PathComponent("bq", None()))
+                          , PathComponent("cq", None())
+                          )
+                        , Minus()
+                        , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                        )
+                      , SubsetEquals()
+                      , PathStart("C", None())
+                      )
+                    )
+                  )
+                )
+              , Implies(
+                  And(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , Implies(
+                      BinRel(
+                        This()
+                      , NotEqual()
+                      , Path(Input("c"), PathComponent("bq", None()))
+                      )
+                    , BinRel(
+                        Path(Input("c"), PathComponent("bq", None()))
+                      , NotEqual()
+                      , This()
+                      )
+                    )
+                  )
+                , And(
+                    BinRel(
+                      Path(This(), PathComponent("cq", None()))
+                    , SubsetEquals()
+                    , PathStart("C", None())
+                    )
+                  , BinRel(Input("c"), In(), PathStart("C", None()))
+                  )
+                )
+              )
+            )
+          , And(
+              Implies(
+                Implies(
+                  BinRel(
+                    This()
+                  , NotEqual()
+                  , Path(Input("c"), PathComponent("bq", None()))
+                  )
+                , BinRel(
+                    Path(Input("c"), PathComponent("bq", None()))
+                  , Equal()
+                  , This()
+                  )
+                )
+              , And(
+                  Implies(
+                    BinRel(
+                      This()
+                    , Equal()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , BinRel(
+                      Cardinality(
+                        BinOp(
+                          Path(This(), PathComponent("cq", None()))
+                        , Minus()
+                        , SetExtent([This()])
+                        )
+                      )
+                    , GreaterThanEquals()
+                    , BasicValue(Integer(0))
+                    )
+                  )
+                , Implies(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , BinRel(
+                      Cardinality(
+                        BinOp(
+                          Path(
+                            Path(Input("c"), PathComponent("bq", None()))
+                          , PathComponent("cq", None())
+                          )
+                        , Minus()
+                        , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                        )
+                      )
+                    , GreaterThanEquals()
+                    , BasicValue(Integer(0))
+                    )
+                  )
+                )
+              )
+            , Implies(
+                And(
+                  BinRel(
+                    This()
+                  , NotEqual()
+                  , Path(Input("c"), PathComponent("bq", None()))
+                  )
+                , Implies(
+                    BinRel(
+                      This()
+                    , NotEqual()
+                    , Path(Input("c"), PathComponent("bq", None()))
+                    )
+                  , BinRel(
+                      Path(Input("c"), PathComponent("bq", None()))
+                    , NotEqual()
+                    , This()
+                    )
+                  )
+                )
+              , BinRel(
+                  Cardinality(Path(This(), PathComponent("cq", None())))
+                , GreaterThanEquals()
+                , BasicValue(Integer(-1))
+                )
+              )
+            )
+          )
+        , Parallel(
+            Assign(Path(Input("c"), PathComponent("bq", None())), This())
+          , Parallel(
+              Guard(
+                BinRel(
+                  Path(Input("c"), PathComponent("bq", None()))
+                , NotEqual()
+                , Null()
+                )
+              , Assign(
+                  Path(
+                    Path(Input("c"), PathComponent("bq", None()))
+                  , PathComponent("cq", None())
+                  )
+                , BinOp(
+                    Path(
+                      Path(Input("c"), PathComponent("bq", None()))
+                    , PathComponent("cq", None())
+                    )
+                  , Minus()
+                  , SetExtent([Path(Input("c"), PathComponent("bq", None()))])
+                  )
+                )
+              )
+            , Assign(
+                Path(This(), PathComponent("cq", None()))
+              , BinOp(
+                  Path(This(), PathComponent("cq", None()))
+                , Union()
+                , SetExtent([Input("c")])
+                )
+              )
+            )
+          )
+        )
+      )
     ]
   , "Invariants"
   , [ ( "A"
@@ -136,13 +453,7 @@
         , Path(This(), PathComponent("n", None()))
         )
       )
-    , ( "C"
-      , BinRel(
-          Path(This(), PathComponent("bp", None()))
-        , NotEqual()
-        , Path(This(), PathComponent("bq", None()))
-        )
-      )
+    , ("C", True())
     ]
   , "Type"
   , [ (("A", "m"), BasicType(Int()))
@@ -158,51 +469,37 @@
   , "Inputs"
   , [ (("A", "increment"), [])
     , (("B", "increment"), [])
+    , (("B", "addQ"), [("c", Class("C"))])
     ]
   , "Outputs"
   , [ (("A", "increment"), [])
     , (("B", "increment"), [])
+    , (("B", "addQ"), [])
     ]
   , "ClassBasedInvariants"
   , [ ( ("A", "m")
       , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("A", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(PathStart("obj", None()), PathComponent("m", None()))
-                , LessThan()
-                , BasicValue(Integer("10"))
-                )
-              )
+          Forall(
+            "obj"
+          , PathStart("A", None())
+          , BinRel(
+              Path(PathStart("obj", None()), PathComponent("m", None()))
+            , LessThan()
+            , BasicValue(Integer("10"))
             )
-          , True()
           )
         , And(
-            And(
-              Forall(
-                "obj"
-              , PathStart("B", None())
-              , Implies(
-                  BinRel(
-                    This()
-                  , Equal()
-                  , Path(PathStart("obj", None()), PathComponent("a", None()))
-                  )
-                , BinRel(
-                    Path(
-                      Path(PathStart("obj", None()), PathComponent("a", None()))
-                    , PathComponent("m", None())
-                    )
-                  , LessThan()
-                  , Path(PathStart("obj", None()), PathComponent("n", None()))
-                  )
+            Forall(
+              "obj"
+            , PathStart("B", None())
+            , BinRel(
+                Path(
+                  Path(PathStart("obj", None()), PathComponent("a", None()))
+                , PathComponent("m", None())
                 )
+              , LessThan()
+              , Path(PathStart("obj", None()), PathComponent("n", None()))
               )
-            , True()
             )
           , True()
           )
@@ -211,46 +508,34 @@
     , (("A", "b"), True())
     , ( ("B", "a")
       , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("B", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(
-                    Path(PathStart("obj", None()), PathComponent("a", None()))
-                  , PathComponent("m", None())
-                  )
-                , LessThan()
-                , Path(PathStart("obj", None()), PathComponent("n", None()))
-                )
+          Forall(
+            "obj"
+          , PathStart("B", None())
+          , BinRel(
+              Path(
+                Path(PathStart("obj", None()), PathComponent("a", None()))
+              , PathComponent("m", None())
               )
+            , LessThan()
+            , Path(PathStart("obj", None()), PathComponent("n", None()))
             )
-          , True()
           )
         , True()
         )
       )
     , ( ("B", "n")
       , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("B", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(
-                    Path(PathStart("obj", None()), PathComponent("a", None()))
-                  , PathComponent("m", None())
-                  )
-                , LessThan()
-                , Path(PathStart("obj", None()), PathComponent("n", None()))
-                )
+          Forall(
+            "obj"
+          , PathStart("B", None())
+          , BinRel(
+              Path(
+                Path(PathStart("obj", None()), PathComponent("a", None()))
+              , PathComponent("m", None())
               )
+            , LessThan()
+            , Path(PathStart("obj", None()), PathComponent("n", None()))
             )
-          , True()
           )
         , True()
         )
@@ -258,46 +543,8 @@
     , (("B", "cp"), True())
     , (("B", "cq"), True())
     , (("C", "o"), True())
-    , ( ("C", "bp")
-      , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("C", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(PathStart("obj", None()), PathComponent("bp", None()))
-                , NotEqual()
-                , Path(PathStart("obj", None()), PathComponent("bq", None()))
-                )
-              )
-            )
-          , True()
-          )
-        , True()
-        )
-      )
-    , ( ("C", "bq")
-      , And(
-          And(
-            Forall(
-              "obj"
-            , PathStart("C", None())
-            , Implies(
-                BinRel(This(), Equal(), PathStart("obj", None()))
-              , BinRel(
-                  Path(PathStart("obj", None()), PathComponent("bp", None()))
-                , NotEqual()
-                , Path(PathStart("obj", None()), PathComponent("bq", None()))
-                )
-              )
-            )
-          , True()
-          )
-        , True()
-        )
-      )
+    , (("C", "bp"), True())
+    , (("C", "bq"), True())
     ]
   , "RealignedInvariants"
   , []
@@ -343,14 +590,43 @@
     ]
   , "Operations"
   , [ ("A", ["increment"])
-    , ("B", ["increment"])
+    , ("B", ["increment", "addQ"])
     , ("C", [])
     ]
-  , "Name"
-  , "fstcsExample"
-  , "TableNames"
-  , []
-  , "IDs"
-  , []
+  , ( "QualifiedInvariants"
+    , [ ( "A"
+        , Forall(
+            "obj"
+          , PathStart("A", None())
+          , BinRel(
+              Path(PathStart("obj", None()), PathComponent("m", None()))
+            , LessThan()
+            , BasicValue(Integer("10"))
+            )
+          )
+        )
+      , ( "B"
+        , Forall(
+            "obj"
+          , PathStart("B", None())
+          , BinRel(
+              Path(
+                Path(PathStart("obj", None()), PathComponent("a", None()))
+              , PathComponent("m", None())
+              )
+            , LessThan()
+            , Path(PathStart("obj", None()), PathComponent("n", None()))
+            )
+          )
+        )
+      , ("C", True())
+      ]
+    , "Name"
+    , "fstcsExample"
+    , "TableNames"
+    , []
+    , "IDs"
+    , []
+    )
   )
 )

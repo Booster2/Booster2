@@ -23,17 +23,17 @@ class B {
 		increment {n' = n + 1}
 
 /*** Method temporarily removed because it's not parsing! */
-/*	addQ { c? : cq'} */
+	addQ { c? : cq'} 
 
 }
 
-/*
+
 class C {
 	attributes
 		o : Int
 		bp : B.cp
 		bq : [B.cq]
 	invariants
-		bp /= bq
+		 //bp /= bq
 	
-}*/
+}

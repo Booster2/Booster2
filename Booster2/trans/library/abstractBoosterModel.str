@@ -42,6 +42,17 @@ imports
 			-> classname
 		where
 			<elem>(classname, <LookupTable> "Classes")
+
+
+/* 	lookup-class-attributes:
+		Takes an identifier, and a model, and returns it back again
+		if the identifier is the name of a class in the model 	
+*/
+
+	lookup-class-attributes:
+		classname
+			-> <lookup>(classname, <LookupTable> "Attributes")
+
 			
 /* 	lookup-attribute-type:
 		Takes a class name, and an attribute name, and a model, 
