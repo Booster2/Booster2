@@ -20,6 +20,7 @@ exports
     'system' -> ID {reject}
     'invariant' -> ID {reject}
     'methods' -> ID {reject}
+    'skip' -> ID {reject}
     
     [0-9]+            -> INT
     
