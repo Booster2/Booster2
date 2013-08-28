@@ -1,0 +1,57 @@
+module library/environment
+
+imports
+
+  include/Booster2
+  
+  library/expression
+ 
+ rules
+ 	
+ 	new-environment:
+ 		x -> []
+ 		
+ 	add-var-to-environment:
+ 		(varname, (classname, maybename, expression), env)
+ 			->
+ 				<union>(env, [(varname, (classname, maybename, expression))])
+ 				
+ 	lookup-environment-type:
+ 		(varname, env)
+ 			-> vartype
+ 			where
+ 				(classname, maybename, expression) := <lookup>(varname, env);
+ 				Set(vartype) := <get-expression-type> (expression, classname, maybename, env)
+ 				
+/* 	lookup-environment-type:
+ 		something -> BasicType(Int())
+ 			where
+ 		log(|Error(), "Cannot lookup env type", something) */			
+ 				
+ 	lookup-environment-mentioned-attributes:
+ 		(varname, env)
+ 			-> atts
+ 			where
+ 				(classname, maybename, expression) := <lookup>(varname, env);
+ 				atts := <get-mentioned-attributes> (classname, maybename, expression, env)
+
+ 	lookup-environment-mentioned-paths:
+ 		(varname, env)
+ 			-> paths
+ 			where
+ 				(classname, maybename, expression) := <lookup>(varname, env);
+ 				paths := <get-mentioned-paths> (classname, maybename, expression, env)
+
+
+
+ 	environment-get-new-name:
+ 		[]
+ 			-> "obj"
+
+ 	environment-get-new-name:
+ 		(env)
+ 			-> str
+ 			where
+ 				l := <int-to-string><length> env;
+ 				str := <concat-strings>["obj", l]
+ 				
