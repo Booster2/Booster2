@@ -1,0 +1,33 @@
+\begin{thebibliography}{WFD08}
+
+\bibitem[Dij76]{Dijkstra1976}
+Edsger~W. Dijkstra.
+\newblock {\em A Discipline of Programming}.
+\newblock Prentice-Hall, 1976.
+
+\bibitem[FWD07]{Faitelson2007}
+David Faitelson, James Welch, and Jim Davies.
+\newblock From predicates to programs: The semantics of a method language.
+\newblock {\em Electr. Notes Theor. Comput. Sci.}, 184:171--187, 2007.
+
+\bibitem[Hoa69]{Hoare1969}
+C.~A.~R. Hoare.
+\newblock An axiomatic basis for computer programming.
+\newblock {\em Commun. ACM}, 12(10):576--580, 1969.
+
+\bibitem[Wan12]{Wang2012}
+Chen-Wei Wang.
+\newblock Calculating preconditions for parallel workflows.
+\newblock In {\em APSEC}, pages 499--504, 2012.
+
+\bibitem[WFD05]{Welch2005}
+James Welch, David Faitelson, and Jim Davies.
+\newblock Automatic maintenance of association invariants.
+\newblock In {\em SEFM}, pages 282--292, 2005.
+
+\bibitem[WFD08]{Welch2008}
+James Welch, David Faitelson, and Jim Davies.
+\newblock Automatic maintenance of association invariants.
+\newblock {\em Software and System Modeling}, 7(3):287--301, 2008.
+
+\end{thebibliography}

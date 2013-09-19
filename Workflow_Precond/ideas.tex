@@ -1,0 +1,705 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,paralist,stmaryrd}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref,proof,./short,color}
+\usepackage[english]{babel}
+\usepackage{slashbox}
+
+\hypersetup{bookmarksopen,colorlinks,linkcolor=black,citecolor=black,urlcolor=black,
+            filecolor=black,pagecolor=black}
+
+\usepackage{geometry}
+\geometry{a4paper, top=28mm, left=28mm, right=28mm, bottom=28mm,
+         headsep=15mm, footskip=15mm}
+
+\newcommand{\TODO}[1]{{\color{red} #1}}
+
+\usepackage{listings}
+
+\lstdefinelanguage{fdr_lang}
+  {morekeywords={channel,assert}}
+
+\lstnewenvironment{fdr}[1][basicstyle=\footnotesize]
+   {
+     \lstset{
+       #1 ,
+       language = fdr_lang , 
+       mathescape=true,
+       frame = single
+       }
+   }
+   {}
+
+\usepackage[hyperref]{ntheorem}
+\newtheorem{definition}{Definition}
+
+\newcommand{\Wf}{\mathit{Wf}}
+
+
+
+
+\title{Calculating Preconditions for \\ Concurrent Guarded Workflows (Draft)}
+\author{Thomas Göthel \and \TODO{tbd}}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+% Was ist das Problem
+We study the problem of calculating preconditions of concurrent guarded workflows in the context of information systems. 
+% Warum ist es ein Problem
+It is well understood how preconditions can be calculated automatically for transactions on information system. However, until now there exists no approach for calculating preconditions of guarded workflows where subsequent actions can be arbitrarily interleaved.
+% Was ist unsere Lösung
+In this paper, we define a minimalistic workflow language for non-recursive guarded workflows and develop an algorithm that calculates the precondition of a set of concurrent such workflows. The calculated precondition ensures that each of the concurrent workflows terminates and that a given postcondition holds after all concurrent workflows have terminated.
+% Was ergeben sich daraus für Konsequenzen
+In large information systems, several users concurrently try to follow their particular workflows. If different users work on shared data, it could happen that one of the users cannot finish its workflow because of some previous action of some other user. With our approach, we are able to calculate statically a precondition for whether an additional workflow can be started without possibly blocking the already running workflows and without itself being blocked.
+\end{abstract}
+
+\section{Introduction}
+
+We study the problem of formally calculating preconditions of concurrent guarded workflows. The precondition shall ensure that each of the concurrent workflows will successfully terminate, independent of the possible ordering of the (guarded) actions in their concurrent execution. As we consider workflows with explicit guards, it has to be ensured that there exists at least one terminating path through each of the considered workflows under the calculated precondition.
+
+In \cite{Faitelson2007}, it has been shown how the Booster language can be used to generate code from formal models in the context of information systems. A Booster model consists of classes, their attributes and methods, bidirectional associations between classes, and class invariants. Methods of classes are described using predicates relating the state before and after executing it. In information systems, methods usually do not comprise complicated algorithms but are simple operations on the data. However, these methods have to preserve several, possibly complex, system invariants during execution. These invariants can be association invariants, multiplicity invariants, symmetry invariants, and user defined invariants. Since the pre-post-condition relation representing a method is relatively simple in information systems, a candidate program can be obtained by transforming the post condition to commands. Additionally, an appropriate precondition needs to be calculated under which the execution of a command is ensured to preserve all system invariants. In~\cite{Welch2005,Welch2008}, it has been shown how these preconditions can be calculated automatically from Booster models. The generated commands together with their calculated preconditions are integrated into guarded commands. The interpretation of guarded commands there is that a command may be executed if its precondition holds and is blocked if it does not hold.
+
+Each method in Booster is assumed to be executed as a transaction. This means, that a method is ensured to preserve all invariants if it is not executed concurrently with other methods. However in practice, different users execute a series of transactions. To calculate the precondition of such a sequential workflow in isolation is easily possible. However, in general, workflows do not run in isolation. Actually, many workflows may be run by different users concurrently and it could happen that a user's workflow cannot be finished because another user worked on shared data making subsequent preconditions false.
+
+In the following, we define different problem classes focussing on different aspects and assumptions of concurrent workflows. 
+
+\subsection{Problems}
+
+In the following, we make the assumption that all considered workflows are finite. This means that none of them involves any sort of recursion.
+
+\subsubsection{Concurrent workflows on shared data}
+
+Preconditions of concurrent workflows need to ensure that their executions are finished independent of the ordering of their transactions. In this general case, we do not consider independence of guarded actions between concurrent workflows, i.e., all possible interleavings are considered explicitly. One simple solution is to calculate all interleaving traces of both workflows and build the conjunction of the preconditions of all these. This idea was basically followed in~\cite{Wang2012}, though making the calculation more efficient by concepts of dynamic programming, i.e., preconditions of common subtraces are not calculated more than once. The problem with this approach, however, is that it completely ignores guards within workflows. This makes the preconditions unnecessarily strong. Furthermore, the approach focusses on the (more efficient) calculation of preconditions for only two concurrent traces. It is not obvious how to directly extend the approach for arbitrarily many concurrent traces. We consider this problem in Section~\ref{sec:shared_workflows} where we develop an algorithm that is capable of calculating preconditions of concurrent workflows that use guards to decide which branch of a choice is to be taken. It also uses concepts of dynamic programming to calculate preconditions of common concurrent workflows only once.
+
+\subsubsection{Concurrent workflows working on separated data}
+
+Calculating preconditions of completely independent workflows is almost trivial. The precondition of a concurrent workflow $pre(W_1 \interleave W_2,I)$ is simply the precondition of the sequential composition $pre(W_1,pre(W_2,I))$. It does not matter which exact ordering of the workflow's actions we consider. So we can take the ordering of $W_1 ; W_2$ as representative. This problem becomes more complicated (and more practical) in the case that two (or more) workflows are only partly (completely) independent such that single guarded actions can be prioritised in a subsequent calculation or if there are only some guarded actions that are only locally independent. If we want to consider independent guarded actions in general, we need to be able to decide whether for two guarded actions $(g,a)$ and $(h,b)$ it holds that the state relations $g \& a; h \& b$ and $h \& b ; g \& a$ are equal or whether one is a subset of the other. We study the problem of independence (prioritisability) of guarded actions and their utility in Section~\ref{sec:combined_workflows}. The main motivation of this study is to reduce the computational effort of the general precondition calculation and to obtain simpler preconditions.
+
+\section{Related Work}
+
+An approach that is relatively close to ours is presented in~\cite{Wang2012}. Like in our case, the calculation of preconditions for parallel workflows is focused on. The main difference is that~\cite{Wang2012} calculates the precondition of two concurrent workflows by considering \textit{all} pairs of traces of the one and the other workflow to calculate the respective precondition by building the conjunction from all these preconditions. This approach is sound, however, also very restrictive because the guards within the workflows are not taken into account. Another difference is that we also consider independent or prioritisable guarded actions to reduce the size of the preconditions and to reduce the amount of computations.
+
+Despite many program logics focussing on concurrent programming logics [...], there exist no approaches that consider weakest preconditions for concurrent programs (or workflows). The advantage of weakest preconditions is that some verification engineer does not have to invent precondition-predicates and to manually show that they are strong enough to prove the necessary postcondition. Instead, our approach allows for automatically calculating preconditions for concurrent workflows that are by construction strong enough to ensure the postcondition to hold after execution.
+
+\TODO{
+\begin{itemize}
+  \item \; [Weakest Precondition Semantics for Time and Concurrency-1992]: focus on time; no focus on automatisation; focus on wp-semantics; very limited sharing of resources
+  \item work on concurrent Hoare logic? : [Towards Concurrent Hoare Logic (MsC thesis)-2012] is probably be a good pointer to relevant related work
+  \item Owicki/Gries?
+  \item Have a look on [An Approach to Compositional Reasoning about Concurrent Objects and Futures-2012]
+  \item \; [A Process-Algebraic Approach to Workflow Specification and Refinement-2007]: workflows patterns described in CSP; composition of workflow patterns; refinement and verification through CSP theory; no underlying data model; no precondition calculation
+  \item \; [Models for Data-Flow Sequential Processes-2005]: sequential processes working on input and output streams; no precondition calculation
+  \item \; [Delay-Insensitive Processes: A Formal Approach to the Design of Asynchronous Circuits, Verification and Implementation of Delay-Insensitive Processes in Restrictive Environments-2003]
+  \item \; [A WEAKEST PRECONDITION SEMANTICS FOR COMMUNICATING PROCESSES-1982]: disjoint variables concurrent processes; explicit communication between processes; only rudimentary underlying data model
+\end{itemize}
+}
+
+
+\section{Background}
+
+\subsection{Weakest Precondition Calculus}
+
+The weakest precondition~\cite{Dijkstra1976} $wp(c,I)$ of a (guarded) command $c$ with respect to a predicate $I$ ensures that the command successfully terminates starting from states $s$ satisfying the precondition and that the reached states satisfy predicate $I$. Furthermore, this precondition is the weakest such precondition: if a condition $P$ ensures that command $c$ successfully terminates reaching a state satisfying $I$ then $P \longrightarrow wp(c,I)$. In other words, the Hoare triple~\cite{Hoare1969} $\{P\} c \{Q\}$ holds \textit{iff} $P \longrightarrow wp(c,Q)$.
+
+Important properties of the weakest precondition calculus include the following:
+
+\begin{itemize}
+  \item if $f \longrightarrow f'$ then $wp(c,f) \longrightarrow wp(c,f')$
+  \item $wp(c,\bot) \longrightarrow \bot$
+  \item $wp(c,f_1 \land f_2) \longleftrightarrow wp(c,f_1) \land wp(c,f_2)$
+  \item $wp(c,f_1) \lor wp(c,f_2) \longrightarrow wp(c,f_1 \lor f_2)$
+  \item if $c$ is deterministic then $wp(c,f_1 \lor f_2) \longrightarrow wp(c,f_1) \lor wp(c,f_2)$
+\end{itemize}
+
+Especially the last property is important because it allows a case distinction on disjunctions occurring in the $wp$ calculation. However, note that it is only valid for deterministic commands $c$.
+
+An important corollary is that if $wp(a,A)$ holds for some arbitrary predicate, then also $wp(A,\top)$ holds. This follows directly from the congruence property of the wp-function w.r.t. logical implication.
+
+
+\section{Definition of concurrent workflows}
+
+In this section, we define a minimalistic guarded workflow language, which is still expressive enough to cope with realistic situations. We restrict ourselves to a minimalistic workflow language in order to study the essence of precondition calculation for concurrent guarded workflows. However, we show that common workflow constructions can be expressed in this language. 
+
+The most severe restrictions are that we assume that all workflows are finite, i.e., they do not contain any recursion, and that parallel workflows are only allowed on the top-level. This means that we can currently not cope with the common $AND-split$ and $AND-fork$ except for the outermost level. While the first restriction is often acceptable, we plan to get rid of the second restriction in future work. 
+
+\subsection{A minimalistic workflow language}
+
+The simplest workflow is simply the terminated workflow. Furthermore, we consider indexed choices over guarded choices between two subsequent workflows. The idea is that in the later precondition calculation, that the indexed choices are interpreted as conjunction and that the guarded choices are basically interpreted as disjunction. This means that guarded choices represent the choices of some user of the workflow who only wants at least one of the choices to be enabled (to successfully finish the workflow). The indexed choices represent that each of the different paths needs to be possible. In this sense it is related to parallel composition. Therefore, a user usually doesn't want to use the $\lExtchoice{nc}$ operator to construct a sequential workflow. Instead, a user would set $I$ to some one-elementary set to define sequential workflows and combine these using the $\interleave$ operator defined below. The $\lExtchoice{nc}$ operator is then used in order to normalise such a concurrent workflow to a sequential workflow.
+
+\begin{definition}[Sequential Workflow]
+We define sequential guarded workflows according to the following grammar.
+
+\begin{tabular}{l c l}
+  $W$ & :=  & Skip \\
+              & $|$ & $\lExtchoice{nc}_{i \in I} \; ( g_{i.1} \& a_{i.1} \Prefix W_{i.1} 
+                                           \Extchoice g_{i.2} \& a_{i.2} \Prefix W_{i.2} )$ \\
+\end{tabular}
+\end{definition}
+
+We put the side condition that the index set $I$ is non-empty.
+
+\begin{definition}[Concurrent Workflow]
+To define concurrent workflows, sequential workflows can be placed in parallel on the top-level.
+
+\begin{tabular}{c c l}
+  $S$ & :=  & $W$ \\
+      & $|$ & $W \interleave S$    	 
+\end{tabular}
+\end{definition}
+
+\subsection{Abbreviations}
+
+Although this is a very reduced workflow language, it comprises much of the workflow language as given in~\cite{Wang2012}.
+
+\begin{itemize}
+  \item simple choice: $g_1 \& a_1 \Prefix W_1 \Extchoice g_2 \& a_2 \Prefix W_2 := \lExtchoice{nc}_{i \in \{\bullet\}}\; (g_1 \& a_1 \Prefix W_1 \Extchoice g_2 \& a_2 \Prefix W_2)$
+  \item stop: $Stop := \bot \& skip \Prefix Skip \Extchoice \bot \& skip \Prefix Skip$
+  \item prefix: $a \Prefix W_1 := \top \& a \Prefix W_1 \Extchoice \bot \& skip \Prefix Skip$
+  \item guarded workflow: $g \& W := g \& skip \Prefix W_1 \Extchoice \bot \Prefix Skip$
+  \item sequential composition: $W_1 ; W_2 :=$ replace all $Skip$ nodes in $W_1$ by $W_2$
+\end{itemize}
+
+The main restrictions in our language are that parallelism may not be nested and that recursion is not allowed. 
+
+\subsection[Normalising concurrent workflows]{Normalising concurrent workflows
+\footnote{\TODO{When I started thinking about precondition calculation of concurrent workflows this was kind of a starting point. In the meantime, I think the value of normalising concurrent workflows is only very limited. The only reason to still consider this is that we could base correctness issues on normalised workflows: $pre(\interleave_i W_i,I) = pre(norm(\interleave_i W_i),I)$ and if $s \models pre(W,I)$ where $W$ is some sequential workflow then for all paths $(s,W) \event{}^* (s',W')$ we either have that $(s',W')$ can somehow proceed (no deadlock) or $W' = Skip$ and $s' \models I$.}}}
+
+To calculate the precondition of a sequential workflow is relatively straight-forward, our aim is to translate concurrent workflows to sequential ones. In the subsequently presented algorithm for the precondition calculation of concurrent workflows, we take advantage of this normalisation procedure to transform and calculate the precondition on the fly.
+
+At first we present the normalisation of the binary case for the sake of a better comprehensibility before we consider the general case.
+
+\subsubsection{The binary case}
+
+The basic idea of our normalisation procedure is to represent possible interleavings of concurrent workflows in terms of indexed choices ($\lExtchoice{nc}$) and to preserve the guarded choices ($\Extchoice$) of all involved sequential workflows.
+
+\begin{tabular}{l c l}
+	$norm(Skip \interleave W)$ &=& $W$ \\
+	$norm(W \interleave Skip)$ &=& $W$ \\
+	\\
+	$norm(\lExtchoice{nc}_{i \in I} \; (g_{i.1} \& a_{i.1} \Prefix W_{i.1} 
+          \Extchoice g_{i.2} \& a_{i.2} \Prefix W_{i.2})$ \\
+\hspace*{15pt} $\interleave \lExtchoice{nc}_{j \in J} \; (g_{j.1} \& a_{j.1} \Prefix W_{j.1} 
+                                                \Extchoice g_{j.2} \& a_{j.2} \Prefix W_{j.2}))$ &=& $\lExtchoice{nc}_{i \in I \uplus J} \; (g_{i.1} \& a_{i.1} \Prefix norm(P_{I,J,{i.1}}) $ \\
+                      && \qquad \; $\Extchoice g_{i.2} \& a_{i.2} \Prefix norm(P_{I,J,{i.2}})) $    
+\end{tabular} 
+\\[5pt]
+
+\underline{case: $i \in I$} \\
+
+\noindent
+$P_{I,J,i.m} = W_{i.m} \interleave \lExtchoice{nc}_{n \in J} \; (g_{n.1} \& a_{n.1} \Prefix W_{n.1} \Extchoice g_{n.2} \& a_{n.2} \Prefix W_{n.2})$                                          
+
+\vspace*{1cm}
+    
+\underline{case: $i \in J$} \\
+                                  
+\noindent
+$P_{I,J,i.m} = \lExtchoice{nc}_{n \in I} \; (g_{n.1} \& a_{n.1} \Prefix W_{n.1} \Extchoice g_{n.2} \& a_{n.2} \Prefix W_{n.2}) \interleave W_{i.m}$
+
+
+\subsubsection{The general case}
+
+The binary case can be generalized to the general case where we normalise arbitrarily many concurrent workflows.
+
+\begin{tabular}{l c l}
+    $norm(\interleave_{j \in J} W_j)$ &=& $norm(\interleave_{j \in J\setminus\{i\}} W_j)$ \quad $\textbf{if } W_i = Skip$ \\
+    $norm(\interleave_{j \in J} (\lExtchoice{nc}_{i \in I_j} (g_{i.1} \& a_{i.1} \Prefix W_{i.1} 
+                                                \Extchoice$ \\
+\hspace*{90pt}                        $g_{i.2} \& a_{i.2} \Prefix W_{i.2})))$ &=& \\
+\end{tabular}
+
+\noindent
+$\lExtchoice{nc}_{i \in \biguplus_{I_j}} (g_{i.1} \& a_{i.1} \Prefix norm(\interleave_{j \in J} \textbf{ if } i \in I_j \textbf{ then } W_{i.1}$ \\ 
+ \hspace*{190pt} $ \textbf{ else } \lExtchoice{nc}_{x \in I_j} (g_{x.1} \& a_{x.1} \Prefix W_{x.1} \Extchoice g_{x.2} \& a_{x.2} \Prefix W_{x.2}))$ \\ 
+\hspace*{28pt}$\Extchoice g_{i.2} \& a_{i.2} \Prefix norm(\interleave_{j \in J} \textbf{ if } i \in I_j \textbf{ then } W_{i.2}$ \\ 
+ \hspace*{190pt} $ \textbf{ else } \lExtchoice{nc}_{x \in I_j} (g_{x.1} \& a_{x.1} \Prefix W_{x.1} \Extchoice g_{x.2} \& a_{x.2} \Prefix W_{x.2})))$     
+
+
+\section{Calculating preconditions of concurrent workflows}
+\label{sec:shared_workflows}
+
+We focus on the problem of calculating preconditions for concurrent workflows that ensure that each of the sequential workflows is ensured to terminate successfully. In contrast to~\cite{Wang2012}, we explicitly consider guards in workflows. This means that we do not insist that every possible execution of a workflow must be possible but that there exists at least one path through each workflow.
+
+\subsection{Precondition calculation of sequential workflows}
+
+Since we can normalise concurrent workflows in our language to sequential ones, we only need to consider the precondition calculation for sequential ones. This calculation takes exactly into account, which choices are to be considered as guarded choices and which choices belong indexed choices (original interleavings).
+
+\noindent
+\begin{tabular}{l c l}
+	$pre(Skip,I)$ & = & $I$ \\
+	$pre(\lExtchoice{nc}_{i \in I} \; (g_{i.1} \& a_{i.1} \Prefix W_{i.1} 
+                                                \Extchoice g_{i.2} \& a_{i.2} \Prefix W_{i.2}),I)$ &=& $\bigwedge_{i \in I} (g_{i.1} \longrightarrow wp(a_{i.1},pre(W_{i.1},I))$ \\ 
+&& \hspace*{27pt} $\land$ \\
+&& \hspace*{24pt}        $g_{i.2} \longrightarrow wp(a_{i.2},pre(W_{i.2},I))$ \\
+&& \hspace*{27pt} $\land$ \\
+&& \hspace*{24pt}        $(g_{i.1} \lor g_{i.2}))$
+\end{tabular}
+
+The occurring conditions are equivalent to 
+
+\noindent
+\hspace*{7pt} $g_{i.1} \land \lnot g_{i.2} \land wp(a_{i.1},pre(W_{i.1},I))$ \\
+$\lor \; \lnot g_{i.1} \land g_{i.2} \land wp(a_{i.2},pre(W_{i.2},I))$ \\
+$\lor \; g_{i.1} \land g_{i.2} \land wp(a_{i.1},pre(W_{i.1},I)) \land wp(a_{i.2},pre(W_{i.2},I))$ \\
+
+This means that we calculate the precondition of only one subsequent path if only $g_{i.1}$ or only $g_{i.2}$ respectively holds. In the case that the guards overlap, i.e., the user has both choices, we need to ensure that both paths terminate and finally reach a state satisfying $I$.
+
+\subsection{Example}
+
+As an abstract example consider the following concurrent workflow with $g_1,g_2$ non-overlapping and $h_1,h_2$ non-overlapping.
+
+\noindent
+\hspace*{4pt} $g_1 \& a_1 \Prefix Skip \Extchoice g_2 \& a_2 \Prefix Skip$ \\
+$\interleave h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix Skip$
+
+\noindent
+First, we normalise this process, which results in the following (sequential) workflow.
+
+\noindent
+\hspace*{20pt} $(g_1 \& a_1 \Prefix (h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix Skip)$ \\
+\hspace*{12pt} $\Extchoice g_2 \& a_2 \Prefix (h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix Skip))$ \\
+$\lExtchoice{nc}$ \\ 
+\hspace*{20pt} $(h_1 \& b_1 \Prefix (g_1 \& a_1 \Prefix Skip \Extchoice g_2 \& a_2 \Prefix Skip)$ \\ 
+\hspace*{12pt} $\Extchoice h_2 \& b_2 \Prefix (g_1 \& a_1 \Prefix Skip \Extchoice g_2 \& a_2 \Prefix Skip))$
+
+\noindent
+Second, we calculate the precondition of this sequential workflow, which is
+
+\noindent
+\hspace*{20pt} $(g_1 \land wp(a_1,h_1 \land wp(b_1,I)$ \\
+\hspace*{90pt} $\lor$ \\
+\hspace*{84pt} $h_2 \land wp(b_2,I))$ \\ 
+\hspace*{30pt} $\lor $ \\
+\hspace*{25pt} $g_2 \land wp(a_2,h_1 \land wp(b_1,I)$ \\ 
+\hspace*{90pt} $\lor$ \\
+\hspace*{84pt} $h_2 \land wp(b_2,I)))$ \\
+$\land$ \\
+\hspace*{20pt} $(h_1 \land wp(b_1,g_1 \land wp(a_1,I)$ \\ 
+\hspace*{90pt} $\lor$ \\ 
+\hspace*{84pt} $g_2 \land wp(a_2,I))$ \\
+\hspace*{30pt} $\lor $ \\
+\hspace*{25pt} $h_2 \land wp(b_2,g_1 \land wp(a_1,I)$ \\ 
+\hspace*{90pt} $\lor$ \\
+\hspace*{84pt} $g_2 \land wp(a_2,I)))$.
+
+Using the approach given in~\cite{Wang2012}, the result would be the following.
+
+\noindent
+\hspace*{4pt} $wp(a_1,wp(b_1,I)) \land wp(a_1,wp(b_2,I))$ \\
+$\land wp(a_2,wp(b_1,I)) \land wp(a_2,wp(b_2,I))$ \\
+$\land wp(b_1,wp(a_1,I)) \land wp(b_1,wp(a_2,I))$ \\
+$\land wp(b_2,wp(a_1,I)) \land wp(b_2,wp(a_2,I))$.
+
+Assume, for example, that after executing $a_1$ the precondition of $b_1$ does not hold, i.e., $wp(a_1,wp(b_1,I)) = \bot$. Furthermore assume that $wp(a_1,wp(b_2,I))$ was satisfiable. Then the approach of~\cite{Wang2012} would consider both workflows not to be executable concurrently. However, when explicitly considering guards, our tree-based calculation (that respects guards) would give a satisfiable precondition (if at least one of the orderings $b_1 ; a_1$, $b_1 ; a_2$, $b_2 ; a_1$, $b_2 ; a_2$ had a precondition in the intersection).
+
+\subsection{An ``efficient'' algorithm for calculating preconditions of concurrent workflows}
+
+The procedure of first normalising the concurrent workflow and second calculating the precondition of the normalised workflow is not very efficient because of two reasons. The first reason is that the normalised version of a concurrent workflow usually gets very big. The second reason is that preconditions of syntactically equal concurrent workflows is calculated more than once. Assume that in a concurrent workflow the $i^\text{th}$ sequential workflow can perform an $a$ and that the $j^\text{th}$ workflow can perform a $b$. Then we perform the precondition calculation (we omit the guards here) $wp(a,wp(b,C'))$ and $wp(b,wp(a,C''))$. Note however that $C' = C''$, i.e., the same subsequent concurrent workflow is reached regardless whether $\langle a,b\rangle$ or $\langle b,a\rangle$ is performed. That the already calculated precondition on, say, the $\langle a,b\rangle$ path can be reused on the other path. 
+
+For these two reasons, we perform the normalisation of some concurrent workflow in our algorithm on the fly and directly calculate the formula representing  the overall precondition. Furthermore, we keep track of the already visited concurrent workflows in a map to calculate preconditions only once. We assume that the single sequential workflows with the concurrent workflow do not use the $\lExtchoice{nc}$ operator in the sense that the corresponding index set $I$ is always a one-element-set.
+
+Our algorithm is shown in Figure~\ref{fig:algorithm_nondisjoint}. To calculate the precondition of a concurrent workflow $\interleave_{i \in I} W_i$ with respect to some post condition $I$, $pre(\interleave_{i \in I} W_i,\{\interleave_{i \in \{\}} \_ \mapsto I\}) ! (\interleave_{i \in I} W_i)$ has to be invoked.
+
+\begin{figure}
+\begin{lstlisting}[basicstyle=\footnotesize,mathescape]
+-- We don't have to calculate anything for the empty composition.
+  pre($\interleave_{i \in \{\}}$ _,lut) = lut
+-- delete all top-level "Skip"s
+  pre($\interleave_{i \in I} W_i$,lut) = pre($\interleave_{i \in (I \setminus \{j\})} W_i$)  | if $W_j = Skip$
+-- the general case:
+-- The algorithm is given informally. However, it can easily be seen that the three
+-- parts with ... can easily be implemented using some iteration over I.
+-- We assume that I={1 .. n} for some arbitrary n to make the algorithm more readable.                         
+  pre(pW $\equiv$ $\interleave_{i \in I} W_i$    
+         $\equiv$ $\interleave_{i \in I}$     $(g_{i.1} \& a_{i.1} \Prefix W_{i.1}$
+               $\Extchoice g_{i.2} \& a_{i.2} \Prefix W_{i.2}$,lut) =
+     if pW def? lut then lut
+     else let lut1   = pre($\interleave_{i \in I} i=1 ? W_{i.1} : W_i$,lut)
+              lut1'  = pre($\interleave_{i \in I} i=1 ? W_{i.2} : W_i$,lut1)
+              ...
+              lut#I  = pre($\interleave_{i \in I} i=\#I ? W_{i.1} : W_i$,lut(#I-1)')
+              lut#I' = pre($\interleave_{i \in I} i=\#I ? W_{i.1} : W_i$,lut#I)
+                            
+              p11 = $g_{1.1}$  --> wp($a_{1.1}$,lut#I'!($\interleave_{i \in I} i=1 ? W_{i.1} : W_i$))
+              p12 = $g_{1.2}$  --> wp($a_{1.2}$,lut#I'!($\interleave_{i \in I} i=1 ? W_{i.2} : W_i$))
+              p13 = ($g_{1.1}$ \/ $g_{1.2}$)
+              ...
+              p#I1 = $g_{\#I.1}$ --> wp($a_{\#I.1}$,lut#I'!($\interleave_{i \in I} i=\#I ? W_{i.1} : W_i$))
+              p#I2 = $g_{\#I.2}$ --> wp($a_{\#I.2}$,lut#I'!($\interleave_{i \in I} i=\#I ? W_{i.2} : W_i$))
+              p#I3 = ($g_{\#I.1}$ \/ $g_{\#I.2}$)
+          in 
+              def(lut#I', pW := (p11  /\ p12  /\ p13) /\ 
+                                       ...            /\ 
+                                (p#I1 /\ p#I2 /\ p#I3) )                             
+\end{lstlisting}
+\caption{Algorithm for calculating preconditions of concurrent guarded workflows}
+\label{fig:algorithm_nondisjoint}
+\end{figure}
+
+We have prototypically implemented this algorithm in Haskell\footnote{The original algorithm is realised in Precond.hs. Currently, it is not running because I changed some basic representations. However, Precond3.hs, Precond4.hs, and Precond5.hs do basically the same if none of the guarded actions is declared as independent to some other guarded action.} as a proof of concept. As expected the calculation of preconditions of several concurrent workflows is effectively possible and the corresponding preconditions get huge. In the next section, we show how the presented algorithm can be extended to consider independent guarded actions between concurrent workflows. By this, we can sometimes considerably reduce the visited state space and we can very often get simpler (smaller) formulas as preconditions.
+
+\subsection{Correctness}
+
+Given a parallel Workflow $W := \interleave_{i \in I} W_i$ and a postcondition $I$. We need to show that $pre(norm(W),I) = pre(W,\{\interleave_{i \in \{\}} \_ \mapsto I\})!W$ (under the current assumption that none of the $W_i$s contains the $\lExtchoice{nc}$ operator).
+
+%\TODO{Questions:
+%
+%\begin{enumerate}
+%  \item How can we combine more than two workflows without the expensive calculation of all possible behaviors of a subset of the workflows to be combined?
+%  \item How can we integrate guards of workflows in the precondition calculation?
+%  \item Is it necessary and if so where to constrain the guards of a workflows?
+%  \item Is it ok to have overlapping guards?
+%  \item Do guards have to be complete?
+%  \item Can concurrent workflows be arbitrarily nested?
+%  \item Is it easy to keep track of the position already reached in a workflow?
+%\end{enumerate}
+%
+%Temporary Answers:
+%
+%\begin{enumerate}
+%  \item The current idea is to calculate the crossproduct of two workflows considering guards within the workflow appropriately.
+%  \item If we do not consider the possible traces but the corresponding tree structure instead, guards can directly be included as symbolic predicates on the edges.
+%  \item Currently, it seems that the only restriction we have to pose is that guards in a sequential workflow cannot overlap (see next answer).
+%  \item This can probably cause problems. Before making the actual decision, we could however check whether the direction we want to take is indeed safe. This means that we have to save the preconditions of all outgoing edges/paths of the node. This would mean that we introduce implicit guards.
+%  \item No, incomplete guards do not pose any problems.
+%  \item In principle, this should be possible. However, the underlying model may become quite large and complex.
+%  \item This would make it necessary to evaluate the (concurrent) workflow model when executing the final implementation. If we restrict the overall number of concurrent workflows in the final implementation, this should however be feasible.
+%\end{enumerate}
+%}
+%
+%\TODO{There are three directions in which Wang's approach could be extended. First, it should be possible to extend the algorithm considerung the calculation of two traces two arbitrarily many traces. Second, it would be interesting to examine how non-determinism could be considered in an extended algorithm. This would mean that we do not calculate preconditions for two or more traces but to two or more tree structures. Third, in Wang's algorithm guards within the workflow are completely ignored. This makes however problems when calculating the pecondition of even just one workflow. It should, however, be relatively easily possible to take workflow guards into consideration when calculating preconditions of traces or tree structures.
+%
+%The problem with Wang's approach is that it is not compositional. If the precondition of two workflows has been calculated and a third workflow is to be considered, the already calculated precondition is not reused. In this paper, we develop an extension of Wang's approach to calculate the precondition of arbitrarily many concurrent workflows on information systems compositionally. By this, we allow the access on an information systems to be extended by additional workflows. Furthermore, each workflow is ensured to be finished if its precondition holds.
+%}
+%
+%\subsection{Precondition calculation for concurrent workflows}
+%
+%In \cite{Wang2012}, the calculation of preconditions of concurrent workflows works on the basis of basically considering all interleaving traces, to calculate the precondition of each trace, and to finally build a conjunction of all these preconditions. It is shown how the calculation of the precondition of two traces can performed more efficiently using dynamic programming techniques. The problem, however, with this approach is that guards in workflows are completely ignored, that the more efficient calculation is only performed for two traces and that a common precondition for \textit{all} possible traces is calculated.
+%
+%\subsubsection{First idea}
+%
+%To overcome these drawbacks, we propose to not only consider single traces of sequential workflows but to consider their tree structure.
+%
+%From an abstract point of view a (sequential) workflow is a finite tree structure where each edge is labeled with an action. If a node in the tree has more then one outgoing actions, decisions whether the the one or another actions is performed afterwards and so forth. In its most abstract version taking the one or another edge is just a nondeterministic choice. However, this is unrealistic because some actions can only be performed if the internal data allows it.
+%Thus, data cannot be abstracted away simply because data has to be considered to analyse whether a particular workflow terminates eventually or whether it gets stuck. 
+%
+%As all workflows are assumed to be finite, i.e., without recursion, the tree structure can directly be taken from the syntactical description of the workflows. By considering the tree structure, we have access to the workflow guards and can combine them appropriately in the precondition calculation at points in the workflow corresponding to choices. \TODO{To be able to iteratively add workflows, we need to keep track of the workflow ``id'' when considering choices in the present workflows.} of In the tree structure, we label each state with the corresponding precondition. We can combine these extended tree structures to new tree structures. This makes it possible to iteratively combine several sequential workflows without the need for the explicit and expensive calculation of all possible traces.
+%
+%\subsubsection{Correctness model}
+%
+%As we have shown above, it is relatively easy to calculate the precondition of sequential workflows. Furthermore, every process in CSP can be expresses equivalently without parallel composition [???]. So the idea is to ``normalize'' the parallel processes, i.e., get rid of parallel compositions and then to perform the precondition calculation on the sequential process.
+
+\section{Preconditions of concurrent workflows with independent (prioritisable) guarded actions}
+\label{sec:combined_workflows}
+
+In this section, we consider prioritisable guarded actions within concurrent workflows. Our aim is to thereby reduce the computational effort in our precondition calculation as given in the last section. The main idea is to leave out certain precondition paths when it basically makes no difference which ordering of two (or more) actions is considered. 
+
+\subsection{Prioritisable guarded actions}
+
+In the most general case (possibly overlapping guards), we have to make sure that the subsequent weakest precondition calculation for one ordering of the guarded action pairs already contains the precondition of the other ordering. This means that we have basically to consider all possibilities of subsequent guards to be true or not resulting in 16 cases. We will, however, discuss below how these conditions can be simplified by strengthening them or assuming that the guards in a guarded action pair are non-overlapping.
+
+\begin{definition}[Prioritisable Guarded Actions]
+A guarded-action-pair $((g_1,a_1),(g_2,a_2))$, where $a_1$ and $a_2$ are deterministic, is prioritisable over $((h_1,b_1),(h_2,b_2))$ if the following conditions hold for all predicates $I$:
+
+\begin{itemize}
+  \item $g_1 \land \lnot g_2 \land wp(a_1,h_1 \land \lnot h_2 \land wp(b_1,I)) \longrightarrow h_1 \land \lnot h_2 \land wp(b_1,g_1 \land \lnot g_2 \land wp(a_1,I))$
+  \item $g_1 \land \lnot g_2 \land wp(a_1,\lnot h_1 \land h_2 \land wp(b_2,I)) \longrightarrow \lnot h_1 \land h_2 \land wp(b_2,g_1 \land \lnot g_2 \land wp(a_1,I))$
+  \item $g_1 \land \lnot g_2 \land wp(a_1, h_1 \land h_2 \land wp(b_1,I)) \longrightarrow h_1 \land h_2 \land wp(b_1,g_1 \land \lnot g_2 \land wp(a_1,I))$
+  \item $g_1 \land \lnot g_2 \land wp(a_1, h_1 \land h_2 \land wp(b_2,I)) \longrightarrow h_1 \land h_2 \land wp(b_2,g_1 \land \lnot g_2 \land wp(a_1,I))$
+  \item[]
+  \item $\lnot g_1 \land g_2 \land wp(a_2,h_1 \land \lnot h_2 \land wp(b_1,I)) \longrightarrow h_1 \land \lnot h_2 \land wp(b_1,\lnot g_1 \land g_2 \land wp(a_2,I))$ 
+  \item $\lnot g_1 \land g_2 \land wp(a_2,\lnot h_1 \land h_2 \land wp(b_2,I)) \longrightarrow \lnot h_1 \land h_2 \land wp(b_2,\lnot g_1 \land g_2 \land wp(a_2,I))$
+  \item $\lnot g_1 \land g_2 \land wp(a_2, h_1 \land h_2 \land wp(b_1,I)) \longrightarrow h_1 \land h_2 \land wp(b_1, \lnot g_1 \land g_2 \land wp(a_2,I))$
+  \item $\lnot g_1 \land g_2 \land wp(a_2, h_1 \land h_2 \land wp(b_2,I)) \longrightarrow h_1 \land h_2 \land wp(b_2, \lnot g_1 \land g_2 \land wp(a_2,I))$
+  \item[]
+  \item $g_1 \land g_2 \land wp(a_1,h_1 \land \lnot h_2 \land wp(b_1,I)) \longrightarrow h_1 \land \lnot h_2 \land wp(b_1,g_1 \land g_2 \land wp(a_1,I))$
+  \item $g_1 \land g_2 \land wp(a_1,\lnot h_1 \land h_2 \land wp(b_2,I)) \longrightarrow \lnot h_1 \land h_2 \land wp(b_2,g_1 \land g_2 \land wp(a_1,I))$
+  \item $g_1 \land g_2 \land wp(a_1, h_1 \land h_2 \land wp(b_1,I)) \longrightarrow h_1 \land h_2 \land wp(b_1,g_1 \land g_2 \land wp(a_1,I))$
+  \item $g_1 \land g_2 \land wp(a_1, h_1 \land h_2 \land wp(b_2,I)) \longrightarrow h_1 \land h_2 \land wp(b_2,g_1 \land g_2 \land wp(a_1,I))$
+  \item[]
+  \item $g_1 \land g_2 \land wp(a_2,h_1 \land \lnot h_2 \land wp(b_1,I)) \longrightarrow h_1 \land \lnot h_2 \land wp(b_1,g_1 \land g_2 \land wp(a_2,I))$ 
+  \item $g_1 \land g_2 \land wp(a_2,\lnot h_1 \land h_2 \land wp(b_2,I)) \longrightarrow \lnot h_1 \land h_2 \land wp(b_2,g_1 \land g_2 \land wp(a_2,I))$
+  \item $g_1 \land g_2 \land wp(a_2, h_1 \land h_2 \land wp(b_1,I)) \longrightarrow h_1 \land h_2 \land wp(b_1,g_1 \land g_2 \land wp(a_2,I))$
+  \item $g_1 \land g_2 \land wp(a_2, h_1 \land h_2 \land wp(b_2,I)) \longrightarrow h_1 \land h_2 \land wp(b_2,g_1 \land g_2 \land wp(a_2,I))$
+\end{itemize}
+\end{definition}
+
+These conditions are difficult to check in general. This is mainly because the conditions have to be checked for arbitrary predicates $I$. To reduce the quantified conditions we define another slightly stronger condition:
+
+\begin{definition}[Strongly Prioritisable Guarded Actions]
+A guarded actions $(g,a)$ is strongly prioritisable over $(h,b)$ if the following conditions hold:
+\begin{itemize}
+  \item $\forall I. wp(a,wp(b,I)) \longrightarrow  wp(b,wp(a,I))$
+  \item $wp(a, h) \longrightarrow h$
+  \item $wp(a, \lnot h) \longrightarrow \lnot h$
+  \item $g \land wp(b,T) \longrightarrow wp(b, g)$
+  \item $\lnot g \land wp(b,T) \longrightarrow wp(b, \lnot g)$
+\end{itemize}
+\end{definition}
+
+Note that we in the last two conditions, e.g., $g \longrightarrow wp(b,g)$ would be too strong because it would mean that $g$ also would need to contain the termination condition of action $b$. 
+
+It can easily be shown that if $(g_1,a_1)$ and $(g_2,a_2)$ are strongly prioritisable over each of $(h_1,b_1)$ and $(h_2,b_2)$ then $((g_1,a_1),(g_2,a_2))$ is prioritisable over $((h_1,b_1)(h_2,b_2))$. By this, we have in total 20 checks, however only 4 quantifying over arbitrary predicates $I$. Thus, 16 of the conditions can be checked fully automatically.
+
+We can simplify the checks above if we assume that $g_1, g_2$ and that $h_1, h_2$ are non-overlapping, i.e., $g_1 \land g_2 \longleftrightarrow \bot$ and $h_1 \land h_2 \longleftrightarrow \bot$.
+
+\begin{definition}[Weakly Prioritisable Guarded Actions]
+A guarded action $(g,a)$ is weakly prioritisable over $(h,b)$ if
+$g \land wp(a,h \land wp(b,I)) \longrightarrow h \land wp(b,g \land wp(a,I))$ for all predicates $I$.
+\end{definition}
+
+If $g_1$ and $g_2$ are non-overlapping and $h_1$ and $h_2$ are non-overlapping then $((g_1,a_1),(g_2,a_2))$ is prioritisable over $((h_1,b_1),(h_2,b_2))$ \textit{iff} $(g_1,a_1),(g_2,a_2)$ are mutually weakly prioritisable over $(h_1,b_1),(h_2,b_2)$. 
+              
+In the next section, we apply these definitions in the context of our precondition calculation. 
+
+
+%At first we review the definition of commands in Booster.
+%
+%\begin{tabular}{c c l}
+%  $C$ &:=& $skip$ \\
+%      &$|$& $x:=E$ \\
+%      &$|$& $\langle guard \rangle \Prefix C$ \\
+%      &$|$& $C \Extchoice C$ \\
+%      &$|$& $C ; C$
+%\end{tabular}
+
+%\subsection{Special actions}
+%
+%Concerning precondition calculation in concurrent workflows, we distiguish the following situations of actions:
+%
+%\begin{itemize}
+%  \item an action $a$ may be irrelevant with respect to system invariants: $\forall I. sys(I) \Longrightarrow wp(a,I) = I$. We assume for all $I$ and all possible actions in the system that $\forall I. sys(I) \Longrightarrow sys (wp(a,I))$. This means that preconditions with respect to system predicates are also system predicates.
+%  \item actions may be independent: $\forall I. wp(a_1,wp(a_2,I)) = wp(a_2,(wp(a_1,I)))$.
+%  \item actions may be asymmetric independent: $\forall I. wp(a_1,wp(a_2,I)) \Longrightarrow wp(a_2,wp(a_1,I))$
+%\end{itemize} 
+
+\subsection{Locally prioritisable guarded actions}
+\label{sec:loc_indep}
+
+In the calculation of concurrent workflows, local prioritisability of guarded actions can be exploited to get simpler preconditions. Consider the following concurrent guarded workflow with $((g_1,a_1),(g_2,a_2))$ prioritisable over $((h_1,b_1),(h_2,b_2))$.
+
+\noindent
+$LEFT \interleave
+ g_1 \& a_1 \Prefix \Wf_{11} \Extchoice g_2 \& a_2 \Prefix \Wf_{12} \interleave 
+ MIDDLE \interleave
+ h_1 \& b_1 \Prefix \Wf_{21} \Extchoice h_2 \& b_2 \Prefix \Wf_{22} \interleave
+ RIGHT$
+ 
+Using our algorithm, we get the following precondition for this concurrent workflow.
+
+\noindent
+$g_1 \longrightarrow wp(a_1,h_1 \longrightarrow wp(b_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}          $\land h_2 \longrightarrow wp(b_2,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\
+\hspace*{60pt}          $\land (h_1 \lor h_2)$ \\
+\hspace*{60pt} $\land A_1)$ 
+
+\noindent
+$\land$
+
+\noindent
+$g_2 \longrightarrow wp(a_2,h_1 \longrightarrow wp(b_1,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}       $\land h_2 \longrightarrow wp(b_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\ 
+\hspace*{60pt}       $\land (h_1 \lor h_2)$ \\
+\hspace*{60pt}       $\land A_2))$
+
+\noindent
+$\land$
+
+\noindent
+$(g_1 \lor g_2)$
+
+\noindent
+$\land$
+
+\noindent
+$h_1 \longrightarrow wp(b_1,g_1 \longrightarrow wp(a_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}        $\land g_2 \longrightarrow wp(a_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}        $\land (g_1 \lor g_2)$ \\ 
+\hspace*{60pt}        $\land B_1)$ 
+
+\noindent
+$\land$
+
+\noindent
+$h_2 \longrightarrow wp(b_2,g_1 \longrightarrow wp(a_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\
+\hspace*{60pt} $\land g_2 \longrightarrow wp(a_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\ 
+\hspace*{60pt} $\land (g_1 \lor g_2)$ \\
+\hspace*{60pt} $\land B_2))$
+
+\noindent
+$\land$
+
+\noindent
+$(h_1 \lor h_2)$
+
+\noindent
+$\land R$
+
+\noindent
+The condition $A_1$, for example, stands for the preconditions that actions from $LEFT$, $\Wf_{11}$, $MIDDLE$, or $RIGHT$ are chosen after the action $a_1$ (and $b_1,b_2$ are chosen subsequently). The condition $R$ stands for the possible preconditions of paths beginning with some other events apart from $a$ and $b$ events. 
+
+\noindent
+From the condition
+
+\noindent
+$g_1 \longrightarrow wp(a_1,h_1 \longrightarrow wp(b_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}          $\land h_2 \longrightarrow wp(b_2,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\
+\hspace*{60pt}          $\land (h_1 \lor h_2))$ 
+
+\noindent
+$\land$
+
+\noindent
+$g_2 \longrightarrow wp(a_2,h_1 \longrightarrow wp(b_1,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}       $\land h_2 \longrightarrow wp(b_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\ 
+\hspace*{60pt}       $\land (h_1 \lor h_2))$
+
+\noindent
+$\land$
+
+\noindent
+$(g_1 \lor g_2)$
+
+\noindent
+we can conclude that 
+
+\noindent
+$h_1 \longrightarrow wp(b_1,g_1 \longrightarrow wp(a_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}        $\land g_2 \longrightarrow wp(a_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}        $\land (g_1 \lor g_2))$ 
+
+\noindent
+$\land$
+
+\noindent
+$h_2 \longrightarrow wp(b_2,g_1 \longrightarrow wp(a_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\
+\hspace*{60pt} $\land g_2 \longrightarrow wp(a_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\ 
+\hspace*{60pt} $\land (g_1 \lor g_2))$
+
+\noindent
+holds. To enable this reasoning we need the prioritisability as above and especially that $a_1$, $a_2$ are deterministic. The latter is necessary to enable the disjunction property of the wp-calculus: $wp(a,X \lor Y) \longrightarrow wp(a,X) \lor wp(a,Y)$, which is only valid for deterministic commands $a$. We use this property in order to make case distinction in, for example, $wp(a_1,h_1 \lor h_2)$. Otherwise, we would not be able to match the premises of the prioritisability clauses (see definition).
+
+\noindent
+This means that we can simplify the original precondition to the following one.
+
+\noindent
+$g_1 \longrightarrow wp(a_1,h_1 \longrightarrow wp(b_1,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}          $\land h_2 \longrightarrow wp(b_2,pre(LEFT \interleave \Wf_{11} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\
+\hspace*{60pt}          $\land (h_1 \lor h_2)$ \\
+\hspace*{60pt} $\land A_1)$ 
+
+\noindent
+$\land$
+
+\noindent
+$g_2 \longrightarrow wp(a_2,h_1 \longrightarrow wp(b_1,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{21} \interleave RIGHT))$ \\
+\hspace*{60pt}       $\land h_2 \longrightarrow wp(b_2,pre(LEFT \interleave \Wf_{12} \interleave MIDDLE \interleave \Wf_{22} \interleave RIGHT))$ \\ 
+\hspace*{60pt}       $\land (h_1 \lor h_2)$ \\
+\hspace*{60pt}       $\land A_2))$
+
+\noindent
+$\land$
+
+\noindent
+$(g_1 \lor g_2)$
+
+\noindent
+$\land$
+
+\noindent
+$h_1 \longrightarrow wp(b_1, B_1)$ 
+
+\noindent
+$\land$
+
+\noindent
+$h_2 \longrightarrow wp(b_2, B_2))$
+
+\noindent
+$\land R$
+
+
+If $B_1$ and $B_2$ are true (no subsequent actions apart from $a_i$ possible), $h_1 \longrightarrow wp(b_1, B_1) \land h_2 \longrightarrow wp(b_2, B_2))$ can be omitted. The detailed proofs of the claims above are basically tedious case distinctions, which we have performed in the Isabelle/HOL theorem prover.
+
+\subsection{Globally prioritisable guarded actions}
+\label{sec:prioritisation}
+
+The approach of reducing preconditions due to locally prioritisable guarded actions can even be used to reduce the visited state space within our algorithm if we assume globally prioritisable guarded actions. Consider the following concurrent workflow.
+
+\noindent
+$\Wf_1 \interleave \dots \interleave g_{i.1} \& a_{i.1} \Prefix \Wf_{i.1} \Extchoice g_{i.2} \& a_{i.2} \Prefix \Wf_{i.2} \interleave \dots \interleave \Wf_n$. 
+
+\noindent
+If $(g_{i.1} , a_{i.1}), (g_{i.2} , a_{i.2})$ are prioritisable over \textit{all} (also subsequent) guarded action pairs of the other workflows, the precondition can be reduced to the following. 
+
+\noindent
+$g_{i.1} \longrightarrow wp(a_{i.1}, pre(W_1 \interleave \dots \interleave \Wf_{i.1} \interleave \dots \interleave \Wf_n))$ \\
+$\lor$ \\
+$g_{i.2} \longrightarrow wp(a_{2.1}, pre(W_1 \interleave \dots \interleave \Wf_{i.2} \interleave \dots \interleave \Wf_n))$ \\
+$\lor$ \\
+$(g_{i.1} \lor g_{i.2})$
+
+It is not necessary to consider, for example, a $\langle b,c,a_{i.1}\rangle$ path because $a_{i.1}$ can first be prioritised over $c$ and then over $b$. This argument extends to arbitrary depths because in each case the guarded $a$ actions can be prioritised until we reach the top-level. 
+
+
+\subsection{Extending the previous algorithm}
+
+In the last section, we have shown how prioritisable guarded actions can be exploited to reduce the precondition formula of some concurrent workflow and how in some cases the visited state space can in principle be reduced in our precondition calculation. In this section, we give some details how we actually implemented these results. 
+
+\subsubsection{Locally prioritisable guarded actions}
+
+In the calculation of pre($W_1 \interleave W_2 \interleave \dots \interleave W_n$) within our algorithm, we exploit the results w.r.t. locally independent actions in the following way. The precondition calculation w.r.t. the initial actions of $W_1$ is identical to the original calculation. However, when we consider $W_2$, we check whether both initial guarded action of $W_2$ are mutually independent from the initial guarded actions of $W_1$. If this holds, we mark the initial actions of $W_1$ as delayed. This means that we calculate 
+
+\noindent
+$g_{2.1} \land wp(a_{2.1} , pre(\overline{W_1} \interleave W_{2.1} \interleave \dots \interleave W_n))$ \\
+$\lor$ \\
+$g_{2.2} \land wp(a_{2.2} , pre(\overline{W_1} \interleave W_{2.2} \interleave \dots \interleave W_n))$
+
+When we then consider some initial actions of $\overline{W_1} \interleave W_{2.1} \interleave \dots \interleave W_n$, $W_1$ is ``undelayed'' subsequently (unless the currently considered initial guarded-pair is again independent from the initial guarded actions of $W_1$). This means that locally independent guarded actions are delayed for exactly one step.
+
+When we consider $W_3$, we check whether we can delay the initial actions of $W_1$ and/or $W_2$ in the same way as described above and so forth. By this, we ensure that the precondition calculation that occurred before is ``more complete'' that the ones after and therefore no information concerning the precondition can be lost.
+
+Consider the following example where $(g,a),(h_1,b_1),(h_2,b_2)$ are mutually independent (note that $(\bot,\_)$ is independent from any other guarded action:
+
+\noindent
+$pre(g \& a \Prefix Skip \interleave h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip))$ \\
+$= g \land wp(a,pre(h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip)))$ \\
+$\land (h_1 \land wp(b_1,pre(\overline{g \& a \Prefix Skip}))$ \\
+\hspace*{10pt}$\lor h_2 \land wp(b_2,\overline{g \& a \Prefix Skip} \interleave h_3 \& b_3 \Prefix Skip))$ \\
+$= g \land wp(a,pre(h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip)))$ \\
+$\land (h_1 \land wp(b_1,\top)$ \\
+\hspace*{10pt}$\lor h_2 \land wp(b_2,h_3 \land wp(b_3,pre(g \& a \Prefix Skip)))$
+
+\subsubsection{Globally prioritisable guarded actions}
+
+Within our algorithm, we check whether the initial guarded-action-pair of some workflow in the composition is independent from all (also subsequent) guarded actions of all other workflows. If we find such a workflow, we prioritise its initial guarded actions as above.
+
+\subsubsection{Integrating locally and globally prioritisable guarded actions}
+
+We have integrated these procedures w.r.t. locally and globally prioritisable guarded actions in our algorithm. In the case of globally prioritisable guarded actions, we only search for undelayed guarded action pairs that are globally prioritisable and have to ensure that they are also prioritisable over currently delayed guarded action pairs because they could be activated later on. After globally prioritising a guarded action pair, all currently delayed guarded actions are undelayed for the subsequent calculation (where they could be delayed again).
+
+\section{Case Study}
+
+\TODO{tbd}
+  
+\section{Discussion/Future Work}
+
+In this paper, we have developed an algorithm that calculates the precondition of concurrent guarded workflows. The precondition ensures that each of the sequential workflows is ensured to successfully terminate and that the overall postcondition is reached. In contrast to related work, we explicitly consider guards in order to obtain preconditions that are not too strong. Our algorithm is ``efficient'' in that it employs concepts of dynamic programming such that preconditions for the same subsequent workflows are only calculated once. Do further reduce the computational effort and to reduce the size of formulas representing preconditions, we have studied how prioritisable guarded actions can be used to do so. All theoretical contributions have been verified using the Isabelle/HOL theorem prover. We have furthermore implemented the algorithm to enable evaluation of our approach. We have considered the case study ... \TODO{tbd}
+
+In future work, we would like to broaden our approach towards the precondition calculation of more sophisticated workflows. This includes that we want to consider nested parallelism, recursive workflows, and synchronization between workflows. The motivation for the latter is that a user of some workflow could be willing to wait for the result of another workflow, which he possibly even initiated.
+
+Another direction for future work could be to look more on input-dependent workflows. This means that control flow is influenced deeper by the input of data that the user enters during executing a particular workflow.
+
+The presented calculation of preconditions for many concurrent workflows is rather complex. The reason for this is the lack of compositionality. This means that we currently cannot infer the precondition of some concurrent workflow $W_1 \interleave W_2$ from the precondition of $W_1$ and the precondition of $W_2$. A study on compositionality of workflows w.r.t. precondition calculation would therefore be very advantageous. Especially, if this calculation was based on a compositional denotational semantics, we could define a notion of refinement on workflows.
+
+\bibliographystyle{alpha}
+\bibliography{/home/tgoethel/SVN/vates/trunk/documents/Bibtex-database/database.bib}
+
+\appendix
+
+\end{document}
