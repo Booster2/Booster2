@@ -65,10 +65,13 @@ preIter (Par ws) i t lut =
 											     else And (get gi2) (Wp ai2 (lut2!par2)) else
 			   if gi2 == natom "false"			     		then if lut2!par1 == Atom "itrue" then Atom "itrue"
 											     else And (get gi1) (Wp ai1 (lut2!par1)) else
-			   if lut2!par1 == Atom "itrue" && lut2!par2 == Atom "itrue"	then Atom "itrue" else	-- In this case gi1 /\ wp(ai1,true) \/ gi2 /\ wp(ai2,true)
-         													-- is implied by another path because "itrue" can only be introduced
-														-- by the situation that all subsequent gj1 and gj2 are delayed.
-														-- A similar argumentation holds above.
+			   if lut2!par1 == Atom "itrue" || lut2!par2 == Atom "itrue"	  then 
+				if lut2!par1 == Atom "itrue" && lut2!par2 == Atom "itrue" then Atom "itrue" else		-- gi1 --> wp(ai1,T) /\ g2 --> wp(ai2,T) 
+																--   /\ (gi1 \/ gi2) is implied by another path
+                                if lut2!par1 == Atom "itrue" then Orn (get gi1) (And (get gi2) (Wp ai2 (lut2!par2))) else	-- gi1 --> wp(ai1,T) /\ (gi1 \/ gi2) is implied by another path
+								  Orn (And (get gi1) (Wp ai1 (lut2!par1))) (get gi2) 		-- gi2 --> wp(ai2,T) /\ (gi1 \/ gi2) is implied by another path
+                           else		
+
 			Orn ( And (get gi1) (Wp ai1 (lut2!par1)) )
 			    ( And (get gi2) (Wp ai2 (lut2!par2)) )
  

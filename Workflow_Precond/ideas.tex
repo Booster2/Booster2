@@ -103,6 +103,7 @@ Despite many program logics focussing on concurrent programming logics [...], th
 \section{Background}
 
 \subsection{Weakest Precondition Calculus}
+\label{ssec:wp_calc}
 
 The weakest precondition~\cite{Dijkstra1976} $wp(c,I)$ of a (guarded) command $c$ with respect to a predicate $I$ ensures that the command successfully terminates starting from states $s$ satisfying the precondition and that the reached states satisfy predicate $I$. Furthermore, this precondition is the weakest such precondition: if a condition $P$ ensures that command $c$ successfully terminates reaching a state satisfying $I$ then $P \longrightarrow wp(c,I)$. In other words, the Hoare triple~\cite{Hoare1969} $\{P\} c \{Q\}$ holds \textit{iff} $P \longrightarrow wp(c,Q)$.
 
@@ -159,8 +160,9 @@ Although this is a very reduced workflow language, it comprises much of the work
 \begin{itemize}
   \item simple choice: $g_1 \& a_1 \Prefix W_1 \Extchoice g_2 \& a_2 \Prefix W_2 := \lExtchoice{nc}_{i \in \{\bullet\}}\; (g_1 \& a_1 \Prefix W_1 \Extchoice g_2 \& a_2 \Prefix W_2)$
   \item stop: $Stop := \bot \& skip \Prefix Skip \Extchoice \bot \& skip \Prefix Skip$
-  \item prefix: $a \Prefix W_1 := \top \& a \Prefix W_1 \Extchoice \bot \& skip \Prefix Skip$
-  \item guarded workflow: $g \& W := g \& skip \Prefix W_1 \Extchoice \bot \Prefix Skip$
+  \item guarded prefix: $g\&a \Prefix W := g \& a \Prefix W \Extchoice \bot \& skip \Prefix Skip$
+  \item unguarded prefix: $a \Prefix W := \top \& a \Prefix W \Extchoice \bot \& skip \Prefix Skip$ 
+  \item guarded workflow: $g \& W := g \& skip \Prefix W \Extchoice \bot \Prefix Skip$
   \item sequential composition: $W_1 ; W_2 :=$ replace all $Skip$ nodes in $W_1$ by $W_2$
 \end{itemize}
 
@@ -240,7 +242,7 @@ Since we can normalise concurrent workflows in our language to sequential ones, 
 && \hspace*{24pt}        $(g_{i.1} \lor g_{i.2}))$
 \end{tabular}
 
-The occurring conditions are equivalent to 
+The conditions occurring above are equivalent to 
 
 \noindent
 \hspace*{7pt} $g_{i.1} \land \lnot g_{i.2} \land wp(a_{i.1},pre(W_{i.1},I))$ \\
@@ -427,6 +429,7 @@ A guarded-action-pair $((g_1,a_1),(g_2,a_2))$, where $a_1$ and $a_2$ are determi
   \item $g_1 \land g_2 \land wp(a_2, h_1 \land h_2 \land wp(b_1,I)) \longrightarrow h_1 \land h_2 \land wp(b_1,g_1 \land g_2 \land wp(a_2,I))$
   \item $g_1 \land g_2 \land wp(a_2, h_1 \land h_2 \land wp(b_2,I)) \longrightarrow h_1 \land h_2 \land wp(b_2,g_1 \land g_2 \land wp(a_2,I))$
 \end{itemize}
+\label{def:prio}
 \end{definition}
 
 These conditions are difficult to check in general. This is mainly because the conditions have to be checked for arbitrary predicates $I$. To reduce the quantified conditions we define another slightly stronger condition:
@@ -582,7 +585,13 @@ $h_2 \longrightarrow wp(b_2,g_1 \longrightarrow wp(a_1,pre(LEFT \interleave \Wf_
 \hspace*{60pt} $\land (g_1 \lor g_2))$
 
 \noindent
-holds. To enable this reasoning we need the prioritisability as above and especially that $a_1$, $a_2$ are deterministic. The latter is necessary to enable the disjunction property of the wp-calculus: $wp(a,X \lor Y) \longrightarrow wp(a,X) \lor wp(a,Y)$, which is only valid for deterministic commands $a$. We use this property in order to make case distinction in, for example, $wp(a_1,h_1 \lor h_2)$. Otherwise, we would not be able to match the premises of the prioritisability clauses (see definition).
+$\land$
+
+\noindent
+$(h_1 \lor h_2)$
+
+\noindent
+holds. To enable this reasoning we need the prioritisability as above and especially that $a_1$, $a_2$ are deterministic. The latter is necessary to enable the disjunction property of the wp-calculus: $wp(a,X \lor Y) \longrightarrow wp(a,X) \lor wp(a,Y)$, which is only valid for deterministic commands $a$. We use this property in order to make case distinction in, for example, $wp(a_1,h_1 \lor h_2)$. Otherwise, we would not be able to match the premises of the prioritisability clauses (see Definition~\ref{def:prio}).
 
 \noindent
 This means that we can simplify the original precondition to the following one.
@@ -624,7 +633,9 @@ $h_2 \longrightarrow wp(b_2, B_2))$
 $\land R$
 
 
-If $B_1$ and $B_2$ are true (no subsequent actions apart from $a_i$ possible), $h_1 \longrightarrow wp(b_1, B_1) \land h_2 \longrightarrow wp(b_2, B_2))$ can be omitted. The detailed proofs of the claims above are basically tedious case distinctions, which we have performed in the Isabelle/HOL theorem prover.
+If $B_1$ or $B_2$ is always true (no subsequent actions apart from $a_i$ possible), then the condition $h_1 \longrightarrow wp(b_1, B_1)$ or $h_2 \longrightarrow wp(b_2, B_2))$ respectively can be omitted because from, e.g., $h_1 \longrightarrow wp(b_1, g_1 \longrightarrow \dots)$ we can infer that also $h_1 \longrightarrow wp(b_1, \top)$ holds (see Section~\ref{ssec:wp_calc}).
+
+The detailed proofs of all claims above are basically tedious case distinctions, which we have performed in the Isabelle/HOL theorem prover~\cite{Nipkow2002}.
 
 \subsection{Globally prioritisable guarded actions}
 \label{sec:prioritisation}
@@ -649,31 +660,40 @@ It is not necessary to consider, for example, a $\langle b,c,a_{i.1}\rangle$ pat
 
 \subsection{Extending the previous algorithm}
 
-In the last section, we have shown how prioritisable guarded actions can be exploited to reduce the precondition formula of some concurrent workflow and how in some cases the visited state space can in principle be reduced in our precondition calculation. In this section, we give some details how we actually implemented these results. 
+In the last section, we have shown how prioritisable guarded actions can be exploited to reduce the precondition formula of some concurrent workflow and how in some cases the visited state space can be reduced in our precondition calculation. In this section, we give some details how we actually implemented these results. 
 
 \subsubsection{Locally prioritisable guarded actions}
 
-In the calculation of pre($W_1 \interleave W_2 \interleave \dots \interleave W_n$) within our algorithm, we exploit the results w.r.t. locally independent actions in the following way. The precondition calculation w.r.t. the initial actions of $W_1$ is identical to the original calculation. However, when we consider $W_2$, we check whether both initial guarded action of $W_2$ are mutually independent from the initial guarded actions of $W_1$. If this holds, we mark the initial actions of $W_1$ as delayed. This means that we calculate 
+In the calculation of pre($W_1 \interleave W_2 \interleave \dots \interleave W_n$) within our algorithm, we exploit the results w.r.t. locally independent actions in the following way. At first, the precondition calculation w.r.t. the initial actions of $W_1$ is identical to the original calculation. However, when we consider $W_2$, we check whether the initial guarded action pair of $W_1$ is prioritisable over the initial guarded action pair of $W_2$. If this holds, we mark the initial actions of $W_1$ as delayed because the previously calculated precondition (where we consider the initial actions of $W1$) already contain the precondition of first performing the initial actions of $W_2$ and then $W_1$. Delayed workflows are not considered in the current step but (possibly) again subsequently.
+
+Within our calculation, we have the following. 
 
 \noindent
 $g_{2.1} \land wp(a_{2.1} , pre(\overline{W_1} \interleave W_{2.1} \interleave \dots \interleave W_n))$ \\
 $\lor$ \\
 $g_{2.2} \land wp(a_{2.2} , pre(\overline{W_1} \interleave W_{2.2} \interleave \dots \interleave W_n))$
 
-When we then consider some initial actions of $\overline{W_1} \interleave W_{2.1} \interleave \dots \interleave W_n$, $W_1$ is ``undelayed'' subsequently (unless the currently considered initial guarded-pair is again independent from the initial guarded actions of $W_1$). This means that locally independent guarded actions are delayed for exactly one step.
+In the subsequent calculation of, for example, $pre(\overline{W_1} \interleave W_{2.1} \interleave \dots \interleave W_n)$, the initial actions of $W_1$ are not considered but are ``undelayed'' when considering initial actions of $W_{2.1}, ..., W_n$ (unless the initial guarded action pair of $W_1$ is again prioritisable over the currently considered guarded action pair of some other workflows). This means that locally prioritisable guarded actions are delayed as long as they are prioritisable over the considered guarded guarded action pair.
 
-When we consider $W_3$, we check whether we can delay the initial actions of $W_1$ and/or $W_2$ in the same way as described above and so forth. By this, we ensure that the precondition calculation that occurred before is ``more complete'' that the ones after and therefore no information concerning the precondition can be lost.
+When we consider the initial guarded action pair of $W_3$, we check for prioritisability of the initial guarded action pairs of $W_1$ and $W_2$ and delay them accordingly if possible. And so on.
 
-Consider the following example where $(g,a),(h_1,b_1),(h_2,b_2)$ are mutually independent (note that $(\bot,\_)$ is independent from any other guarded action:
+In general, when considering the initial actions of some workflow $W_i$, we temporarily delay workflow $W_j$ with $j<i$ if the guarded action pair of $W_j$ is prioritisable over the initial guarded action pair of $W_i$. By this, we ensure that the precondition calculation that has been performed for the ''left'' workflows is ``more complete''.
+
+Consider the following illustrating example where $((g,a),(\bot,skip))$ is prioritisable over $(h_1,b_1),(h_2,b_2)$ and where $h_1,h_2$ do not overlap.
 
 \noindent
 $pre(g \& a \Prefix Skip \interleave h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip))$ \\
 $= g \land wp(a,pre(h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip)))$ \\
 $\land (h_1 \land wp(b_1,pre(\overline{g \& a \Prefix Skip}))$ \\
-\hspace*{10pt}$\lor h_2 \land wp(b_2,\overline{g \& a \Prefix Skip} \interleave h_3 \& b_3 \Prefix Skip))$ \\
+\hspace*{10pt}$\lor h_2 \land wp(b_2,pre(\overline{g \& a \Prefix Skip} \interleave h_3 \& b_3 \Prefix Skip)))$ \\
 $= g \land wp(a,pre(h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip)))$ \\
 $\land (h_1 \land wp(b_1,\top)$ \\
+\hspace*{10pt}$\lor h_2 \land wp(b_2,h_3 \land wp(b_3,pre(g \& a \Prefix Skip)))$ \\
+$= g \land wp(a,pre(h_1 \& b_1 \Prefix Skip \Extchoice h_2 \& b_2 \Prefix (h_3 \& b_3 \Prefix Skip)))$ \\
+$\land (h_1 $ \\
 \hspace*{10pt}$\lor h_2 \land wp(b_2,h_3 \land wp(b_3,pre(g \& a \Prefix Skip)))$
+
+Note that the last equality is sound because from the $g$-conjunct we already know that $h_1 \longrightarrow wp(b_1,T)$ holds (see Section~\ref{sec:loc_indep}).  
 
 \subsubsection{Globally prioritisable guarded actions}
 

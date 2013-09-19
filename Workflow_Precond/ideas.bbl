@@ -1,4 +1,4 @@
-\begin{thebibliography}{WFD08}
+\begin{thebibliography}{NPW02}
 
 \bibitem[Dij76]{Dijkstra1976}
 Edsger~W. Dijkstra.
@@ -14,6 +14,12 @@ David Faitelson, James Welch, and Jim Davies.
 C.~A.~R. Hoare.
 \newblock An axiomatic basis for computer programming.
 \newblock {\em Commun. ACM}, 12(10):576--580, 1969.
+
+\bibitem[NPW02]{Nipkow2002}
+Tobias Nipkow, Lawrence~C. Paulson, and Markus Wenzel.
+\newblock {\em {Isabelle/HOL --- A Proof Assistant for Higher-Order Logic}},
+  volume 2283 of {\em LNCS}.
+\newblock Springer, 2002.
 
 \bibitem[Wan12]{Wang2012}
 Chen-Wei Wang.

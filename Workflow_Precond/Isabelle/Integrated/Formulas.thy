@@ -82,11 +82,16 @@ lemma m_imp_cong: "\<lbrakk> f1 ||=|| f1' ; f2 ||=|| f2' \<rbrakk> \<Longrightar
 
 
 
+lemma m_imp_refl: "f ||\<longrightarrow>|| f"
+  by(simp add: m_imp_def)
 
 lemma m_imp_redund: "f ||\<longrightarrow>|| f' \<Longrightarrow> f ||=|| f |\<and>| f'"
   by(auto simp add: m_equiv_def m_imp_def)
 
-lemma m_imp_and: "f ||\<longrightarrow>|| f' \<Longrightarrow> f |\<and>| f'' ||\<longrightarrow>|| f'"
+lemma m_imp_and1: "f ||\<longrightarrow>|| f' \<Longrightarrow> f |\<and>| f'' ||\<longrightarrow>|| f'"
+  by(simp add: m_imp_def)
+
+lemma m_imp_and2: "f ||\<longrightarrow>|| f' \<Longrightarrow> f'' |\<and>| f ||\<longrightarrow>|| f'"
   by(simp add: m_imp_def)
 
 lemma m_imp_trans: "\<lbrakk> x ||\<longrightarrow>|| y ; y ||\<longrightarrow>|| z \<rbrakk> \<Longrightarrow> x ||\<longrightarrow>|| z"
@@ -103,6 +108,9 @@ lemma [simp]: "g1 |\<and>| g2 ||=|| F
   by(auto simp add: m_equiv_def m_imp_def)
 
 lemma f_eval_m_imp_mp: "\<lbrakk> f_eval v g ; g ||\<longrightarrow>|| g2 \<rbrakk> \<Longrightarrow> f_eval v g2"
+  by(clarsimp simp add: m_imp_def)
+
+lemma f_imp_m_imp_cong: "\<lbrakk> g ||\<longrightarrow>|| f ; f' ||\<longrightarrow>|| g' \<rbrakk> \<Longrightarrow> f |\<longrightarrow>| f' ||\<longrightarrow>|| g |\<longrightarrow>| g'"
   by(clarsimp simp add: m_imp_def)
 
 end

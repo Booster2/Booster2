@@ -199,8 +199,8 @@ indepActions _ (Normal (Atom "false"),_) = True
 -- Example Workflows ---------------------------------------------------------------------
 -- ---------------------------------------------------------------------------------------
 
+indepActions (g1,"a1") (h1,x) = elem x ["b1","b2"]
 indepActions (g1,"a2") (h1,x) = elem x ["b1","b2"]
-indepActions (g1,"b2") (h1,x) = elem x ["a2","c2"]
 --indepActions (g1,"b1") (h1,x) = elem x ["c2"]
 --indepActions (g1,"a2") (h1,x) = elem x ["c1"]
 --indepActions (g1,"c1") (h1,x) = elem x ["a1","a2"]
@@ -264,6 +264,8 @@ exSeqWfChoice23 = Choice (natom "g1''","a1''") (Choice (natom "g11''","a11''") S
 exSeqWfMixed21 = Choice (natom "g1","a1") (prefix (natom "g3","a3") Skip)
                         (natom "g2","a2") Skip
 
+exSeqWfMixed22 = Choice (natom "h1","b1") (prefix (natom "h3","b3") Skip)
+                        (natom "h2","b2") Skip
 
 exSeqStrange = Choice (natom "i1","c") (Skip)
                       (natom "false","d") (prefix (natom "i2","e") Skip)
@@ -278,6 +280,8 @@ exParWf5    = Par [exSeqWfSingle21,exSeqWfSingle22,exSeqWfSingle13]
 exParWf6    = Par [exSeqWfSingle12,exSeqWfMixed21]
 
 exParWf7    = Par [exSeqWfSingle11,exSeqWfSingle22,exSeqWfSingle13]
+
+exParWf8    = Par [exSeqWfChoice11,exSeqWfMixed22]
 
 exParWfHuge = Par [exSeqWfChoice21 , exSeqWfChoice22 , exSeqWfChoice23, exSeqWfChoice21 , exSeqWfChoice22]
 
