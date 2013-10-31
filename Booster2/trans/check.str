@@ -46,6 +46,30 @@ rules
   		);
   		<currymap(build-lookup-table-class-component)> (name, [cs*])    
   	
+/* *****************************************************************
+   ********** Workflow Stuff - BEGIN *******************************
+   *****************************************************************  */	
+  build-lookup-table:
+  	SeqWf(name,definition) -> SeqWf(name,definition)
+  	with
+  	rules(
+  		SeqWfs :+ name -> name
+  	)
+  	
+  build-lookup-table:
+  	ParWf(name,definition) -> ParWf(name,definition)
+  	with
+  	rules(
+  		ParWfs :+ name -> name
+  	)	
+   
+  build-lookup-table:
+  	x -> x	
+  
+/* *****************************************************************
+   ********** Workflow Stuff - END *********************************
+   ***************************************************************** */ 
+  	
   /*build-lookup-table:
   	x -> x
   		with
@@ -256,7 +280,35 @@ rules
                                       
    constraint-warning:
   	Class(name, extends, []) -> (name, $[Empty class [name]])
-                                      
+ 
+/* *****************************************************************
+   ********** Workflow Stuff - BEGIN *******************************
+   *****************************************************************  */	    
+
+  constraint-error:
+		SeqWf(name, definition) -> (name, $[Duplicate (sequential) workflow name: [name]])
+	where
+		not(<bagof-SeqWfs> name => [_])      // not a one-elementary set!
+
+  constraint-error:
+		ParWf(name, definition) -> (name, $[Duplicate (parallel) workflow name: [name]])
+	where
+		not(<bagof-ParWfs> name => [_])
+                               
+  constraint-error:
+  	Single(name) -> (name,$[sequential workflow [name] not defined])
+  	where
+  	  not(<SeqWfs> name)            		// name not in the domain                   
+                               
+  constraint-error:
+  	Multiple(list,name) -> (name,$[sequential workflow [name] not defined])
+  	where
+  	  not(<SeqWfs> name)
+  	                                
+/* *****************************************************************
+   ********** Workflow Stuff - END *********************************
+   *****************************************************************  */	
+                                         
   constraint-error:
   	x -> (x, $[True is equal to False])
   		where

@@ -1,0 +1,7 @@
+system workflowTest
+
+workflow w1 : Normal true & a -> SKIP [] Normal true & b -> SKIP
+
+workflow w2 : Normal true & c -> SKIP [] Normal true & d -> SKIP
+
+par p1: w1 ||| w2

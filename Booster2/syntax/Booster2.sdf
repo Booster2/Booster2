@@ -17,7 +17,7 @@ exports
 	
 	SetDef -> SystemComponent
 	Class -> SystemComponent
-	Workflow -> SystemComponent
+	
 	SystemComponent -> BoosterTerm
 
 	'class' ID Extends? '{' ClassComponents * '}' -> Class  {cons("Class")}
@@ -181,22 +181,43 @@ exports
   	PathComponent -> BoosterTerm
   	
   	
-  	
-  	'workflow' ID ':' WorkflowExpression -> Workflow {cons("Workflow")}
-  	
-  	'Skip' -> WorkflowExpression {cons("Skip")}
-  	
-  	MethodReference -> WorkflowExpression
-  	
-  	Expression '&' Workflow -> WorkflowExpression {cons("Guard")}
-  	
-  	Workflow '|||' Workflow -> WorkflowExpression {cons("Interleave")}
-  	
-  	Workflow '[]' Workflow -> WorkflowExpression {cons("Choice")}
-  	
-  	Workflow '->' Workflow -> WorkflowExpression {cons("Sequence")}
 
-	ID -> WorkflowExpression {cons("WorkflowReference")}
+%% *****************************************************************
+%% ********** Workflow Stuff - BEGIN *******************************
+%% *****************************************************************
+
+  'Normal' Constraint 						-> Guard {cons("Normal")}
+  'Delayed' Constraint 						-> Guard {cons("Delayed")}
+  
+  Guard '&' ID					-> GuardedAction {cons("GA")}
+  
+  
+  'Skip'									-> SeqWfExpression {cons("Skip")}
+  
+  GuardedAction '->' SeqWfExpression
+  '[]' 
+  GuardedAction '->' SeqWfExpression 		-> SeqWfExpression{cons("Choice")}
+  
+  'WAIT.' INT '.' INT '->' SeqWfExpression	-> SeqWfExpression {cons("Wait")}
+  
+  ID 										-> SeqWfExpression {cons("WorkflowReference")}
+
+
+  'workflow' ID ':' SeqWfExpression 		-> SeqWf {cons("SeqWf")}
+  
+  
+  ID										-> ParWfExpression {cons("Single")}
+  ParWfExpression '|||' ID					-> ParWfExpression {cons("Multiple")}
+  
+  'par' ID ':' ParWfExpression				-> ParWf {cons("ParWf")}
+  
+  
+  SeqWf -> SystemComponent
+  ParWf -> SystemComponent
+    
+%% *****************************************************************
+%% ********** Workflow Stuff - END *********************************
+%% *****************************************************************	  
   	
  exports 
  variables
