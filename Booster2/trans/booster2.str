@@ -17,6 +17,10 @@ imports
   elaborate/main
   compile/main
  
+  // Workflow Stuff Begin
+  calculateWFPrecond/main
+  // Workflow Stuff End
+ 
   translate/booster/abstractBoosterModel
   translate/sql/abstractBoosterModel
   translate/sql/sql

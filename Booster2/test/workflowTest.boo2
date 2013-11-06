@@ -1,7 +1,17 @@
 system workflowTest
 
-workflow w1 : Normal true & a -> SKIP [] Normal true & b -> SKIP
-
-workflow w2 : Normal true & c -> SKIP [] Normal true & d -> SKIP
-
-par p1: w1 ||| w2
+class C1 {
+	attributes
+   	  	x : INT
+   	  methods
+  	  	add1 { x' = x + 1 }
+  	  	
+  	  	sub1 { x' = x - 1 }
+  	  invariants
+  	    x >= 0 & x <= 2 
+  	  workflows
+  	    seq w3: SKIP 
+  	    seq w1: Normal true & add1() -> w2
+  	    seq w2: Normal true & sub1() -> w3
+  	    par p: w1 ||| w2
+}

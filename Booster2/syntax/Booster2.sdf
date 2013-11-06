@@ -31,6 +31,10 @@ exports
 	'attributes' Attribute*  -> ClassComponents {cons("Attributes")}
 	'methods' Method*  -> ClassComponents {cons("Methods")}
 	'invariants' Constraint* -> ClassComponents {cons("Invariant")}
+	%% Workflow Stuff Begin
+	'workflows' WorkflowComponent* -> ClassComponents {cons("Workflows")}
+	%% Workflow Stuff End
+	
 	ClassComponents -> BoosterTerm
 	 
 	 'set' ID '{' {ID ','}+ '}' -> SetDef {cons("SetDef")}
@@ -188,8 +192,10 @@ exports
 
   'Normal' Constraint 						-> Guard {cons("Normal")}
   'Delayed' Constraint 						-> Guard {cons("Delayed")}
+  "(" Guard ")"								-> Guard {bracket}
   
-  Guard '&' ID					-> GuardedAction {cons("GA")}
+  
+  Guard '&' MethodReference					-> GuardedAction {cons("GA")}
   
   
   'Skip'									-> SeqWfExpression {cons("Skip")}
@@ -199,21 +205,31 @@ exports
   GuardedAction '->' SeqWfExpression 		-> SeqWfExpression{cons("Choice")}
   
   'WAIT.' INT '.' INT '->' SeqWfExpression	-> SeqWfExpression {cons("Wait")}
+
+  'seq' ID ':' SeqWfExpression 		-> SeqWf {cons("SeqWf")}
   
+  %% The following definitions are supposed to be syntactic sugar and should be simplified before
+  %% doing precondition calculation
   ID 										-> SeqWfExpression {cons("WorkflowReference")}
-
-
-  'workflow' ID ':' SeqWfExpression 		-> SeqWf {cons("SeqWf")}
   
+  GuardedAction '->' SeqWfExpression 		-> SeqWfExpression {cons("Prefix")}
+
+  "(" SeqWfExpression ")" 					-> SeqWfExpression {bracket}
+
+  
+  
+  %% Concurrent Workflows
   
   ID										-> ParWfExpression {cons("Single")}
-  ParWfExpression '|||' ID					-> ParWfExpression {cons("Multiple")}
+  ID '|||' ParWfExpression					-> ParWfExpression {cons("Multiple")}
   
   'par' ID ':' ParWfExpression				-> ParWf {cons("ParWf")}
   
   
-  SeqWf -> SystemComponent
-  ParWf -> SystemComponent
+  
+  
+  SeqWf -> WorkflowComponent
+  ParWf -> WorkflowComponent
     
 %% *****************************************************************
 %% ********** Workflow Stuff - END *********************************

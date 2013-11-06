@@ -1,0 +1,35 @@
+module workflow
+
+imports
+  include/Booster2
+  
+rules
+	// check whether a guard is a normal one and equal false
+	guard_false: Normal (False()) -> Normal (False())
+	
+	// get the constraint from a normal guard
+	get: Normal (constr) -> constr
+	
+	// check whether a sequential workflow is skip, i.e., has terminated	
+	skip_d : Skip() -> Skip()
+	
+	// check whether a sequential workflow is a choice node
+	choide_d: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
+	
+	// selectors for choice node
+	sel_ga1: Choice( GA(wg1,wa1) , wf1 , 
+	                  GA(wg2,wa2) , wf2) -> GA(wg1,wa1)
+	sel_g1: Choice( GA(wg1,wa1) , wf1 , 
+	                 GA(wg2,wa2) , wf2) -> wg1
+	sel_a1: Choice( GA(wg1,wa1) , wf1 , 
+	                 GA(wg2,wa2) , wf2) -> wa1
+	sel_w1: Choice( GA(wg1,wa1) , wf1 , 
+	                 GA(wg2,wa2) , wf2) -> wf1
+    sel_ga2: Choice( GA(wg1,wa1) , wf1 , 
+	                  GA(wg2,wa2) , wf2) -> GA(wg2,wa2)
+	sel_g2: Choice( GA(wg1,wa1) , wf1 , 
+	                 GA(wg2,wa2) , wf2) -> wg2
+	sel_a2: Choice( GA(wg1,wa1) , wf1 , 
+	                 GA(wg2,wa2) , wf2) -> wa2
+	sel_w2: Choice( GA(wg1,wa1) , wf1 , 
+	                 GA(wg2,wa2) , wf2) -> wf2

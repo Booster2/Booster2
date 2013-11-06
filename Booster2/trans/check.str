@@ -46,30 +46,6 @@ rules
   		);
   		<currymap(build-lookup-table-class-component)> (name, [cs*])    
   	
-/* *****************************************************************
-   ********** Workflow Stuff - BEGIN *******************************
-   *****************************************************************  */	
-  build-lookup-table:
-  	SeqWf(name,definition) -> SeqWf(name,definition)
-  	with
-  	rules(
-  		SeqWfs :+ name -> name
-  	)
-  	
-  build-lookup-table:
-  	ParWf(name,definition) -> ParWf(name,definition)
-  	with
-  	rules(
-  		ParWfs :+ name -> name
-  	)	
-   
-  build-lookup-table:
-  	x -> x	
-  
-/* *****************************************************************
-   ********** Workflow Stuff - END *********************************
-   ***************************************************************** */ 
-  	
   /*build-lookup-table:
   	x -> x
   		with
@@ -96,6 +72,25 @@ rules
 	build-lookup-table-class-component:
 		(name, Invariant([is*])) -> 
 			<currymap(build-lookup-table-class-component)> (name, [is*])
+
+    // Workflow Stuff Begin
+    build-lookup-table-class-component:
+    	(name, Workflows([ws*])) -> 
+    	    <currymap(build-lookup-table-class-component)> (name,[ws*])
+    	    
+    build-lookup-table-class-component:
+    	(cname, SeqWf(name,exp)) -> (cname, SeqWf(name,exp))
+    	with
+    		rules(
+    			SeqWfs :+ (cname,name) -> (cname,name)
+    		)
+    build-lookup-table-class-component:
+    	(cname, ParWf(name,exp)) -> (cname, ParWf(name,exp))
+    	with
+    		rules(
+    			ParWfs :+ (cname,name) -> (cname,name)
+    		)		
+    // Workflow Stuff End
 
 	build-lookup-table-class-component:
 		(cname, Attribute(aname, type)) -> (cname, Attribute(aname, type)) 
@@ -186,7 +181,51 @@ rules
 	constraint-error-components:
 		(name, Invariant([is*])) -> []
 
+    /* *****************************************************************
+   ********** Workflow Stuff - BEGIN *******************************
+   *****************************************************************  */	    
 
+  constraint-error-components:
+		(name, Workflows([wfs*])) -> [nwfs*]
+	where
+		[nwfs*] := <currymap(constraint-error-workflow)> (name, [wfs*])
+		
+  constraint-error-workflow:
+  	    (cname,SeqWf(name,definition)) -> (name, $[Duplicate (sequential) workflow: [name]])
+  	where
+  		not(<bagof-SeqWfs> (cname,name) => [_])
+
+  constraint-error-workflow:
+		(cname, ParWf(name, definition)) -> (name, $[Duplicate (parallel) workflow name: [name]])
+	where
+		not(<bagof-ParWfs>(cname,name) => [_])
+	
+  constraint-error-workflow:
+  	    (cname,ParWf(pname,definition)) -> <constraint-error-parwf> (cname,definition)	
+
+  // I don't know why this is necessary.
+  constraint-error-workflow: t -> []
+    
+                              
+  constraint-error-parwf:
+  	    (cname,Single(name)) -> (name, $[sequential workflow [name] not defined]) 
+  	where                          
+         not(<SeqWfs> (cname,name))
+         
+  constraint-error-parwf:
+  	    (cname,Multiple(name,definition)) -> (name, $[sequential workflow [name] not defined]) 
+  	where                          
+         not(<SeqWfs> (cname,name))
+         
+  constraint-error-parwf:
+  	    (cname,Multiple(name,definition)) -> <constraint-error-parwf> (cname,definition)
+  	 
+  // I don't know why this is necessary.	    
+  constraint-error-parwf: t -> []
+                                                    
+/* *****************************************************************
+   ********** Workflow Stuff - END *********************************
+   *****************************************************************  */
 
 	constraint-error-attribute:
 		(cname, Attribute(aname, type)) -> (aname, $[Duplicate attribute name "[aname]" in class [cname]])
@@ -280,34 +319,7 @@ rules
                                       
    constraint-warning:
   	Class(name, extends, []) -> (name, $[Empty class [name]])
- 
-/* *****************************************************************
-   ********** Workflow Stuff - BEGIN *******************************
-   *****************************************************************  */	    
-
-  constraint-error:
-		SeqWf(name, definition) -> (name, $[Duplicate (sequential) workflow name: [name]])
-	where
-		not(<bagof-SeqWfs> name => [_])      // not a one-elementary set!
-
-  constraint-error:
-		ParWf(name, definition) -> (name, $[Duplicate (parallel) workflow name: [name]])
-	where
-		not(<bagof-ParWfs> name => [_])
-                               
-  constraint-error:
-  	Single(name) -> (name,$[sequential workflow [name] not defined])
-  	where
-  	  not(<SeqWfs> name)            		// name not in the domain                   
-                               
-  constraint-error:
-  	Multiple(list,name) -> (name,$[sequential workflow [name] not defined])
-  	where
-  	  not(<SeqWfs> name)
-  	                                
-/* *****************************************************************
-   ********** Workflow Stuff - END *********************************
-   *****************************************************************  */	
+ 	
                                          
   constraint-error:
   	x -> (x, $[True is equal to False])

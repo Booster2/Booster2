@@ -1,0 +1,89 @@
+module precond
+
+imports
+  include/Booster2
+  trans/calculateWFPrecond/misc
+  trans/calculateWFPrecond/workflow
+  compile/main
+  
+  // TODO: Currently, we don't support prioritisation of guarded actions
+  
+rules
+	
+	/* **************************************
+	   main precondition function
+	   ************************************** */
+	
+	// if the concurrent workflow "[wfs*]" is already defined in 
+	// the lookup-table we finish
+	pre: [wfs*] -> [wfs*]
+	where <wf_lut> [wfs*]
+	
+	// if all sequential workflows in the list have terminated, i.e., are
+	// equal to SKIP each, we finished
+    pre: [wfs*] -> [wfs*]
+    where <list_all(skip_d)> [wfs*]
+    with rules( wf_lut :+ [wfs*] -> "has to be replaced accordingly")  
+	
+	// the normal case
+	pre: [wfs*] -> [wfs*]
+	where formset := <preIter> ([wfs*],0, <subti>(<length> wfs* , 1))
+	with rules( wf_lut :+ [wfs*] -> <foldr(!True(), And)> formset )
+	
+	
+	/* **************************************
+	   the iteration function -- actual program 
+	   logic implemented here
+	   ************************************** */
+	   	
+	// if i is greater then the list length, we are done
+	preIter: ([wfs*],i,t) -> []
+	where <gt> (i,t)
+	
+	// Skip at position i
+	preIter: ([wfs*],i,t) -> formset
+	where wi := <getPos> ([wfs*],i) ;
+	       <skip_d> wi;
+	       formset := <preIter>([wfs*],<addi>(i,1),t)
+		   
+	// normal case
+	preIter: ([wfs*],i,t) -> formset
+	where  wi := <getPos>([wfs*],i);
+	       gi1 := <sel_g1>(wi);
+		   ai1 := <sel_a1>(wi);
+		   wi1 := <sel_w1>(wi);
+		   gi2 := <sel_g2>(wi);
+		   ai2 := <sel_a2>(wi);
+		   wi2 := <sel_w2>(wi);
+		
+		   par1 := <listUpdate> ([wfs*], i, wi1); 
+		   par2 := <listUpdate> ([wfs*], i, wi2); 
+
+           if not(<guard_false> gi1) then <pre> par1 end;
+           if not(<guard_false> gi2) then <pre> par2 end;
+           
+           
+           if <guard_false> gi1 ; <guard_false> gi2 then loc_cond := False() else 
+           if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<calculate-wp> (ai2 , <wf_lut> par2))) else 
+           if <guard_false> gi2 then loc_cond := And ((<get> gi1) ,(<calculate-wp> (ai1 , <wf_lut> par1))) else
+           	    And (And(
+           	      Implies(<get> gi1 , <calculate-wp> (ai1, <wf_lut> par1))
+           	      ,	
+           	      Implies(<get> gi2 , <calculate-wp> (ai2, <wf_lut> par2))
+           	    )
+           	    , Or( <get> gi1, <get> gi2)	 	
+           	    )   
+           end end end;
+           
+           formset_rest := <preIter> ([wfs*],<addi>(i,1),t);
+           formset := <conc> ([loc_cond], formset_rest)
+           
+		
+	
+	
+	// here, we actually want to use the actual precondition calculation	
+	//calculate-wp: t -> t	
+	
+	//currently needs to be excluded, otherwise build error	
+    init_lut: t -> t
+    with  rules ( wf_lut :+ "" -> "has to be replaced accordingly" )

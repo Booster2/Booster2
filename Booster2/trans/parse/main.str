@@ -8,6 +8,7 @@ imports
   
 rules
 	
+	
 	/* parse: 
 		Takes a system and produces a lookup table with all the information in it
 	 parse : System
@@ -36,8 +37,48 @@ rules
 			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites) >classes
 			LookupTable :+ "Operations" -> operations 
 			LookupTable :+ "Constraints" -> constraints
-			
-		)
+			LookupTable :+ "SeqWorkflows" -> []
+		);
+	    <expandSeqWorkflows> system
+
+
+		fullyExpanded: Skip() -> Skip()
+		fullyExpanded: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
+		where <fullyExpanded> wf1;
+		      <fullyExpanded> wf2
+		fullyExpanded: Wait(i,j,wf) -> Wait(i,j,wf)
+		where <fullyExpanded> wf
+		fullyExpanded: Prefix(ga,wf) -> Prefix(ga,wf)
+		where <fullyExpanded> wf
+		
+
+
+    	expandSeqWorkflows:
+		system -> <topdown(innermost(expandwf))> system
+
+
+		expandwf:
+			WorkflowReference(wfr) -> wf
+			where
+				wf := <lookup> (wfr,(<LookupTable> "SeqWorkflows"));
+				log(|Error(), "expandwf first", wfr)
+				
+		expandwf: SeqWf(name,definition) -> SeqWf(name,definition)
+		where not(<lookup> (name,(<LookupTable> "SeqWorkflows")));
+		      <fullyExpanded> definition;
+		      wfs := <LookupTable> "SeqWorkflows";
+		      log(|Error(), "expandwf second", name);
+		      newwfs := <conc>(wfs,[(name, definition)]);
+		      //log(|Error(),"hello",newwfs);
+             rules( 
+		      	LookupTable :+ "SeqWorkflows" -> newwfs
+		      )
+		      // log(|Error(), <LookupTable> "SeqWorkflows")
+		
+
+
+
+
 
 
 	initialize-lookup-table:

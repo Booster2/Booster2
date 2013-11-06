@@ -1,0 +1,30 @@
+module misc
+
+imports
+	include/Booster2
+	
+rules
+	// checks whether a list is an empty list
+	listEmpty : [] -> []
+	
+	// update a list at a certain position; 
+	// it is assumed that the given index is greater or equal 0 and
+    // that it is less then the length of the list
+	listUpdate: ([x,xs*],0,y) -> [y, xs*]
+	listUpdate: ([x,xs*],i,y) -> <conc>([x], <listUpdate>(xs*,<subti>(i,1),y))
+	
+	// get the value of a list at a certain (existing) position
+	getPos: ([x,xs*],0) -> x
+	getPos: ([x,xs*],i) -> <getPos> ([xs*],<subti>(i,1))
+	
+	// check whether a certain predicate holds true for all elements in a list
+	list_all(pred): [] -> []
+	list_all(pred): [x,xs*] -> [x,xs*]
+	where <pred> x;
+	      <list_all(pred)> xs*
+		
+		
+	// left folds a list but tries to avoid the use of the neutral element 
+	mfold(neutral,comb): [] -> <neutral>
+	mfold(neutral,comb): [a] -> a
+	mfold(neutral,comb): [x,xs*] -> <comb> (x, <mfold(neutral,comb)> [xs*])

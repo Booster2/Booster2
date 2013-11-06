@@ -36,6 +36,7 @@ imports
 				("QualifiedInvariants",  <LookupTable> "QualifiedInvariants",
 				"Name",  <LookupTable> "Name",
 				"TableNames",  <LookupTable> "TableNames",
-				"IDs",  <LookupTable> "IDs" ))
+				"IDs",  <LookupTable> "IDs" )),
+				"SeqWorkflows", <LookupTable> "SeqWorkflows"
 			)			
 				
