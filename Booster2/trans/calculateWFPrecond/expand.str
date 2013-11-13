@@ -1,0 +1,56 @@
+module expand
+
+imports
+  include/Booster2  
+  
+rules
+
+// from parse
+	// make a usual list from a concurrent workflow 
+	makeParList: Single(name) -> [name]
+	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)
+	
+		
+
+	// checks whether a sequential workflow is fully expended, i.e., it does not use workflow references anymore
+	fullyExpanded: Skip() -> Skip()
+	fullyExpanded: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
+	where <fullyExpanded> wf1;
+	      <fullyExpanded> wf2
+	fullyExpanded: Wait(i,j,wf) -> Wait(i,j,wf)
+	where <fullyExpanded> wf
+	fullyExpanded: Prefix(ga,wf) -> Prefix(ga,wf)
+	where <fullyExpanded> wf
+		
+
+    expandSeqWorkflows:
+	system -> <outermost(expandSeqWf)> (<innermost(expandSeqWf)> system)
+
+
+	expandSeqWf:
+		WorkflowReference(wfr) -> wf
+		where
+			wf := <lookup> (wfr,(<PrecondLookupTable> "SeqWorkflows"))
+				
+	expandSeqWf: SeqWf(name,definition) -> SeqWf(name,definition)
+	where not(<lookup> (name,(<PrecondLookupTable> "SeqWorkflows")));
+	      <fullyExpanded> definition;
+	      wfs := <PrecondLookupTable> "SeqWorkflows";
+	      newwfs := <conc>(wfs,[(name, definition)]);
+          rules( 
+	      	PrecondLookupTable :+ "SeqWorkflows" -> newwfs
+	      )
+		      
+		      
+	expandParWorkflows: system -> <topdown(try(expandParWf))> system
+	
+	expandParWf: ParWf(name,xs) -> [wfs*]
+	where
+		not(<lookup> (name,(<PrecondLookupTable> "ParWorkflows")));
+		wfs_ref* := <makeParList> xs;
+		wfs* := <map(\wfr -> <lookup> (wfr,<PrecondLookupTable> "SeqWorkflows")\)> wfs_ref*;
+		par_wfs := <PrecondLookupTable> "ParWorkflows";
+	    newwfs := <conc>(par_wfs,[(name, wfs*)]);
+        rules( 
+	      	PrecondLookupTable :+ "ParWorkflows" -> newwfs
+	    )

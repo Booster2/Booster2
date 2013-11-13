@@ -4,25 +4,4 @@ imports
 	include/Booster2
   
 rules
-	// It is necessary that all workflow references in a sequential workflow are resolved.
-	// This means that all defined workflows need to be collected in a lookup-table
-	// Then, used references have to be replaced accordingly. Care has to be taken because
-	// Disallowed recursions need to be found. Furthermore, some strategy of kind "do as long as 
-	// possible" is necessary because several consecutive replacements could be necessary.
-	// example1: seq w1: a -> w2 ; seq w2: b -> w1  --> this is illegal because of recursion
-	// example2: seq w1: a -> w2 ; seq w2: b -> w3 ; seq w3 : c -> SKIP   -->
-	// w1 needs to be expanded to seq w1: a -> b -> c -> SKIP 
-	expandSeq : t -> t  	
 	
-	// make a usual list from a concurrent workflow 
-	makeParList: Single(name) -> [name]
-	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)	
-
-	
-	// replace all workflow references in a concurrent workflow (list)
-	// by the the actual sequential workflows 	  
-	expandPar : [name*] -> [defs*]
-	with [defs*] := <map(getWFDefinition)> [name*]
-  
-	// Here, I think we need some LookupTable from the previous parsing
-	getWFDefinition: t -> t

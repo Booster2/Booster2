@@ -10,8 +10,9 @@ class C1 {
   	  invariants
   	    x >= 0 & x <= 2 
   	  workflows
-  	    seq w3: SKIP 
-  	    seq w1: Normal true & add1() -> w2
-  	    seq w2: Normal true & sub1() -> w3
-  	    par p: w1 ||| w2
+  	    seq w0: Normal true & add1() -> Wait.0.1 -> Wait.1.0 -> Normal true & add1() -> SKIP
+  	    seq w1: Wait.0.1 -> Normal true & sub1() -> Wait.1.0 -> SKIP
+  	    //seq w0: Wait.0.1 -> SKIP
+  	    //seq w1: Wait.0.1 -> SKIP
+  	    par p: w0 ||| w1
 }

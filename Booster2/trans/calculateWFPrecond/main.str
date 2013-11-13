@@ -3,26 +3,36 @@ module main
 imports
   include/Booster2  
   
-  //trans/parse/main
-  //trans/elaborate/main
-  //trans/compile/constraint
-  //trans/compile/relation
-  
+  trans/calculateWFPrecond/expand
   trans/calculateWFPrecond/precond
-  
   
 /* 
    Calculate the preconditions of all workflows after method specification have successfully been
    translated to commands with <program>. 
    TODO: The main task is to produce the lookup table as given by the Haskell algorithm. 
-*/  
+*/ 
+
+//log(|Error(), "expandwf first", wfr) 
   
 rules
+	// the main strategy from the precondition calculation
+	precond: system -> system
+	where
+		rules(
+			PrecondLookupTable :+ "SeqWorkflows" -> []
+			PrecondLookupTable :+ "ParWorkflows" -> []
+			PrecondLookupTable :+ "ParWorkflows_Precond" -> []
+		);
+	    <expandSeqWorkflows> system;
+	    <expandParWorkflows> system;
+	    <calculatePrecond> system
+	    
+	    
+	 // should be moved to booster2.str eventually 
+	 precond_debug: system -> ("precond_debug",
+		("SeqWorkflows", <PrecondLookupTable> "SeqWorkflows",
+		"ParWorkflows", <PrecondLookupTable> "ParWorkflows",
+		"ParWorkflows_Precond", <PrecondLookupTable> "ParWorkflows_Precond")
+	 ) where <precond> system
+
 	
-	// this rule should eliminate workflow references, get rid of prefix, etc
-	simplifySeqWorkflows:
-		t -> t
-	
-	
-	calculateWFPrecond:
-		t -> t

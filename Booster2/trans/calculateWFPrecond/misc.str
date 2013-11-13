@@ -27,4 +27,11 @@ rules
 	// left folds a list but tries to avoid the use of the neutral element 
 	mfold(neutral,comb): [] -> <neutral>
 	mfold(neutral,comb): [a] -> a
-	mfold(neutral,comb): [x,xs*] -> <comb> (x, <mfold(neutral,comb)> [xs*])
+    mfold(neutral,comb): [x,xs*] -> <comb> (x, <mfold(neutral,comb)> [xs*])
+    
+    // for some reasons, mfold from above doesnt work for, e.g., "<mfold(!True(),And)> [True(),True()]" 
+    // and I don't know how to fix it
+    // however, exactly this is working in the stratego-shell
+    AndFold: [] -> True()
+	AndFold: [a] -> a
+    AndFold: [x,xs*] -> And (x, <AndFold> [xs*])
