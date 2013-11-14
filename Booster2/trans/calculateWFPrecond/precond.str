@@ -38,7 +38,7 @@ rules
 	// equal to SKIP each, we finished
     pre: [wfs*] -> [wfs*]
     where <list_all(skip_d)> [wfs*]//; log(|Error(),"case2" ,[wfs*])
-    with rules( wf_lut :+ [wfs*] -> "has to be replaced accordingly")  
+    with rules( wf_lut :+ [wfs*] -> True())  
 	
 	// the normal case
 	pre: [wfs*] -> [wfs*]
@@ -74,13 +74,13 @@ rules
 		wi_to := <string-to-int>(<sel_to> wi);
 		wi_sub := <sel_w1> wi;
 		
-		log(|Error(),"check2" ,([wfs*],wi_to,i,t));
+		//log(|Error(),"check2" ,([wfs*],wi_to,i,t));
 		wj := <getPos> ([wfs*],wi_to) ;
 		
-		log(|Error(),"before if" ,wj);
+		//log(|Error(),"before if" ,wj);
 		
 		if <wait_d> wj;
-		   log(|Error(),"after wait_d check1" ,[wfs*]);
+		   //log(|Error(),"after wait_d check1" ,[wfs*]);
 		   wj_from := <string-to-int>(<sel_from> wj);
 		   wj_to := <string-to-int>(<sel_to> wj);
 		   wj_sub := <sel_w1> wj;
@@ -88,7 +88,7 @@ rules
 		   <equal>(wi_from,wj_from);
 		   <equal>(wi_to,wj_to)
 		then par1 := <listUpdate>((<listUpdate>([wfs*],i,wi_sub)),wi_to,wj_sub);
-			log(|Error(),"par1" ,par1); 
+			//log(|Error(),"par1" ,par1); 
 		     <pre> par1;
 		     p := <wf_lut> par1;
 		     formset := [p] 
@@ -170,14 +170,20 @@ rules
            program_tmp : t -> t
            calculate-wp_tmp : t -> t
            
-           wp: (m,post) -> ("wp(", m , post ,")")
-           
 		   wp : (m,post) -> cond
 		   where
-		   		classname := "";
-		   		methname := "";
-		   		constraint := "";
-		   		program := <program_tmp> (classname,methname,post);
-		   		cond := <calculate-wp_tmp> (program, constraint,classname,methname)
+		   	    programs := <LookupTable> "Programs";
+		   	    log(|Error(),"Programs lut" ,programs); 
+		   		classname := "C1"; // for testing
+		   		methname := "add1"; // for testing
+		   		program := <lookup> ((classname,methname),programs);
+		   		log(|Error(),"program from lut" ,program);
+		   		//cond := <calculate-wp> (program,post,classname,methname);
+		   		//log(|Error(),"calculated condition",cond)
+				cond := ("wp(", m , post ,")")
 		
+		// never used!! Just declared to prevent undefinedness error
+		cheat : t -> t
+		with rules (LookupTable :+ "" -> ""
+		             calculate-wp :+ "" -> "")
 	

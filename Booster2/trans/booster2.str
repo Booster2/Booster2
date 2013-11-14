@@ -15,8 +15,8 @@ imports
   
   
   elaborate/main
-  compile/main
  
+  compile/main
   // Workflow Stuff Begin
   calculateWFPrecond/main
   // Workflow Stuff End
@@ -213,7 +213,23 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 	   		filename := <guarantee-extension(|"test")> path;
 	   		result :=  (<subsets> [1,2,3],<subsets> [3,2,1])   
    		
-   		
+ /* *************************
+ *** Workflow Stuff Begin ***
+ ************************* */
+	 builder-precond-debug: (selected, position, ast, path, project-path) -> (filename,result)
+	 where
+	 	<precond> 
+	 	  <compile> 
+	 	    <elaborate> 
+	 	      <parse> 
+	 	        selected;
+	 	filename := "precond_debug";
+	 	result := ("SeqWorkflows", <PrecondLookupTable> "SeqWorkflows",
+				   "ParWorkflows", <PrecondLookupTable> "ParWorkflows",
+				   "ParWorkflows_Precond", <PrecondLookupTable> "ParWorkflows_Precond")
+/* *************************
+*** Workflow Stuff End *****
+************************* */				   
 
 main-booster =
   xtc-input-wrap(

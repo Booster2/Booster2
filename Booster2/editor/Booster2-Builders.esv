@@ -25,7 +25,7 @@ builders
   builder                   : "Simplify" = builder-simplify (openeditor) (realtime) (source)
   builder                   : "Translate Booster" = builder-translate-booster (openeditor) (realtime) (source)
   builder                   : "Translate SQL" = builder-translate-sql (openeditor) (realtime) (source)
-  builder					 : "Precond Debugging" = precond_debug (openeditor) (realtime) (meta) (source)
+  builder					 : "Precond Debugging" = builder-precond-debug (openeditor) (realtime) (meta) (source)
   //builder                   : "Expand into Booster notation" = expand-booster (openeditor) (realtime) (source)
   //builder                   : "Expand into Booster Terms" = expand-booster-without-printing (openeditor) (realtime) (source)
   //builder              		: "Generate installation SQL" = install-sql (openeditor) (realtime) (source)

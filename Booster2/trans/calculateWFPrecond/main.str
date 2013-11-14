@@ -27,12 +27,5 @@ rules
 	    <expandParWorkflows> system;
 	    <calculatePrecond> system
 	    
-	    
-	 // should be moved to booster2.str eventually 
-	 precond_debug: system -> ("precond_debug",
-		("SeqWorkflows", <PrecondLookupTable> "SeqWorkflows",
-		"ParWorkflows", <PrecondLookupTable> "ParWorkflows",
-		"ParWorkflows_Precond", <PrecondLookupTable> "ParWorkflows_Precond")
-	 ) where <precond> system
 
 	
