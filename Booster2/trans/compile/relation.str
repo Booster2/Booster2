@@ -480,19 +480,6 @@ imports
 			
 			
 
-/* 	is-defined:
-		takes an expression in the context of a model, a classname, 
-		and a methodname, and returns a constraint
-*/			
-			
-	is-defined:
-		(classname, method, BinRel(expr1, binrel, expr2), env)
-			-> And(And(constraint1, constraint2), BinRel(expr1, binrel, expr2))
-		where
-			constraint1 := <is-defined> (classname, method, expr1, env);
-			constraint2 := <is-defined> (classname, method, expr2, env)
-		
-
 
 /* 	make-old:
 		takes a relation, and returns its representation in the 

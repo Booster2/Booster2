@@ -4,6 +4,10 @@ imports
   include/Booster2
     
   elaborate/valueExpression
+  //
+  library/constraint
+  compile/relation
+  //
   library/valueExpression
   library/basicTypes
   
@@ -11,75 +15,3 @@ rules
 	
 	
 
-/* 	is-defined
-*/
-
-	is-defined:
-		 (classname, method, BasicValue(t), env)
-		 	-> BinRel(BasicValue(t), In(), typeExtent)
-		 where
-		 	t' := <get-corresponding-booster-type> t;
-		 	typeExtent := <get-type-extent> t'
-		 		 	
-	is-defined:
-		 (classname, method, TypeExtent(t), env)
-		 	-> True()
-		 	
-	is-defined:
-		 (classname, method, Null(), env)
-		 	-> True()
-		 	
-	is-defined:
-		 (classname, method, Input(i), env)
-		 	-> True()
-		 	
-	is-defined:
-		 (classname, method, Output(i), env)
-		 	-> True()
-		 	
-	is-defined:
-		 (classname, method, This(), env)
-		 	-> True()
-		 	
-	is-defined:
-		 (classname, method, ThisPrimed(), env)
-		 	-> True()
-
-	is-defined:
-		 (classname, method, Path(a,b), env)
-		 	-> And(constraint, BinRel(a, NotEqual(), Null()))
-		 where
-		 	Optional(type) := <resolve-path-type>(classname, a, method, env);
-		 	constraint := <is-defined> (classname, method, a, env) 
-
-	is-defined:
-		 (classname, method, Path(a,b), env)
-		 	-> <is-defined> (classname, method, a, env)
-
-	is-defined:
-		 (classname, method, PathStart(a,maybeprimed), env)
-		 	-> True()
-
-	is-defined:
-		 (classname, method, PathComponent(a,maybeprimed), env)
-		 	-> <is-defined> (classname, method, a, env) 
-		 	
-	is-defined:
-		 (classname, method, SetExtent([]), env)
-		 	-> True()
-	
-	is-defined:
-		 (classname, method, SetExtent([elem, elems*]), env)
-		 	-> And(constraint1, constraint2)
-		 where
-		 	constraint1 := <is-defined> (classname, method, elem, env);
-		 	constraint2 := <is-defined> (classname, method, SetExtent([elems*]), env) 
-	
-	/* is-defined:
-		(classname, method, expr) -> 
-			True()
-		where
-			log(|Error(), " Error!", classname);
-			log(|Error(), method, expr) */ 	 	
-		
- 

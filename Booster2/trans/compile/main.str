@@ -4,12 +4,8 @@ imports
   include/Booster2
   
   library/constraint
-  library/relation
-  library/expression
-  library/valueExpression
-  
+
   library/abstractBoosterModel
-  compile/relation
   compile/constraint
   compile/guardedCommand
   library/environment
@@ -92,6 +88,7 @@ rules
 			-> (And(constraint4, constraint3), Guard(constraint1, program2))
 		where
 			(constraint3, program2) := <calculate-wp> (program1, constraint2, classname, methname);
+			log(|Error(),"c3,p2",(constraint3,program2));
 			constraint4 := <is-defined>(classname, methname, constraint3, <new-environment>[])
 	calculate-wp:
 		(Sequence(program1, program2), constraint1, classname, methname)
