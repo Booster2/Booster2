@@ -3,7 +3,7 @@ module parse
 imports
   include/Booster2
   
-  library/typedecl
+  library/typeDecl
   library/multiplicity
   
 rules

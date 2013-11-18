@@ -835,11 +835,14 @@ imports
 		 	constraint2 := <is-defined> (classname, method, SetExtent([elems*]), env) 
 	
 	
+	// I removed this catch-rule again.
+	/*
 	 is-defined:
 		(classname, method, expr,env) -> 
 			True()
 		where
 			log(|Error(), " Error!", classname);
-			log(|Error(), method, expr) 	 	
+			log(|Error(), method, expr) 
+	*/	 	
 		
  
