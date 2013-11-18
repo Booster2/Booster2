@@ -1,9 +1,0 @@
-module parse/constraint
-
-imports
-  include/Booster2
-   
-
- rules
- 	
- 	

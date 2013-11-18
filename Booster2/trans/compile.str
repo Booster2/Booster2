@@ -1,21 +1,251 @@
-module compile/relation
+module compile
 
 imports
   include/Booster2
   
-  compile/expression
-  compile/valueExpression
-
-  elaborate/valueExpression
+  library/constraint
 
   library/abstractBoosterModel
+  library/environment
   library/expression
   library/valueExpression
-  library/environment
- 
- rules
- 	
- 	
+  library/basicTypes
+
+rules
+
+	compile:
+		system -> system
+	where
+		<program-main> system
+		
+/* 	program:
+		Applies run-program to the constraints in a model
+*/
+
+	program-main:
+		system -> system
+		with
+			programs := <map(run-program)>(<LookupTable> "Constraints");
+			rules(
+				LookupTable :+ "Programs" -> programs
+			)
+			
+		
+
+/* 	run-program:
+		Applies program to each constraint, with the abstract booster machine for reference
+*/
+			
+	run-program:
+			((classname, methname), constraint)
+				-> ((classname, methname), Guard(constraint7, program2))
+			with
+				program := <program> (classname, methname, constraint);
+				[paths*] := <get-modified-paths>(program);
+				constraint2a :=  <get-type-constraint> ([paths*], classname, methname, <new-environment>[]);
+				constraint2b :=  <get-multiplicity-constraint> ([paths*], classname, methname, <new-environment>[]);
+				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
+				
+				[atts*] := <get-modified-attributes>(program, classname, methname, <new-environment>[]);
+				invs := <lookup-invariants>([atts*]);
+				constraint4 := <make-post-state><conjoin-constraints>(invs);
+				
+				constraint5 := And(constraint4, constraint3);
+				
+				(constraint6, program2) := <calculate-wp>(program, constraint5, classname, methname);
+				constraint7 := <make-old> constraint6 
+				
+			
+/*
+*/
+	calculate-wp:
+		(Skip(), constraint, classname, methodname)
+			-> (constraint, Skip())
+
+	calculate-wp:
+		(Assign(path, expression), constraint1, classname, methname)
+			-> (And( constraint2, And(constraint3, constraint4)), Assign(path, expression))
+		where 
+			
+			path1 := <make-post-state> path;
+			constraint2 := <aliasing-substitute> (classname, methname, constraint1, path1, expression, <new-environment>[]);
+			constraint3 := <is-defined> (classname, methname, expression, <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, path, <new-environment>[])
+			
+
+	calculate-wp:
+		(New(o, cl), constraint1, classname, methname)
+			-> (And(constraint4, And(constraint3, constraint2)), New(o, cl))
+		where 
+			
+			constraint2 := <aliasing-substitute> (classname, methname, constraint1, PathStart(cl, None()), BinOp(PathStart(cl, None()),Union(), Output(o)), <new-environment>[]);
+			constraint3 := <is-defined> (classname, methname, BinOp(PathStart(cl, None()),Union(),Output(o)), <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()), <new-environment>[])
+
+
+				
+	calculate-wp:
+		(Guard(constraint1, program1), constraint2, classname, methname)
+			-> (And(constraint4, constraint3), Guard(constraint1, program2))
+		where
+			(constraint3, program2) := <calculate-wp> (program1, constraint2, classname, methname);
+			log(|Error(),"c3,p2",(constraint3,program2));
+			constraint4 := <is-defined>(classname, methname, constraint3, <new-environment>[])
+	calculate-wp:
+		(Sequence(program1, program2), constraint1, classname, methname)
+			-> (constraint3, Sequence(program4, program3))
+		where
+			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
+			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname)
+
+	calculate-wp:
+		(Choice(program1, program2), constraint1, classname, methname)
+			-> (Or(constraint2, constraint3), 
+				Choice(Guard(constraint2, program3), 
+					   Guard(constraint3, program4)))
+				where
+			(constraint2, program3) := <calculate-wp> (program1, constraint1, classname, methname);
+			(constraint3, program4) := <calculate-wp> (program2, constraint1, classname, methname)
+
+	calculate-wp:
+		(Parallel(program1, program2), constraint1, classname, methname)
+			-> (constraint3, Parallel(program3, program4))
+		where
+			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
+			//<debug> ("constraint2", constraint2);
+			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname)
+			//<debug> ("constraint3", constraint3)
+			
+
+
+rules
+/* get-modified-paths:
+	Takes a program and returns all the paths that may be modified by it
+*/
+	get-modified-paths:
+		Skip()
+			-> []
+			
+	get-modified-paths:
+		Assign(path, expression)
+			-> [path]	
+
+	get-modified-paths:
+		New(name, class)
+			-> []	
+
+
+	get-modified-paths:
+		Guard(constraint, program)
+			-> <get-modified-paths> (program)
+			
+	get-modified-paths:
+		Parallel(program1, program2)
+			-> [paths1*, paths2*]
+		where
+			[paths1*] := <get-modified-paths> (program1);
+			[paths2*] := <get-modified-paths> (program2)
+
+	get-modified-paths:
+		Choice(program1, program2)
+			-> [paths1*, paths2*]
+		where
+			[paths1*] := <get-modified-paths> (program1);
+			[paths2*] := <get-modified-paths> (program2)
+
+	get-modified-paths:
+		Sequence(program1, program2)
+			-> [paths1*, paths2*]
+		where
+			[paths1*] := <get-modified-paths> (program1);
+			[paths2*] := <get-modified-paths> (program2)
+
+/* 	program:
+		takes a constraint, in the context of a class, and a method name,
+		and a model, and returns a candidate program to achieve 
+		the constraint as a goal			
+*/
+
+
+
+	program:
+		(classname, methodname, True())
+			-> Skip()
+
+	program:
+		(classname, methodname, False())
+			-> Guard(False(), Skip())
+
+	program:
+		(classname, methodname, And(constraint1, constraint2))
+			-> Parallel(program1, program2)
+		with
+			program1 := <program> (classname, methodname, constraint1);
+			program2 := <program> (classname, methodname, constraint2)
+
+	program:
+		(classname, methodname, Or(constraint1, constraint2))
+			-> Choice(program1, program2)
+		with
+			program1 := <program> (classname, methodname, constraint1);
+			program2 := <program> (classname, methodname, constraint2)
+
+	program:
+		(classname, methodname, Then(constraint1, constraint2))
+			-> Sequence(program1, program2)
+		with
+			program1 := <program> (classname, methodname, constraint1);
+			program2 := <program> (classname, methodname, constraint2)
+
+	program:
+		(classname, methodname, Implies(constraint1, constraint2))
+			-> Choice(Guard(constraint1,program1), Guard(Not(constraint1),Skip()))
+		with
+			program1 := <program> (classname, methodname, constraint1)
+
+	program:
+		(classname, methodname, Not(constraint1))
+			-> Guard(Not(constraint1),Skip())
+
+
+
+/*	TODO:
+		These are incomplete
+*/
+	program:
+		(classname, methodname, Exists(name, expr, constraint))
+			-> Any(name, expr, program)
+		with
+			program := <program> (classname, methodname, constraint)
+		
+	program:
+		(classname, methodname, Forall(name, expr, constraint))
+			-> All(name, expr, program)
+		with
+			program := <program> (classname, methodname, constraint)
+		
+	program:
+		(classname1, methodname1, MethodReference(path, substs*))
+			-> program
+		with
+			(classname2, methodname2, constraint) := 
+				<get-method-ref-constraint> (classname1, methodname1, MethodReference(path, [substs*]));
+			program := <program> (classname2, methodname2, constraint)
+			
+/* 	get-method-ref-constraint:
+		takes a class name, a method name, a method reference, and an abm,
+		and returns the constraint corresponding to that reference.			
+*/
+
+/* 	TODO:
+		This method is incomplete
+*/
+	
+
+	get-method-ref-constraint:
+		(classname, methodname, MethodReference(path, [substs*]))
+			-> True()
+
 
 /* 	program:
 		takes a relation, in the context of a class, and a method name,
@@ -493,3 +723,6 @@ imports
 			expr3 := <make-old> expr1;
 			expr4 := <make-old> expr2
 
+
+
+	

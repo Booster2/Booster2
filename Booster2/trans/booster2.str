@@ -8,15 +8,11 @@ imports
   lib/editor-common.generated
   check
   
-  parse/main
+  parse
   
-  parse/class
-  parse/system
-  
-  
-  elaborate/main
+  elaborate
  
-  compile/main
+  compile
   // Workflow Stuff Begin
   calculateWFPrecond/main
   // Workflow Stuff End
@@ -26,7 +22,7 @@ imports
   translate/sql/sql
   translate/lookupTable
   
-  simplify/main
+  simplify
   
   library/strategy
   library/environment

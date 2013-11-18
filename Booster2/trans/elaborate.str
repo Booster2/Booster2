@@ -1,0 +1,961 @@
+module elaborate
+
+imports
+  include/Booster2  
+  
+  library/constraint
+  library/strategy
+  library/environment
+  library/abstractBoosterModel
+  library/valueExpression
+  library/basicTypes
+  library/binRel
+ 
+
+rules
+	
+	elaborate:
+		system -> system
+	where
+				/*<combine-invariants> 
+   				<calculate-class-invariants> 
+   				<create-constraint-for-each-attribute> 
+   				*/
+   				< generate-inputs-and-outputs > 
+   				<insert-this-main>
+  				system ;
+  				invariants := <LookupTable> "Invariants";
+  				qualified-invariants := <map(qualify-invariant)> invariants;
+  				rules(			
+					LookupTable :+ "QualifiedInvariants" -> qualified-invariants
+				);
+ 				invs-atts := <map(get-mentioned-attributes-in-invariant)> qualified-invariants;
+ 				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
+  				rules(			
+					LookupTable :+ "ClassBasedInvariants" -> att-invs
+				) 
+  
+ qualify-invariant:
+ 	(classname, True())
+ 		-> (classname, True())
+
+
+ qualify-invariant:
+ 	(classname, invariant)
+ 		-> (classname, Forall(varname, PathStart(classname, None()), invariant'))
+ 	where
+ 		varname := <environment-get-new-name><new-environment>[];
+ 		invariant' := <literal-substitute> (classname, None(), invariant, [This()], PathStart(varname, None()), <new-environment>[])
+  
+ get-mentioned-attributes-in-invariant:
+ 	(classname, invariant)
+ 		-> (classname, invariant, atts)
+ 		where 
+ 			atts := <get-mentioned-attributes> (classname, None(), invariant, <new-environment> [])
+  
+  
+  
+  getattributes:
+  	(invs-atts, ((classname, attname), type)) 
+  		-> ((classname, attname), constraint) 
+  		where
+  			invs1 := <curryfilter(match-attributes)> ((classname, attname), invs-atts);
+  			constraint := <combine-constraints> invs1
+
+ match-attributes:
+ 	((classname1, attname), (classname2, constraint, atts))
+ 		-> (classname2, constraint, atts)
+	where
+		<elem>((classname1, attname), atts) 
+
+
+ match-attributes:
+ 	((classname1, attname), (classname2, constraint, atts))
+ 		-> None()
+ 		 
+
+combine-constraints:
+	[] -> True()			
+
+combine-constraints:
+	[(cname, c, atts), cs*] -> And(c, <combine-constraints> [cs*])			
+ 
+			  
+  /* 	insert-this:
+		Takes all the constraints, and the invariants, and puts 'this' at the 
+		front of any paths which need it.  
+*/
+
+	insert-this-main:
+		x -> x
+		with
+			invs := <insert-this-invariants> <LookupTable> "Invariants";
+			consts := <insert-this-constraints> <LookupTable> "Constraints";
+			rules(
+				LookupTable :+ "Invariants" -> invs
+			    LookupTable :+ "Constraints" -> consts
+			)
+
+/* 	insert-this-invariants:
+		Takes all the invariants, and puts 'this' at the 
+		front of any paths which need it.  I can't seem to curry this function, so the
+		'map' functionality is built in  
+*/
+	
+	
+	insert-this-invariants:
+		[] -> []			
+
+	insert-this-invariants:
+		[(name, constraint), invs*]
+			-> [(name, constraint2), invs2*]
+		where
+			constraint2 := <insert-this> (constraint, name);
+			[invs2*] := <insert-this-invariants> [invs*]
+			
+/* 	insert-this-constraints:
+		Takes all the constraints, and puts 'this' at the 
+		front of any paths which need it.  I can't seem to curry this function, so the
+		'map' functionality is built in  
+*/
+	
+	insert-this-constraints:
+		[] 
+			-> []			
+
+	insert-this-constraints:
+		[((classname, methodname), constraint), consts*]
+			-> [((classname, methodname), constraint2), consts2*]
+		where
+			constraint2 := <insert-this> (constraint, classname);
+			[consts2*] := <insert-this-constraints> [consts*]
+			
+		
+/* 	generate-inputs-and-outputs:
+		Takes a method constraint, and an Abstract Booster Model and 
+		returns an Abstract Booster Model with the ins and outs filled in
+*/
+
+	generate-inputs-and-outputs:
+		system -> system 
+		with 
+			(inputs, outputs) := <generate-method-inputs-and-outputs> <LookupTable> "Constraints";
+
+			rules(
+				LookupTable :+ "Inputs" -> inputs
+				LookupTable :+ "Outputs" -> outputs
+			)
+
+			
+/* 	generate-method-inputs-and-outputs:
+		Takes a list of method constraints, and an Abstract Booster Model and 
+		returns an list of pairs of pairs: 
+			[(classname, methodname), (inputname, type)]
+*/
+	generate-method-inputs-and-outputs:
+		something 
+			-> (inputs, outputs)
+		where
+			inputsandoutputs := <map(deduce-types-method)> something;
+			inputs := <map(split-inputs)> inputsandoutputs;
+			outputs := <map(split-outputs)> inputsandoutputs 
+			/*inputs := [];
+			outputs := [];
+			log(|Error(), "inputs and outputs:", inputsandoutputs) */
+
+
+	split-inputs:
+		((classname, methodname), inputs, outputs)
+			-> ((classname, methodname), inputs)
+
+	split-outputs:
+		((classname, methodname), inputs, outputs)
+			-> ((classname, methodname), outputs)
+
+/* [((classname, methodname),ins1)] */
+
+	deduce-types-method:
+		((classname, methodname), constraint)
+			-> ((classname, methodname), inputs, outputs)
+		where 
+			inputsandoutputs := <deduce-types>(classname, methodname, constraint,[]);
+			inputs := <filter(isInput)> inputsandoutputs;
+			outputs := <filter(isOutput)> inputsandoutputs
+			/*inputs := [];
+			outputs := [];
+			log(|Error(), "inputs and outputs:", inputsandoutputs) */
+
+	isInput:
+		(Input(name), type)
+			-> (name, type)
+
+	isOutput:
+		(Output(name), type)
+			-> (name, type)
+
+
+/* 	create-constraint-for-each-attribute:
+*/
+
+/*	create-constraint-for-each-attribute:
+		system -> system
+		where 
+*/
+			/*invariants' := <realign-invariants> <LookupTable> "Invariants"; */
+/*			attribute-constraints := <map(create-constraint)>(<LookupTable> "Type");
+			rules(
+				LookupTable :+ "RealignedInvariants" ->  attribute-constraints
+			) 
+*/
+/* create-constraint */
+	
+/*	create-constraint: 
+		((classname, attname), type)
+			-> ((classname, attname), True())
+*/
+/* 	realign-invariants:
+		takes a set of (class, invariant) pairs and returns a set of 
+		(class, invariant, atts) pairs where atts is a set of attributes mentioned in
+		the invariant.
+		I can't seem to curry this function, so map is built in.  
+
+		This function doesn't appear to be used any more.
+
+*/
+/*	realign-invariants:
+		[] -> [] 
+
+	realign-invariants:
+		[(name, constraint), invs*]
+			-> <union>( [(name, constraint, atts)], invs2)
+		with
+			log(|Error(), "realign-invariants", [(name, constraint), invs*]); 
+			invs2 := <realign-invariants>[invs*];
+			atts := <get-mentioned-attributes>(name, "" , constraint)
+*/
+
+
+/* 	create-attribute-constraints:
+*/
+
+
+	create-attribute-constraints:
+		([(classname, [attname, atts*]) , classes*], invs1)
+			-> <union>([((classname, attname), True())], invs2)
+		where
+			invs2 := <create-attribute-constraints> ([(classname, [atts*]), classes*], invs1) 
+			
+	create-attribute-constraints:
+		([(Name,[]), classes*], invs)
+			-> <create-attribute-constraints> ([classes*], invs)
+			
+	create-attribute-constraints:
+		([], invs)
+			-> []
+			
+	create-attribute-constraints:
+		(classes, [])
+			-> []
+			
+			
+			
+/* 	find-invariant:
+		I can't seem to curry this function, so map is built in.  
+*/
+/*
+	find-invariant:
+		(classname, attname, [])
+			-> True()
+			
+	find-invariant:
+		(classname1, attname, [(classname2, constraint, []), invs*])		
+			-> <find-invariant> (classname1, attname, [invs*])
+			
+	find-invariant:
+		(classname1, attname1, [(classname2, constraint, [(classname1, attname1), atts*]), invs2*])
+			-> And(constraint, inv)
+		where
+			inv := <find-invariant>(classname1, attname1, [invs2*])
+		
+	find-invariant:
+		(classname1, attname1, [(classname2, constraint, [(classname3, attname2), atts*]), invs2*])
+			-> inv
+		where
+			inv := <find-invariant>(classname1, attname1, [(classname2, constraint, [atts*]), invs2*])
+*/
+
+/* calculate class-invariants:
+		rewrite the invariants so that they appear in terms of the other classes
+*/
+/*	calculate-class-invariants:
+		system -> system
+			where
+				cinvariants1 := <map(split-class-constraints)> <LookupTable> "Invariants";
+				cinvariants2 := <get-invariants-mentioned-attributes> (cinvariants1);
+				rules(			
+					LookupTable :+ "ClassBasedInvariants" -> cinvariants2
+				);
+				log(|Error(), "Cinvariants1", cinvariants1);
+				log(|Error(), "Cinvariants2", cinvariants2)
+*/			
+
+/*	combine-invariants: 
+   		system -> system
+		where
+				cinvariants := <combine-invariants> (<LookupTable> "RealignedInvariants", <LookupTable> "ClassBasedInvariants");
+			rules(
+				LookupTable :+ "ClassBasedInvariants" -> cinvariants 
+			)
+*/			
+/*	split-class-constraints:
+		(classname, And(constraint1, constraint2))
+			-> (classname, [constraints1*, constraints2*])
+		where
+			(classname, [constraints1*]) := <split-class-constraints>(classname, constraint1);
+			(classname, [constraints2*]) := <split-class-constraints>(classname, constraint2)
+
+	split-class-constraints:
+		(classname, constraint)
+			-> (classname, [constraint])
+*/			
+
+/* 	get-invariants-mentioned-attributes:
+		curry, blah
+*/	
+
+/*	get-invariants-mentioned-attributes:
+		[] -> []
+			
+
+
+	get-invariants-mentioned-attributes:
+		[(classname, invs), invs2*]
+			-> [inv1, invs3*]
+		where
+			inv1 := <get-invariant-mentioned-attributes>(classname, invs);
+			[invs3*] := <get-invariants-mentioned-attributes>[invs2*]
+*/			
+/* 	get-invariant-mentioned-attributes:
+		curry, blah
+*/	
+
+/*	get-invariant-mentioned-attributes:
+		(classname, [])
+			-> []
+	
+
+	get-invariant-mentioned-attributes:
+		(classname, [inv, invs*])
+			-> [triples*, invs2*]
+		where
+			atts := <get-mentioned-attributes>(classname, None(), inv);
+			classes := <get-mentioned-classes> (atts);
+			[invs2*] := <get-invariant-mentioned-attributes> (classname, [invs*]);
+			[triples*] := <apply-replace-this>(classname, classes, atts, inv)
+	
+*/		
+		
+			
+/*	apply-replace-this:
+		(classname, [], atts, constraint)
+			-> []
+
+	apply-replace-this:
+		(classname, [cname1, cnames*], [], constraint)
+			-> []
+
+
+	apply-replace-this:
+		(classname, [cname1, cnames*], [(cname2, attname), atts*], constraint)
+			-> [((cname2, attname), Implies(constraint1, constraint2)), invs*, invs2*]
+			
+		where
+			<equal>(cname2, cname1);
+			(constraint1, constraint2) := <replace-this-for-attribute>(classname, cname2, attname, constraint);
+			[invs*] := <apply-replace-this> (classname, [cname1, cnames*], [atts*], constraint);
+			[invs2*] := <apply-replace-this> (classname, [cnames*], [(cname2, attname), atts*], constraint)
+			
+			
+	apply-replace-this:
+		(classname, [cname1, cnames*], [(cname2, attname), atts*], constraint)
+			-> [invs*, invs2*]
+		where
+			[invs*]	:= <apply-replace-this> (classname, [cname1, cnames*], [atts*], constraint);
+			[invs2*] := <apply-replace-this> (classname, [cnames*], [(cname2, attname), atts*], constraint)
+*/
+/*	get-mentioned-classes:
+		[] -> []
+		
+	get-mentioned-classes:
+		[(classname, attname), atts*]
+			-> <union>([classname],classes*)
+		where
+			classes* := <get-mentioned-classes>([atts*]) 	
+*/
+
+
+/*	insert-this:
+		Takes a constraint, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/ 	
+
+	insert-this: 
+		(True(), classname)
+			-> True()
+			
+	insert-this: 
+		(False(), classname)
+			-> False()
+			
+	insert-this:
+			(Not(constraint), classname)
+				-> Not(constraint2)
+			where
+				constraint2 := <insert-this> (constraint, classname)			
+			
+	insert-this: 
+		(And(constraint1, constraint2), classname)
+			-> And(constraint3, constraint4)
+		with 
+			constraint3 := <insert-this>(constraint1, classname);
+			constraint4 := <insert-this>(constraint2, classname)
+
+	insert-this: 
+		(Or(constraint1, constraint2), classname)
+			-> Or(constraint3, constraint4)
+		with 
+			constraint3 := <insert-this>(constraint1, classname);
+			constraint4 := <insert-this>(constraint2, classname)
+
+	insert-this: 
+		(Then(constraint1, constraint2), classname)
+			-> Then(constraint3, constraint4)
+		with 
+			constraint3 := <insert-this>(constraint1, classname);
+			constraint4 := <insert-this>(constraint2, classname)
+
+	insert-this: 
+		(Implies(constraint1, constraint2), classname)
+			-> Implies(constraint3, constraint4)
+		with 
+			constraint3 := <insert-this>(constraint1, classname);
+			constraint4 := <insert-this>(constraint2, classname)
+
+/*	deduce-types:
+		Description goes here
+*/ 	
+
+	deduce-types:
+		(classname, methodname, Then(expr1, expr2), alreadyknown)
+		 	-> types2
+		where
+			types1 := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			types2 := <deduce-types> (classname, methodname, expr2, types1)
+
+	deduce-types:
+		(classname, methodname, And(expr1, expr2), alreadyknown)
+		 	-> types2
+		where
+			types1 := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			types2 := <deduce-types> (classname, methodname, expr2, types1)
+
+
+
+
+
+	
+
+
+
+
+ 	deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr2, types1)
+
+ 	deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			(BasicType(t), types2) := <deduce-types> (classname, methodname, expr1, types1)
+
+
+    deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			types2 := <infer-type> (classname, methodname, expr2, BasicType(t), types1)
+
+    deduce-types:
+		(classname, methodname, BinOp(expr1, op, expr2), alreadyknown)
+		 	-> (BasicType(t), types2)
+		where
+			(BasicType(t), types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			types2 := <infer-type> (classname, methodname, expr1, BasicType(t), types1)
+			
+			
+
+	deduce-types:
+		(classname, methodname, PathStart(a,maybeprimed), alreadyknown)
+			-> (Set(Class(a)), alreadyknown)
+		where
+			<equal>(a, <lookup-class-name>(a))
+
+	
+	deduce-types:
+		(classname, methodname, Output(name), alreadyknown)
+			-> (type, alreadyknown)
+		where
+			type := <lookup>(Output(name), alreadyknown)
+
+	deduce-types:
+		(classname, methodname, BasicValue(t), alreadyknown)
+			-> (BasicType(t'), alreadyknown)
+			where
+				t' := <get-corresponding-booster-type> t
+
+	deduce-types:
+		(classname, methodname, This(), alreadyknown)
+			->(Class(classname), <union>([(Input("this"), Class(classname))], alreadyknown))
+
+
+	deduce-types:
+		(classname, methodname, Path(path, PathComponent(att, maybeprimed)), alreadyknown)
+			-> (type, alreadyknown)
+		where
+			(Class(c), newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
+			type := <lookup-attribute-type> (c, att)
+			/* type := <resolve-path-type>
+					(classname, Path(path,component), (classname, methodname), newlyknown) */
+			
+
+
+				
+
+			
+
+			
+		
+		 	
+		 	
+
+
+
+
+/*
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, And(constraint1, constraint2))
+			-> (And(constraint3, constraint4), 
+				And(constraint5, constraint6))
+			where
+				(constraint3, constraint5) := <replace-this-for-attribute>(thisclassname, otherclassname, attname, constraint1);
+				(constraint4, constraint6) := <replace-this-for-attribute>(thisclassname, otherclassname, attname, constraint2)
+			
+			
+	replace-this-for-attribute:
+		(classname, attname, Or(constraint1, constraint2))
+			-> (And(constraint3, constraint4), 
+				Or(constraint5, constraint6))
+			where
+				(constraint3, constraint5) := <replace-this-for-attribute>(classname, attname, constraint1);
+				(constraint4, constraint6) := <replace-this-for-attribute>(classname, attname, constraint2)
+	
+	
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Implies(constraint1, constraint2))
+			-> (And(constraint3, constraint4), 
+				Implies(constraint5, constraint6))
+			where
+				(constraint3, constraint5) := <replace-this-for-attribute>(thisclassname, otherclassname, attname, constraint1);
+				(constraint4, constraint6) := <replace-this-for-attribute>(thisclassname, otherclassname, attname, constraint2)
+				
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, True())
+			-> (True(), 
+				True())
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, False())
+			-> (True(), 
+				False())
+	
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Not(constraint1))
+			-> (constraint2, Not(constraint3))
+		where
+			(constraint2, constraint3) := <replace-this-for-attribute>(thisclassname, otherclassname, attname, constraint1)
+
+*/
+
+/*	deduce-types:
+		Description goes here
+*/ 	
+	
+	deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			(type2, types2) := <deduce-types> (classname, methodname, expr2, types1);
+			[] := <get-binrel-type> (type1, rel, type2)
+			
+	deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			(type2, types2) := <deduce-types> (classname, methodname, expr1, types1);
+			[] := <get-binrel-type> (type1, rel, type2)
+
+    deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr1, alreadyknown );
+			type2 := <get-binrel-type> (type1, rel);
+			types2 := <infer-type> (classname, methodname, expr2, type2, types1)
+
+    deduce-types:
+		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
+		 	-> types2
+		where
+			(type1, types1) := <deduce-types> (classname, methodname, expr2, alreadyknown );
+			type2 := <get-binrel-type> (rel, type1);
+			types2 := <infer-type> (classname, methodname, expr1, type2, types1)
+
+
+
+
+/* 	insert-this:
+		Takes a constraint, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/
+
+	insert-this:
+		(BinRel(expr1, binrel, expr2), classname)
+			-> BinRel(expr3, binrel, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+
+
+
+	
+	
+/*	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, BinRel(expr1, binrel, expr2))
+			-> (And(constraint1, constraint2), BinRel(expr3, binrel, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+*/
+
+/* 	infer-type:
+		Description goes here	
+*/
+
+
+
+
+ 	infer-type:
+ 		(classname, methodname, BinOp(expr1, op, expr2), type, alreadyknown)
+ 			-> <union>(vars1, vars2)
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, alreadyknown);
+ 			vars2 := <infer-type> (classname, methodname, expr2, type, alreadyknown)
+
+
+
+  					
+ 	infer-type:
+ 		(classname, methodname, Head(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Tail(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Cardinality(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+ 	infer-type:
+ 		(classname, methodname, Negative(expr1), type, inorout)
+ 			-> vars1
+ 		with
+ 			vars1 := <infer-type> (classname, methodname, expr1, type, inorout)
+
+
+ 	
+/*	deduce-types:
+		Description goes here
+*/ 	
+
+			
+
+/* 	insert-this:
+		Takes an expression, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/
+			
+	insert-this:
+		(Head(expr1), classname)
+			-> Head(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+	insert-this:
+		(Tail(expr1), classname)
+			-> Tail(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+	insert-this:
+		(Negative(expr1), classname)
+			-> Negative(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+	insert-this:
+		(Cardinality(expr1), classname)
+			-> Cardinality(expr2)
+		where
+			expr2 := <insert-this> (expr1, classname)
+
+
+	insert-this:
+		(BinOp(expr1, op, expr2), classname)
+			-> BinOp(expr3, op, expr4)
+		where
+			expr3 := <insert-this> (expr1, classname);
+			expr4 := <insert-this> (expr2, classname)
+
+			
+/*
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, BinOp(expr1, op, expr2))
+			-> (And(constraint1, constraint2), BinOp(expr3, op, expr4))
+		where
+			(constraint1, expr3) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1);
+			(constraint2, expr4) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr2)
+
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Head(expr1))
+			-> (constraint1, Head(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Tail(expr1))
+			-> (constraint1, Tail(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Cardinality(expr1))
+			-> (constraint1, Cardinality(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Negative(expr1))
+			-> (constraint1, Negative(expr2))
+		where
+			(constraint1, expr2) := <replace-this-for-attribute> (thisclassname, otherclassname, attname, expr1)
+
+*/
+
+ 	
+/* 	infer-type:
+		Description goes here	
+*/
+		
+	infer-type:
+		(classname, methodname, Output(name), type1, [alreadyknown*])
+			->[(Output(name), type1), alreadyknown*]
+
+	infer-type:
+		(classname, methodname, Input(name), type1, [alreadyknown*])
+			->[(Input(name), type1), alreadyknown*]
+
+/*	infer-type:
+		(classname, methodname, Input(name), type1, [alreadyknown*])
+			->[(Input(name), type1), alreadyknown*] */
+
+			
+/*	deduce-types:
+		Description here
+*/
+
+
+/*	deduce-types:
+		something
+			-> []
+		where
+			log(|Error(), "Error in deduce-types", something)				
+
+
+	infer-type:
+		something
+			-> []
+		where
+			log(|Error(), "Error in infer-type", something)				
+*/
+
+
+/* 	insert-this:
+		Takes a value expression, and returns it with any paths transformed so that
+		they have 'this' at the front, if applicable 
+*/
+
+
+	insert-this:
+		(BasicValue(t), classname) 
+			-> BasicValue(t)
+			
+	insert-this:
+		(TypeExtent(t), classname)
+			-> TypeExtent(t)
+			
+	insert-this:
+		(Null(), classname)
+			-> Null()
+			
+	insert-this:
+		(Input(inputname), classname)
+			-> Input(inputname)
+			
+	insert-this:
+		(Output(outputname), classname)
+			-> Output(outputname)
+			
+	insert-this:
+		(This(), classname)
+			-> This()
+			
+	insert-this:
+		(ThisPrimed(), classname)
+			-> ThisPrimed()
+
+	insert-this:
+		(Path(a,b), classname)
+			-> Path(c,b)
+		where
+			c := <insert-this> (a, classname)
+			
+	insert-this:
+		(PathComponent(name, maybePrimed), classname)
+			-> PathComponent(name, maybePrimed)
+
+	insert-this:
+		(PathStart(name, maybePrimed), classname)
+			-> Path(This(), PathComponent(name, maybePrimed))
+			where
+				type := <lookup-attribute-type> ((classname, name))
+
+	 insert-this:
+		(PathStart(name, maybePrimed), classname)
+			-> PathStart(name, maybePrimed) 
+			
+	
+
+	insert-this:
+		(SetExtent([]), classname)
+			-> SetExtent([])
+
+	insert-this:
+		(SetExtent([expr1, exprs1*]), classname)
+			-> SetExtent([expr2, exprs2*])
+		where
+			expr2 := <insert-this> expr1;
+			SetExtent([exprs2*]) := <insert-this> SetExtent([exprs1*])
+	
+
+/*	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, BasicValue(t))
+			-> (True(), BasicValue(t))
+			
+			
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, TypeExtent(t))
+			-> (True(), TypeExtent(t))
+			
+			
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Null())
+			-> (True(), Null())
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, This())
+			-> (True(), This())
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (True(), Path(This(),b))
+				
+		where */
+			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
+/*			attname2 := <get-path-attribute-name>(a);
+			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
+			Class(thisclassname) := <lookup-attribute-type> ((otherclassname, attname3))
+
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (BinRel(Path(This(),PathComponent(attname3, None())),NotEqual(), Null()),  Path(This(),b))
+				
+		where */
+			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
+/*			attname2 := <get-path-attribute-name>(a);
+			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
+			Optional(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
+
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (BinRel(Path(This(),PathComponent(attname3, None())), NotEqual(), SetExtent([])), Path(This(),b))
+				
+		where */
+			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
+/*			attname2 := <get-path-attribute-name>(a);
+			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
+			Set(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
+
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (Exists("obj",
+						PathStart(thisclassname, None()),
+						BinRel(This(), Equal(), 
+							  Path(PathStart("obj",None()),
+							  	   PathComponent(attname2, None())))), Path(This(),b))
+				
+		where */
+			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
+/*			not(<equal>(thisclassname, otherclassname));
+			log(|Error(), "get-path-attribute-name", (thisclassname, otherclassname, attname, Path(a,b)));
+			attname2 := <get-path-attribute-name>(a)
+			
+	
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, Path(a,b))
+			-> (True(), Path(a,b))
+		
+	replace-this-for-attribute:
+		(thisclassname, otherclassname, attname, PathStart(a,b))
+			-> (True(), PathStart(a,b))	
+			
+*/	
+

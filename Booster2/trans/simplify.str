@@ -1,13 +1,25 @@
-module simplify/constraint
+module simplify
 
 imports
   include/Booster2
+  
+  simplify
 
-  library/abstractBoosterModel
-  	
 rules
 
-// Some normalisation rules?
+	simplify-main:
+		system -> system
+		with
+			simp-programs := <map(simp)> <LookupTable> "Programs"; 
+			rules(
+				LookupTable :+ "Programs" -> simp-programs
+			)
+			
+	simp:
+		((classname, progname), prog) 
+			-> ((classname, progname), <innermost(simplify)> prog)
+			
+			// Some normalisation rules?
 /*	simplify:
 		BinRel(expr, Equal(), This())
 			-> BinRel(This(), Equal(), expr)
@@ -191,4 +203,122 @@ rules
 			-> Or(Not(p), q)
 */
 
+
+
+	simplify:
+		BinRel(expr, NotEqual(), expr)
+			-> False()
+
+	simplify:
+		BinRel(expr, Equal(), expr)
+			-> True()
 	
+	simplify:
+		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), LessThanEquals(), BasicValue(Integer(j)))
+			-> BinRel(a, LessThanEquals(), BasicValue(Integer(k)))
+		where
+			k := <subt>(j,i)
+
+
+	simplify:
+		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), GreaterThanEquals(), BasicValue(Integer(j)))
+			-> BinRel(a, GreaterThanEquals(), BasicValue(Integer(k)))
+		where
+			k := <subt>(j,i)
+
+
+	simplify:
+		BinRel(expression1, In(), BinOp(expression2, Union(), SetExtent([expression1])))
+			-> True()
+			
+
+	simplify:
+		BinRel(BinOp(expression1, Union(), expression2), SubsetEquals(), expression3)
+			-> And(BinRel(expression1, SubsetEquals(), expression3), 
+					BinRel(expression2, SubsetEquals(), expression3))
+
+	
+
+	simplify:
+		BinRel(SetExtent([]), SubsetEquals(), expression2)
+			-> True()		
+
+	simplify:
+		BinRel(SetExtent([exp, exps*]), SubsetEquals(), expression2)
+			-> And(BinRel(exp, In(), expression2), BinRel(SetExtent([exps*]), SubsetEquals(), expression2))
+
+			
+	simplify:
+		Not(BinRel(e1, Equal(), e2))
+		 	-> BinRel(e1, NotEqual(), e2)		
+
+	simplify:
+		Not(BinRel(e1, NotEqual(), e2))
+		 	-> BinRel(e1, Equal(), e2)		
+		 	
+	simplify:
+		Not(BinRel(e1, In(), e2))
+		 	-> BinRel(e1, NotIn(), e2)		
+
+	simplify:
+		Not(BinRel(e1, NotIn(), e2))
+		 	-> BinRel(e1, In(), e2)	
+		 	
+	
+
+	simplify:
+		(BinOp(BasicValue(Integer(i)), Times(), BasicValue(Integer(j))))
+			-> BasicValue(Integer( k ))
+		where
+			k := <mulS>(i, j)
+
+			
+	simplify:
+		(BinOp(BasicValue(Integer(i)), Plus(), BasicValue(Integer(j))))
+			-> BasicValue(Integer( k ))
+		where
+			k := <addS>(i, j)
+
+	simplify:
+		(BinOp(BasicValue(Integer(i)), Minus(), BasicValue(Integer(j))))
+			-> BasicValue(Integer( k ))
+		where
+			k := <subtS>(i, j)
+
+	simplify:
+		(BinOp(BasicValue(Integer(i)), Divide(), BasicValue(Integer(j))))
+			-> BasicValue(Integer( k ))
+		where
+			k := <divS>(i, j)
+
+			
+	simplify:
+		Cardinality(BinOp(a,Union(), b))
+			-> BinOp(Cardinality(a), Plus(), Cardinality(b))
+	
+	simplify:
+		Cardinality(SetExtent([]))
+			-> BasicValue(Integer(0))	
+
+/*	simplify:
+		Cardinality(SetExtent([a]))
+			-> BasicValue(Integer(1))
+*/			
+	simplify:
+		Cardinality(SetExtent([a, as*]))
+			-> BasicValue(Integer(k))
+		where
+			BasicValue(Integer(i)) := <simplify> Cardinality(SetExtent([as*]));
+			k := <add>(i,1)
+			
+
+			
+	simplify:
+		Guard(e1, Guard(e2, p))
+			-> Guard(And(e1,e2),p)
+
+	simplify:
+		Guard(True(), p)
+			-> p
+			
+

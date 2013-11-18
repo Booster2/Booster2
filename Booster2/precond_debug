@@ -1,0 +1,80 @@
+( "SeqWorkflows"
+, [ ( "w0"
+    , Prefix(
+        GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+      , Wait(
+          "0"
+        , "1"
+        , Wait(
+            "1"
+          , "0"
+          , Prefix(
+              GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+            , Skip()
+            )
+          )
+        )
+      )
+    )
+  , ( "w1"
+    , Wait(
+        "0"
+      , "1"
+      , Prefix(
+          GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+        , Wait("1", "0", Skip())
+        )
+      )
+    )
+  ]
+, "ParWorkflows"
+, [ ( "p"
+    , [ Prefix(
+          GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+        , Wait(
+            "0"
+          , "1"
+          , Wait(
+              "1"
+            , "0"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+              , Skip()
+              )
+            )
+          )
+        )
+      , Wait(
+          "0"
+        , "1"
+        , Prefix(
+            GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+          , Wait("1", "0", Skip())
+          )
+        )
+      ]
+    )
+  ]
+, "ParWorkflows_Precond"
+, [ ( "p"
+    , And(
+        True()
+      , ( "wp("
+        , MethodReference(PathStart("add1", None()), [])
+        , And(
+            True()
+          , ( "wp("
+            , MethodReference(PathStart("sub1", None()), [])
+            , And(
+                True()
+              , ("wp(", MethodReference(PathStart("add1", None()), []), True(), ")")
+              )
+            , ")"
+            )
+          )
+        , ")"
+        )
+      )
+    )
+  ]
+)

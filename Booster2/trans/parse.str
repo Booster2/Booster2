@@ -1,0 +1,438 @@
+module parse
+
+imports
+  include/Booster2
+  
+  library/typedecl
+  library/multiplicity
+  
+rules
+	
+	
+	/* parse: 
+		Takes a system and produces a lookup table with all the information in it
+	 parse : System
+*/
+	parse: 
+   		system -> 
+   				system
+	with
+   		<initialize-lookup-table> system; 
+   		classes := <get-classes-from-system> system;
+		constraints := <concat><map(get-class-method-constraints)> classes;
+		operations := <map(get-class-method-names)> classes;
+		rules(
+			LookupTable :+ "Name" -> <get-system-name> system
+			LookupTable :+ "Sets" -> <get-sets> system 
+			LookupTable :+ "Classes" -> <map(get-class-name)> classes
+			LookupTable :+ "Invariants" -> <zip>
+						(<map(get-class-name)> classes,
+						<map(get-class-invariant)> classes)
+			LookupTable :+ "Attributes" -> <map(get-class-attribute-names)> classes
+			LookupTable :+ "Ids" -> <zip>( <map(get-class-name)> classes, 
+										   <map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))> classes)
+			LookupTable :+ "Type" -> <concat><map(get-class-attribute-types)> classes
+			LookupTable :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)> classes
+			LookupTable :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)> classes
+			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites) >classes
+			LookupTable :+ "Operations" -> operations 
+			LookupTable :+ "Constraints" -> constraints
+		)
+	    
+
+	initialize-lookup-table:
+		system -> 
+			system
+		where 
+			rules(
+				LookupTable :+ "Constraints" -> []
+				LookupTable :+ "Programs" -> []
+				LookupTable :+ "Invariants" -> []
+				LookupTable :+ "QualifiedInvariants" -> []
+				LookupTable :+ "Type" -> []
+				LookupTable :+ "Inputs" -> []
+				LookupTable :+ "Outputs" -> []
+				LookupTable :+ "ClassBasedInvariants" -> []
+				LookupTable :+ "RealignedInvariants" -> []
+				LookupTable :+ "Sets" -> []
+				LookupTable :+ "Classes" -> []
+				LookupTable :+ "Opposites" -> []
+				LookupTable :+ "MinMults" -> []
+				LookupTable :+ "MaxMults" -> []
+				LookupTable :+ "Attributes" -> []
+				LookupTable :+ "Operations" -> []
+				LookupTable :+ "Name" -> []
+				LookupTable :+ "TableNames" -> []
+				LookupTable :+ "IDs" -> []
+			)
+				
+		
+
+	get-system-name:
+		System(sysname,systemComponents) 
+  			-> sysname
+	
+	
+/* get-sets: 
+		Takes a System and returns the sets
+*/
+	get-sets:
+  		System(sysname,systemComponents) 
+  			-> sets
+  		where 
+  			sets := <filter(isSet)> systemComponents 
+
+	isSet:
+		SetDef(name, values)
+			-> SetDef (name, values)
+  		
+ 
+/* get-classes-from-system: 
+		Takes a list of system components and returns a set of 
+		classes
+*/
+
+	get-classes-from-system:
+  		System(sysname, syscomponents) ->
+  			classes
+  		where 
+  			classes := <filter(isClass)> syscomponents 
+
+	isClass:
+		Class(name, extends, classcomponents)
+			-> Class (name, extends, classcomponents)
+			
+
+/* get-class-name: 
+		Takes a class and returns its class name
+*/
+			
+	get-class-name:
+		Class(name,extends, classComponents) 
+			-> name
+			
+			
+/* get-class-attributes: 
+		Takes a class and returns a list of attributes 
+*/
+ 
+ 	get-class-attributes:
+ 		Class(name, extends, classComponents)
+ 			-> atts
+ 		where
+ 			attSections := <filter(isAttSection)> classComponents;
+ 			atts := <foldr([], union)> attSections
+
+	isAttSection:
+		 Attributes(attrs) -> attrs
+ 
+ 			
+/* get-class-attribute-names: 
+		Takes a class and returns a pair of name, attribute names
+*/
+
+	get-class-attribute-names: 
+		Class(name, extends, systemComponents*)
+			-> (name, attnames)
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*)
+
+/* get-class-attribute-types: 
+		Takes a class and returns a list of triples: classname, attname, type
+*/
+
+	get-class-attribute-types: 
+		Class(name, extends, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
+			atttypes := <map(get-attribute-type)> <get-class-attributes> Class(name, extends, systemComponents*);
+			xs := <zip>(<cart(id)>([name], attnames), atttypes)
+
+/* get-class-attribute-max-mults: 
+		Takes a class and returns a list of triples: classname, attname, maxmult
+*/
+
+	get-class-attribute-max-mults: 
+		Class(name, extends, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
+			maxmults := <map(get-attribute-max-mult)> <get-class-attributes> Class(name, extends, systemComponents*);
+			xs :=  <zip>(<cart(id)>([name], attnames), maxmults)
+
+/* get-class-attribute-min-mults: 
+		Takes a class and returns a list of triples: classname, attname, minmult
+*/
+
+	get-class-attribute-min-mults: 
+		Class(name, extends, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
+			minmults := <map(get-attribute-min-mult)> <get-class-attributes> Class(name, extends, systemComponents*);
+			xs :=  <zip>(<cart(id)>([name], attnames), minmults)
+
+/* get-class-attribute-opposites: 
+		Takes a class and returns a list of triples: classname, attname, opposite
+*/
+
+	get-class-attribute-opposites: 
+		Class(name, extends, systemComponents*)
+			-> xs
+		with
+			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
+			opposites := <map(get-attribute-opposite)> <get-class-attributes> Class(name, extends, systemComponents*);
+			xs :=  <filter(has-opposite)> <zip>(<cart(id)>([name], attnames), opposites)
+
+
+/* get-class-invariant: 
+		Takes a class and returns its invariant
+*/
+ 
+ 
+  	get-class-invariant:
+ 		Class(name, extends, classComponents)
+ 			-> invs
+ 		where
+ 			invSections := <filter(isInvSection)> classComponents;
+ 			invs := <foldr(!True(), conjoinInvs)> invSections
+
+	isInvSection:
+		 Invariant(invs) -> 
+		 	<foldr(!True(), conjoinInvs)> invs
+ 
+ 	conjoinInvs:
+ 		(const1,True())
+ 			-> const1
+ 
+ 	conjoinInvs:
+ 		(const1,const2)
+ 			-> And(const1, const2)
+ 
+
+ 	
+
+/* get-class-methods: 
+		Takes a class and returns a list of methods 
+*/
+
+ 
+ 	get-class-methods:
+ 		Class(name, extends, classComponents)
+ 			-> meths
+ 		where
+ 			methSections := <filter(isMethSection)> classComponents;
+ 			meths := <foldr([], union)> methSections
+
+	isMethSection:
+		 Methods(meths) -> meths 
+ 
+ 
+
+
+/* get-class-method-names: 
+		Takes a class and returns a pair of name, method names
+*/
+
+	get-class-method-names: 
+		Class(name, extends, classComponents)
+			-> (name, methnames)
+		with
+			methnames := <filter(get-method-name)> <get-class-methods> Class(name, extends, classComponents)
+
+/* get-class-method-constraints: 
+		Takes a class and returns a list of triples: classname, methodname, constraint
+*/
+
+	get-class-method-constraints: 
+		Class(name, extends,  classComponents)
+			-> xs
+		with
+			meths := <get-class-methods> Class(name, extends, classComponents) ;
+			methnames := <filter(get-method-name)> meths;
+			constraints := <filter(get-method-constraint)> meths;
+			xs := <zip>(<cart(id)>([name], methnames), constraints) 
+			
+			
+	
+/* get-method-name: 
+		Takes a method and returns its name.
+*/
+ 	
+ 	get-method-name:
+ 		Method(methName, methConstraint)
+ 		 	-> methName
+
+/*	get-method-name:
+		something -> ""
+		where 
+			log(|Error(), "get-method-name error", something) */
+
+/* get-method-constraint: 
+		Takes a method and returns its name.
+*/
+ 	
+ 	get-method-constraint:
+ 		Method(methName, methConstraint)
+ 		 	-> methConstraint
+
+/* get-attribute-name: 
+		Takes an attribute and returns its name.
+*/
+ 	
+ 	get-attribute-name:
+ 		Attribute(attName, attType)
+ 		 	-> attName
+
+ 	get-attribute-name:
+ 		Attribute(attName, identity, attType)
+ 		 	-> attName
+
+
+/* get-attribute-type: 
+		Takes an attribute and returns its type.
+*/
+ 	
+ 	get-attribute-type:
+ 		Attribute(attName, attType)
+ 			-> type
+ 		with
+ 			type := <get-minimal-type> attType
+
+ 	get-attribute-type:
+ 		Attribute(attName, identity, attType)
+ 			-> type
+ 		with
+ 			type := <get-minimal-type> attType
+
+/* get-attribute-max-mult: 
+		Takes an attribute and returns its maximum multiplicity.
+*/
+ 	
+ 	get-attribute-max-mult:
+ 		Attribute(attName, attType)
+ 			-> maxmult
+ 		with
+ 			maxmult := <get-max-mult> attType
+
+ 	get-attribute-max-mult:
+ 		Attribute(attName, identity, attType)
+ 			-> maxmult
+ 		with
+ 			maxmult := <get-max-mult> attType
+
+
+/* get-attribute-min-mult: 
+		Takes an attribute and returns its minimum multiplicity.
+*//* has-opposite: 
+		Returns the attribute if it has an opposite.
+*/
+ 	
+ 	get-attribute-min-mult:
+ 		Attribute(attName, attType)
+ 			-> minmult
+ 		with
+ 			minmult := <get-min-mult> attType
+
+ 	get-attribute-min-mult:
+ 		Attribute(attName, identity, attType)
+ 			-> minmult
+ 		with
+ 			minmult := <get-min-mult> attType
+
+
+/* get-attribute-min-mult: 
+		Takes an attribute and returns its minimum multiplicity.
+*/
+ 	
+ 	get-attribute-opposite:
+ 		Attribute(attName, attType)
+ 			-> opp
+ 		with
+ 			opp := <get-opposite> attType
+
+ 	get-attribute-opposite:
+ 		Attribute(attName, identity, attType)
+ 			-> opp
+ 		with
+ 			opp := <get-opposite> attType
+ 			
+/* has-opposite: 
+		Returns the attribute if it has an opposite.
+*/
+ 	
+ 	has-opposite:
+ 		((name1, name2), (name3, name4))
+ 			-> ((name1, name2), (name3, name4))
+ 	
+
+
+	attribute-is-id:
+		Attribute(attName, identity, attType)
+ 			-> Attribute(attName, identity, attType)
+
+		
+ /* get-max-mult:
+ 		Takes a TypeDecl and returns its maximum multiplicity	
+ 
+ */
+ 
+	get-max-mult: 
+		BasicType(t) -> 1
+				
+	get-max-mult:
+		UniDirectional(name) -> 1
+	
+	get-max-mult:
+		BiDirectional(name1,name2) -> 1
+		
+	get-max-mult:
+		Optional(typedecl) -> 1
+		
+	get-max-mult:
+		Set(typedecl, mult) -> x
+	with x := <get-max> mult
+
+ /* get-min-mult:
+ 		Takes a TypeDecl and returns its minimum multiplicity	
+  */
+ 
+	get-min-mult: 
+		BasicType(t) -> 1
+		
+	get-min-mult:
+		UniDirectional(name) -> 1
+	
+	get-min-mult:
+		BiDirectional(name1,name2) -> 1
+		
+	get-min-mult:
+		Optional(typedecl) -> 0
+		
+	get-min-mult:
+		Set(typedecl, mult) -> x
+	with x := <get-min> mult
+
+ /* get-opposite:
+ 		Takes a TypeDecl and returns its opposite attribute	
+  */
+ 
+	get-opposite: 
+		BasicType(t) -> ()
+				
+	get-opposite:
+		UniDirectional(name) -> ()
+	
+	get-opposite:
+		BiDirectional(name1,name2) -> (name1, name2)
+		
+	get-opposite:
+		Optional(typedecl) -> x
+	with x := <get-opposite> typedecl
+		
+	get-opposite:
+		Set(typedecl, mult) -> x
+	with x := <get-opposite> typedecl
+
+
