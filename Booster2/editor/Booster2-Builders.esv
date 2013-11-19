@@ -11,8 +11,9 @@ builders
 
 builders
 
-  provider 					: include/booster2.ctree                                                                                         
-  //provider 					: include/booster2-java.jar                                                                                      
+  //provider 					: include/booster2.ctree                                                                                         
+  provider 					: include/booster2-java.jar                                                                                      
+  provider 					: include/booster2.jar                                                                                      
                                                             
                                                                                                                
   observer                  : editor-analyze                                                                   

@@ -29,8 +29,34 @@ imports
   library/abstractBoosterModel
   library/valueExpression
   
-rules // Main editor interface (defined by editor/Booster-Builders and -References.esv)
+rules  
   
+  main-booster2 =
+  xtc-input-wrap(
+    // Read input
+    ?FILE(input);
+    prim("SSL_EXT_enable_origins");
+    ast                             := <parse-booster2-file> input;
+    // Analyze
+    (errors, warnings, notes) := <editor-analyze> (ast, input, ".");
+    // ...
+    
+	//log(|Error(), errors);
+	//log(|Warning(), warnings);
+	//log(|Info(), notes);
+    // Compile
+    (output, contents)              := <builder-translate-booster> (ast, [], ast, input, ".");
+    
+    // Write to disk
+    handle := <fopen> (output, "w");
+    <fputs> (contents, handle);
+    fclose
+  <+
+    // Report any errors
+    prim("SSL_stacktrace_get_all_frame_names"); report-failure
+  )
+  
+rules // Main editor interface (defined by editor/Booster-Builders and -References.esv)
   // Analyzes the current program, returning a tuple with errors, warnings, and notes;
   // each a list of (term, message) tuples or simply (message) terms.
   editor-analyze: 
@@ -41,6 +67,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
       errors   := <collect-all(constraint-error, conc)> ast;
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast
+
   
   // Prints the abstract syntax ATerm of a selection.
   generate-aterm:
@@ -227,26 +254,5 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 *** Workflow Stuff End *****
 ************************* */				   
 
-main-booster =
-  xtc-input-wrap(
-    // Read input
-    ?FILE(input);
-    prim("SSL_EXT_enable_origins");
-    ast                             := <parse-booster2-file> input;
 
-    // Analyze
-    (ast', errors, warnings, notes) := <editor-analyze> (ast, input, ".");
-    // ...
-    
-    // Compile
-    (output, contents)              := <builder-translate-sql> (ast', [], ast, input, ".");
-    
-    // Write to disk
-    handle := <fopen> (output, "w");
-    <fputs> (contents, handle);
-    fclose
-  <+
-    // Report any errors
-    prim("SSL_stacktrace_get_all_frame_names"); report-failure
-  )
 
