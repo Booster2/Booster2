@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="Booster2" default="all">
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+
+	<!-- Main target -->
+	<target name="all" depends="empty-folder, run-tests" />
+
+	<target name="empty-folder">
+		<delete>
+			<fileset dir="./output">
+				<include name="*" />
+			</fileset>
+		</delete>
+		<delete>
+			<fileset dir="./output/succeeded">
+				<include name="*" />
+			</fileset>
+		</delete>
+			<delete>
+				<fileset dir="./output/failed">
+					<include name="*" />
+				</fileset>
+			</delete>
+
+		
+		<echo>Emptied folders.</echo>
+	</target>
+
+	<target name="run-tests">
+		<echo>Running tests...</echo>
+		<foreach target="_runTest" param="sourceFile">
+			<path>
+				<fileset dir="./source/" casesensitive="no" />
+			</path>
+		</foreach>
+		
+		<resourcecount property="failing">
+			<fileset dir="./output/failed">
+				<include name="*.boo2"/>
+			</fileset>
+		</resourcecount>
+		<resourcecount property="succeeding">
+			<fileset dir="./output/succeeded">
+				<include name="*.boo2"/>
+			</fileset>
+		</resourcecount>
+		<resourcecount property="total">
+			<fileset dir="./source">
+				<include name="*.boo2"/>
+			</fileset>
+		</resourcecount>
+		<echo message="Total tests: ${total}.  Succeeded: ${succeeding}.  Failed: ${failing}"/>
+		<if>
+			<equals arg1="${failing}" arg2="0" />
+			<then>
+			</then>
+			<else>
+				<fail message="There are ${failing} failing tests"/>
+			</else>
+		</if>		
+	</target>
+
+	<target name="_runTest">
+
+		<basename property="basename" file="${sourceFile}" suffix=".boo2" />
+		<java classname="run">
+			<arg value="trans.main-booster2" />
+			<arg value="-i" />
+			<arg value="${sourceFile}" />
+
+			<classpath>
+				<pathelement location="../../include/booster2.jar" />
+				<pathelement location="../../include/booster2-java.jar" />
+				<pathelement location="../../utils/strategoxt.jar" />
+			</classpath>
+		</java>
+
+		<move file="./source/${basename}.expanded.boo2" todir="./output/"/>
+
+		<exec dir="." executable="diff" resultproperty="diffresult">
+			<arg line="-wB" /> <!-- Ignore white space and blank lines -->
+			<arg file="./expected/${basename}.expanded.boo2" />
+			<arg file="./output/${basename}.expanded.boo2" />
+		</exec>
+		<if>
+			<equals arg1="${diffresult}" arg2="0" />
+			<then>
+				<echo message="${sourceFile} succeeded" />
+				<move file="./output/${basename}.expanded.boo2" todir="./output/succeeded"/>
+			</then>
+			<else>
+				<echo message="################################################################################" />
+				<echo message="Warning!!! Test Failed!" />
+				<echo message="Failing Test: ${sourceFile}" />
+				<echo message="################################################################################" />
+				<move file="./output/${basename}.expanded.boo2" todir="./output/failed"/>
+			</else>
+		</if>
+
+	</target>
+</project>
