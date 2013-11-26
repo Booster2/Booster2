@@ -21,6 +21,9 @@ rules
    		classes := <get-classes-from-system> system;
 		constraints := <concat><map(get-class-method-constraints)> classes;
 		operations := <map(get-class-method-names)> classes;
+		seqwfs := <map(Fst)><map(get-class-wfs)> classes;
+		parwfs := <map(Snd)><map(get-class-wfs)> classes;
+
 		rules(
 			LookupTable :+ "Name" -> <get-system-name> system
 			LookupTable :+ "Sets" -> <get-sets> system 
@@ -37,6 +40,8 @@ rules
 			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites) >classes
 			LookupTable :+ "Operations" -> operations 
 			LookupTable :+ "Constraints" -> constraints
+			LookupTable :+ "SeqWorkflows" -> seqwfs
+			LookupTable :+ "ParWorkflows" -> parwfs
 		)
 	    
 
@@ -64,7 +69,17 @@ rules
 				LookupTable :+ "Name" -> []
 				LookupTable :+ "TableNames" -> []
 				LookupTable :+ "IDs" -> []
+				LookupTable :+ "SeqWorkflows" -> []
+				LookupTable :+ "ParWorkflows" -> []
+				LookupTable :+ "ExpandedSeqWorkflows" -> []
+				LookupTable :+ "ExpandedParWorkflows" -> []
+			);
+			rules(
+				PrecondLookupTable :+ "SeqWorkflows" -> []
+				PrecondLookupTable :+ "ParWorkflows" -> []
+				PrecondLookupTable :+ "ParWorkflows_Precond" -> []
 			)
+
 				
 		
 
@@ -255,6 +270,33 @@ rules
 			xs := <zip>(<cart(id)>([name], methnames), constraints) 
 			
 			
+/* getSeq/ParWorfklows
+
+*/
+			
+	get-class-wfs: 
+		Class(name, extends,  classComponents)
+			-> ((name,seqWfs),(name,parWfs))
+		with
+			allWfs := <get-class-wf_sections> Class(name, extends, classComponents);
+			seqWfs := <filter(isSeqWf)> allWfs;
+			parWfs := <filter(isParWf)> allWfs
+	
+	get-class-wf_sections:
+ 		Class(name, extends, classComponents)
+ 			-> meths
+ 		where
+ 			wfSections := <filter(isWorkflowSection)> classComponents;
+ 			meths := <foldr([], union)> wfSections
+
+	isWorkflowSection:
+		 Workflows(wfs) -> wfs
+		 
+	isSeqWf:
+		SeqWf(n,expr) -> SeqWf(n,expr)  
+		
+	isParWf:
+		ParWf(n,expr) -> ParWf(n,expr)  
 	
 /* get-method-name: 
 		Takes a method and returns its name.

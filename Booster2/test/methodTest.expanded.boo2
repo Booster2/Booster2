@@ -4,43 +4,12 @@ system methodTest
 class class1 {
 	attributes
 		att1 : INT
-		att2 : STRING
 		
 	invariants
 		true
 	methods
-		m_a1 { this.att1 = a? 
-		               --> ( skip ) }
-		m_a2 { 3 : INT 
-		               --> ( this.att1 := 3 ) }
-		m_a3 { this.att1 = a? 
-		               --> ( skip ) }
-		m_a4 { 3 : INT 
-		               --> ( this.att1 := 3 ) }
-		m_a5 { this.att1 = 7 
-		               --> ( skip ) }
-		m_a6 { 7 : INT 
-		               --> ( this.att1 := 7 ) }
-		m_a7 { a? = this.att1 
-		               --> ( skip ) }
-		m_a8 { 3 = this.att1 
-		               --> ( skip ) }
-		m_b1 { this.att2 = a? 
-		               --> ( skip ) }
-		m_b2 { "Hello" : STRING 
-		               --> ( this.att2 := "Hello" ) }
-		m_b3 { this.att2 = a? 
-		               --> ( skip ) }
-		m_b4 { "Hello" : STRING 
-		               --> ( this.att2 := "Hello" ) }
-		m_b5 { this.att2 = "Hello"" World" 
-		               --> ( skip ) }
-		m_b6 { "Hello"" World" : STRING 
-		               --> ( this.att2 := "Hello"" World" ) }
-		m_b7 { a? = this.att2 
-		               --> ( skip ) }
-		m_b8 { "Hello" = this.att2 
-		               --> ( skip ) }
+		m1 { this.att1 + 5 : INT 
+		               --> ( this.att1 := this.att1 + 5 ) }
 		
 }
 

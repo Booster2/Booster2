@@ -33,7 +33,91 @@ rules
  				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
   				rules(			
 					LookupTable :+ "ClassBasedInvariants" -> att-invs
-				) 
+				) ;
+				
+				seqwfs' := <map(expandSeqWorkflows)>(<LookupTable> "SeqWorkflows");
+  				rules(			
+					LookupTable :+ "ExpandedSeqWorkflows" -> seqwfs'
+				);
+				parwfs' := <map(expandParWorkflows)>(<LookupTable> "ParWorkflows");
+  				rules(			
+					LookupTable :+ "ExpandedParWorkflows" -> parwfs'
+				)
+  		
+  
+  
+  // Workflow Begin
+ 
+/*    expandSeqWorfklows: (expanded,n_expanded) -> (expanded, n_expanded)
+    where
+    	[] := <filter(fullyExpanded)> n_expanded
+    	
+ 
+    expandSeqWorfklows: (expanded,n_expanded) -> (expanded', n_expanded')
+    where
+    	already_expanded := <filter(fullyExpanded)> n_expanded;
+    	expanded' := <union> (expanded,already_expanded);
+    	n_expanded1 := <diff> (n_expanded,already_expanded);
+    	n_expanded' := map<replaceReference(already_expanded)> n_expanded1;
+    	
+  */
+	// make a usual list from a concurrent workflow 
+	makeParList: Single(name) -> [name]
+	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)
+	
+		
+
+	// checks whether a sequential workflow is fully expended, i.e., it does not use workflow references anymore
+	fullyExpanded: Skip() -> Skip()
+	fullyExpanded: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
+	where <fullyExpanded> wf1;
+	      <fullyExpanded> wf2
+	fullyExpanded: Wait(i,j,wf) -> Wait(i,j,wf)
+	where <fullyExpanded> wf
+	fullyExpanded: Prefix(ga,wf) -> Prefix(ga,wf)
+	where <fullyExpanded> wf
+		
+
+    expandSeqWorkflows: (cname, seqwfs) -> (cname, seqwfs')
+    	where
+    		rules(
+    			PrecondLookupTable :+ "SeqWorkflows" -> []
+    		);
+    		seqwfs' := <outermost(expandSeqWf)> (<innermost(expandSeqWf)> seqwfs)
+    		
+    		
+//	system -> <topdown(expand)> system
+	
+//	
+
+
+	expandSeqWf:
+		WorkflowReference(wfr) -> wf
+		where
+			wf := <lookup> (wfr,(<PrecondLookupTable> "SeqWorkflows"))
+				
+	expandSeqWf: SeqWf(name,definition) -> (name,definition)
+	where not(<lookup> (name,(<PrecondLookupTable> "SeqWorkflows")));
+	      <fullyExpanded> definition;
+	      wfs := <PrecondLookupTable> "SeqWorkflows";
+	      newwfs := <conc>(wfs,[(name, definition)]);
+          rules( 
+	      	PrecondLookupTable :+ "SeqWorkflows" -> newwfs
+	      )
+		      
+		      
+	expandParWorkflows: (cname,parwfs) -> (cname,parwfs')
+		where
+		parwfs' := <currymap(expandParWf)> (cname, parwfs)
+		
+	expandParWf: (cname, ParWf(name,xs)) -> (name,wfs*)
+	where
+		wfs_ref* := <makeParList> xs;
+		classExpandedSeqWorkflows := <lookup>(cname, <LookupTable> "ExpandedSeqWorkflows");
+		wfs* := <map(\wfr -> <lookup> (wfr,classExpandedSeqWorkflows)\)> wfs_ref*
+  
+  // Workflow End
+  
   
  qualify-invariant:
  	(classname, True())

@@ -66,11 +66,12 @@ rules
 		(Assign(path, expression), constraint1, classname, methname)
 			-> (And( constraint2, And(constraint3, constraint4)), Assign(path, expression))
 		where 
-			
+			log(|Error(),"before wp-assign:",(path,":=",expression,"!!!",constraint1));
 			path1 := <make-post-state> path;
 			constraint2 := <aliasing-substitute> (classname, methname, constraint1, path1, expression, <new-environment>[]);
 			constraint3 := <is-defined> (classname, methname, expression, <new-environment>[]);
-			constraint4 := <is-defined> (classname, methname, path, <new-environment>[])
+			constraint4 := <is-defined> (classname, methname, path, <new-environment>[]);
+			log(|Error(),"after wp-assign:",constraint2)
 			
 
 	calculate-wp:
@@ -83,14 +84,19 @@ rules
 			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()), <new-environment>[])
 
 
-				
+	// Thomas: Why is the guard "constraint1" never used subsequently?			
 	calculate-wp:
 		(Guard(constraint1, program1), constraint2, classname, methname)
 			-> (And(constraint4, constraint3), Guard(constraint1, program2))
 		where
+			log(|Error(),"wp prog w.r.t. prost condition:",(program1,"!!!",constraint2));
 			(constraint3, program2) := <calculate-wp> (program1, constraint2, classname, methname);
-			log(|Error(),"c3,p2",(constraint3,program2));
-			constraint4 := <is-defined>(classname, methname, constraint3, <new-environment>[])
+			log(|Error(),"c3,p2",(constraint3,"!!!",program2));
+			constraint4 := <is-defined>(classname, methname, constraint3, <new-environment>[]);
+			log(|Error(),"c4",constraint4)
+			
+			
+			
 	calculate-wp:
 		(Sequence(program1, program2), constraint1, classname, methname)
 			-> (constraint3, Sequence(program4, program3))

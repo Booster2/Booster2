@@ -8,11 +8,30 @@ class C1 {
   	  	
   	  	sub1 { x' = x - 1 }
   	  invariants
-  	    x >= 0 & x <= 2 
+  	    x >= 2 & x <= 4 
   	  workflows
-  	    seq w0: Normal true & add1() -> Wait.0.1 -> Wait.1.0 -> Normal true & add1() -> SKIP
+  	    seq w0: Normal true & add1() -> Wait.0.1 -> Wait.1.0 -> Normal true & add1() -> w1
   	    seq w1: Wait.0.1 -> Normal true & sub1() -> Wait.1.0 -> SKIP
-  	    //seq w0: Wait.0.1 -> SKIP
-  	    //seq w1: Wait.0.1 -> SKIP
-  	    par p: w0 ||| w1
+  	  workflows
+  	    seq w2: Normal true & add1() -> Normal true & add1() -> SKIP
+  	    par p: w2 
+  	    //par p: w0 ||| w1
+  	  workflows
+  	    par p1: w1
+}
+
+class C2 {
+	attributes
+   	  	x : INT
+   	  methods
+  	  	add1 { x' = x + 1 }
+  	  	
+  	  	sub1 { x' = x - 1 }
+  	  invariants
+  	    x >= 2 & x <= 4 
+  	  workflows
+  	    seq w0: Normal true & add1() -> Wait.0.1 -> Wait.1.0 -> Normal true & add1() -> w1
+  	    seq w1: Wait.0.1 -> Normal true & sub1() -> Wait.1.0 -> SKIP
+  	  workflows
+  	    par p: w1
 }

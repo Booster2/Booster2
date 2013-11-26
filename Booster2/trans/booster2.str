@@ -241,7 +241,8 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
  ************************* */
 	 builder-precond-debug: (selected, position, ast, path, project-path) -> (filename,result)
 	 where
-	 	<precond> 
+	  <precond>
+	 	<simplify-main> 
 	 	  <compile> 
 	 	    <elaborate> 
 	 	      <parse> 
