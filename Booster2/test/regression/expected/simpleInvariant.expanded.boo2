@@ -1,0 +1,16 @@
+system methodTest 
+
+
+class class1 {
+	attributes
+		att1 : INT
+		
+	invariants
+		this.att1 < 10
+	methods
+		m1 { (this.att1 + 5 < 10 
+		                & this.att1 + 5 : INT) 
+		               --> ( this.att1 := this.att1 + 5 ) }
+		
+}
+

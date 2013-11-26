@@ -1,0 +1,102 @@
+System ClassicCars 
+	class ProductLine {
+		attributes
+			productLine  (ID) : String
+			textDescription : String
+			htmlDescription : String
+			image : String
+			products : SET ( Product . productLine )[*]
+		methods
+			updateText{textDescription' = t?}
+	} 
+	
+	class Product {
+		attributes
+			productName (ID) : String
+			productCode (ID) : String
+			productLine : ProductLine . products
+			productScale : String
+			productVendor : String
+			productDescription : String
+			quantityInStock : Int
+			buyPrice : String
+			MSRP : String
+			forPurchaseOrders : SET(PurchaseOrderDetails . product)[*]
+	}
+	
+	class PurchaseOrderDetails {
+		attributes
+			purchaseOrder : PurchaseOrder . details
+			product (ID) : Product . forPurchaseOrders
+			quantityOrdered (ID) : Int
+			priceEach : String
+			orderLineNumber : Int
+	}
+	
+	class PurchaseOrder {
+		attributes
+			orderNumber (ID) : Int
+			orderDate (ID) : String
+			requiredDate : String
+			shippedDate : String
+			status : String 
+			comments : String
+			details : SET( PurchaseOrderDetails . purchaseOrder )[*]
+			customer : Customer . orders
+			
+	}
+	
+	class Customer {
+		attributes
+			customerNumber (ID) : Int
+			customerName (ID) : String
+			contactLastName : String 
+			contactFirstName : String 
+			phone : String 
+			addressLine1 : String
+			addressLine2 : String
+			city : String
+			state : String
+			postalCode : String
+			country : String
+			salesRepEmployee : Employee . salesRepFor
+			creditLimit : String
+			orders : SET (PurchaseOrder . customer)[*]
+			payments : SET ( Payment . customer )[*]
+	}
+	
+	class Payment {
+		attributes
+			customer (ID) : Customer . payments
+			checkNumber (ID) : String
+			paymentDate : String
+			amount : String
+	}
+	
+	class Employee {
+		attributes
+			employeeNumber (ID) : Int
+			lastName (ID) : String
+			firstName (ID) : String
+			extension : String
+			email : String  
+			office : Office . employees
+			reportsTo : [Employee . inChargeOf]
+			jobTitle : String
+			inChargeOf : SET(Employee . reportsTo)[*]
+			salesRepFor : SET(Customer . salesRepEmployee)[*]
+	}
+	
+	class Office {
+		attributes
+			officeCode (ID) : Int
+			city (ID) : String
+			phone : String
+			addressLine1 : String
+			addressLine2 : String
+			state : String
+			country : String
+			postalCode : String
+			territory : String
+			employees : SET(Employee.office)[*]
+	}

@@ -300,6 +300,39 @@ rules
 		Cardinality(SetExtent([]))
 			-> BasicValue(Integer(0))	
 
+
+	// if n < 0 and 
+	//     card(something) >= n
+	// then True
+	//
+	// The cardinality of anything is always greater than 0
+	simplify:
+		BinRel(Cardinality(something), GreaterThanEquals(), BasicValue(Integer(v)))
+			-> True()
+		where
+			<lt>(v,0)	
+
+	simplify:
+		BinRel(Cardinality(something), GreaterThan(), BasicValue(Integer(v)))
+			-> True()
+		where
+			<lt>(v,0)	
+
+	simplify:
+		BinRel(Cardinality(something), LessThanEquals(), BasicValue(Integer(v)))
+			-> False()
+		where
+			<lt>(v,0)	
+
+	simplify:
+		BinRel(Cardinality(something), LessThan(), BasicValue(Integer(v)))
+			-> False()
+		where
+			<lt>(v,0)	
+
+
+
+
 /*	simplify:
 		Cardinality(SetExtent([a]))
 			-> BasicValue(Integer(1))

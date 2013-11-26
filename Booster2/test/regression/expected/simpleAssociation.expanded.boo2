@@ -1,0 +1,28 @@
+system methodTest 
+
+
+class Parent {
+	attributes
+		children : set ( Child . parents  ) [ 0 .. * ]
+		
+	invariants
+		true
+	methods
+		m1 { ((this.children <<: Child 
+		                 & c? : Child) 
+		                & (c?.parents <<: Parent 
+		                   & this : Parent)) 
+		               --> ( (c?.parents := c?.parents \/ {this}) 
+		                       || (this.children := this.children \/ {c?}) ) }
+		
+}
+class Child {
+	attributes
+		parents : set ( Parent . children  ) [ 0 .. * ]
+		
+	invariants
+		true
+	methods
+		
+}
+

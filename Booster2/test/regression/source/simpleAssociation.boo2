@@ -1,0 +1,13 @@
+system methodTest
+
+class Parent {
+	attributes
+   		children : SET(Child . parents)[*] 
+   	methods
+  		m1 { c? : children' }	
+}
+
+class Child {
+	attributes
+		parents : SET(Parent.children)[*]
+}
