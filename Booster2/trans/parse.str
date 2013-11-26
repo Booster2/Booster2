@@ -73,6 +73,7 @@ rules
 				LookupTable :+ "ParWorkflows" -> []
 				LookupTable :+ "ExpandedSeqWorkflows" -> []
 				LookupTable :+ "ExpandedParWorkflows" -> []
+				LookupTable :+ "ParWorkflows_Precond" -> []
 			);
 			rules(
 				PrecondLookupTable :+ "SeqWorkflows" -> []

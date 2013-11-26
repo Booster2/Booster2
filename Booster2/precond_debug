@@ -1,80 +1,674 @@
-( "SeqWorkflows"
-, [ ( "w0"
-    , Prefix(
-        GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
-      , Wait(
-          "0"
-        , "1"
-        , Wait(
-            "1"
-          , "0"
-          , Prefix(
-              GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
-            , Skip()
+( ( "Constraints"
+  , [ ( ("C1", "add1")
+      , BinRel(
+          Path(This(), PathComponent("x", Some(Primed())))
+        , Equal()
+        , BinOp(
+            Path(This(), PathComponent("x", None()))
+          , Plus()
+          , BasicValue(Integer("1"))
+          )
+        )
+      )
+    , ( ("C1", "sub1")
+      , BinRel(
+          Path(This(), PathComponent("x", Some(Primed())))
+        , Equal()
+        , BinOp(
+            Path(This(), PathComponent("x", None()))
+          , Minus()
+          , BasicValue(Integer("1"))
+          )
+        )
+      )
+    , ( ("C2", "add1")
+      , BinRel(
+          Path(This(), PathComponent("x", Some(Primed())))
+        , Equal()
+        , BinOp(
+            Path(This(), PathComponent("x", None()))
+          , Plus()
+          , BasicValue(Integer("1"))
+          )
+        )
+      )
+    , ( ("C2", "sub1")
+      , BinRel(
+          Path(This(), PathComponent("x", Some(Primed())))
+        , Equal()
+        , BinOp(
+            Path(This(), PathComponent("x", None()))
+          , Minus()
+          , BasicValue(Integer("1"))
+          )
+        )
+      )
+    ]
+  , "Programs"
+  , [ ( ("C1", "add1")
+      , Guard(
+          And(
+            And(
+              BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Plus()
+                , BasicValue(Integer("1"))
+                )
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Plus()
+                , BasicValue(Integer("1"))
+                )
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          , BinRel(
+              BinOp(
+                Path(This(), PathComponent("x", None()))
+              , Plus()
+              , BasicValue(Integer("1"))
+              )
+            , In()
+            , TypeExtent(Int())
+            )
+          )
+        , Assign(
+            Path(This(), PathComponent("x", None()))
+          , BinOp(
+              Path(This(), PathComponent("x", None()))
+            , Plus()
+            , BasicValue(Integer("1"))
             )
           )
         )
       )
-    )
-  , ( "w1"
-    , Wait(
-        "0"
-      , "1"
-      , Prefix(
-          GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
-        , Wait("1", "0", Skip())
+    , ( ("C1", "sub1")
+      , Guard(
+          And(
+            And(
+              BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Minus()
+                , BasicValue(Integer("1"))
+                )
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Minus()
+                , BasicValue(Integer("1"))
+                )
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          , BinRel(
+              BinOp(
+                Path(This(), PathComponent("x", None()))
+              , Minus()
+              , BasicValue(Integer("1"))
+              )
+            , In()
+            , TypeExtent(Int())
+            )
+          )
+        , Assign(
+            Path(This(), PathComponent("x", None()))
+          , BinOp(
+              Path(This(), PathComponent("x", None()))
+            , Minus()
+            , BasicValue(Integer("1"))
+            )
+          )
         )
       )
-    )
-  ]
-, "ParWorkflows"
-, [ ( "p"
-    , [ Prefix(
-          GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
-        , Wait(
-            "0"
-          , "1"
-          , Wait(
-              "1"
-            , "0"
+    , ( ("C2", "add1")
+      , Guard(
+          And(
+            And(
+              BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Plus()
+                , BasicValue(Integer("1"))
+                )
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Plus()
+                , BasicValue(Integer("1"))
+                )
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          , BinRel(
+              BinOp(
+                Path(This(), PathComponent("x", None()))
+              , Plus()
+              , BasicValue(Integer("1"))
+              )
+            , In()
+            , TypeExtent(Int())
+            )
+          )
+        , Assign(
+            Path(This(), PathComponent("x", None()))
+          , BinOp(
+              Path(This(), PathComponent("x", None()))
+            , Plus()
+            , BasicValue(Integer("1"))
+            )
+          )
+        )
+      )
+    , ( ("C2", "sub1")
+      , Guard(
+          And(
+            And(
+              BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Minus()
+                , BasicValue(Integer("1"))
+                )
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                BinOp(
+                  Path(This(), PathComponent("x", None()))
+                , Minus()
+                , BasicValue(Integer("1"))
+                )
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          , BinRel(
+              BinOp(
+                Path(This(), PathComponent("x", None()))
+              , Minus()
+              , BasicValue(Integer("1"))
+              )
+            , In()
+            , TypeExtent(Int())
+            )
+          )
+        , Assign(
+            Path(This(), PathComponent("x", None()))
+          , BinOp(
+              Path(This(), PathComponent("x", None()))
+            , Minus()
+            , BasicValue(Integer("1"))
+            )
+          )
+        )
+      )
+    ]
+  , "Invariants"
+  , [ ( "C1"
+      , And(
+          BinRel(
+            Path(This(), PathComponent("x", None()))
+          , GreaterThanEquals()
+          , BasicValue(Integer("2"))
+          )
+        , BinRel(
+            Path(This(), PathComponent("x", None()))
+          , LessThanEquals()
+          , BasicValue(Integer("4"))
+          )
+        )
+      )
+    , ( "C2"
+      , And(
+          BinRel(
+            Path(This(), PathComponent("x", None()))
+          , GreaterThanEquals()
+          , BasicValue(Integer("2"))
+          )
+        , BinRel(
+            Path(This(), PathComponent("x", None()))
+          , LessThanEquals()
+          , BasicValue(Integer("4"))
+          )
+        )
+      )
+    ]
+  , "Type"
+  , [ (("C1", "x"), BasicType(Int()))
+    , (("C2", "x"), BasicType(Int()))
+    ]
+  , "Inputs"
+  , [ (("C1", "add1"), [])
+    , (("C1", "sub1"), [])
+    , (("C2", "add1"), [])
+    , (("C2", "sub1"), [])
+    ]
+  , "Outputs"
+  , [ (("C1", "add1"), [])
+    , (("C1", "sub1"), [])
+    , (("C2", "add1"), [])
+    , (("C2", "sub1"), [])
+    ]
+  , "ClassBasedInvariants"
+  , [ ( ("C1", "x")
+      , And(
+          Forall(
+            "obj"
+          , PathStart("C1", None())
+          , And(
+              BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          )
+        , True()
+        )
+      )
+    , ( ("C2", "x")
+      , And(
+          Forall(
+            "obj"
+          , PathStart("C2", None())
+          , And(
+              BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          )
+        , True()
+        )
+      )
+    ]
+  , "RealignedInvariants"
+  , []
+  , "Sets"
+  , []
+  )
+, ( "Classes"
+  , ["C1", "C2"]
+  , "Opposites"
+  , []
+  , "MinMults"
+  , [ (("C1", "x"), 1)
+    , (("C2", "x"), 1)
+    ]
+  , "MaxMults"
+  , [ (("C1", "x"), 1)
+    , (("C2", "x"), 1)
+    ]
+  , "Attributes"
+  , [("C1", ["x"]), ("C2", ["x"])]
+  , "Operations"
+  , [ ("C1", ["add1", "sub1"])
+    , ("C2", ["add1", "sub1"])
+    ]
+  , ( "QualifiedInvariants"
+    , [ ( "C1"
+        , Forall(
+            "obj"
+          , PathStart("C1", None())
+          , And(
+              BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          )
+        )
+      , ( "C2"
+        , Forall(
+            "obj"
+          , PathStart("C2", None())
+          , And(
+              BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , GreaterThanEquals()
+              , BasicValue(Integer("2"))
+              )
+            , BinRel(
+                Path(PathStart("obj", None()), PathComponent("x", None()))
+              , LessThanEquals()
+              , BasicValue(Integer("4"))
+              )
+            )
+          )
+        )
+      ]
+    , "Name"
+    , "workflowTest"
+    , "TableNames"
+    , []
+    , "IDs"
+    , []
+    , "SeqWorkflows"
+    , [ ( "C1"
+        , [ SeqWf(
+              "w0"
             , Prefix(
                 GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
               , Skip()
               )
             )
-          )
+          , SeqWf(
+              "w1"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+              , Skip()
+              )
+            )
+          , SeqWf(
+              "w2"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+              , Prefix(
+                  GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+                , Skip()
+                )
+              )
+            )
+          ]
         )
-      , Wait(
-          "0"
-        , "1"
-        , Prefix(
-            GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
-          , Wait("1", "0", Skip())
-          )
+      , ( "C2"
+        , [ SeqWf(
+              "w0"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+              , Wait(
+                  "0"
+                , "1"
+                , Wait(
+                    "1"
+                  , "0"
+                  , Prefix(
+                      GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+                    , Skip()
+                    )
+                  )
+                )
+              )
+            )
+          , SeqWf(
+              "w1"
+            , Wait(
+                "0"
+              , "1"
+              , Prefix(
+                  GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+                , Wait("1", "0", Skip())
+                )
+              )
+            )
+          ]
+        )
+      ]
+    , "ParWorkflows"
+    , [ ("C1", [])
+      , ("C2", [ParWf("p", Multiple("w0", Single("w1")))])
+      ]
+    , "ExpandedSeqWorkflows"
+    , [ ( "C1"
+        , [ ( "w0"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+              , Skip()
+              )
+            )
+          , ( "w1"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+              , Skip()
+              )
+            )
+          , ( "w2"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+              , Prefix(
+                  GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+                , Skip()
+                )
+              )
+            )
+          ]
+        )
+      , ( "C2"
+        , [ ( "w0"
+            , Prefix(
+                GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+              , Wait(
+                  "0"
+                , "1"
+                , Wait(
+                    "1"
+                  , "0"
+                  , Prefix(
+                      GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+                    , Skip()
+                    )
+                  )
+                )
+              )
+            )
+          , ( "w1"
+            , Wait(
+                "0"
+              , "1"
+              , Prefix(
+                  GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+                , Wait("1", "0", Skip())
+                )
+              )
+            )
+          ]
+        )
+      ]
+    , "ExpandedParWorkflows"
+    , [ ("C1", [])
+      , ( "C2"
+        , [ ( "p"
+            , [ Prefix(
+                  GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+                , Wait(
+                    "0"
+                  , "1"
+                  , Wait(
+                      "1"
+                    , "0"
+                    , Prefix(
+                        GA(Normal(True()), MethodReference(PathStart("add1", None()), []))
+                      , Skip()
+                      )
+                    )
+                  )
+                )
+              , Wait(
+                  "0"
+                , "1"
+                , Prefix(
+                    GA(Normal(True()), MethodReference(PathStart("sub1", None()), []))
+                  , Wait("1", "0", Skip())
+                  )
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    , "ParWorkflows_Precond"
+    , [ ("C1", [])
+      , ( "C2"
+        , [ ( "p"
+            , And(
+                And(
+                  And(
+                    And(
+                      BinRel(
+                        BinOp(
+                          BinOp(
+                            BinOp(
+                              Path(This(), PathComponent("x", None()))
+                            , Plus()
+                            , BasicValue(Integer("1"))
+                            )
+                          , Minus()
+                          , BasicValue(Integer("1"))
+                          )
+                        , Plus()
+                        , BasicValue(Integer("1"))
+                        )
+                      , GreaterThanEquals()
+                      , BasicValue(Integer("2"))
+                      )
+                    , BinRel(
+                        BinOp(
+                          BinOp(
+                            BinOp(
+                              Path(This(), PathComponent("x", None()))
+                            , Plus()
+                            , BasicValue(Integer("1"))
+                            )
+                          , Minus()
+                          , BasicValue(Integer("1"))
+                          )
+                        , Plus()
+                        , BasicValue(Integer("1"))
+                        )
+                      , LessThanEquals()
+                      , BasicValue(Integer("4"))
+                      )
+                    )
+                  , BinRel(
+                      BinOp(
+                        BinOp(
+                          BinOp(
+                            Path(This(), PathComponent("x", None()))
+                          , Plus()
+                          , BasicValue(Integer("1"))
+                          )
+                        , Minus()
+                        , BasicValue(Integer("1"))
+                        )
+                      , Plus()
+                      , BasicValue(Integer("1"))
+                      )
+                    , In()
+                    , TypeExtent(Int())
+                    )
+                  )
+                , And(
+                    And(
+                      BinRel(
+                        BinOp(
+                          BinOp(
+                            Path(This(), PathComponent("x", None()))
+                          , Plus()
+                          , BasicValue(Integer("1"))
+                          )
+                        , Minus()
+                        , BasicValue(Integer("1"))
+                        )
+                      , GreaterThanEquals()
+                      , BasicValue(Integer("2"))
+                      )
+                    , BinRel(
+                        BinOp(
+                          BinOp(
+                            Path(This(), PathComponent("x", None()))
+                          , Plus()
+                          , BasicValue(Integer("1"))
+                          )
+                        , Minus()
+                        , BasicValue(Integer("1"))
+                        )
+                      , LessThanEquals()
+                      , BasicValue(Integer("4"))
+                      )
+                    )
+                  , BinRel(
+                      BinOp(
+                        BinOp(
+                          Path(This(), PathComponent("x", None()))
+                        , Plus()
+                        , BasicValue(Integer("1"))
+                        )
+                      , Minus()
+                      , BasicValue(Integer("1"))
+                      )
+                    , In()
+                    , TypeExtent(Int())
+                    )
+                  )
+                )
+              , And(
+                  And(
+                    BinRel(
+                      BinOp(
+                        Path(This(), PathComponent("x", None()))
+                      , Plus()
+                      , BasicValue(Integer("1"))
+                      )
+                    , GreaterThanEquals()
+                    , BasicValue(Integer("2"))
+                    )
+                  , BinRel(
+                      BinOp(
+                        Path(This(), PathComponent("x", None()))
+                      , Plus()
+                      , BasicValue(Integer("1"))
+                      )
+                    , LessThanEquals()
+                    , BasicValue(Integer("4"))
+                    )
+                  )
+                , BinRel(
+                    BinOp(
+                      Path(This(), PathComponent("x", None()))
+                    , Plus()
+                    , BasicValue(Integer("1"))
+                    )
+                  , In()
+                  , TypeExtent(Int())
+                  )
+                )
+              )
+            )
+          ]
         )
       ]
     )
-  ]
-, "ParWorkflows_Precond"
-, [ ( "p"
-    , And(
-        True()
-      , ( "wp("
-        , MethodReference(PathStart("add1", None()), [])
-        , And(
-            True()
-          , ( "wp("
-            , MethodReference(PathStart("sub1", None()), [])
-            , And(
-                True()
-              , ("wp(", MethodReference(PathStart("add1", None()), []), True(), ")")
-              )
-            , ")"
-            )
-          )
-        , ")"
-        )
-      )
-    )
-  ]
+  )
 )

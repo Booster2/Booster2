@@ -3,7 +3,7 @@ module main
 imports
   include/Booster2  
   
-  trans/calculateWFPrecond/expand
+  library/strategy
   trans/calculateWFPrecond/precond
   
 /* 
@@ -16,16 +16,16 @@ imports
   
 rules
 	// the main strategy from the precondition calculation
-	precond: system -> system
+	precond-main: system -> system
 	where
-		rules(
-			PrecondLookupTable :+ "SeqWorkflows" -> []
-			PrecondLookupTable :+ "ParWorkflows" -> []
-			PrecondLookupTable :+ "ParWorkflows_Precond" -> []
-		);
-	    <expandSeqWorkflows> system;
-	    <expandParWorkflows> system;
-	    <calculatePrecond> system
-	    
+		ParWfs := <LookupTable> "ExpandedParWorkflows";
+		<map(\(cname,classParWfs) ->  <precond-class> (cname,classParWfs) \)> ParWfs
+		
+	precond-class: (cname,namedef_list) -> (cname,namedef_list)
+	where
+		namedPreconds := <currymap(precond)> (cname,namedef_list);
+		oldPreconds := <LookupTable> "ParWorkflows_Precond";
+		newPreconds := <union>(oldPreconds,[(cname,namedPreconds)]);
+		rules( LookupTable :+ "ParWorkflows_Precond" -> newPreconds)
 
 	

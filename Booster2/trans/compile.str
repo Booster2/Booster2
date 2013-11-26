@@ -66,12 +66,10 @@ rules
 		(Assign(path, expression), constraint1, classname, methname)
 			-> (And( constraint2, And(constraint3, constraint4)), Assign(path, expression))
 		where 
-			log(|Error(),"before wp-assign:",(path,":=",expression,"!!!",constraint1));
 			path1 := <make-post-state> path;
 			constraint2 := <aliasing-substitute> (classname, methname, constraint1, path1, expression, <new-environment>[]);
 			constraint3 := <is-defined> (classname, methname, expression, <new-environment>[]);
-			constraint4 := <is-defined> (classname, methname, path, <new-environment>[]);
-			log(|Error(),"after wp-assign:",constraint2)
+			constraint4 := <is-defined> (classname, methname, path, <new-environment>[])
 			
 
 	calculate-wp:
