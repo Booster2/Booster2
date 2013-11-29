@@ -180,6 +180,31 @@ combine-constraints:
 			    LookupTable :+ "Constraints" -> consts
 			)
 
+
+/*	insert-this-main:
+		system -> system'
+		where
+			system' := <topdown(try(addscope <+ insert-this-fragment))> system;
+			log(|Error(), system')
+
+	addscope:
+		Class(cname, extends, components)
+			-> Class(cname, extends, components)
+		where
+			rules(
+				LookupTable :+ "ParentClass" -> cname
+			)
+
+	insert-this-fragment:
+		PathStart(name, maybePrimed)
+			-> Path(This(), PathComponent(name, maybePrimed))
+			where
+				classname := <LookupTable> "ParentClass";
+				type := <lookup-attribute-type> ((classname, name))
+*/
+	
+		
+
 /* 	insert-this-invariants:
 		Takes all the invariants, and puts 'this' at the 
 		front of any paths which need it.  I can't seem to curry this function, so the

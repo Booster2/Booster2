@@ -65,7 +65,7 @@
 	<target name="_runTest">
 
 		<basename property="basename" file="${sourceFile}" suffix=".boo2" />
-		<java classname="run">
+		<java classname="run" fork="false">
 			<arg value="trans.main-booster2" />
 			<arg value="-i" />
 			<arg value="${sourceFile}" />
