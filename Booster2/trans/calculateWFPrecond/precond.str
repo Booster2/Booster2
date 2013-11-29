@@ -10,19 +10,33 @@ imports
   
 rules
 	
-	calculatePrecond: system -> <topdown(try(calculateParPrecond))> system
-	    
-	calculateParPrecond: ParWf(name,xs) -> form
+	// The following three methods are used to work with the Map of calculated preconditions
+	resetMap : () -> ()
 	where
-		not(<lookup> (name, <PrecondLookupTable> "ParWorkflows_Precond"));
-		wfs* := <lookup> (name,<PrecondLookupTable> "ParWorkflows");
-	 	<pre> wfs*;
-	 	form := <wf_lut>;
-	 	par_wfs := <PrecondLookupTable> "ParWorkflows_Precond";
-	 	newwfs := <conc>(par_wfs,[(name, <innermost(simplify)> form)]);
-	 	rules(
-	 		PrecondLookupTable :+ "ParWorkflows_Precond" -> newwfs
-	 	)
+		rules(
+			wf_lut :+ "map" -> []
+		)
+		
+	updateMap: nv -> nv
+	where
+		oldMap := <wf_lut> "map";
+		rules(wf_lut :+ "map" -> <conc> ([nv] , oldMap))
+		
+	lookupMap: par -> form
+	where
+		form := <lookup> (par, <wf_lut> "map")
+	// They should be generalised at some point!
+		
+	
+	
+	// calculate the precondition of the concurrent workflow pdef
+	// with name pname being defined in class cname
+	precond: (cname,(pname,pdef)) -> (pname,form)
+	where
+		<resetMap> ();
+		if not(<equal>(<wf_lut> "map",[])) then log(|Error(),"wf_lut ist nicht leer") end;
+		<pre> (cname,pdef);
+		form := <innermost(simplify)> (<lookupMap> pdef)
 	
 	
 	/* **************************************
@@ -31,24 +45,21 @@ rules
 	
 	// if the concurrent workflow "[wfs*]" is already defined in 
 	// the lookup-table we finish
-	pre: [wfs*] -> [wfs*]
-	where <wf_lut> [wfs*]//; log(|Error(),"case1" ,[wfs*])
+	pre: (cname,[wfs*]) -> (cname,[wfs*])
+	where <lookupMap> [wfs*] //; log(|Error(),"case1" ,[wfs*])
 	
 	// if all sequential workflows in the list have terminated, i.e., are
 	// equal to SKIP each, we finished
-    pre: [wfs*] -> [wfs*]
-    where <list_all(skip_d)> [wfs*]//; log(|Error(),"case2" ,[wfs*])
-    with rules( wf_lut :+ [wfs*] -> True())  
+    pre: (cname,[wfs*]) -> (cname,[wfs*])
+    where <list_all(skip_d)> [wfs*];//; log(|Error(),"case2" ,[wfs*])
+          <updateMap> ([wfs*],True())
 	
 	// the normal case
-	pre: [wfs*] -> [wfs*]
-	where //log(|Error(),"case3.1" ,[wfs*]);
-		   formset := <preIter> ([wfs*],0, <subti>(<length> wfs* , 1));
-		   //log(|Error(),"case3.2" ,[wfs*]);
+	pre: (cname,[wfs*]) -> (cname,[wfs*])
+	where formset := <preIter> ((cname,[wfs*]),0, <subti>(<length> wfs* , 1));
 		   form1 := <AndFold> formset;
-		   form := form1
-		   //log(|Error(),"case3.3" ,[wfs*])
-	with rules( wf_lut :+ [wfs*] -> form )
+		   form := form1;
+		   <updateMap> ([wfs*],form)
 	
 	
 	/* **************************************
@@ -57,17 +68,17 @@ rules
 	   ************************************** */
 	   	
 	// if i is greater then the list length, we are done
-	preIter: ([wfs*],i,t) -> []
+	preIter: ((cname,[wfs*]),i,t) -> []
 	where <gt> (i,t)
 	
 	// Skip at position i
-	preIter: ([wfs*],i,t) -> formset
+	preIter: ((cname,[wfs*]),i,t) -> formset
 	where wi := <getPos> ([wfs*],i) ;
 	       <skip_d> wi;
-	       formset := <preIter>([wfs*],<addi>(i,1),t)
+	       formset := <preIter>((cname,[wfs*]),<addi>(i,1),t)
 	
 	// Wait at position i
-	preIter: ([wfs*],i,t) -> formset
+	preIter: ((cname,[wfs*]),i,t) -> formset
 	where
 		wi := <getPos> ([wfs*],i);
 		<wait_d> wi;
@@ -90,14 +101,14 @@ rules
 		   <equal>(wi_to,wj_to)
 		then par1 := <listUpdate>((<listUpdate>([wfs*],i,wi_sub)),wi_to,wj_sub);
 			//log(|Error(),"par1" ,par1); 
-		     <pre> par1;
-		     p := <wf_lut> par1;
+		     <pre> (cname,par1);
+		     p := <lookupMap> par1;
 		     formset := [p] 
-		else formset := <preIter> ([wfs*],<addi>(i,1),t) 
+		else formset := <preIter> ((cname,[wfs*]),<addi>(i,1),t) 
 		end
 	       
 	// prefix at position i
-	preIter: ([wfs*],i,t) -> formset
+	preIter: ((cname,[wfs*]),i,t) -> formset
 	where wi := <getPos> ([wfs*],i) ;
 	       <prefix_d> wi;
 	       gi1 := <sel_g1>(wi);
@@ -105,15 +116,16 @@ rules
 		   wi1 := <sel_w1>(wi);
 		   
 		   par1 := <listUpdate> ([wfs*], i, wi1);
-		   <pre> par1;
+		   <pre> (cname,par1);
 		   
-		   loc_cond := And(<get> gi1,<wp> (ai1 , <wf_lut> par1));
-		   formset_rest := <preIter> ([wfs*],<addi>(i,1),t);
+		   loc_cond := And(<get> gi1,<wp> ((cname,ai1) , <lookupMap> par1));
+		   formset_rest := <preIter> ((cname,[wfs*]),<addi>(i,1),t);
 		   formset := <conc> ([loc_cond], formset_rest)
 		   
-	// normal case
-	preIter: ([wfs*],i,t) -> formset
+	// Choice case
+	preIter: ((cname,[wfs*]),i,t) -> formset
 	where  wi := <getPos>([wfs*],i);
+			<choide_d> wi;
 	       gi1 := <sel_g1>(wi);
 		   ai1 := <sel_a1>(wi);
 		   wi1 := <sel_w1>(wi);
@@ -124,23 +136,23 @@ rules
 		   par1 := <listUpdate> ([wfs*], i, wi1); 
 		   par2 := <listUpdate> ([wfs*], i, wi2); 
 
-           if not(<guard_false> gi1) then <pre> par1 end;
-           if not(<guard_false> gi2) then <pre> par2 end;
+           if not(<guard_false> gi1) then <pre> (cname,par1) end;
+           if not(<guard_false> gi2) then <pre> (cname,par2) end;
            
            if <guard_false> gi1 ; <guard_false> gi2 then loc_cond := False() else 
-           if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<wp> (ai2 , <wf_lut> par2))) else 
-           if <guard_false> gi2 then loc_cond := And ((<get> gi1) ,(<wp> (ai1 , <wf_lut> par1))) else
+           if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<wp> ((cname,ai2) , <lookupMap> par2))) else 
+           if <guard_false> gi2 then loc_cond := And ((<get> gi1) ,(<wp> ((cname,ai1) , <lookupMap> par1))) else
            	    loc_cond :=
            	    And (And(
-           	      Implies(<get> gi1 , <wp> (ai1, <wf_lut> par1))
+           	      Implies(<get> gi1 , <wp> ((cname,ai1), <lookupMap> par1))
            	      ,	
-           	      Implies(<get> gi2 , <wp> (ai2, <wf_lut> par2))
+           	      Implies(<get> gi2 , <wp> ((cname,ai2), <lookupMap> par2))
            	    )
            	    , Or( <get> gi1, <get> gi2)	 	
            	    )   
            end end end;
-           
-           formset_rest := <preIter> ([wfs*],<addi>(i,1),t);
+          
+           formset_rest := <preIter> ((cname,[wfs*]),<addi>(i,1),t);
            formset := <conc> ([loc_cond], formset_rest)
            
            
@@ -167,13 +179,10 @@ rules
 				constraint7 := <make-old> constraint6
 */
            
-           
-           
-           
-           program_tmp : t -> t
-           calculate-wp_tmp : t -> t
-          
            /*
+           getGuard: Guard(expr,prog) -> expr
+		   getGuard: t -> True()
+           
 		   wp : (m,post) -> cond
 		   where
 		   	    programs := <LookupTable> "Programs";
@@ -190,12 +199,20 @@ rules
 				//cond := ("wp(", m , post ,")")
 			*/
 			
-			wp : (m,post) -> constraint7
+			
+			// get the method name from a path
+			getMethodName: Path(path,PathComponent(name,[decorators*])) -> name
+			getMethodName: PathStart(name,[decorators*]) -> name
+			
+			// do the wp-calculation
+			wp : ((cname,MethodReference(path,[substs*])),post) -> constraint7
 		   	where
 		   	    constraints := <LookupTable> "Constraints";
-		   		classname := "C1"; // for testing
-		   		log(|Error(),"method-reference:",m);
-		   		methname := "add1"; // for testing
+		   		classname := cname;
+		   		log(|Error(),"check",path);
+		   		log(|Error(),"mname",<getMethodName> path);
+		   		methname := <getMethodName> path;
+		   		
 		   		constraint := <lookup> ((classname,methname),constraints); 
 		   		program := <program> (classname, methname, constraint);
 		   		[paths*] := <get-modified-paths>(program);
@@ -212,12 +229,8 @@ rules
 				post-new := <make-post-state> post;
 				post-constraint := And(post-new,constraint5);
 				
-				log(|Error(),"the postcondition:",post-constraint);
 				(constraint6, program2) := <calculate-wp>(program, post-constraint, classname, methname);
 				constraint7 := <make-old> constraint6
-		
-		getGuard: Guard(expr,prog) -> expr
-		getGuard: t -> True()
 		
 		// never used!! Just declared to prevent undefinedness error
 		cheat : t -> t

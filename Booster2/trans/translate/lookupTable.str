@@ -40,6 +40,7 @@ imports
 				"SeqWorkflows",  <LookupTable> "SeqWorkflows",
 				"ParWorkflows",  <LookupTable> "ParWorkflows" ,
 				"ExpandedSeqWorkflows",  <LookupTable> "ExpandedSeqWorkflows" ,
-				"ExpandedParWorkflows",  <LookupTable> "ExpandedParWorkflows" ))
+				"ExpandedParWorkflows",  <LookupTable> "ExpandedParWorkflows",
+				"ParWorkflows_Precond",  <LookupTable> "ParWorkflows_Precond"))
 			)			
 				
