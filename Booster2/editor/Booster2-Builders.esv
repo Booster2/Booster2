@@ -33,6 +33,7 @@ builders
   //builder              		: "Generate SQL from Booster" = booster-to-sql (openeditor) (realtime) (source)
   //builder                   : "Test Dynamic Rules" = test-dynamic-rules (openeditor) (realtime) (source)
   builder                   : "Test some stuff" = builder-test (openeditor) (realtime) (source)
+  builder                   : "New, refactored builder" = new-builder (openeditor) (realtime) (source)
                                  
                                                    
   // on save: generate-abstractBoosterMachine                                                                                   

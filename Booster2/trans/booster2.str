@@ -167,9 +167,17 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		(selected, position, ast, path, project-path) -> (filename, result)
    	 where
    		filename := <guarantee-extension(|"1")> path;
-   		result :=   <output-lookup-table>
+   		result := <innermost(add-type-info)>selected
+   		
+   		/*result :=   <output-lookup-table>
    				          <parse> 
-   				            selected   
+   				            selected */   
+	add-type-info:
+		Input(i) -> Input(i) {"What is this type?"}
+
+	add-type-info:
+		Input(i) {"What is this type?"} -> Input(i) {[i]}
+
 
    builder-elaborate: 
    		(selected, position, ast, path, project-path) -> (filename, result)
@@ -229,6 +237,14 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    				          <parse> 
    				            selected
 
+	new-builder:
+	(selected, position, ast, path, project-path) -> (filename, result)
+   	 with
+   		filename := <guarantee-extension(|"expanded.test")> path;
+   		result := 
+	   			<new-elaborate>
+					<new-parse> 
+						selected 
 
    builder-test: 
    		(selected, position, ast, path, project-path) -> (filename, result)

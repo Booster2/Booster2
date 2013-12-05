@@ -479,3 +479,82 @@ rules
 	with x := <get-opposite> typedecl
 
 
+/*********************************************************************************************
+-- New content here.
+*********************************************************************************************/
+
+new-parse:
+	system 
+		-> <new-build-lookup-table><annotate-terms> system
+	
+annotate-terms:
+	system
+		-> <topdown(try(annotate-term))>system
+		
+annotate-term:
+	Class (classname, maybeExtends, components)
+		-> Class (classname, maybeExtends, components)
+	where
+		rules(			
+			ScopeTable :+ "ContainingClass" -> classname
+		)
+
+annotate-term:
+	something 
+		-> something {[("Containing Class", classname)]}
+	where
+		classname := <ScopeTable> "ContainingClass"
+
+new-build-lookup-table:
+	system
+		-> 
+		<topdown(try(add-method-to-lookup-table))>
+			<topdown(try(add-attribute-to-lookup-table))> 
+				<init-lookup-table> 
+					system
+		
+add-attribute-to-lookup-table:
+	Attribute(attName, identity, attType) { annots }
+		-> Attribute(attName, identity, attType) { annots }
+	where
+		classname := <lookup> ("Containing Class", annots);
+		currentAtts := <union>([(classname, attName)],  <LookupTable> "Attributes");
+		rules(			
+			LookupTable :+ "Attributes" -> currentAtts
+		)
+
+
+add-attribute-to-lookup-table:
+	Attribute(attName, attType) { annots }
+		-> Attribute(attName, attType) { annots }
+	where
+		classname := <lookup> ("Containing Class", annots);
+		currentAtts := <union>([(classname, attName)],  <LookupTable> "Attributes");
+		rules(			
+			LookupTable :+ "Attributes" -> currentAtts
+		)
+
+add-method-to-lookup-table:
+	Method(methodName, constraint) { annots }
+		-> Method(methodName, constraint) { annots }
+	where
+		classname := <lookup> ("Containing Class", annots);
+		currentMeths := <union>([(classname, methodName)],  <LookupTable> "Methods");
+		rules(			
+			LookupTable :+ "Methods" -> currentMeths
+		)
+
+init-lookup-table:
+	system 
+		-> system
+	where
+		rules(			
+			LookupTable :+ "Attributes" -> []
+			LookupTable :+ "Methods" -> []
+		)
+	
+add-annotation:
+	(something {annots}, name, value)
+		-> something {annots'}
+	where
+		annots' := <union>(annots, (name, value))	
