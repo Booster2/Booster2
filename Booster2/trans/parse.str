@@ -13,263 +13,85 @@ rules
 		Takes a system and produces a lookup table with all the information in it
 	 parse : System
 */
+
+	// Methods for retrieving different types of system components
+	getClasses = filter(?Class(_,_,_))
+	getSets = filter(?SetDef(_,_))
+	
+	// Methods for retrieving different types of class components
+	getAttributes = <concat> <filter(\ Attributes(attrs) -> attrs \)>
+	getMethods = <concat> <filter(\ Methods(meths) -> meths \)>
+	getInvariants = <concat> <filter(\ Invariant(invs) -> invs \)>
+
+	getClassComponents = \ Class(_, _, c) -> c \
+	getClassName = \ Class(n, _, _) -> n \
+	
+
 	parse: 
-   		system -> 
-   				system
+   		System(name, components) -> 
+   				System(name, components)
 	with
-   		<initialize-lookup-table> system; 
-   		classes := <get-classes-from-system> system;
-		constraints := <concat><map(get-class-method-constraints)> classes;
-		operations := <map(get-class-method-names)> classes;
-		seqwfs := <map(Fst)><map(get-class-wfs)> classes;
-		parwfs := <map(Snd)><map(get-class-wfs)> classes;
+   		<initialize-lookup-table> name;
+   		sets := <map(organise-set)> <getSets> components;
+   		classes := <getClasses> components;
+   		classes' := <map(organise-class)> classes;
+		attributes := []; // <map(organise-attribute)><concat><cart(id)>([name], <map(getClassComponents ; getAttributes)> classes);
+		methods := []; //<map(organise-method)><concat><cart(id)>([name], <map(getClassComponents ; getMethods)> classes);
+		log(|Error(), <zip>(<map(getClassName)> classes, <map(getClassComponents ; getAttributes)> classes));
 
 		rules(
-			LookupTable :+ "Name" -> <get-system-name> system
-			LookupTable :+ "Sets" -> <get-sets> system 
-			LookupTable :+ "Classes" -> <map(get-class-name)> classes
-			LookupTable :+ "Invariants" -> <zip>
-						(<map(get-class-name)> classes,
-						<map(get-class-invariant)> classes)
-			LookupTable :+ "Attributes" -> <map(get-class-attribute-names)> classes
-			LookupTable :+ "Ids" -> <zip>( <map(get-class-name)> classes, 
-										   <map(get-class-attributes ; filter(attribute-is-id); map(get-attribute-name))> classes)
-			LookupTable :+ "Type" -> <concat><map(get-class-attribute-types)> classes
-			LookupTable :+ "MaxMults" -> <concat><map(get-class-attribute-max-mults)> classes
-			LookupTable :+ "MinMults" -> <concat><map(get-class-attribute-min-mults)> classes
-			LookupTable :+ "Opposites" -> <concat><map(get-class-attribute-opposites) >classes
-			LookupTable :+ "Operations" -> operations 
-			LookupTable :+ "Constraints" -> constraints
-			LookupTable :+ "SeqWorkflows" -> seqwfs
-			LookupTable :+ "ParWorkflows" -> parwfs
+			LookupTable :+ "Name" ->  name
+			LookupTable :+ "SetDef" -> sets 
+			LookupTable :+ "Class" ->  classes'
+			LookupTable :+ "Attribute" ->  attributes
+			LookupTable :+ "Method" ->  methods
 		)
 	    
 
-	initialize-lookup-table:
-		system -> 
-			system
-		where 
+	initialize-lookup-table: 
+		x -> x 
+		with 
 			rules(
-				LookupTable :+ "Constraints" -> []
-				LookupTable :+ "Programs" -> []
-				LookupTable :+ "Invariants" -> []
-				LookupTable :+ "QualifiedInvariants" -> []
-				LookupTable :+ "Type" -> []
-				LookupTable :+ "Inputs" -> []
-				LookupTable :+ "Outputs" -> []
-				LookupTable :+ "ClassBasedInvariants" -> []
-				LookupTable :+ "RealignedInvariants" -> []
-				LookupTable :+ "Sets" -> []
-				LookupTable :+ "Classes" -> []
-				LookupTable :+ "Opposites" -> []
-				LookupTable :+ "MinMults" -> []
-				LookupTable :+ "MaxMults" -> []
-				LookupTable :+ "Attributes" -> []
-				LookupTable :+ "Operations" -> []
 				LookupTable :+ "Name" -> []
-				LookupTable :+ "TableNames" -> []
-				LookupTable :+ "IDs" -> []
-				LookupTable :+ "SeqWorkflows" -> []
-				LookupTable :+ "ParWorkflows" -> []
-				LookupTable :+ "ExpandedSeqWorkflows" -> []
-				LookupTable :+ "ExpandedParWorkflows" -> []
-				LookupTable :+ "ParWorkflows_Precond" -> []
-			);
-			rules(
-				PrecondLookupTable :+ "SeqWorkflows" -> []
-				PrecondLookupTable :+ "ParWorkflows" -> []
-				PrecondLookupTable :+ "ParWorkflows_Precond" -> []
+				LookupTable :+ "SetDef" -> []
+				LookupTable :+ "Class" -> []
+				LookupTable :+ "Attribute" -> []
+				LookupTable :+ "Method" -> []
 			)
 
 				
 		
-
-	get-system-name:
-		System(sysname,systemComponents) 
-  			-> sysname
+	organise-set:
+		SetDef(name, elements) -> (name, elements)
 	
-	
-/* get-sets: 
-		Takes a System and returns the sets
-*/
-	get-sets:
-  		System(sysname,systemComponents) 
-  			-> sets
-  		where 
-  			sets := <filter(isSet)> systemComponents 
-
-	isSet:
-		SetDef(name, values)
-			-> SetDef (name, values)
-  		
- 
-/* get-classes-from-system: 
-		Takes a list of system components and returns a set of 
-		classes
-*/
-
-	get-classes-from-system:
-  		System(sysname, syscomponents) ->
-  			classes
-  		where 
-  			classes := <filter(isClass)> syscomponents 
-
-	isClass:
-		Class(name, extends, classcomponents)
-			-> Class (name, extends, classcomponents)
-			
-
-/* get-class-name: 
-		Takes a class and returns its class name
-*/
-			
-	get-class-name:
-		Class(name,extends, classComponents) 
-			-> name
-			
-			
-/* get-class-attributes: 
-		Takes a class and returns a list of attributes 
-*/
- 
- 	get-class-attributes:
- 		Class(name, extends, classComponents)
- 			-> atts
- 		where
- 			attSections := <filter(isAttSection)> classComponents;
- 			atts := <foldr([], union)> attSections
-
-	isAttSection:
-		 Attributes(attrs) -> attrs
- 
- 			
-/* get-class-attribute-names: 
-		Takes a class and returns a pair of name, attribute names
-*/
-
-	get-class-attribute-names: 
-		Class(name, extends, systemComponents*)
-			-> (name, attnames)
-		with
-			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*)
-
-/* get-class-attribute-types: 
-		Takes a class and returns a list of triples: classname, attname, type
-*/
-
-	get-class-attribute-types: 
-		Class(name, extends, systemComponents*)
-			-> xs
-		with
-			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
-			atttypes := <map(get-attribute-type)> <get-class-attributes> Class(name, extends, systemComponents*);
-			xs := <zip>(<cart(id)>([name], attnames), atttypes)
-
-/* get-class-attribute-max-mults: 
-		Takes a class and returns a list of triples: classname, attname, maxmult
-*/
-
-	get-class-attribute-max-mults: 
-		Class(name, extends, systemComponents*)
-			-> xs
-		with
-			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
-			maxmults := <map(get-attribute-max-mult)> <get-class-attributes> Class(name, extends, systemComponents*);
-			xs :=  <zip>(<cart(id)>([name], attnames), maxmults)
-
-/* get-class-attribute-min-mults: 
-		Takes a class and returns a list of triples: classname, attname, minmult
-*/
-
-	get-class-attribute-min-mults: 
-		Class(name, extends, systemComponents*)
-			-> xs
-		with
-			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
-			minmults := <map(get-attribute-min-mult)> <get-class-attributes> Class(name, extends, systemComponents*);
-			xs :=  <zip>(<cart(id)>([name], attnames), minmults)
-
-/* get-class-attribute-opposites: 
-		Takes a class and returns a list of triples: classname, attname, opposite
-*/
-
-	get-class-attribute-opposites: 
-		Class(name, extends, systemComponents*)
-			-> xs
-		with
-			attnames := <map(get-attribute-name)> <get-class-attributes> Class(name, extends, systemComponents*);
-			opposites := <map(get-attribute-opposite)> <get-class-attributes> Class(name, extends, systemComponents*);
-			xs :=  <filter(has-opposite)> <zip>(<cart(id)>([name], attnames), opposites)
-
-
-/* get-class-invariant: 
-		Takes a class and returns its invariant
-*/
- 
- 
-  	get-class-invariant:
- 		Class(name, extends, classComponents)
- 			-> invs
- 		where
- 			invSections := <filter(isInvSection)> classComponents;
- 			invs := <foldr(!True(), conjoinInvs)> invSections
-
-	isInvSection:
-		 Invariant(invs) -> 
-		 	<foldr(!True(), conjoinInvs)> invs
- 
- 	conjoinInvs:
- 		(const1,True())
- 			-> const1
- 
- 	conjoinInvs:
- 		(const1,const2)
- 			-> And(const1, const2)
- 
-
- 	
-
-/* get-class-methods: 
-		Takes a class and returns a list of methods 
-*/
-
- 
- 	get-class-methods:
- 		Class(name, extends, classComponents)
- 			-> meths
- 		where
- 			methSections := <filter(isMethSection)> classComponents;
- 			meths := <foldr([], union)> methSections
-
-	isMethSection:
-		 Methods(meths) -> meths 
- 
- 
-
-
-/* get-class-method-names: 
-		Takes a class and returns a pair of name, method names
-*/
-
-	get-class-method-names: 
+	organise-class:
 		Class(name, extends, classComponents)
-			-> (name, methnames)
-		with
-			methnames := <filter(get-method-name)> <get-class-methods> Class(name, extends, classComponents)
+			-> (name, (extends', attributes, methods, constraints, workflows))
+		where
+			extends' := <\ None() -> [] \ <+ \ Some(Extend(es)) -> es \> extends;
+			attributes := <map(\ Attribute(name, _,_) -> name \)><getAttributes> classComponents;			
+			methods := <map(\ Method(name, _ ) -> name \)><getMethods> classComponents;	
+			constraints := <getInvariants> classComponents;
+			workflows := [];
+		log(|Error(), (name, (extends, attributes, methods, constraints, workflows)))
+	
+	
+ 	organise-attribute:
+ 		Attribute(attName, decorators, type)
+ 			-> (attName, (decorators, type, opposite, minmult, maxmult))
+ 		where
+ 			opposite := [];
+ 			minmult := 1;
+ 			maxmult := 1
+ 			
+ 			 
 
-/* get-class-method-constraints: 
-		Takes a class and returns a list of triples: classname, methodname, constraint
-*/
-
-	get-class-method-constraints: 
-		Class(name, extends,  classComponents)
-			-> xs
-		with
-			meths := <get-class-methods> Class(name, extends, classComponents) ;
-			methnames := <filter(get-method-name)> meths;
-			constraints := <filter(get-method-constraint)> meths;
-			xs := <zip>(<cart(id)>([name], methnames), constraints) 
+ 	organise-method:
+ 		(className, Method(methName, constraint))
+ 			-> ((className, methName), constraint) 
 			
+			
+
 			
 /* getSeq/ParWorfklows
 
@@ -299,38 +121,7 @@ rules
 	isParWf:
 		ParWf(n,expr) -> ParWf(n,expr)  
 	
-/* get-method-name: 
-		Takes a method and returns its name.
-*/
- 	
- 	get-method-name:
- 		Method(methName, methConstraint)
- 		 	-> methName
 
-/*	get-method-name:
-		something -> ""
-		where 
-			log(|Error(), "get-method-name error", something) */
-
-/* get-method-constraint: 
-		Takes a method and returns its name.
-*/
- 	
- 	get-method-constraint:
- 		Method(methName, methConstraint)
- 		 	-> methConstraint
-
-/* get-attribute-name: 
-		Takes an attribute and returns its name.
-*/
- 	
- 	get-attribute-name:
- 		Attribute(attName, attType)
- 		 	-> attName
-
- 	get-attribute-name:
- 		Attribute(attName, identity, attType)
- 		 	-> attName
 
 
 /* get-attribute-type: 
@@ -338,29 +129,18 @@ rules
 */
  	
  	get-attribute-type:
- 		Attribute(attName, attType)
+ 		Attribute(attName, decorations, attType)
  			-> type
  		with
  			type := <get-minimal-type> attType
 
- 	get-attribute-type:
- 		Attribute(attName, identity, attType)
- 			-> type
- 		with
- 			type := <get-minimal-type> attType
 
 /* get-attribute-max-mult: 
 		Takes an attribute and returns its maximum multiplicity.
 */
  	
  	get-attribute-max-mult:
- 		Attribute(attName, attType)
- 			-> maxmult
- 		with
- 			maxmult := <get-max-mult> attType
-
- 	get-attribute-max-mult:
- 		Attribute(attName, identity, attType)
+ 		Attribute(attName, decorations, attType)
  			-> maxmult
  		with
  			maxmult := <get-max-mult> attType
@@ -372,14 +152,9 @@ rules
 		Returns the attribute if it has an opposite.
 */
  	
- 	get-attribute-min-mult:
- 		Attribute(attName, attType)
- 			-> minmult
- 		with
- 			minmult := <get-min-mult> attType
 
  	get-attribute-min-mult:
- 		Attribute(attName, identity, attType)
+ 		Attribute(attName, decorations, attType)
  			-> minmult
  		with
  			minmult := <get-min-mult> attType
@@ -390,13 +165,7 @@ rules
 */
  	
  	get-attribute-opposite:
- 		Attribute(attName, attType)
- 			-> opp
- 		with
- 			opp := <get-opposite> attType
-
- 	get-attribute-opposite:
- 		Attribute(attName, identity, attType)
+ 		Attribute(attName, decorations, attType)
  			-> opp
  		with
  			opp := <get-opposite> attType
@@ -478,83 +247,3 @@ rules
 		Set(typedecl, mult) -> x
 	with x := <get-opposite> typedecl
 
-
-/*********************************************************************************************
--- New content here.
-*********************************************************************************************/
-
-new-parse:
-	system 
-		-> <new-build-lookup-table><annotate-terms> system
-	
-annotate-terms:
-	system
-		-> <topdown(try(annotate-term))>system
-		
-annotate-term:
-	Class (classname, maybeExtends, components)
-		-> Class (classname, maybeExtends, components)
-	where
-		rules(			
-			ScopeTable :+ "ContainingClass" -> classname
-		)
-
-annotate-term:
-	something 
-		-> something {[("Containing Class", classname)]}
-	where
-		classname := <ScopeTable> "ContainingClass"
-
-new-build-lookup-table:
-	system
-		-> 
-		<topdown(try(add-method-to-lookup-table))>
-			<topdown(try(add-attribute-to-lookup-table))> 
-				<init-lookup-table> 
-					system
-		
-add-attribute-to-lookup-table:
-	Attribute(attName, identity, attType) { annots }
-		-> Attribute(attName, identity, attType) { annots }
-	where
-		classname := <lookup> ("Containing Class", annots);
-		currentAtts := <union>([(classname, attName)],  <LookupTable> "Attributes");
-		rules(			
-			LookupTable :+ "Attributes" -> currentAtts
-		)
-
-
-add-attribute-to-lookup-table:
-	Attribute(attName, attType) { annots }
-		-> Attribute(attName, attType) { annots }
-	where
-		classname := <lookup> ("Containing Class", annots);
-		currentAtts := <union>([(classname, attName)],  <LookupTable> "Attributes");
-		rules(			
-			LookupTable :+ "Attributes" -> currentAtts
-		)
-
-add-method-to-lookup-table:
-	Method(methodName, constraint) { annots }
-		-> Method(methodName, constraint) { annots }
-	where
-		classname := <lookup> ("Containing Class", annots);
-		currentMeths := <union>([(classname, methodName)],  <LookupTable> "Methods");
-		rules(			
-			LookupTable :+ "Methods" -> currentMeths
-		)
-
-init-lookup-table:
-	system 
-		-> system
-	where
-		rules(			
-			LookupTable :+ "Attributes" -> []
-			LookupTable :+ "Methods" -> []
-		)
-	
-add-annotation:
-	(something {annots}, name, value)
-		-> something {annots'}
-	where
-		annots' := <union>(annots, (name, value))	

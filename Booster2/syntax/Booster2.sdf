@@ -31,21 +31,26 @@ exports
 	'attributes' Attribute*  -> ClassComponents {cons("Attributes")}
 	'methods' Method*  -> ClassComponents {cons("Methods")}
 	'invariants' Constraint* -> ClassComponents {cons("Invariant")}
+	
+	
 	%% Workflow Stuff Begin
 	'workflows' WorkflowComponent* -> ClassComponents {cons("Workflows")}
 	%% Workflow Stuff End
+	
+	
 	
 	ClassComponents -> BoosterTerm
 	 
 	 'set' ID '{' {ID ','}+ '}' -> SetDef {cons("SetDef")}
 	 SetDef -> BoosterTerm
 	 
-	 ID ':' TypeDecl -> Attribute {cons("Attribute")}
-	 ID Identity ':' TypeDecl -> Attribute {cons("Attribute")}
-	 ID ':' TypeDecl -> Attribute {cons("Attribute")}
+	 ID Decoration* ':' TypeDecl -> Attribute {cons("Attribute")}
+
 	 Attribute -> BoosterTerm
 	 
 	 '(' 'ID' ')' -> Identity {cons("Identity")}
+	 
+	 Identity -> Decoration
   
 	 ID '{' Constraint '}' -> Method {cons("Method")}
 	 ID '{' Expression '}' -> Method {cons("Method"), deprecated}

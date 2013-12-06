@@ -1075,9 +1075,10 @@ combine-constraints:
 
 new-elaborate:
 	system 
-		-> 	<new-calculate-types>
-				<new-insert-this> 
-					system
+		-> 	<new-get-input-types>
+				<new-calculate-types>
+					<new-insert-this> 
+						system
 	
 new-insert-this:
 	system 
@@ -1099,29 +1100,72 @@ new-insert-this-item:
 
 new-calculate-types:
 	system -> 
-		<innermost(new-infer-types <+ new-deduce-types )> system
+		<innermost(new-deduce-types <+ new-induce-types  )> system
+
+
+new-deduce-types:
+	something {annots}
+		-> something {annots'}
+	where
+		<not(lookup)> ("Type", annots);
+		types := <get-possible-types> something {annots};
+		annots' := <union>(annots, [("Type", types)])
 		
-new-infer-types:
-	BasicValue(Integer(i)) {annots}
-		-> BasicValue(Integer(i)) {annots'}
-	where
-		<not(lookup)> ("Type", annots);
-		annots' := <union>(annots, [("Type", [Int(), Optional(Int())])])
+		
+get-possible-types:
+	BasicValue(Integer(i)) -> [Int(), Optional(Int())]
 
-new-infer-types:
-	BasicValue(String(s)) {annots}
-		-> BasicValue(String(s)) {annots'}
-	where
-		<not(lookup)> ("Type", annots);
-		annots' := <union>(annots, [("Type", [String(), Optional(String())])])
 
+get-possible-types:
+	BasicValue(String(s)) -> [String(), Optional(String())]
+
+
+get-possible-types:
+	String() -> [Set(String())] 
 	
-new-deduce-types:	
-	BinOp(lhs {annots1} , op, rhs {annots2}) { annots }
-		-> BinOp(lhs {annots1} , op, rhs {annots2}) { annots' }
+get-possible-types:
+	Int() -> [Set(Int())] 
+
+get-possible-types:
+	DateTime() -> [Set(DateTime())] 
+
+get-possible-types:
+	Boolean() -> [Set(Boolean())] 
+
+get-possible-types:
+	This() {annots} -> [Class(classname)]
+		where
+	classname := <lookup> ("Containing Class", annots)
+
+get-possible-types:
+	Path(path, PathComponent(name, maybePrimed)) {annots}
+		-> types
+		where
+	types := [Int(), Optional(Int())];
+	classname := <lookup> ("Containing Class", annots);
+	log(|Error(), "Lookup Attribute Table", <lookup>((classname, name), <LookupTable> "Attributes"))	
+
+
+
+
+new-induce-types:
+	BinOp( expr1 { annots1}, Op, expr2 {annots2})
+		-> BinOp( expr1 { annots1}, Op, expr2 {annots2'})
 	where
-		<not(lookup)> ("Type", annots);
-		<elem>(Int(), <lookup>("Type", annots1));
-		<elem>(Int(), <lookup>("Type", annots2));
-		annots' := <union>(annots, [("Type", [Int()])])
-			
+		types := <lookup> ("Type", annots1);
+		<not(lookup)> ("Type", annots2);
+		annots2' := <union>(annots2, [("Type", types)])
+
+
+
+
+
+new-get-input-types:
+	system -> <topdown(try(new-input-type))> system
+	
+new-input-type:
+	Input(name) {annots}
+		-> Input(name) {annots}
+	where
+		types := <lookup> ("Type", annots);
+		log(|Error(), ("input name has types:", name, types))

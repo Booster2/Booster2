@@ -12,35 +12,54 @@ imports
  
 
  rules
- 	
+output-list(s) : ([], sep) -> $[]
+output-list(s) : ([x], sep) -> $[[<s> x]]
+output-list(s): ([x | xs], sep) -> 
+$[[<s> x][sep][<output-list(s)> (xs, sep)]]
 
-	output-lookup-table:
-		system ->
-			(
-				("Constraints",  <LookupTable> "Constraints",
-				
-				"Programs",  <LookupTable> "Programs",
-				"Invariants",  <LookupTable> "Invariants",
-				"Type",  <LookupTable> "Type",
-				"Inputs",  <LookupTable> "Inputs",
-				"Outputs",  <LookupTable> "Outputs",
-				"ClassBasedInvariants",  <LookupTable> "ClassBasedInvariants",
-				"RealignedInvariants",  <LookupTable> "RealignedInvariants",
-				"Sets",  <LookupTable> "Sets"),
-				("Classes",  <LookupTable> "Classes",
-				"Opposites",  <LookupTable> "Opposites",
-				"MinMults",  <LookupTable> "MinMults",
-				"MaxMults",  <LookupTable> "MaxMults",
-				"Attributes",  <LookupTable> "Attributes",
-				"Operations",  <LookupTable> "Operations",
-				("QualifiedInvariants",  <LookupTable> "QualifiedInvariants",
-				"Name",  <LookupTable> "Name",
-				"TableNames",  <LookupTable> "TableNames",
-				"IDs",  <LookupTable> "IDs",
-				"SeqWorkflows",  <LookupTable> "SeqWorkflows",
-				"ParWorkflows",  <LookupTable> "ParWorkflows" ,
-				"ExpandedSeqWorkflows",  <LookupTable> "ExpandedSeqWorkflows" ,
-				"ExpandedParWorkflows",  <LookupTable> "ExpandedParWorkflows",
-				"ParWorkflows_Precond",  <LookupTable> "ParWorkflows_Precond"))
-			)			
-				
+output-list = output-list(id)
+
+output-lookup-table:
+	system ->
+$[
+System
+	[systemName]
+	
+SetDefs	
+	[<output-list(output-setdef)> (setdefs, "\n")]
+
+Classes	
+	[<output-list(output-class)> (classes, "\n")]
+
+Attributes	
+	[<output-list(output-attribute)> (attributes, "\n")]
+
+Methods	
+	methods
+	
+]
+	where
+		systemName := <LookupTable> "Name";
+		setdefs := <LookupTable> "SetDef";
+		classes := <LookupTable> "Class";
+		attributes := <LookupTable> "Attribute";
+		methods := <LookupTable> "Method"
+		
+
+output-setdef:
+	(name, elements)
+		-> 
+$[[name]: [<output-list> (elements, ",")]]		
+	
+output-class:
+	(name, (extends, attributes, methods, constraints, workflows))-> 
+$[name:       [name]
+  extends:    [<output-list>(extends, ",")]
+  attributes: [<output-list>(attributes, ",")]
+  methods:    [<output-list>(methods, ",")]]
+  
+output-attribute:
+	((cname, aname), decorations, type, opposite, minmuly, maxmult)
+		->
+$[class name: [cname]
+  attribute name: [aname]]

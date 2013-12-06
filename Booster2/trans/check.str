@@ -93,7 +93,7 @@ rules
     // Workflow Stuff End
 
 	build-lookup-table-class-component:
-		(cname, Attribute(aname, type)) -> (cname, Attribute(aname, type)) 
+		(cname, Attribute(aname, decorations, type)) -> (cname, Attribute(aname, decorations, type)) 
 		with
 			rules(
 				Attributes :+ (cname, aname) -> (cname, aname)
@@ -228,7 +228,7 @@ rules
    *****************************************************************  */
 
 	constraint-error-attribute:
-		(cname, Attribute(aname, type)) -> (aname, $[Duplicate attribute name "[aname]" in class [cname]])
+		(cname, Attribute(aname, decorations, type)) -> (aname, $[Duplicate attribute name "[aname]" in class [cname]])
 	where
 		not(<bagof-Attributes> (cname, aname) => [_])
 
