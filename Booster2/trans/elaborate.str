@@ -188,8 +188,8 @@ combine-constraints:
 			log(|Error(), system')
 
 	addscope:
-		Class(cname, extends, components)
-			-> Class(cname, extends, components)
+		Reference(cname, extends, components)
+			-> Reference(cname, extends, components)
 		where
 			rules(
 				LookupTable :+ "ParentClass" -> cname
@@ -610,7 +610,7 @@ combine-constraints:
 
 	deduce-types:
 		(classname, methodname, PathStart(a,maybeprimed), alreadyknown)
-			-> (Set(Class(a)), alreadyknown)
+			-> (Set(Reference(a)), alreadyknown)
 		where
 			<equal>(a, <lookup-class-name>(a))
 
@@ -629,14 +629,14 @@ combine-constraints:
 
 	deduce-types:
 		(classname, methodname, This(), alreadyknown)
-			->(Class(classname), <union>([(Input("this"), Class(classname))], alreadyknown))
+			->(Reference(classname), <union>([(Input("this"), Reference(classname))], alreadyknown))
 
 
 	deduce-types:
 		(classname, methodname, Path(path, PathComponent(att, maybeprimed)), alreadyknown)
 			-> (type, alreadyknown)
 		where
-			(Class(c), newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
+			(Reference(c), newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
 			type := <lookup-attribute-type> (c, att)
 			/* type := <resolve-path-type>
 					(classname, Path(path,component), (classname, methodname), newlyknown) */
@@ -1016,10 +1016,10 @@ combine-constraints:
 			-> (True(), Path(This(),b))
 				
 		where */
-			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
+			/* Reference(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
 /*			attname2 := <get-path-attribute-name>(a);
 			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
-			Class(thisclassname) := <lookup-attribute-type> ((otherclassname, attname3))
+			Reference(thisclassname) := <lookup-attribute-type> ((otherclassname, attname3))
 
 
 	replace-this-for-attribute:
@@ -1027,10 +1027,10 @@ combine-constraints:
 			-> (BinRel(Path(This(),PathComponent(attname3, None())),NotEqual(), Null()),  Path(This(),b))
 				
 		where */
-			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
+			/* Optional(Reference(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
 /*			attname2 := <get-path-attribute-name>(a);
 			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
-			Optional(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
+			Optional(Reference(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
 
 
 	replace-this-for-attribute:
@@ -1038,10 +1038,10 @@ combine-constraints:
 			-> (BinRel(Path(This(),PathComponent(attname3, None())), NotEqual(), SetExtent([])), Path(This(),b))
 				
 		where */
-			/* Optional(Class(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
+			/* Optional(Reference(otherclassname)) := <resolve-path-type>(thisclassname, a, None()); */
 /*			attname2 := <get-path-attribute-name>(a);
 			(otherclassname, attname3) := <lookup-opposite> ((thisclassname, attname2));
-			Set(Class(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
+			Set(Reference(thisclassname)) := <lookup-attribute-type> ((otherclassname, attname3))
 
 	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, Path(a,b))
@@ -1052,7 +1052,7 @@ combine-constraints:
 							  	   PathComponent(attname2, None())))), Path(This(),b))
 				
 		where */
-			/* Class(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
+			/* Reference(otherclassname) := <resolve-path-type>(thisclassname, a, None()); */
 /*			not(<equal>(thisclassname, otherclassname));
 			log(|Error(), "get-path-attribute-name", (thisclassname, otherclassname, attname, Path(a,b)));
 			attname2 := <get-path-attribute-name>(a)
@@ -1133,7 +1133,7 @@ get-possible-types:
 	Boolean() -> [Set(Boolean())] 
 
 get-possible-types:
-	This() {annots} -> [Class(classname)]
+	This() {annots} -> [Reference(classname)]
 		where
 	classname := <lookup> ("Containing Class", annots)
 

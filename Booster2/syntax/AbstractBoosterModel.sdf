@@ -23,7 +23,7 @@ exports
   'null' -> Type {cons("Null")}
   'INT' -> Type {cons("Int")}
   'STRING' -> Type {cons("String")}
-  ID -> Type {cons("Class")}
+  ID -> Type {cons("Reference")}
 
   '[' Type ']' -> Type {cons("Optional")}
   'set' '(' Type ')' -> Type {cons("Set")}

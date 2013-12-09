@@ -98,7 +98,7 @@ imports
 						["class","methodName","isObjectMethod"], 
 						[String(classname),String(methodname),True()], None())
 		where
-			<elem>(("this", Class(classname)), <lookup>((classname, methodname), <LookupTable> "Inputs"))
+			<elem>(("this", Reference(classname)), <lookup>((classname, methodname), <LookupTable> "Inputs"))
 
 	booster-to-metadata-method:
 		(classname, methodname) ->
@@ -154,11 +154,11 @@ imports
 			desc := <get-type-name-for-metadata> t 
 
 	attribute-type-metadata:
-		Class(name) -> ("ClassRef","Mandatory",name,"")
+		Reference(name) -> ("ClassRef","Mandatory",name,"")
 		where 
 			<equal>(name, <lookup-class-name> name)
 	attribute-type-metadata:
-		Class(name) -> ("SetValue","Mandatory","",name)
+		Reference(name) -> ("SetValue","Mandatory","",name)
 		where 
 			<equal>(name, <lookup-set-name> name)
 
@@ -169,11 +169,11 @@ imports
 			desc := <get-type-name-for-metadata> t 
 
 	attribute-type-metadata:
-		Optional(Class(name)) -> ("ClassRef","Optional",name,"")
+		Optional(Reference(name)) -> ("ClassRef","Optional",name,"")
 		where 
 			<equal>(name, <lookup-class-name> name)
 	attribute-type-metadata:
-		Optional(Class(name)) -> ("SetValue","Optional","",name)
+		Optional(Reference(name)) -> ("SetValue","Optional","",name)
 		where 
 			<equal>(name, <lookup-set-name> name)
 	
@@ -184,12 +184,12 @@ imports
 			desc := <get-type-name-for-metadata> t 
 
 	attribute-type-metadata:
-		Set(Class(name)) -> ("ClassRef","Set",name,"")
+		Set(Reference(name)) -> ("ClassRef","Set",name,"")
 		where 
 			<equal>(name, <lookup-class-name> name )
 			
 	attribute-type-metadata:
-		Set(Class(name)) -> ("SetValue","Set","",name)
+		Set(Reference(name)) -> ("SetValue","Set","",name)
 		where 
 			<equal>(name, <lookup-set-name> name)
 
@@ -282,7 +282,7 @@ imports
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
 			-> [Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname]))), columns*]
 		where
-			Class(cname) := <lookup> ((name,attname1), types);
+			Reference(cname) := <lookup> ((name,attname1), types);
 			<equal>(<lookup-set-name> cname, cname);
 			1 := <lookup>((name, attname1), maxmults);			
 			1 := <lookup>((name, attname1), minmults);
@@ -293,7 +293,7 @@ imports
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
 			-> [Column(attname1, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])]))), columns*]
 		where
-			Class(cname) := <lookup> ((name,attname1), types);
+			Reference(cname) := <lookup> ((name,attname1), types);
 			<equal>(<lookup-class-name> cname, cname);
 			not(<lookup-opposite>(name, attname1));
 			1 := <lookup>((name, attname1), maxmults);			
@@ -319,7 +319,7 @@ imports
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
 			-> [Column(attname1, "null", True(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname]))), columns*]
 		where
-			Optional(Class(cname)) := <lookup> ((name,attname1), types);
+			Optional(Reference(cname)) := <lookup> ((name,attname1), types);
 			<equal>(<lookup-set-name> cname, cname);
 			1 := <lookup>((name, attname1), maxmults);			
 			0 := <lookup>((name, attname1), minmults);
@@ -330,7 +330,7 @@ imports
 		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
 			-> [Column(attname1, "null", True(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])]))), columns*]
 		where
-			Optional(Class(cname)) := <lookup> ((name,attname1), types);
+			Optional(Reference(cname)) := <lookup> ((name,attname1), types);
 			<equal>(<lookup-class-name>cname, cname);
 			not(<lookup-opposite>(name, attname1));
 			1 := <lookup>((name, attname1), maxmults);			
@@ -369,7 +369,7 @@ imports
 		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
 			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(), None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
 		where
-			Class(oname) := <lookup> ((name, attname1), types);
+			Reference(oname) := <lookup> ((name, attname1), types);
 			(oname, oaname) := <lookup> ((name, attname1), opposite);
 			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*] ) ;
 			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
@@ -384,7 +384,7 @@ imports
 		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
 			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
 		where
-			Optional(Class(oname)) := <lookup> ((name, attname1), types);
+			Optional(Reference(oname)) := <lookup> ((name, attname1), types);
 			(oname, oaname) := <lookup> ((name, attname1), opposite);
 			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*]  );
 			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
@@ -399,7 +399,7 @@ imports
 		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
 			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
 		where
-			Set(Class(oname)) := <lookup> ((name, attname1), types);
+			Set(Reference(oname)) := <lookup> ((name, attname1), types);
 			(oname, oaname) := <lookup> ((name, attname1), opposite);
 			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*] ) ;
 			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
@@ -447,7 +447,7 @@ imports
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
 				 Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))]), tables*]
 		where
-			Set(Class(cname)) := <lookup> ((name, attname1), types);
+			Set(Reference(cname)) := <lookup> ((name, attname1), types);
 			<equal>(<lookup-set-name> cname, cname);
 			tablename := <concat-strings> [name, "_", attname1];
 			firstcolname := <concat-strings> [name, "Id"];			
@@ -462,7 +462,7 @@ imports
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
 				 Column(attname1, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))]), tables*]
 		where
-			Set(Class(cname)) := <lookup> ((name, attname1), types);
+			Set(Reference(cname)) := <lookup> ((name, attname1), types);
 			<equal>(<lookup-class-name> cname, cname);
 			tablename := <concat-strings> [name, "_", attname1];
 			firstcolname := <concat-strings> [name, "Id"];			
@@ -537,14 +537,14 @@ imports
 			t' := <get-type-booster-to-sql> t
 
 	convert-inputs:
-		[(name, Class(cname)), ins*]
+		[(name, Reference(cname)), ins*]
 			-> [Input(name, Varchar(1000)), inputs*]
 		where
 			<equal>(cname, <lookup-set-name> cname); 
 			[inputs*] := <convert-inputs> [ins*]
 
 	convert-inputs:
-		[(name, Class(cname)), ins*]
+		[(name, Reference(cname)), ins*]
 			-> [Input(name, Int()), inputs*]
 		where
 			[inputs*] := <convert-inputs> [ins*]
@@ -565,7 +565,7 @@ imports
 			[outputs*] := <convert-outputs> [outs*]
 
 	convert-outputs:
-		[(name, Class(cname)), outs*]
+		[(name, Reference(cname)), outs*]
 			-> [Output(name, Int()), outputs*]
 		where
 			[outputs*] := <convert-outputs> [outs*]
@@ -577,7 +577,7 @@ imports
 			[outputs*] := <convert-outputs> [outs*]
 
 	convert-outputs:
-		[(name, Set(Class(cname))), outs*]
+		[(name, Set(Reference(cname))), outs*]
 			-> [Output(name, Int()), outputs*]
 		where
 			[outputs*] := <convert-outputs> [outs*]
@@ -595,7 +595,7 @@ imports
 			where 
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
-				Class(tablename) := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
+				Reference(tablename) := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
@@ -606,7 +606,7 @@ imports
 			where 
 				attname := <get-path-attribute-name>(path);
 				path' := <get-path-initial-path>(path);
-				Optional(Class(tablename)) := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
+				Optional(Reference(tablename)) := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, path)
 
@@ -634,7 +634,7 @@ imports
 			where 
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
-				Class(classname') := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
+				Reference(classname') := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
 				tablename := <get-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
@@ -863,7 +863,7 @@ imports
 						  None(), 
 						  None())
 		where
-			Class(c) := <resolve-path-type> (classname, p, None(), <new-environment> []);
+			Reference(c) := <resolve-path-type> (classname, p, None(), <new-environment> []);
 			expr :=  <booster-to-relational-expression> (classname, progname, p)
 				 				
 

@@ -86,33 +86,33 @@ imports
 		(classname, attname)
 			-> $[ [name] . [attname2] ]
 		where
-			Class(name) := <lookup-attribute-type>(classname, attname);
+			Reference(name) := <lookup-attribute-type>(classname, attname);
 			(name, attname2) := <lookup>((classname, attname), <LookupTable> "Opposites")
 
 	output-to-booster-attribute-type:
 		(classname, attname)
 			-> $[ [name] ]
 		where
-			Class(name) := <lookup-attribute-type>(classname, attname)
+			Reference(name) := <lookup-attribute-type>(classname, attname)
 
 	output-to-booster-attribute-type:
 		(classname, attname)
 			-> ${[ {name} . {attname2} ]}
 		where
-			Optional(Class(name)) := <lookup-attribute-type>(classname, attname);
+			Optional(Reference(name)) := <lookup-attribute-type>(classname, attname);
 			(name, attname2) := <lookup>((classname, attname), <LookupTable> "Opposites") 
 
 	output-to-booster-attribute-type:
 		(classname, attname)
 			-> ${[ {name} ]}
 		where
-			Optional(Class(name)) := <lookup-attribute-type>(classname, attname)
+			Optional(Reference(name)) := <lookup-attribute-type>(classname, attname)
 			
 	output-to-booster-attribute-type:
 		(classname, attname)
 			-> ${set ( {name} . {attname2}  ) [ {<lookup-min-mult>(classname, attname)} .. {<lookup-max-mult>(classname, attname)} ]}
 		where
-			Set(Class(name)) := <lookup-attribute-type>(classname, attname);
+			Set(Reference(name)) := <lookup-attribute-type>(classname, attname);
 			(name, attname2) := <lookup-opposite>(classname, attname)
 			
 
@@ -120,7 +120,7 @@ imports
 		(classname, attname)
 			-> ${set ( {name} ) [ {<lookup-min-mult>(classname, attname)} .. {<lookup-max-mult>(classname, attname)} ]}
 		where
-			Set(Class(name)) := <lookup-attribute-type>(classname, attname)
+			Set(Reference(name)) := <lookup-attribute-type>(classname, attname)
 		
 	
 	output-to-booster-methods:

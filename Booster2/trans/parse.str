@@ -3,8 +3,6 @@ module parse
 imports
   include/Booster2
   
-  library/typeDecl
-  library/multiplicity
   
 rules
 	
@@ -25,7 +23,8 @@ rules
 
 	getClassComponents = \ Class(_, _, c) -> c \
 	getClassName = \ Class(n, _, _) -> n \
-	arrangeClass = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getAttributes> Class(n, e, c)) \
+	arrangeClassAttributes = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getAttributes> Class(n, e, c)) \
+	arrangeClassMethods = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getMethods> Class(n, e, c)) \
 
 	parse: 
    		System(name, components) -> 
@@ -35,9 +34,8 @@ rules
    		sets := <map(organise-set)> <getSets> components;
    		classes := <getClasses> components;
    		classes' := <map(organise-class)> classes;
-		attributes := []; // <map(organise-attribute)><concat><cart(id)>([name], <map(getClassComponents ; getAttributes)> classes);
-		methods := []; //<map(organise-method)><concat><cart(id)>([name], <map(getClassComponents ; getMethods)> classes);
-		log(|Error(),  <map(organise-attribute)><concat><map(arrangeClass)> classes);
+		attributes := <map(organise-attribute)><concat><map(arrangeClassAttributes)> classes;
+		methods := <map(organise-method)><concat><map(arrangeClassMethods)> classes;
 
 		rules(
 			LookupTable :+ "Name" ->  name
@@ -78,11 +76,12 @@ rules
 	
  	organise-attribute:
  		(cname, Attribute(attName, decorators, type))
- 			-> ((cname, attName), (decorators, type, opposite, minmult, maxmult))
+ 			-> ((cname, attName), (decorators, type', opposite, minmult, maxmult))
  		where
- 			opposite := [];
- 			minmult := 1;
- 			maxmult := 1
+ 			type' := <get-minimal-type> type;
+ 			opposite := <get-opposite> type;
+ 			minmult := <get-min-mult> type;
+ 			maxmult := <get-max-mult> type
  	organise-attribute:
  		something -> something
  		where
@@ -91,7 +90,9 @@ rules
 
  	organise-method:
  		(className, Method(methName, constraint))
- 			-> ((className, methName), constraint) 
+ 			-> ((className, methName), constraint, guardedCommand)
+ 		where
+ 			guardedCommand := [] 
 			
 			
 
@@ -126,66 +127,6 @@ rules
 	
 
 
-
-/* get-attribute-type: 
-		Takes an attribute and returns its type.
-*/
- 	
- 	get-attribute-type:
- 		Attribute(attName, decorations, attType)
- 			-> type
- 		with
- 			type := <get-minimal-type> attType
-
-
-/* get-attribute-max-mult: 
-		Takes an attribute and returns its maximum multiplicity.
-*/
- 	
- 	get-attribute-max-mult:
- 		Attribute(attName, decorations, attType)
- 			-> maxmult
- 		with
- 			maxmult := <get-max-mult> attType
-
-
-/* get-attribute-min-mult: 
-		Takes an attribute and returns its minimum multiplicity.
-*//* has-opposite: 
-		Returns the attribute if it has an opposite.
-*/
- 	
-
- 	get-attribute-min-mult:
- 		Attribute(attName, decorations, attType)
- 			-> minmult
- 		with
- 			minmult := <get-min-mult> attType
-
-
-/* get-attribute-min-mult: 
-		Takes an attribute and returns its minimum multiplicity.
-*/
- 	
- 	get-attribute-opposite:
- 		Attribute(attName, decorations, attType)
- 			-> opp
- 		with
- 			opp := <get-opposite> attType
- 			
-/* has-opposite: 
-		Returns the attribute if it has an opposite.
-*/
- 	
- 	has-opposite:
- 		((name1, name2), (name3, name4))
- 			-> ((name1, name2), (name3, name4))
- 	
-
-
-	attribute-is-id:
-		Attribute(attName, identity, attType)
- 			-> Attribute(attName, identity, attType)
 
 		
  /* get-max-mult:
@@ -250,3 +191,72 @@ rules
 		Set(typedecl, mult) -> x
 	with x := <get-opposite> typedecl
 
+/*	get-max:
+		Gets the maximum of this multiplicity
+	
+*/ 
+
+	get-max:
+		MultMinAndMax(a,b) -> <string-to-int>b
+		
+		
+	get-max:
+		MultJustMax(a) -> <string-to-int>a
+		
+	get-max:
+		MultJustMin(a) -> "*"
+		
+	get-max:
+		MultSingle(a) -> <string-to-int>a
+		
+	get-max:
+		MultAny() -> "*"
+		
+/*	get-min:
+		Gets the minimum of this multiplicity
+	
+*/ 
+
+	get-min:
+		MultMinAndMax(a,b) -> <string-to-int>a
+		
+		
+	get-min:
+		MultJustMax(a) -> 0
+		
+	get-min:
+		MultJustMin(a) -> <string-to-int>a
+		
+	get-min:
+		MultSingle(a) -> <string-to-int>a
+		
+	get-min:
+		MultAny() -> 0
+		
+		
+		
+/* get-minimal-type:
+ 		Takes a TypeDecl and returns its minimal type	
+ 
+ */
+ 
+
+	get-minimal-type:
+		BasicType(t) -> BasicType(t)
+
+		
+	get-minimal-type:
+		UniDirectional(name) -> Reference(name)
+	
+	get-minimal-type:
+		BiDirectional(name1,name2) -> Reference(name1)
+		
+	get-minimal-type:
+		Optional(typedecl) -> Optional(type)
+	with
+		type := <get-minimal-type> typedecl
+		
+	get-minimal-type:
+		Set(typedecl, mult) -> Set(type)
+	with
+		type := <get-minimal-type> typedecl

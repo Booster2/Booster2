@@ -142,14 +142,14 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
     	(cname, mname, Path (pathStart, something)) -> 
 			attnames
 			where
-				Class(c) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
+				Reference(c) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
 		      	attnames := <lookup-class-attributes> c
 
     get-potential-attributes:
     	(cname, mname, Path (pathStart, something)) -> 
 			attnames
 			where
-				Optional(Class(c)) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
+				Optional(Reference(c)) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
 		      	attnames := <lookup-class-attributes> c
 		      	
 		      	

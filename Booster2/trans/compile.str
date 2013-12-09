@@ -289,7 +289,7 @@ rules
 		where
 			path1 := <make-old> Path(a,b);
 			False() := <is-old> Path(a,b) ;
-			Class(name) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Reference(name) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name2 := <lookup-set-name> name;
 			<equal>(name, name2) 
 
@@ -299,7 +299,7 @@ rules
 		where
 			path1 := <make-old> Path(a,b);
 			False() := <is-old> Path(a,b) ;
-			Optional(Class(name)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name2 := <lookup-set-name> name;
 			<equal>(name, name2) 
 			
@@ -311,7 +311,7 @@ rules
 			/*log(|Warning(), "Matching new"); */
 			path1 := <make-old> PathStart(cl,Some(Primed()));
 			False() := <is-old> PathStart(cl,Some(Primed())) ;
-			Set(Class(cl)) := <resolve-path-type> (classname, PathStart(cl,Some(Primed())), (classname, methodname), <new-environment> [])  
+			Set(Reference(cl)) := <resolve-path-type> (classname, PathStart(cl,Some(Primed())), (classname, methodname), <new-environment> [])  
 
 
 			
@@ -326,14 +326,14 @@ rules
 							  		 BinOp(name2, Minus(),
 							  		 	   SetExtent([path3])))))
 		where
-			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name> (name2);
 			<equal>(name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -346,14 +346,14 @@ rules
 							  Assign(Path(path3, PathComponent(name6, None())),
 							  		 Null())))
 		where
-			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name> (name2);
 			<equal>(name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -369,14 +369,14 @@ rules
 							  		 			PathComponent(name6, None())), Minus(),  
 							  		 	   SetExtent([path1])))))
 		where
-			Optional(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name> (name2);
 			<equal>(name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))		
@@ -389,14 +389,14 @@ rules
 					    	   BinOp(PathStart(name2, None()), Minus(), 
 					    	   		 SetExtent([path3]))))
 		where
-			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name> (name2);
 			<equal>(name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -409,14 +409,14 @@ rules
 						Assign(Path(expression, PathComponent(name6, None())),
 							   Null()))
 		where
-			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name> (name2);
 			<equal> (name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -431,14 +431,14 @@ rules
 							   BinOp(Path(expression, PathComponent(name6, None())), Minus(),  
 							   		 SetExtent([path1]))))
 		where
-			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name> (name2);
 			<equal> (name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -450,14 +450,14 @@ rules
 				Parallel(Assign(path3, expression), 
 						 Assign(Path(expression,PathComponent(name6, None())),path1)))
 		where
-			Class(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Reference(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal> (name, name2);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type>(classname, path1, (classname, methodname), <new-environment> [] );
+			Reference(name4) := <resolve-path-type>(classname, path1, (classname, methodname), <new-environment> [] );
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b)) ;
 			False() := <is-old> (Path(a,b))
@@ -469,14 +469,14 @@ rules
 								 Assign(Path(expression, name6), path1)),
 						Assign(Path(path3, PathComponent(name6, None())), Null()) )
 		where
-			Class(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Reference(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal> (name, name2);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type>(classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type>(classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -495,14 +495,14 @@ rules
 							   		 SetExtent([path1]))))
 								 
 		where
-			Class(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Reference(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal> (name, name2);
 			name3 := <get-path-attribute-name>(Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -523,14 +523,14 @@ rules
 					 		  Assign(Path(expression, PathComponent(name6, None())),
 					 		  	     path1)))
 		where
-			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal>(name, name2);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path>(Path(a,b));	
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old>(Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -562,14 +562,14 @@ rules
 								 Assign(Path(expression, PathComponent(name6, None())),
 								 		path1)))
 		where
-			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal>(name, name2);
 			name3 := <get-path-attribute-name>(Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite>((name4, name3));
-			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b)) 	
@@ -606,14 +606,14 @@ rules
 							SetExtent([path1]))))
 			
 		where
-			Optional(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Optional(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal>(name, name2);
 			name3 := <get-path-attribute-name>(Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -638,14 +638,14 @@ rules
 								 	   			   	     PathComponent(name3, None())), Minus(), 
 								 	   			   	SetExtent([expression]))))))
 		where
-			Set(Class(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Set(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal>(name, name2);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Class(name5) := <lookup-attribute-type> ((name2, name6));
+			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -667,14 +667,14 @@ rules
 						Assign(Path(expression, PathComponent(name6, None())),
 							   path1))
 		where
-			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal>(name, name2);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Optional(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))
@@ -689,14 +689,14 @@ rules
 							   BinOp(Path(expression, PathComponent(name6, None())), Union(), 
 							   		 SetExtent([path1]))))
 		where
-			Set(Class(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name := <lookup-class-name>(name2);
 			<equal>(name2, name);
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
-			Class(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
+			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Set(Class(name5)) := <lookup-attribute-type> ((name2, name6));
+			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-old> (Path(a,b));
 			False() := <is-old> (Path(a,b))

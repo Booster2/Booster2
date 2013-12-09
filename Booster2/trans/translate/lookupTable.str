@@ -12,6 +12,16 @@ imports
  
 
  rules
+ 	
+ 	output-lookup-table:
+ 		system -> 
+	 		("Name:", <LookupTable> "Name",
+	 		"SetDef:", <LookupTable> "SetDef",
+	 		"Class:", <LookupTable> "Class",
+	 		"Attribute:", <LookupTable> "Attribute",
+	 		"Method:", <LookupTable> "Method")
+ 	
+/* 	
 output-list(s) : ([], sep) -> $[]
 output-list(s) : ([x], sep) -> $[[<s> x]]
 output-list(s): ([x | xs], sep) -> 
@@ -23,18 +33,23 @@ output-lookup-table:
 	system ->
 $[
 System
+
 	[systemName]
 	
 SetDefs	
-	[<output-list(output-setdef)> (setdefs, "\n")]
+
+	[<output-list(output-setdef)> (setdefs, "\r\t")]
 
 Classes	
-	[<output-list(output-class)> (classes, "\n")]
+
+	[<output-list(output-class)> (classes, "\r\t")]
 
 Attributes	
-	[<output-list(output-attribute)> (attributes, "\n")]
+
+	[<output-list(output-attribute)> (attributes, "\r\t")]
 
 Methods	
+
 	methods
 	
 ]
@@ -54,12 +69,13 @@ $[[name]: [<output-list> (elements, ",")]]
 output-class:
 	(name, (extends, attributes, methods, constraints, workflows))-> 
 $[name:       [name]
-  extends:    [<output-list>(extends, ",")]
-  attributes: [<output-list>(attributes, ",")]
-  methods:    [<output-list>(methods, ",")]]
+extends:    [<output-list>(extends, ",")]
+attributes: [<output-list>(attributes, ",")]
+methods:    [<output-list>(methods, ",")]]
   
 output-attribute:
-	((cname, aname), decorations, type, opposite, minmuly, maxmult)
+	((cname, aname), (decorations, type, opposite, minmult, maxmult))
 		->
-$[class name: [cname]
-  attribute name: [aname]]
+$[name: [cname] . [aname]]
+
+*/

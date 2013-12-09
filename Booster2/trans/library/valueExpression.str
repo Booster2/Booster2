@@ -78,7 +78,7 @@ imports
 			-> <union>(atts1, [(otherclassname, attname)])
 		where
 			atts1 := <get-mentioned-attributes>(classname, maybename, path, env);
-			Class(otherclassname) := <resolve-path-type>(classname, path, (classname, maybename), env);
+			Reference(otherclassname) := <resolve-path-type>(classname, path, (classname, maybename), env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 			
 	get-mentioned-attributes:
@@ -86,7 +86,7 @@ imports
 			-> <union>(atts1, [(otherclassname, attname)])
 		where
 			atts1 := <get-mentioned-attributes>(classname, maybename, path, env);
-			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, (classname, maybename) , env);
+			Optional(Reference(otherclassname)) := <resolve-path-type>(classname, path, (classname, maybename) , env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 	
 	get-mentioned-attributes:
@@ -250,14 +250,14 @@ imports
 		(classname, methodname, Path(a,b), env)
 			-> [(classname2, attname)]
 		where
-			Class(classname2) := <resolve-path-type> (classname, a, (classname, methodname), env);
+			Reference(classname2) := <resolve-path-type> (classname, a, (classname, methodname), env);
 			attname := <get-path-attribute-name> (Path(a,b))
 
 	get-path-attribute:
 		(classname, methodname, Path(a,b), env)
 			-> [(classname2, attname)]
 		where
-			Optional(Class(classname2)) := <resolve-path-type> (classname, a, (classname, methodname), env);
+			Optional(Reference(classname2)) := <resolve-path-type> (classname, a, (classname, methodname), env);
 			attname := <get-path-attribute-name> (Path(a,b))
 			
 /* 	get-expression-type
@@ -279,12 +279,12 @@ imports
 
 	get-expression-type:
 		(This(), classname, methodname, env)
-			-> Class(classname)
+			-> Reference(classname)
 
 
 	get-expression-type:
 		(ThisPrimed(), classname, methodname, env)
-			-> Class(classname)
+			-> Reference(classname)
 
 
 	get-expression-type:
@@ -321,19 +321,19 @@ imports
 
 	get-expression-type:
 		(PathStart(name, maybePrimed), classname, methodname, env)
-			-> Set(Class(name))
+			-> Set(Reference(name))
 			where
 				<equal>(name, <lookup-class-name> name)
 
 	get-expression-type:
 		(PathStart(name, maybePrimed), classname, methodname, env)
-			-> Class(name)
+			-> Reference(name)
 			where
 				<equal>(name, <lookup-set-value> name)
 
 	get-expression-type:
 		(PathStart(name, maybePrimed), classname, methodname, env)
-			-> Set(Class(name))
+			-> Set(Reference(name))
 			where
 				<equal>(name, <lookup-set-name> name)
 
@@ -341,14 +341,14 @@ imports
 		(Path(ps, PathComponent(attname, maybeprimed)), classname, methodname, env)
 			-> t
 		where
-			Class(otherclassname) := <get-expression-type> (ps, classname, methodname, env);
+			Reference(otherclassname) := <get-expression-type> (ps, classname, methodname, env);
 			t := <lookup-attribute-type> ((otherclassname, attname))
 			
 	get-expression-type:
 		(Path(ps, PathComponent(attname, maybeprimed)), classname, methodname, env)
 			-> t
 		where
-			Optional(Class(otherclassname)) := <get-expression-type> (ps, classname, methodname, env);
+			Optional(Reference(otherclassname)) := <get-expression-type> (ps, classname, methodname, env);
 			t := <lookup-attribute-type> ((otherclassname, attname))
 
 
@@ -434,11 +434,11 @@ imports
 
 	resolve-path-type:
 		(classname, This(), method, env) 
-			-> Class(classname)
+			-> Reference(classname)
 
 	resolve-path-type:
 		(classname, ThisPrimed(), method, env) 
-			-> Class(classname)
+			-> Reference(classname)
 			
 	resolve-path-type:
 		(classname, Input(attname), (classname, methname), env)
@@ -456,20 +456,20 @@ imports
 	
 	resolve-path-type:
 		(classname, PathStart(attname, None()), method, env)
-			-> (Class(attname))
+			-> (Reference(attname))
 		where
 			<equal>(attname, <lookup-set-name>attname)
 
 	resolve-path-type:
 		(classname, PathStart(attname, None()), method, env)
-			-> Class(setname)
+			-> Reference(setname)
 		where
 			setname := <lookup-set-value> (attname);
 			not(<equal>(setname, ()))
 
 	resolve-path-type:
 		(classname, PathStart(attname, maybeprimed), method, env)
-			-> Set(Class(attname))
+			-> Set(Reference(attname))
 		where
 			<equal>(attname, <lookup-class-name>(attname))
 						
@@ -490,14 +490,14 @@ imports
 		(classname, Path(path, PathComponent(attname, maybeprimed)), method, env)
 			->  type
 		where
-			Optional(Class(classname2)) := <resolve-path-type> (classname, path, method, env);
+			Optional(Reference(classname2)) := <resolve-path-type> (classname, path, method, env);
 			type := <lookup-attribute-type>((classname2, attname))
 
 	resolve-path-type:
 		(classname, Path(path, PathComponent(attname, maybeprimed)), method, env)
 			-> type
 		where
-			Class(classname2) := <resolve-path-type> (classname, path, method, env);
+			Reference(classname2) := <resolve-path-type> (classname, path, method, env);
 			type := <lookup-attribute-type>((classname2, attname))
 		
 		
@@ -726,7 +726,7 @@ imports
 			-> <union>(paths1, [Path(path, PathComponent(attname, maybeprimed))])
 		where
 			paths1 := <get-mentioned-paths>(classname, methodname, path, env);
-			Class(otherclassname) := <resolve-path-type>(classname, path, (classname, methodname), env);
+			Reference(otherclassname) := <resolve-path-type>(classname, path, (classname, methodname), env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 			
 	get-mentioned-paths:
@@ -734,7 +734,7 @@ imports
 			-> <union>(paths1, [Path(path, PathComponent(attname, maybeprimed))])
 		where
 			paths1 := <get-mentioned-paths>(classname, methodname, path, env);
-			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, (classname, methodname), env);
+			Optional(Reference(otherclassname)) := <resolve-path-type>(classname, path, (classname, methodname), env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 	
 	get-mentioned-paths:
@@ -763,7 +763,7 @@ imports
 			<union>(paths1, [Path(path, PathComponent(attname, maybeprimed))])
 		where
 			paths1 := <get-mentioned-paths>(classname, maybename, path, env);
-			Optional(Class(otherclassname)) := <resolve-path-type>(classname, path, maybename, env);
+			Optional(Reference(otherclassname)) := <resolve-path-type>(classname, path, maybename, env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 
  		something -> []

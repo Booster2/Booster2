@@ -6,28 +6,4 @@ imports
  
  rules
  	
- /* get-minimal-type:
- 		Takes a TypeDecl and returns its minimal type	
  
- */
- 
-
-	get-minimal-type:
-		BasicType(t) -> BasicType(t)
-
-		
-	get-minimal-type:
-		UniDirectional(name) -> Class(name)
-	
-	get-minimal-type:
-		BiDirectional(name1,name2) -> Class(name1)
-		
-	get-minimal-type:
-		Optional(typedecl) -> Optional(type)
-	with
-		type := <get-minimal-type> typedecl
-		
-	get-minimal-type:
-		Set(typedecl, mult) -> Set(type)
-	with
-		type := <get-minimal-type> typedecl

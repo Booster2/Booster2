@@ -145,7 +145,7 @@ imports
 		(Assign(path, expression), classname, methodname, abm)
 			-> [(classname1, attname)]
 		where
-			Class(classname1) := <resolve-path-type>(classname, path, abm, Some(methodname));
+			Reference(classname1) := <resolve-path-type>(classname, path, abm, Some(methodname));
 			attname := <get-path-attribute-name> (path, abm)
 */
 			
@@ -193,21 +193,21 @@ imports
 		([path, paths*], classname, methodname, env) 
 			-> And(BinRel(path, In(), PathStart(name1, None())), constraint1 )
 		where
-			Optional(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname), env);
+			Optional(Reference(name1)) := <resolve-path-type>(classname, path, (classname, methodname), env);
 			constraint1 := <get-type-constraint>([paths*], classname, methodname, env)
 
 	get-type-constraint:
 		([path, paths*], classname, methodname, env) 
 			-> And(BinRel(path, SubsetEquals(), PathStart(name1, None())), constraint1 )
 		where
-			Set(Class(name1)) := <resolve-path-type>(classname, path, (classname, methodname), env);
+			Set(Reference(name1)) := <resolve-path-type>(classname, path, (classname, methodname), env);
 			constraint1 := <get-type-constraint>([paths*], classname, methodname, env)
 
 	get-type-constraint:
 		([path, paths*], classname, methodname, env) 
 			-> And(BinRel(path, In(), PathStart(name1, None())), constraint1 )
 		where
-			Class(name1) := <resolve-path-type>(classname, path, (classname, methodname), env);
+			Reference(name1) := <resolve-path-type>(classname, path, (classname, methodname), env);
 			constraint1 := <get-type-constraint>([paths*], classname, methodname, env)
 			
 				

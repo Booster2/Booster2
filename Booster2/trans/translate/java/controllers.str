@@ -233,7 +233,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Class(name) := <lookup-attribute-type> (classname, attname);
+			Reference(name) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-class-name> name);
 			not(<lookup-opposite>(classname, attname))
 
@@ -248,7 +248,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Class(name) := <lookup-attribute-type> (classname, attname);
+			Reference(name) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-class-name> name)
 						
 
@@ -275,7 +275,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Optional(Class(name)) := <lookup-attribute-type> (classname, attname);
+			Optional(Reference(name)) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-class-name> name);
 			not(<lookup-opposite>(classname, attname))
 
@@ -290,7 +290,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Optional(Class(name)) := <lookup-attribute-type> (classname, attname);
+			Optional(Reference(name)) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-class-name> name)
 
 
@@ -318,7 +318,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Set(Class(name)) := <lookup-attribute-type> (classname, attname);
+			Set(Reference(name)) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-class-name> name)
 		
 	attribute-java:
@@ -344,7 +344,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Class(name) := <lookup-attribute-type> (classname, attname);
+			Reference(name) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-set-name> name)
 
 	attribute-java:
@@ -370,7 +370,7 @@ rules
 				"}\n\n"
 				]
 		where 
-			Optional(Class(name)) := <lookup-attribute-type> (classname, attname);
+			Optional(Reference(name)) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-set-name> name)
 
 	attribute-java:
@@ -397,6 +397,6 @@ rules
 				"}\n\n"
 				]
 		where 
-			Set(Class(name)) := <lookup-attribute-type> (classname, attname);
+			Set(Reference(name)) := <lookup-attribute-type> (classname, attname);
 			<equal>(name, <lookup-set-name> name)
 */

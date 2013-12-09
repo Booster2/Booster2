@@ -78,11 +78,11 @@ rules
 	type-xml:
 		String() -> ("String","Mandatory","","")
 	type-xml:
-		Class(name) -> ("ClassRef","Mandatory",name,"")
+		Reference(name) -> ("ClassRef","Mandatory",name,"")
 		where 
 			<equal>(name, <lookup-class-name> name)
 	type-xml:
-		Class(name) -> ("SetValue","Mandatory","",name)
+		Reference(name) -> ("SetValue","Mandatory","",name)
 		where 
 			<equal>(name, <lookup-set-name> name)
 
@@ -91,11 +91,11 @@ rules
 	type-xml:
 		Optional(String()) -> ("String","Optional","","")
 	type-xml:
-		Optional(Class(name)) -> ("ClassRef","Optional",name,"")
+		Optional(Reference(name)) -> ("ClassRef","Optional",name,"")
 		where 
 			<equal>(name, <lookup-class-name> name)
 	type-xml:
-		Optional(Class(name)) -> ("SetValue","Optional","",name)
+		Optional(Reference(name)) -> ("SetValue","Optional","",name)
 		where 
 			<equal>(name, <lookup-set-name> name)
 	
@@ -104,11 +104,11 @@ rules
 	type-xml:
 		Set(String()) -> ("String","Set","","")
 	type-xml:
-		Set(Class(name)) -> ("ClassRef","Set",name,"")
+		Set(Reference(name)) -> ("ClassRef","Set",name,"")
 		where 
 			<equal>(name, <lookup-class-name> name )
 	type-xml:
-		Set(Class(name)) -> ("SetValue","Set","",name)
+		Set(Reference(name)) -> ("SetValue","Set","",name)
 		where 
 			<equal>(name, <lookup-set-name> name)
 	
