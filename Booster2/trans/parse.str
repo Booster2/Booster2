@@ -25,7 +25,7 @@ rules
 
 	getClassComponents = \ Class(_, _, c) -> c \
 	getClassName = \ Class(n, _, _) -> n \
-	
+	arrangeClass = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getAttributes> Class(n, e, c)) \
 
 	parse: 
    		System(name, components) -> 
@@ -37,7 +37,7 @@ rules
    		classes' := <map(organise-class)> classes;
 		attributes := []; // <map(organise-attribute)><concat><cart(id)>([name], <map(getClassComponents ; getAttributes)> classes);
 		methods := []; //<map(organise-method)><concat><cart(id)>([name], <map(getClassComponents ; getMethods)> classes);
-		log(|Error(), <zip>(<map(getClassName)> classes, <map(getClassComponents ; getAttributes)> classes));
+		log(|Error(),  <map(organise-attribute)><concat><map(arrangeClass)> classes);
 
 		rules(
 			LookupTable :+ "Name" ->  name
@@ -72,18 +72,21 @@ rules
 			attributes := <map(\ Attribute(name, _,_) -> name \)><getAttributes> classComponents;			
 			methods := <map(\ Method(name, _ ) -> name \)><getMethods> classComponents;	
 			constraints := <getInvariants> classComponents;
-			workflows := [];
-		log(|Error(), (name, (extends, attributes, methods, constraints, workflows)))
+			workflows := []/*;
+		log(|Error(), (name, (extends, attributes, methods, constraints, workflows))) */
 	
 	
  	organise-attribute:
- 		Attribute(attName, decorators, type)
- 			-> (attName, (decorators, type, opposite, minmult, maxmult))
+ 		(cname, Attribute(attName, decorators, type))
+ 			-> ((cname, attName), (decorators, type, opposite, minmult, maxmult))
  		where
  			opposite := [];
  			minmult := 1;
  			maxmult := 1
- 			
+ 	organise-attribute:
+ 		something -> something
+ 		where
+ 			log(|Error(), something)
  			 
 
  	organise-method:
