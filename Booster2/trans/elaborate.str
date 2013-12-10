@@ -16,6 +16,19 @@ rules
 	
 	elaborate:
 		system -> system
+		where
+			<repeat(insertThis)> system
+
+	insertThis:
+		system -> system
+			where
+		constraints := <LookupTable> "Method"
+
+
+
+
+	elaborate:
+		system -> system
 	where
 				/*<combine-invariants> 
    				<calculate-class-invariants> 
