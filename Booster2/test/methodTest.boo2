@@ -6,16 +6,22 @@ system methodTest
  
    class class1 {
    	  attributes
-   	  	att1 (ID) : INT
+   	  	attA (ID) : INT
+   	  	attB : INT
+   	  	attC : STRING
    	  methods
   	  	m1 { att1' =  this.att1 + a? }
 	
    }
 
-   class class2 {
+   class class2 extends class1{
    	  attributes
    	  	att1 : INT
    	  	att2 : STRING
    	  	att3 : class1
    }
 
+	class class3 extends class2{
+		attributes
+			attZ : INT
+	}

@@ -14,27 +14,109 @@ imports
 
 rules
 	
+	getSuperClasses = (\ (n, (s,s',a,m,c,w)) -> s\)
+	getInheritance = (\ (n, (s,s',a,m,c,w)) -> ([n], s)\)
+	getAttributes = (\ (e,a,m,c,w) -> a \)
+	getInheritanceAttributes = (\ (c, c' ) -> ([(c,c')],a) where a := <getAttributes><lookup>(c', <LookupTable> "Class")\)
+	addAttribute = (\ ((e,as,m,c,w), a) -> (e,<union>([a],as),m,c,w)\)
+
+	getSubClasses = (\ name -> subclasses where (subclasses,s',a,m,c,w) := (<lookup>(name, <LookupTable>"Class") )\)
+	
 	elaborate:
 		system -> system
 		where
-			<repeat(insertThis)> system
+			<normaliseInheritance> system ;
+			<repeat(get-potential-inheritance)> system
+			
 
-	insertThis:
+	normaliseInheritance:
 		system -> system
 			where
-		constraints := <LookupTable> "Method"
+				<map(\ (n, (s,s',a,m,c,w)) -> <map(\m -> <addSuperClassRelation>(m,n)\)> s \)><LookupTable> "Class";
+				<map(\ (n, (s,s',a,m,c,w)) -> <map(addSubClassRelation ; addSuperClassRelation)><cart(id)>(s,s') \)><LookupTable> "Class"
+				
+/*	
+	(subclass, superclass)
+		where
+			<elem>(subclass, <\ (s,s',a,m,c,w) -> s'\> <lookup>(superclass, <LookupTable> "Class"))
+	
+*/	
+	
+	get-potential-inheritance:
+		system -> system
+			where
+				possibleExpansions := <concat><concat><map(getInheritance; cart(id); map(getInheritanceAttributes ; cart(id)))><LookupTable> "Class";
+				<not(equal)>(<filter(try-expand)> possibleExpansions, [])
+				
+		
+	
+	try-expand:
+		((superclass, subclass), attribute)
+			-> ((superclass, subclass), attribute)
+		where
+			currentlyKnownAttributes := <LookupTable> "Attribute";
+			<not(lookup)>((superclass, attribute), currentlyKnownAttributes);
+			newAttribute := <lookup> ((subclass, attribute), currentlyKnownAttributes);
+			newAttributes := <union>(currentlyKnownAttributes, [((superclass, attribute), newAttribute)]);
+			currentlyKnownClasses := <LookupTable> "Class";
+			oldClass := <lookup>(superclass, currentlyKnownClasses);
+			newClassDef := <addAttribute>(oldClass, attribute);
+			newClasses := <union>(<diff>(currentlyKnownClasses, [(superclass, oldClass)]), [(superclass, newClassDef)]);
+			rules(
+				LookupTable :+ "Attribute" -> newAttributes
+				LookupTable :+ "Class" -> newClasses
+			)
 
+			
+			
+			
+	replaceClass(s):
+		(oldClassName)
+			-> (oldClassName)
+		where
+			currentlyKnownClasses := <LookupTable> "Class";
+			oldClass := <lookup>(oldClassName, currentlyKnownClasses);
+			newClasses := <union>(<diff>(currentlyKnownClasses, [(oldClassName, oldClass)]), [<s>(oldClassName, oldClass)]);
+			rules(
+				LookupTable :+ "Class" -> newClasses
+			)
 
+	addSubClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
+				<replaceClass(\ (superclass, (s,s',a,m,c,w)) -> (superclass, (<union>(s, [subclass]),s',a,m,c,w))\)> superclass \)		
+	addSuperClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
+				<replaceClass(\ (subclass, (s,s',a,m,c,w)) -> (subclass, (s, <union>(s', [superclass]),a,m,c,w))\)> subclass \)		
+			
+			
+/*			
+	expandInheritance:
+		system 
+			-> system
+		where
+			attributes := <LookupTable> "Attribute";
+			attributes' := <filter(canBeExpanded)> attributes;
+			<not(equal)> (attributes', [])
+			
+	canBeExpanded:
+		((cname, aname), (d,t,o,min, max))
+			-> ((cname, aname), (d,t,o,min, max))
+		where
+			
+			
+			
+			
+			<elem>((superclassname, aname), <LookupTable> "Attribute") 
+			<lookup>(subclassname, <LookupTable> "Class")
+*/
 
-
+/*
 	elaborate:
 		system -> system
-	where
+	where */
 				/*<combine-invariants> 
    				<calculate-class-invariants> 
    				<create-constraint-for-each-attribute> 
    				*/
-   				< generate-inputs-and-outputs > 
+   				/*< generate-inputs-and-outputs > 
    				<insert-this-main>
   				system ;
   				invariants := <LookupTable> "Invariants";
@@ -56,7 +138,7 @@ rules
   				rules(			
 					LookupTable :+ "ExpandedParWorkflows" -> parwfs'
 				)
-  		
+ */ 		
   
   
   // Workflow Begin

@@ -64,9 +64,10 @@ rules
 	
 	organise-class:
 		Class(name, extends, classComponents)
-			-> (name, (extends', attributes, methods, constraints, workflows))
+			-> (name, (subclasses, superclasses, attributes, methods, constraints, workflows))
 		where
-			extends' := <\ None() -> [] \ <+ \ Some(Extend(es)) -> es \> extends;
+			subclasses := <\ None() -> [] \ <+ \ Some(Extend(es)) -> <map(\Extension(c) -> c \)> es \> extends;
+			superclasses := [];
 			attributes := <map(\ Attribute(name, _,_) -> name \)><getAttributes> classComponents;			
 			methods := <map(\ Method(name, _ ) -> name \)><getMethods> classComponents;	
 			constraints := <getInvariants> classComponents;
