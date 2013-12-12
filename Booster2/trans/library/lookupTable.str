@@ -1,0 +1,39 @@
+module lookupTable
+
+imports
+  include/Booster2  
+  
+  library/lookupTable
+ 
+
+rules
+			
+	replaceClass(s):
+		(oldClassName)
+			-> (oldClassName)
+		where
+			currentlyKnownClasses := <LookupTable> "Class";
+			oldClass := <lookup>(oldClassName, currentlyKnownClasses);
+			newClasses := <union>(<diff>(currentlyKnownClasses, [(oldClassName, oldClass)]), [<s>(oldClassName, oldClass)]);
+			rules(
+				LookupTable :+ "Class" -> newClasses
+			)
+
+	insertIntoLookupTable:
+		(table, tdef)
+			-> (table, tdef)
+		where
+			prevTable := <LookupTable> table;
+			newTable := <union>(prevTable, [tdef]);
+			rules(
+				LookupTable :+ table -> newTable
+			)
+
+	addSubClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
+				<replaceClass(\ (superclass, (s,s',a,m,c,w)) -> (superclass, (<union>(s, [subclass]),s',a,m,c,w))\)> superclass \)		
+	addSuperClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
+				<replaceClass(\ (subclass, (s,s',a,m,c,w)) -> (subclass, (s, <union>(s', [superclass]),a,m,c,w))\)> subclass \)		
+			
+	addClassAttribute = (\ (cname, aname, adef) -> (cname, aname, adef) where
+				<replaceClass(\ (cname, (s,a,m,c,w)) -> (cname, (s, <union>(a, [aname]),m,c,w))\)> cname ;
+				<insertIntoLookupTable>("Attribute", ((cname, aname), adef)) \)		

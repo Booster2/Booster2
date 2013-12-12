@@ -17,7 +17,7 @@ imports
   calculateWFPrecond/main
   // Workflow Stuff End
  
-  translate/booster/abstractBoosterModel
+  translate/booster/booster
   translate/sql/abstractBoosterModel
   translate/sql/sql
   translate/lookupTable
@@ -174,8 +174,8 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    builder-elaborate: 
    		(selected, position, ast, path, project-path) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"2")> path;
-   		result :=   <output-lookup-table>
+   		filename := <guarantee-extension(|"exp.boo2")> path;
+   		result :=   <output-to-booster>
    						<elaborate>
    				          <parse> 
    				            selected   

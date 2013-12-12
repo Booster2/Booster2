@@ -1,0 +1,218 @@
+module translate/booster/booster
+
+imports
+  include/Booster2
+
+  library/lookupTable
+  library/basicTypes
+  library/binOp
+  library/binRel 
+
+ rules
+ 	
+/* output-to-booster:
+*/
+
+foldout(s): ([], sep) -> $[ ]
+foldout(s): ([x], sep) -> $[[<s> x]]
+foldout(s): ([x|xs*], sep) -> $[[<s> x][sep][<foldout(s)>([xs*], sep)]]
+//foldout(s): something -> $[] where log(|Error(), "foldoutError", something)
+
+outputAttributes = (\ classname -> <foldout(attribute)>(<filter(\ ((cname, aname), adef) -> ((cname, aname), adef) where <eq>(cname, classname)\)><LookupTable>"Attribute", "\r") \)
+outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mdef) -> ((cname, mname), mdef) where <eq>(cname, classname)\)><LookupTable>"Method", "\r") \)
+
+	output-to-booster:
+	 	system
+	 		-> $[system [<LookupTable> "Name"] 
+	 			 ["\r\r"] 
+	 			 [<foldout(setdef)> (<LookupTable> "SetDef", "\r\r")]
+	 			 ["\r\r"]
+	 			 [<foldout(class)> (<LookupTable> "Class", "\r\r")] ]
+
+		
+	setdef:
+		(name, values)
+			-> $[["\t"]set [name] { [<foldout(set-value)> (values, ", ")] }]
+	
+	set-value:
+		name -> $[[name]]
+
+
+
+
+	class:
+		(classname, (extends, atts, meths, invs, wfs))
+			-> $[["\t"]class [classname] { ["\r\t\t"]attributes["\r"][<outputAttributes> classname]["\r\t\t"]invariants [<foldout(constraint)> (invs, "\r\t\t")]["\r\t\t"]methods [<outputMethods> classname]["\r\t"]}]
+				
+	attribute:
+		((classname, attname), (decs, type, opposite, minmult, maxmult)) 
+			-> $[["\t\t\t"][attname] [<foldout(decorator)>(decs, ", ")] : [<type>(type, opposite, minmult, maxmult)] ]
+			//[<output-to-booster-attribute-type>(classname, attname)]]
+				
+	decorator:
+		Identity() -> $[(ID)]
+		
+		
+	type: 
+		(BasicType(t), opposite, minmult, maxmult)	
+			-> <get-type-booster-notation> t
+
+	type:
+		(Optional(BasicType(t)), opposite, minmult, maxmult)
+			-> ${[ { <get-type-booster-notation> t } ]}
+				
+	type:
+		(Set(BasicType(t)), opposite, minmult, maxmult)
+			-> ${set ( { <get-type-booster-notation> t } )  [{minmult} .. {maxmult}]}
+			
+	type:
+		(Reference(name), opposite, minmult, maxmult)
+			-> $[ [name] [<opposite>opposite] ]
+
+	type:
+		(Optional(Reference(name)), opposite, minmult, maxmult)
+			-> $[ [name] [<opposite>opposite] ]
+
+	type:
+		(Set(Reference(name)), opposite, minmult, maxmult)
+			-> ${set ( { name }{<opposite>opposite} )  [{minmult} .. {maxmult}]}
+
+	opposite:
+		(name, name') -> $[ . [name']]
+
+	opposite:
+		() -> $[]
+
+	
+	method:
+		((classname, methodname), (constraint, guardedCommand))
+			-> $[ [methodname] { [<guardedCommand> guardedCommand] }]
+		where
+			<not(equal)>(guardedCommand, ())
+
+	method:
+		((classname, methodname), (constraint, guardedCommand))
+			-> $[ [methodname] { [<constraint> constraint] }]
+
+
+	guardedCommand:
+		Skip() -> $[skip]
+
+	guardedCommand:
+		New(Output(o), cl) -> $[new [o]! : [cl]]
+			
+	guardedCommand:
+		Assign(path, expression) -> $[[<expression> path] := [<expression> expression]]								
+			
+	guardedCommand:
+		Parallel (gc1, gc2) -> $[ ([<guardedCommand> gc1]) || ([<guardedCommand> gc2])]
+			
+	guardedCommand:
+		Choice (gc1, gc2) -> ${({<guardedCommand> gc1}) [] ({<guardedCommand> gc2})}
+			
+	guardedCommand:
+		Sequence (gc1, gc2)
+			-> $[([<guardedCommand> gc1]) ; ([<guardedCommand> gc2])]
+			
+	guardedCommand:
+		Guard (constraint, gc)
+			-> $[ [<constraint> constraint] --> ( [<guardedCommand> gc] )]
+				
+										
+	constraint: 
+		True() -> $[true]
+			
+	constraint: 
+		False() -> $[false]
+			
+	constraint:
+			Not(constraint) -> $[not ([<constraint> constraint])]	
+	
+	constraint: 
+		And(constraint1, constraint2) -> $[([<constraint> constraint1] & [<constraint> constraint2])]
+
+	constraint: 
+		Or(constraint1, constraint2) -> $[([<constraint> constraint1] or [<constraint> constraint2])]
+
+	constraint: 
+		Then(constraint1, constraint2) -> $[([<constraint> constraint1] ;[<constraint> constraint2])]
+
+	constraint: 
+		Implies(constraint1, constraint2) -> $[([<constraint> constraint1] => [<constraint> constraint2])]
+
+	constraint: 
+		Exists(name, expr, constraint) -> $[(exists [name] : [<expression> expr] @ ([constraint]))]
+
+	constraint: 
+		Forall(name, expr, constraint) -> $[(forall [name] : [<expression> expr] @ ([constraint]))] 										
+										
+	constraint:
+		BinRel(expr1, rel, expr2) -> $[[ <expression> expr1] [<get-binrel-booster-notation> rel] [<expression> expr2]]
+
+
+	expression:
+		Head(expr1) -> $[head([<expression> expr1])]
+
+	expression:
+		Tail(expr1)	-> $[tail([<expression> expr1])]
+
+	expression:
+		Negative(expr1) -> $[-[<expression> expr1]]
+
+	expression:
+		Cardinality(expr1) -> $[card([<expression> expr1])]
+
+	expression:
+		BinOp(expr1, op, expr2) -> $[[<expression> expr1] [<get-binop-booster-notation> op] [<expression> expr2]]
+
+	expression:
+		BasicValue(Integer(i)) -> $[[i]]
+
+	expression:
+		BasicValue(String(s)) -> $[[s]]
+			
+	expression:
+		TypeExtent(t) -> <get-type-booster-notation> t 
+			
+	expression:
+		Null() -> $[null]
+			
+	expression:
+		Input(inputname) -> $[[inputname]?]
+			
+	expression:
+		Output(outputname) -> $[[outputname]!]
+			
+	expression:
+		This() -> $[this]
+			
+	expression:
+		ThisPrimed() -> $[this']
+
+	expression:
+		Path(a,b) -> $[[<expression> a].[<expression> b]]
+			
+	expression:
+		PathComponent(name, None()) -> $[[name]]
+
+	expression:
+		PathComponent(name, Some(Primed())) -> $[[name]']
+
+
+	expression:
+		PathStart(st, None()) -> $[[st]]
+
+			
+	expression:
+		PathStart(st, Some(Primed())) -> $[[st]']
+
+	expression:
+		PathStart(st, None()) -> $[[<expression> st]]
+			
+	expression:
+		PathStart(st, Some(Primed())) -> $[[<expression> st]']
+
+	expression:
+		SetExtent(exprs) -> $[{[<foldout(expression)>(exprs, ", ")]}]
+		
+		

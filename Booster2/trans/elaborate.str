@@ -3,88 +3,50 @@ module elaborate
 imports
   include/Booster2  
   
-  library/constraint
-  library/strategy
-  library/environment
-  library/abstractBoosterModel
-  library/valueExpression
-  library/basicTypes
-  library/binRel
+  library/lookupTable
  
 
 rules
 	
-	getSuperClasses = (\ (n, (s,s',a,m,c,w)) -> s\)
-	getInheritance = (\ (n, (s,s',a,m,c,w)) -> ([n], s)\)
-	getAttributes = (\ (e,a,m,c,w) -> a \)
-	getInheritanceAttributes = (\ (c, c' ) -> ([(c,c')],a) where a := <getAttributes><lookup>(c', <LookupTable> "Class")\)
-	addAttribute = (\ ((e,as,m,c,w), a) -> (e,<union>([a],as),m,c,w)\)
-
-	getSubClasses = (\ name -> subclasses where (subclasses,s',a,m,c,w) := (<lookup>(name, <LookupTable>"Class") )\)
 	
 	elaborate:
 		system -> system
 		where
-			<normaliseInheritance> system ;
-			<repeat(get-potential-inheritance)> system
+			//<normaliseInheritance> system ;
+			<repeat(inheritance-attributes)> system
 			
 
-	normaliseInheritance:
+	inheritance-attributes:
 		system -> system
 			where
-				<map(\ (n, (s,s',a,m,c,w)) -> <map(\m -> <addSuperClassRelation>(m,n)\)> s \)><LookupTable> "Class";
-				<map(\ (n, (s,s',a,m,c,w)) -> <map(addSubClassRelation ; addSuperClassRelation)><cart(id)>(s,s') \)><LookupTable> "Class"
-				
-/*	
-	(subclass, superclass)
+		atts := <filter(attributes-can-be-percolated)> <LookupTable> "Attribute";
+		<not(equal)>(atts, []);
+		<map(percolate-attributes)> atts /* ;
+		log(|Error(), atts) */
+
+
+	attributes-can-be-percolated:
+		((cname, aname), adef) 
+			-> ((cname, aname), (cnames, adef))
 		where
-			<elem>(subclass, <\ (s,s',a,m,c,w) -> s'\> <lookup>(superclass, <LookupTable> "Class"))
+			cnames := <concat><filter(\ (n, (s,a,m,c,w)) -> [n] where <elem>(cname, s); <not(elem)>(aname, a)\)> <LookupTable> "Class";
+			<not(equal)> (cnames, [])
+
 	
-*/	
-	
-	get-potential-inheritance:
-		system -> system
-			where
-				possibleExpansions := <concat><concat><map(getInheritance; cart(id); map(getInheritanceAttributes ; cart(id)))><LookupTable> "Class";
-				<not(equal)>(<filter(try-expand)> possibleExpansions, [])
-				
+	percolate-attributes:
+		((cname, aname), (cnames, adef))
+			-> []
+		where
+			<map(\cname' -> <addClassAttribute> (cname', aname, adef) \)> cnames
 		
-	
-	try-expand:
-		((superclass, subclass), attribute)
-			-> ((superclass, subclass), attribute)
-		where
-			currentlyKnownAttributes := <LookupTable> "Attribute";
-			<not(lookup)>((superclass, attribute), currentlyKnownAttributes);
-			newAttribute := <lookup> ((subclass, attribute), currentlyKnownAttributes);
-			newAttributes := <union>(currentlyKnownAttributes, [((superclass, attribute), newAttribute)]);
-			currentlyKnownClasses := <LookupTable> "Class";
-			oldClass := <lookup>(superclass, currentlyKnownClasses);
-			newClassDef := <addAttribute>(oldClass, attribute);
-			newClasses := <union>(<diff>(currentlyKnownClasses, [(superclass, oldClass)]), [(superclass, newClassDef)]);
-			rules(
-				LookupTable :+ "Attribute" -> newAttributes
-				LookupTable :+ "Class" -> newClasses
-			)
+		
 
 			
 			
-			
-	replaceClass(s):
-		(oldClassName)
-			-> (oldClassName)
-		where
-			currentlyKnownClasses := <LookupTable> "Class";
-			oldClass := <lookup>(oldClassName, currentlyKnownClasses);
-			newClasses := <union>(<diff>(currentlyKnownClasses, [(oldClassName, oldClass)]), [<s>(oldClassName, oldClass)]);
-			rules(
-				LookupTable :+ "Class" -> newClasses
-			)
 
-	addSubClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
-				<replaceClass(\ (superclass, (s,s',a,m,c,w)) -> (superclass, (<union>(s, [subclass]),s',a,m,c,w))\)> superclass \)		
-	addSuperClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
-				<replaceClass(\ (subclass, (s,s',a,m,c,w)) -> (subclass, (s, <union>(s', [superclass]),a,m,c,w))\)> subclass \)		
+
+			
+			
 			
 			
 /*			
@@ -200,11 +162,11 @@ rules
 	      	PrecondLookupTable :+ "SeqWorkflows" -> newwfs
 	      )
 		      
-		      
+/*		      
 	expandParWorkflows: (cname,parwfs) -> (cname,parwfs')
 		where
 		parwfs' := <currymap(expandParWf)> (cname, parwfs)
-		
+*/		
 	expandParWf: (cname, ParWf(name,xs)) -> (name,wfs*)
 	where
 		wfs_ref* := <makeParList> xs;
@@ -219,7 +181,7 @@ rules
  		-> (classname, True())
 
 
- qualify-invariant:
+/* qualify-invariant:
  	(classname, invariant)
  		-> (classname, Forall(varname, PathStart(classname, None()), invariant'))
  	where
@@ -240,7 +202,7 @@ rules
   		where
   			invs1 := <curryfilter(match-attributes)> ((classname, attname), invs-atts);
   			constraint := <combine-constraints> invs1
-
+*/
  match-attributes:
  	((classname1, attname), (classname2, constraint, atts))
  		-> (classname2, constraint, atts)
@@ -340,7 +302,7 @@ combine-constraints:
 		returns an Abstract Booster Model with the ins and outs filled in
 */
 
-	generate-inputs-and-outputs:
+/*	generate-inputs-and-outputs:
 		system -> system 
 		with 
 			(inputs, outputs) := <generate-method-inputs-and-outputs> <LookupTable> "Constraints";
@@ -349,24 +311,24 @@ combine-constraints:
 				LookupTable :+ "Inputs" -> inputs
 				LookupTable :+ "Outputs" -> outputs
 			)
-
+*/
 			
 /* 	generate-method-inputs-and-outputs:
 		Takes a list of method constraints, and an Abstract Booster Model and 
 		returns an list of pairs of pairs: 
 			[(classname, methodname), (inputname, type)]
 */
-	generate-method-inputs-and-outputs:
+/*	generate-method-inputs-and-outputs:
 		something 
 			-> (inputs, outputs)
 		where
 			inputsandoutputs := <map(deduce-types-method)> something;
 			inputs := <map(split-inputs)> inputsandoutputs;
-			outputs := <map(split-outputs)> inputsandoutputs 
+			outputs := <map(split-outputs)> inputsandoutputs */
 			/*inputs := [];
 			outputs := [];
 			log(|Error(), "inputs and outputs:", inputsandoutputs) */
-
+/*
 
 	split-inputs:
 		((classname, methodname), inputs, outputs)
@@ -375,20 +337,20 @@ combine-constraints:
 	split-outputs:
 		((classname, methodname), inputs, outputs)
 			-> ((classname, methodname), outputs)
-
+*/
 /* [((classname, methodname),ins1)] */
 
-	deduce-types-method:
+/*	deduce-types-method:
 		((classname, methodname), constraint)
 			-> ((classname, methodname), inputs, outputs)
 		where 
 			inputsandoutputs := <deduce-types>(classname, methodname, constraint,[]);
 			inputs := <filter(isInput)> inputsandoutputs;
-			outputs := <filter(isOutput)> inputsandoutputs
-			/*inputs := [];
+			outputs := <filter(isOutput)> inputsandoutputs */
+			/* inputs := [];
 			outputs := [];
 			log(|Error(), "inputs and outputs:", inputsandoutputs) */
-
+/*
 	isInput:
 		(Input(name), type)
 			-> (name, type)
@@ -396,7 +358,7 @@ combine-constraints:
 	isOutput:
 		(Output(name), type)
 			-> (name, type)
-
+*/
 
 /* 	create-constraint-for-each-attribute:
 */
@@ -603,7 +565,7 @@ combine-constraints:
 		they have 'this' at the front, if applicable 
 */ 	
 
-	insert-this: 
+/*	insert-this: 
 		(True(), classname)
 			-> True()
 			
@@ -644,12 +606,12 @@ combine-constraints:
 		with 
 			constraint3 := <insert-this>(constraint1, classname);
 			constraint4 := <insert-this>(constraint2, classname)
-
+*/
 /*	deduce-types:
 		Description goes here
 */ 	
 
-	deduce-types:
+/*	deduce-types:
 		(classname, methodname, Then(expr1, expr2), alreadyknown)
 		 	-> types2
 		where
@@ -733,7 +695,7 @@ combine-constraints:
 		where
 			(Reference(c), newlyknown) := <deduce-types> (classname, methodname, path, alreadyknown);		
 			type := <lookup-attribute-type> (c, att)
-			/* type := <resolve-path-type>
+*/			/* type := <resolve-path-type>
 					(classname, Path(path,component), (classname, methodname), newlyknown) */
 			
 
@@ -798,7 +760,7 @@ combine-constraints:
 /*	deduce-types:
 		Description goes here
 */ 	
-	
+/*	
 	deduce-types:
 		(classname, methodname, BinRel(expr1, rel, expr2), alreadyknown)
 		 	-> types2
@@ -831,7 +793,7 @@ combine-constraints:
 			type2 := <get-binrel-type> (rel, type1);
 			types2 := <infer-type> (classname, methodname, expr1, type2, types1)
 
-
+*/
 
 
 /* 	insert-this:
@@ -1025,7 +987,7 @@ combine-constraints:
 		they have 'this' at the front, if applicable 
 */
 
-
+/*
 	insert-this:
 		(BasicValue(t), classname) 
 			-> BasicValue(t)
@@ -1086,7 +1048,7 @@ combine-constraints:
 		where
 			expr2 := <insert-this> expr1;
 			SetExtent([exprs2*]) := <insert-this> SetExtent([exprs1*])
-	
+	*/
 
 /*	replace-this-for-attribute:
 		(thisclassname, otherclassname, attname, BasicValue(t))
