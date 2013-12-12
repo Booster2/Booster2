@@ -2,6 +2,8 @@
 
 \section{Introduction}
 
+A 'staged compilation process', similar to that described on Page 8 of \cite{KatsVisser2010}.
+
 \section{Structure}
 
 \begin{itemize}
@@ -9,21 +11,6 @@
   \begin{itemize}
     \item Initialize lookup table
     \item Populate lookup table
-    \begin{itemize}
-      \item Name
-      \item Sets
-      \item Classes
-      \item Invariants
-      \item Attributes
-      \item Ids
-      \item Type
-      \item MaxMults
-      \item MinMults
-      \item Opposites
-      \item Operations
-      \item Constraints
-      \item Workflows
-    \end{itemize}
   \end{itemize}
   \item Elaborate
   \begin{itemize}
@@ -52,6 +39,24 @@
   \item Simplify
   \item Translate
 \end{itemize}
+
+\subsection{Parse}
+
+In this initial stage of the process, the tree of abstract terms which
+comprises the abstract syntax is inserted into a lookup table, for
+later reference.  At this point, only simple inferences are made; any
+complicated inferences are left until the 'elaborate' part of the
+process.
+
+Before the lookup table can be created, it must first be initialised,
+which is useful in later steps: when the lookup-table is
+pretty-printed after a stage, perhaps for debugging purposes, there is
+no danger of an uninitialised part of the table.
+ 
+\subsection{Elaborate}
+\subsection{Compile}
+\subsection{Simplify}
+\subsection{Translate}
   
 \section{Implementing in Spoofax}
 
@@ -115,7 +120,7 @@ These are the fields that are originally stored in the lookup table.
 
 "SetDef" -> (name, [elements])
 
-"Class" -> (name, ([extends], [attributes], [methods], 
+"Class" -> (name, ([subclasses], [attributes], [methods], 
                                          [constraints], [workflows]))
 
 "Attribute" -> ((cname, aname), (decorations, type, 
