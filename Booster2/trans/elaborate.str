@@ -12,16 +12,25 @@ rules
 	elaborate:
 		system -> system
 		where
+			<unrollSubclasses> system;
 			//<normaliseInheritance> system ;
-			<repeat(inheritance-attributes)> system
+			<repeat( inheritance-attributes <+ inheritance-methods)> system
 			
+	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
+			
+	unrollSubclass: 
+	cname -> allSubClasses 
+		where 
+			allSubClasses := <nub><concat><\ set -> <union>([set], <map(unrollSubclass)> set) \><\ (is,as,a,m,c,w) -> is \><lookup>(cname, <LookupTable> "Class");
+			/*log(|Error(),  "allSubClasses", allSubClasses) */
+			<replaceClass(\ (cname, (is,as,a,m,c,w)) -> (cname, (is,allSubClasses,a,m,c,w)) \)> cname 		
 
 	inheritance-attributes:
 		system -> system
 			where
 		atts := <filter(attributes-can-be-percolated)> <LookupTable> "Attribute";
 		<not(equal)>(atts, []);
-		<map(percolate-attributes)> atts /* ;
+		<map(percolate-attribute)> atts /* ;
 		log(|Error(), atts) */
 
 
@@ -29,16 +38,59 @@ rules
 		((cname, aname), adef) 
 			-> ((cname, aname), (cnames, adef))
 		where
-			cnames := <concat><filter(\ (n, (s,a,m,c,w)) -> [n] where <elem>(cname, s); <not(elem)>(aname, a)\)> <LookupTable> "Class";
+			cnames := <concat><filter(\ (n, (is,as,a,m,c,w)) -> [n] where <elem>(cname, as); <not(elem)>(aname, a)\)> <LookupTable> "Class";
 			<not(equal)> (cnames, [])
 
 	
-	percolate-attributes:
+	percolate-attribute:
 		((cname, aname), (cnames, adef))
 			-> []
 		where
 			<map(\cname' -> <addClassAttribute> (cname', aname, adef) \)> cnames
 		
+
+	inheritance-methods:
+		system -> system
+			where
+		newMethods := <map(try(\((cname, mname),(c,gc,e,False())) -> ((cname, mname),(c,gc,e,True())) 
+							where [] := <filter(\ cname' -> <lookup>((cname', mname), <LookupTable>"Method") \)>
+										<\(is,as,a,m,c,w) -> as\><lookup>(cname, <LookupTable>"Class") \))><LookupTable> "Method";
+		log(|Error(), "New Methods", newMethods);
+		rules(
+			LookupTable :+ "Method" -> newMethods
+		);
+		meths := <filter(methods-can-be-percolated)> <LookupTable> "Method";
+		<not(equal)>(meths, []);
+		<map(percolate-method)> meths
+
+
+	methods-can-be-percolated:
+		((cname, mname), mdef) 
+			-> ((cname, mname), (cnames, mdef))
+		where
+			cnames := <concat>
+				<filter(\ 
+					(n, (is,as,a,m,c,w)) -> [n] 
+						where <elem>(cname, is); 
+							  (<not(elem)>(mname, m) <+ 
+							   <not(elem)>(cname, <\ (constraint, gc, exts, False()) -> exts \><lookup>((n, mname), <LookupTable>"Method")))\)> 
+							   	<LookupTable> "Class";
+			<not(equal)> (cnames, [])
+
+	
+	percolate-method:
+		((cname, mname), (cnames, (c,gc,e, done)))
+			-> []
+		where
+			<map(\ cname' -> cname' where
+				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False()) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
+				log(|Error(), "submethods", submethods);
+				<equal>([],submethods);
+				log(|Error(), "submethods", submethods);
+					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), True())) 
+					<+ <updateClassMethod> (cname', mname, c, cname))
+			 \)> cnames
+
 		
 
 			

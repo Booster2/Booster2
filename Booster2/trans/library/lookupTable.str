@@ -18,22 +18,56 @@ rules
 			rules(
 				LookupTable :+ "Class" -> newClasses
 			)
-
-	insertIntoLookupTable:
-		(table, tdef)
-			-> (table, tdef)
+			
+	replaceMethod(s):
+		(cname, mname)
+			-> (cname, mname)
 		where
-			prevTable := <LookupTable> table;
-			newTable := <union>(prevTable, [tdef]);
+			currentlyKnownMethods := <LookupTable> "Method";
+			oldMethod := <lookup>((cname, mname), currentlyKnownMethods);
+			newMethods := <union>(<diff>(currentlyKnownMethods, [((cname, mname), oldMethod)]), [<s>((cname, mname), oldMethod)]);
 			rules(
-				LookupTable :+ table -> newTable
+				LookupTable :+ "Method" -> newMethods
 			)
 
-	addSubClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
+	/*insertIntoLookupTable(|tname):
+		tdef
+			-> tdef
+		where
+			prevTable := <LookupTable> tname;
+			newTable := <union>(prevTable, [tdef]);
+			rules(
+				LookupTable :+ tname -> newTable
+			);
+			log(|Error(), ("Inserting into lookup table", tname, newTable, <LookupTable> tname))
+*/
+
+/*	addSubClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
 				<replaceClass(\ (superclass, (s,s',a,m,c,w)) -> (superclass, (<union>(s, [subclass]),s',a,m,c,w))\)> superclass \)		
 	addSuperClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
 				<replaceClass(\ (subclass, (s,s',a,m,c,w)) -> (subclass, (s, <union>(s', [superclass]),a,m,c,w))\)> subclass \)		
-			
+*/			
 	addClassAttribute = (\ (cname, aname, adef) -> (cname, aname, adef) where
-				<replaceClass(\ (cname, (s,a,m,c,w)) -> (cname, (s, <union>(a, [aname]),m,c,w))\)> cname ;
-				<insertIntoLookupTable>("Attribute", ((cname, aname), adef)) \)		
+				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, <union>(a, [aname]),m,c,w))\)> cname ;
+				prevTable := <LookupTable> "Attribute";
+				newTable := <union>(prevTable, [((cname, aname), adef)]);
+				rules(
+					LookupTable :+ "Attribute" -> newTable
+				) \)		
+				
+	addClassMethod = (\ (cname, mname, mdef) -> (cname, mname, mdef) where
+				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is, as, a, <union>(m, [mname]),c,w))\)> cname ;
+//				<insertIntoLookupTable(|"Method")> ((cname, mname), mdef)
+				prevTable := <LookupTable> "Method";
+				<not(lookup)>((cname, mname), prevTable);
+				newTable := <union>(prevTable, [((cname, mname), mdef)]);
+				rules(
+					LookupTable :+ "Method" -> newTable
+				);
+				log(|Error(), "add Class Method", (cname, mname)) \)
+				
+	updateClassMethod = (\ (cname, mname, constraint, extcname) -> (cname, mname, constraint, extcname) where
+				<replaceMethod(\ ((cn, mn), (c, gc, exts, done)) -> ((cn, mn), (And(c, constraint), gc, <union>(exts, [extcname]), True())) \)> (cname, mname);
+				log(|Error(), "update Class Method", (cname, mname)) \)
+				
+				
