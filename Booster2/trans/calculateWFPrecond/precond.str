@@ -35,7 +35,7 @@ rules
 	where
 		<resetMap> ();
 		if not(<equal>(<wf_lut> "map",[])) then log(|Error(),"wf_lut ist nicht leer") end;
-		<pre> (cname,pdef);
+		<pre> (cname,pname,pdef);
 		form := <innermost(simplify)> (<lookupMap> pdef)
 	
 	
@@ -45,18 +45,18 @@ rules
 	
 	// if the concurrent workflow "[wfs*]" is already defined in 
 	// the lookup-table we finish
-	pre: (cname,[wfs*]) -> (cname,[wfs*])
+	pre: (cname,pname,[wfs*]) -> (cname,[wfs*])
 	where <lookupMap> [wfs*] //; log(|Error(),"case1" ,[wfs*])
 	
 	// if all sequential workflows in the list have terminated, i.e., are
 	// equal to SKIP each, we finished
-    pre: (cname,[wfs*]) -> (cname,[wfs*])
+    pre: (cname,pname,[wfs*]) -> (cname,[wfs*])
     where <list_all(skip_d)> [wfs*];//; log(|Error(),"case2" ,[wfs*])
           <updateMap> ([wfs*],True())
 	
 	// the normal case
-	pre: (cname,[wfs*]) -> (cname,[wfs*])
-	where formset := <preIter> ((cname,[wfs*]),0, <subti>(<length> wfs* , 1));
+	pre: (cname,pname,[wfs*]) -> (cname,[wfs*])
+	where formset := <preIter> ((cname,pname,[wfs*],False()),0, <subti>(<length> wfs* , 1));
 		   form1 := <AndFold> formset;
 		   form := form1;
 		   <updateMap> ([wfs*],form)
@@ -68,23 +68,32 @@ rules
 	   ************************************** */
 	   	
 	// if i is greater then the list length, we are done
-	preIter: ((cname,[wfs*]),i,t) -> []
+	preIter: ((cname,pname,[wfs*],False()),i,t) -> [False()]
+	where <gt> (i,t);
+	       log(|Error(), (cname,pname) ,"Concurrent workflow deadlocks!")
+	
+	preIter: ((cname,pname,[wfs*],True()),i,t) -> []
 	where <gt> (i,t)
 	
 	// Skip at position i
-	preIter: ((cname,[wfs*]),i,t) -> formset
+	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
 	where wi := <getPos> ([wfs*],i) ;
 	       <skip_d> wi;
-	       formset := <preIter>((cname,[wfs*]),<addi>(i,1),t)
+	       formset := <preIter>((cname,pname,[wfs*],changed),<addi>(i,1),t)
 	
 	// Wait at position i
-	preIter: ((cname,[wfs*]),i,t) -> formset
+	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
 	where
 		wi := <getPos> ([wfs*],i);
 		<wait_d> wi;
 		wi_from := <string-to-int>(<sel_from> wi);
 		wi_to := <string-to-int>(<sel_to> wi);
 		wi_sub := <sel_w1> wi;
+		
+		// from and to id have to be different and in the range
+		not(<equal>(wi_from,wi_to));
+		<leq>(wi_from,t);
+		<leq>(wi_to,t);
 		
 		//log(|Error(),"check2" ,([wfs*],wi_to,i,t));
 		wj := <getPos> ([wfs*],wi_to) ;
@@ -100,15 +109,15 @@ rules
 		   <equal>(wi_from,wj_from);
 		   <equal>(wi_to,wj_to)
 		then par1 := <listUpdate>((<listUpdate>([wfs*],i,wi_sub)),wi_to,wj_sub);
-			//log(|Error(),"par1" ,par1); 
-		     <pre> (cname,par1);
+			 //log(|Error(),"par1" ,par1); 
+		     <pre> (cname,pname,par1);
 		     p := <lookupMap> par1;
 		     formset := [p] 
-		else formset := <preIter> ((cname,[wfs*]),<addi>(i,1),t) 
+		else formset := <preIter> ((cname,pname,[wfs*],changed),<addi>(i,1),t) 
 		end
 	       
 	// prefix at position i
-	preIter: ((cname,[wfs*]),i,t) -> formset
+	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
 	where wi := <getPos> ([wfs*],i) ;
 	       <prefix_d> wi;
 	       gi1 := <sel_g1>(wi);
@@ -116,14 +125,14 @@ rules
 		   wi1 := <sel_w1>(wi);
 		   
 		   par1 := <listUpdate> ([wfs*], i, wi1);
-		   <pre> (cname,par1);
+		   <pre> (cname,pname,par1);
 		   
 		   loc_cond := And(<get> gi1,<wp> ((cname,ai1) , <lookupMap> par1));
-		   formset_rest := <preIter> ((cname,[wfs*]),<addi>(i,1),t);
+		   formset_rest := <preIter> ((cname,pname,[wfs*],True()),<addi>(i,1),t);
 		   formset := <conc> ([loc_cond], formset_rest)
 		   
 	// Choice case
-	preIter: ((cname,[wfs*]),i,t) -> formset
+	preIter: ((cname,pname,[wfs*]),i,t) -> formset
 	where  wi := <getPos>([wfs*],i);
 			<choide_d> wi;
 	       gi1 := <sel_g1>(wi);
@@ -136,8 +145,8 @@ rules
 		   par1 := <listUpdate> ([wfs*], i, wi1); 
 		   par2 := <listUpdate> ([wfs*], i, wi2); 
 
-           if not(<guard_false> gi1) then <pre> (cname,par1) end;
-           if not(<guard_false> gi2) then <pre> (cname,par2) end;
+           if not(<guard_false> gi1) then <pre> (cname,pname,par1) end;
+           if not(<guard_false> gi2) then <pre> (cname,pname,par2) end;
            
            if <guard_false> gi1 ; <guard_false> gi2 then loc_cond := False() else 
            if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<wp> ((cname,ai2) , <lookupMap> par2))) else 
@@ -152,32 +161,21 @@ rules
            	    )   
            end end end;
           
-           formset_rest := <preIter> ((cname,[wfs*]),<addi>(i,1),t);
+           formset_rest := <preIter> ((cname,pname,[wfs*],True()),<addi>(i,1),t);
            formset := <conc> ([loc_cond], formset_rest)
-           
-           
-           
-           
-/*           
-           run-program:
-			((classname, methname), constraint)
-				-> ((classname, methname), Guard(constraint7, program2))
-			with
-				program := <program> (classname, methname, constraint);
-				[paths*] := <get-modified-paths>(program);
-				constraint2a :=  <get-type-constraint> ([paths*], classname, methname, <new-environment>[]);
-				constraint2b :=  <get-multiplicity-constraint> ([paths*], classname, methname, <new-environment>[]);
-				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
-				
-				[atts*] := <get-modified-attributes>(program, classname, methname, <new-environment>[]);
-				invs := <lookup-invariants>([atts*]);
-				constraint4 := <make-post-state><conjoin-constraints>(invs);
-				
-				constraint5 := And(constraint4, constraint3);
-				
-				(constraint6, program2) := <calculate-wp>(program, constraint5, classname, methname);
-				constraint7 := <make-old> constraint6
-*/
+    
+    // no matching case   
+    preIter: ((cname,pname,[wfs*],changed),i,t) -> [False()]
+	where
+		wi := <getPos> ([wfs*],i);
+		
+		if <wait_d> wi then wi_from := <string-to-int>(<sel_from> wi);
+							 wi_to := <string-to-int>(<sel_to> wi);
+							 wi_sub := <sel_w1> wi;
+							 if <equal>(wi_from,wi_to) then log(|Error(), (cname,pname),"self references in wait constructs not allowed") end;
+							 if <gt>(wi_from,t) then log(|Error(), (cname,pname),"source of wait not in range") end;
+							 if <gt>(wi_to,t) then log(|Error(), (cname,pname),"target of wait not in range") end
+		end
            
            /*
            getGuard: Guard(expr,prog) -> expr
@@ -209,8 +207,8 @@ rules
 		   	where
 		   	    constraints := <LookupTable> "Constraints";
 		   		classname := cname;
-		   		log(|Error(),"check",path);
-		   		log(|Error(),"mname",<getMethodName> path);
+		   		//log(|Error(),"check",path);
+		   		//log(|Error(),"mname",<getMethodName> path);
 		   		methname := <getMethodName> path;
 		   		
 		   		constraint := <lookup> ((classname,methname),constraints); 
@@ -227,7 +225,7 @@ rules
 				constraint5 := And(constraint4, constraint3);
 				
 				post-new := <make-post-state> post;
-				post-constraint := And(post-new,constraint5);
+				post-constraint := And(constraint5,post-new);
 				
 				(constraint6, program2) := <calculate-wp>(program, post-constraint, classname, methname);
 				constraint7 := <make-old> constraint6
