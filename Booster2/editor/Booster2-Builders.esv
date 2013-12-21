@@ -20,20 +20,17 @@ builders
                                                                                                                
   // builder                   : "Generate Java code"   = generate-java (openeditor) (realtime)                   
   builder                   : "Show abstract syntax" = generate-aterm (openeditor) (realtime) (meta) (source)  
-  builder                   : "Parse" = builder-parse (openeditor) (realtime) (source)
-  builder                   : "Elaborate" = builder-elaborate (openeditor) (realtime) (source)
-  builder                   : "Compile" = builder-compile (openeditor) (realtime) (source)
-  builder                   : "Simplify" = builder-simplify (openeditor) (realtime) (source)
-  builder                   : "Translate Booster" = builder-translate-booster (openeditor) (realtime) (source)
-  builder                   : "Translate SQL" = builder-translate-sql (openeditor) (realtime) (source)
-  builder					 : "Precond Debugging" = builder-precond-debug (openeditor) (realtime) (meta) (source)
-  //builder                   : "Expand into Booster notation" = expand-booster (openeditor) (realtime) (source)
-  //builder                   : "Expand into Booster Terms" = expand-booster-without-printing (openeditor) (realtime) (source)
-  //builder              		: "Generate installation SQL" = install-sql (openeditor) (realtime) (source)
-  //builder              		: "Generate SQL from Booster" = booster-to-sql (openeditor) (realtime) (source)
-  //builder                   : "Test Dynamic Rules" = test-dynamic-rules (openeditor) (realtime) (source)
+  builder                   : "Parse to Booster" = parseToBooster (openeditor) (realtime) (source)
+  builder                   : "Parse to Lookup Table" = parseToLookupTable (openeditor) (realtime) (source)
+  builder                   : "Elaborate to Booster" = elaborateToBooster (openeditor) (realtime) (source)
+  builder                   : "Elaborate to Lookup Table" = elaborateToLookupTable (openeditor) (realtime) (source)
+  builder                   : "Compile to Booster" = compileToBooster (openeditor) (realtime) (source)
+  builder                   : "Compile to Lookup Table" = compileToLookupTable (openeditor) (realtime) (source)
+  builder                   : "Simplify to Booster" = simplifyToBooster (openeditor) (realtime) (source)
+  builder                   : "Simplify to Lookup Table" = simplifyToLookupTable (openeditor) (realtime) (source)
+  builder                   : "Generate SQL" = translateToSQL (openeditor) (realtime) (source)
+
   builder                   : "Test some stuff" = builder-test (openeditor) (realtime) (source)
-  builder                   : "New, refactored builder" = new-builder (openeditor) (realtime) (source)
                                  
                                                    
   // on save: generate-abstractBoosterMachine                                                                                   

@@ -10,17 +10,20 @@
 	<target name="empty-folder">
 		<delete>
 			<fileset dir="./output">
-				<include name="*" />
+				<include name="**/*.sql" />
+				<include name="**/*.boo2" />
 			</fileset>
 		</delete>
 		<delete>
 			<fileset dir="./output/succeeded">
-				<include name="*" />
+				<include name="**/*.sql" />
+				<include name="**/*.boo2" />
 			</fileset>
 		</delete>
 			<delete>
 				<fileset dir="./output/failed">
-					<include name="*" />
+					<include name="**/*.sql" />
+					<include name="**/*.boo2" />
 				</fileset>
 			</delete>
 
@@ -30,7 +33,7 @@
 
 	<target name="run-tests">
 		<echo>Running tests...</echo>
-		<foreach target="_runTest" param="sourceFile">
+		<foreach target="_runAllTests" param="sourceFile">
 			<path>
 				<fileset dir="./source/" casesensitive="no" />
 			</path>
@@ -38,17 +41,17 @@
 		
 		<resourcecount property="failing">
 			<fileset dir="./output/failed">
-				<include name="*.boo2"/>
+				<include name="**/*.boo2"/>
 			</fileset>
 		</resourcecount>
 		<resourcecount property="succeeding">
 			<fileset dir="./output/succeeded">
-				<include name="*.boo2"/>
+				<include name="**/*.boo2"/>
 			</fileset>
 		</resourcecount>
 		<resourcecount property="total">
 			<fileset dir="./source">
-				<include name="*.boo2"/>
+				<include name="**/*.boo2"/>
 			</fileset>
 		</resourcecount>
 		<echo message="Total tests: ${total}.  Succeeded: ${succeeding}.  Failed: ${failing}"/>
@@ -62,11 +65,19 @@
 		</if>		
 	</target>
 
+	
+	<target name="_runAllTests">
+		<antcall target="_runTest">
+			<param name="transformName" value="java-parse-booster"/>
+			<param name="folderName" value="parsed-booster"/>
+			<param name="suffix" value=".parsed.boo2"/>
+		</antcall>
+	</target>
+	
 	<target name="_runTest">
-
 		<basename property="basename" file="${sourceFile}" suffix=".boo2" />
 		<java classname="run" fork="false">
-			<arg value="trans.main-booster2" />
+			<arg value="trans.${transformName}" />
 			<arg value="-i" />
 			<arg value="${sourceFile}" />
 
@@ -77,25 +88,25 @@
 			</classpath>
 		</java>
 
-		<move file="./source/${basename}.expanded.boo2" todir="./output/"/>
+		<move file="./source/${basename}${suffix}" todir="./output/${folderName}"/>
 
 		<exec dir="." executable="diff" resultproperty="diffresult">
-			<arg line="-wB" /> <!-- Ignore white space and blank lines -->
-			<arg file="./expected/${basename}.expanded.boo2" />
-			<arg file="./output/${basename}.expanded.boo2" />
+			<arg line="-wqbB" /> <!-- Ignore white space and blank lines, do it quietly -->
+			<arg file="./expected/${folderName}/${basename}${suffix}" />
+			<arg file="./output/${folderName}/${basename}${suffix}" />
 		</exec>
 		<if>
 			<equals arg1="${diffresult}" arg2="0" />
 			<then>
 				<echo message="${sourceFile} succeeded" />
-				<move file="./output/${basename}.expanded.boo2" todir="./output/succeeded"/>
+				<move file="./output/${folderName}/${basename}${suffix}" todir="./output/succeeded/${folderName}"/>
 			</then>
 			<else>
 				<echo message="################################################################################" />
 				<echo message="Warning!!! Test Failed!" />
 				<echo message="Failing Test: ${sourceFile}" />
 				<echo message="################################################################################" />
-				<move file="./output/${basename}.expanded.boo2" todir="./output/failed"/>
+				<move file="./output/${folderName}/${basename}${suffix}" todir="./output/failed/${folderName}"/>
 			</else>
 		</if>
 

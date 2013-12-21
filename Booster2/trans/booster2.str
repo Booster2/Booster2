@@ -31,7 +31,24 @@ imports
   
 rules  
   
-  main-booster2 =
+  parseToBooster = (\ x -> <builder-parse(output-to-booster)> ("parsed.boo2", x) \)
+  parseToLookupTable = (\ x -> <builder-parse(output-lookup-table)> ("parsed.table", x) \)
+
+  elaborateToBooster = (\ x -> <builder-elaborate(output-to-booster)> ("elaborated.boo2", x) \)
+  elaborateToLookupTable = (\ x -> <builder-elaborate(output-lookup-table)> ("elaborated.table", x) \)
+
+  compileToBooster = (\ x -> <builder-compile(output-to-booster)> ("compiled.boo2", x) \)
+  compileToLookupTable = (\ x -> <builder-compile(output-lookup-table)> ("compiled.table", x) \)
+
+  simplifyToBooster = (\ x -> <builder-simplify(output-to-booster)> ("simplified.boo2", x) \)
+  simplifyToLookupTable = (\ x -> <builder-simplify(output-lookup-table)> ("simplified.table", x) \)
+
+  translateToSQL = (\ x -> <builder-translate-sql> ("sql", x) \)
+  
+  java-parse-booster = main(parseToBooster)
+  java-parse-lut = main(parseToLookupTable)
+  
+  main(s) =
   xtc-input-wrap(
     // Read input
     ?FILE(input);
@@ -45,7 +62,7 @@ rules
 	//log(|Warning(), warnings);
 	//log(|Info(), notes);
     // Compile
-    (output, contents)              := <builder-translate-booster> (ast, [], ast, input, ".");
+    (output, contents)              := <s> (ast, [], ast, input, ".");
     
     // Write to disk
     handle := <fopen> (output, "w");
@@ -163,37 +180,37 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    
    /*** These are the actual transformations that are available from the editor ***/
    
-   builder-parse: 
-   		(selected, position, ast, path, project-path) -> (filename, result)
+   builder-parse(output): 
+   		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"1")> path;
-   		result :=   <output-lookup-table>
+   		filename := <guarantee-extension(|extension)> path;
+   		result :=   <output>
    				          <parse> 
    				            selected   
 
-   builder-elaborate: 
-   		(selected, position, ast, path, project-path) -> (filename, result)
+   builder-elaborate(output): 
+   		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"exp.boo2")> path;
+   		filename := <guarantee-extension(|extension)> path;
    		result :=   <output-to-booster>
    						<elaborate>
    				          <parse> 
    				            selected   
    
-   builder-compile: 
-   		(selected, position, ast, path, project-path) -> (filename, result)
+   builder-compile(output): 
+   		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"3")> path;
+   		filename := <guarantee-extension(|extension)> path;
    		result :=   <output-lookup-table>
    						<compile>
 	   						<elaborate>
 	   				          <parse> 
 	   				            selected   
 
-   builder-simplify: 
-   		(selected, position, ast, path, project-path) -> (filename, result)
+   builder-simplify(output): 
+   		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
-   		filename := <guarantee-extension(|"4")> path;
+   		filename := <guarantee-extension(|extension)> path;
    		result :=   <output-lookup-table>
    						<simplify-main>
 	   						<compile>
@@ -203,9 +220,9 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    
 
    builder-translate-sql:
-   	(selected, position, ast, path, project-path) -> (filename, result')
+   	(extension, (selected, position, ast, path, project-path)) -> (filename, result')
    	 with
-   		filename := <guarantee-extension(|"sql")> path;
+   		filename := <guarantee-extension(|extension)> path;
 		result := <pp-install>
    				  	<booster-to-relational>
    				  		<simplify-main>
@@ -218,17 +235,17 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		result' := <concat-strings>[result, standard-text]   
    		
    		
-   builder-translate-booster:
-   	(selected, position, ast, path, project-path) -> (filename, result)
+/*   builder-translate-booster:
+   	(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 with
-   		filename := <guarantee-extension(|"expanded.boo2")> path;
+   		filename := <guarantee-extension(|extension)> path;
    		result :=  <output-to-booster>  
    				  <simplify-main>
    				  	<compile>
 		 				<elaborate>
    				          <parse> 
    				            selected
-
+*/
 /*	new-builder:
 	(selected, position, ast, path, project-path) -> (filename, result)
    	 with
