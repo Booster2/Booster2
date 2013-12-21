@@ -1,0 +1,5 @@
+system attributeInheritance 
+ 
+
+
+	class a  { 		attributes			a  : INT		invariants 		methods 	}	class b  { 		attributes			b  : STRING		invariants 		methods 	}	class c extends a, b { 		attributes		invariants 		methods 	}
