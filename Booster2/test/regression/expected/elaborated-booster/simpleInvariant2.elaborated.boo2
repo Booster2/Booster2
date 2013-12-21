@@ -1,0 +1,5 @@
+system methodTest 
+ 
+
+
+	class class1  { 		attributes			name  : STRING		invariants name /= "James"		methods 			m1 { name' = n? }	}

@@ -47,6 +47,10 @@ rules
   
   java-parse-booster = main(parseToBooster)
   java-parse-lut = main(parseToLookupTable)
+
+  java-elaborate-booster = main(elaborateToBooster)
+  java-elaborate-lut = main(elaborateToLookupTable)
+
   
   main(s) =
   xtc-input-wrap(
