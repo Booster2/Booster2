@@ -5,6 +5,20 @@
 % \usepackage{charter}
 % \usepackage{charter}
 
+\usepackage{hyperref}
+
+\usepackage{listings,color}
+
+\definecolor{verbgray}{gray}{0.9}
+
+\lstnewenvironment{code}{%
+  \lstset{backgroundcolor=\color{verbgray},
+  frame=single,
+  framerule=0pt,
+  basicstyle=\ttfamily,
+  columns=fullflexible}}{}
+
+\definecolor{shadecolor}{rgb}{.9, .9, .9}
 
 \usepackage{cmbright}
 \usepackage[T1]{fontenc}
@@ -56,6 +70,8 @@
 \part{Using The Booster Language}
 \part{Transformations and Heuristics}
 \include{chapter3}
+\part{The Spoofax Implementation}
+\include{chapter4}
 
 %\include{conclusions}
 
