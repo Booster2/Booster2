@@ -1,0 +1,77 @@
+\chapter{The Booster Language}
+
+
+This section is intended to document the Booster syntax.  As a
+reference, the complete abstract syntax is placed in an appendix.
+
+\section{System, comments}
+A booster system is described by a single text file, with the system
+name at the top.  The system name is used as a namespace for any
+generated artefacts: databases, services etc. and hence should be both
+identifying and unique.
+
+For example:
+
+\begin{code}
+system ComputingLaboratory
+
+// ... The system definition goes here
+\end{code}
+
+There are no restrictions on the type-senstivity of names in
+Booster, but convention is to use camel-case, with the initial letter
+capitalised for the names of systems, classes and sets, while methods
+and attributes use lower-case letters.
+
+Comments can be (and should be) put into the code in the normal way:
+using the familiar notation of \verb|//| for a single-line comment,
+and \verb|/* ... */| for multi-line comments.
+
+\begin{code}
+// This is a single-line comment
+
+/* This is a multi-line 
+comment */
+\end{code}
+
+Comments may be placed anywhere inside the text file, and it is
+recommended that descriptive comments appear before the code that is
+being described.
+
+
+\section{Classes and attributes}
+
+Booster may be described as an object-based language: data,
+functionality and constraints are organised in structures known as
+classes.  A class may be defined within the context of a system, and
+is given a name, to represent the real-world objects that it will be
+representing.  Within a class, attributes, methods and invariants can
+be defined within separate sections using the keywords as shown in the
+example below:
+
+\begin{code}
+class C {
+  attributes
+    /* attributes for the class C are defined here */
+  methods
+    /* methods for the class C are defined here */
+  invariants
+    /* invariants for the class C are defined here */
+}
+\end{code}
+
+For ease of definition, multiple sections of each type may be
+defined.  Each section is optional, although an empty class may
+trigger a warning in the editor.  This subsection focuses on the
+contents of an \verb|attributes| section; later subsections deal with
+methods and attributes.
+
+
+
+\section{Types and user-defined enumerations}
+
+\section{Methods}
+
+\section{Invariants: Static and Dynamic}
+
+\section{Inheritance}

@@ -1,0 +1,5 @@
+system S 
+ 
+
+
+	class a  { 		attributes			a  : INT		invariants 		methods 			m1 { a' = 3 }	}	class b extends a { 		attributes			a  : INT		invariants 		methods 			m1 { (a < 10 & a' = 3) }	}

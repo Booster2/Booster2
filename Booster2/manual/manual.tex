@@ -65,13 +65,17 @@
 
 %now include the files of latex for each of the chapters etc
 \part{Introduction}
-\include{chapter1}
-\include{chapter2}
-\part{Using The Booster Language}
+\include{chapters/introduction}
+\include{chapters/language}
+\include{chapters/guardedcommands}
+\include{chapters/implangs}
 \part{Transformations and Heuristics}
-\include{chapter3}
+\include{chapters/transformations}
+\part{Using The Booster Language}
+\include{chapters/defaultsystem}
 \part{The Spoofax Implementation}
-\include{chapter4}
+\include{chapters/implementation}
+\include{chapters/howtos}
 
 %\include{conclusions}
 
@@ -80,8 +84,8 @@
 
 \part{Appendices}
 
-\include{appendix1}
-\include{appendix2}
+\include{chapters/syntax}
+\include{chapters/reference}
 
 %next line adds the Bibliography to the contents page
 \addcontentsline{toc}{chapter}{Bibliography}

@@ -1,0 +1,14 @@
+\chapter{How-Tos}
+
+\section{Adding a new primitive type}
+
+To add a new type to Booster:
+\begin{itemize}
+\item Add it to the Booster2.sdf file, and add a corresponding 'Extent' 
+\item Make sure the syntax is disallowed by the tokenizer (common.sdf)
+\item Add the rules for the type in library/basicTypes.str
+\item Ensure there is a corresponding type in the Relational.sdf
+  syntax, and that the output methods are appropriate.
+\end{itemize}
+
+\section{Creating a new platform-specific output}

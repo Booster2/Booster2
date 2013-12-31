@@ -75,20 +75,15 @@ rules
 			-> ((cname, mname), (constraint, gc, exts, False()))
 		where
 			[] := <filter(\ cname' -> cname' where <lookup>((cname', mname), <LookupTable> "Method")\)><\ (is, as, atts, meths, cons, wfs) -> as \><lookup> (cname, <LookupTable> "Class");
-			<updateDone> (cname, mname);
-			log(|Error(), "Marking method as done", ((cname, mname)))
+			<updateDone> (cname, mname)
 
 	mark-method-as-done:
 		((cname, mname), (constraint, gc, exts, False()))
 			-> ((cname, mname), (constraint, gc, exts, False()))
 		where
 			submethod-classes := <filter(\ cname' -> cname' where <lookup>((cname', mname), <LookupTable> "Method")\)><\ (is, as, atts, meths, cons, wfs) -> as \><lookup> (cname, <LookupTable> "Class");
-			log(|Error(), "this-method", (cname, mname));
-			log(|Error(), "sub-method classes", submethod-classes);
-			log(|Error(), "exts", exts);
 			<set-eq>(exts, submethod-classes);
-			<updateDone> (cname, mname);
-			log(|Error(), "Marking method as done", ((cname, mname)))
+			<updateDone> (cname, mname)
 
 
 	methods-can-be-percolated:
@@ -102,15 +97,13 @@ rules
 							  (<not(elem)>(mname, m) <+ 
 							   <not(elem)>(cname, <\ (constraint, gc, exts, False()) -> exts \><lookup>((n, mname), <LookupTable>"Method")))\)> 
 							   	<LookupTable> "Class";
-			<not(equal)> (cnames, []);
-			log(|Error(), "I can percolate this method", (cname, mname))
+			<not(equal)> (cnames, [])
 
 	
 	percolate-method:
 		((cname, mname), (cnames, c,gc,e, done))
 			-> []
 		where
-			log(|Error(), "I'm percolating this method", (cname, mname));
 			<map(\ cname' -> cname' where
 				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False()) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
 				//log(|Error(), "submethods", submethods);
@@ -118,14 +111,29 @@ rules
 				//log(|Error(), "submethods", submethods);
 					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), done)) 
 					<+ <updateClassMethod> (cname', mname, c, cname, e))
-			 \)> cnames;
-			 log(|Error(), "I've percolated this method", (cname, mname))
+			 \)> cnames
 
 		
 
 			
 			
+	inheritance-invariants:
+		system -> system
+			where
+		
+		newInvariants := <map(try(\((cname, mname),(c,gc,e,False())) -> ((cname, mname),(c,gc,e,True())) 
+							where [] := <filter(\ cname' -> <lookup>((cname', mname), <LookupTable>"Method") \)>
+										<\(is,as,a,m,c,w) -> as\><lookup>(cname, <LookupTable>"Class") \))><LookupTable> "Method";
+		//log(|Error(), "New Methods", newMethods);
+		rules(
+			LookupTable :+ "Method" -> newMethods
+		);
+		meths := <filter(methods-can-be-percolated)> <LookupTable> "Method";
+		<not(equal)>(meths, []);
+		<map(percolate-method)> meths;
+		<filter(mark-method-as-done)> <LookupTable> "Method"
 
+		
 
 			
 			
