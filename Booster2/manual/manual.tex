@@ -18,6 +18,7 @@
   basicstyle=\ttfamily,
   columns=fullflexible}}{}
 
+
 \definecolor{shadecolor}{rgb}{.9, .9, .9}
 
 \usepackage{cmbright}
@@ -44,6 +45,9 @@
 %end the preamble and start the document
 \begin{document}
 
+\setlength{\tabcolsep}{10pt}
+
+
 %this baselineskip gives sufficient line spacing for an examiner to easily
 %markup the thesis with comments
 %\baselineskip=18pt plus1pt
@@ -65,15 +69,23 @@
 
 %now include the files of latex for each of the chapters etc
 \part{Introduction}
+
 \include{chapters/introduction}
 \include{chapters/language}
 \include{chapters/guardedcommands}
 \include{chapters/implangs}
+
 \part{Transformations and Heuristics}
+
 \include{chapters/transformations}
+\include{chapters/typededuction}
+
 \part{Using The Booster Language}
+
 \include{chapters/defaultsystem}
+
 \part{The Spoofax Implementation}
+
 \include{chapters/implementation}
 \include{chapters/howtos}
 
@@ -88,11 +100,16 @@
 \include{chapters/reference}
 
 %next line adds the Bibliography to the contents page
-\addcontentsline{toc}{chapter}{Bibliography}
+\addcontentsline{toc}{chapter}{References}
 %uncomment next line to change bibliography name to references
-%\renewcommand{\bibname}{References}
+\renewcommand{\bibname}{References}
 \bibliography{refs}        %use a bibtex bibliography file refs.bib
 \bibliographystyle{plain}  %use the plain bibliography style
 
 \end{document}
 
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

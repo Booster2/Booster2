@@ -1,11 +1,10 @@
 \chapter{The Booster Language}
 
-
 This section is intended to document the Booster syntax.  As a
 reference, the complete abstract syntax is placed in an appendix.
 
 \section{System, comments}
-A booster system is described by a single text file, with the system
+A Booster system is described by a single text file, with the system
 name at the top.  The system name is used as a namespace for any
 generated artefacts: databases, services etc. and hence should be both
 identifying and unique.
@@ -66,12 +65,392 @@ trigger a warning in the editor.  This subsection focuses on the
 contents of an \verb|attributes| section; later subsections deal with
 methods and attributes.
 
+An attribute definition consists in a name, and information about
+type, multiplicity and symmetry constraints.  In addition, there may
+be additional hints for an interface about how attributes are used.
 
+A simple attribute is defined by giving its name, and its type,
+separated by a colon (\verb|:|).  Here is an example of a simple
+attribute:
+
+\begin{code}
+  firstName : STRING
+\end{code}
+
+This defines an attribute whose name is \verb|firstName| and whose
+type is the basic type \verb|STRING|.  In Booster it is conventional
+to start attribute names in lower case.  
+
+There is no separator between attribute definitions, e.g.
+\begin{code}
+  firstName : STRING
+  lastName : STRING
+\end{code}
+
+Multiplicity information can also be defined.  The examples above show
+simple, mandatory attributes.  An attribute may be marked as
+\emph{optional} by including the type in square brackets (\verb|[]|).
+An optional attribute may take a value included in the type, or may be
+given the value \verb|null|, a special value whose presence indicate
+that the value of the attribute is not defined.
+
+For example, we may define an optional middle name of type
+\verb|STRING|:
+
+\begin{code}
+  middleName : [STRING]
+\end{code}
+
+We may also allow an attribute to take a number of values.  Initially,
+we simply allow an \emph{unordered set} of values, but in future versions we
+intend to allow ordered \emph{sets}, \emph{bags}, and \emph{sequences}
+of values. 
+
+To define a set-valued attribute, we use the keyword \verb|SET|, round
+brackets (\verb|()|), and a multiplicity constraint.  This defines
+the maximum and minimum number of values that an attribute may take.
+For example, to declare that an attribute has between zero and five
+values, we might define as follows:
+
+\begin{code}
+  middleNames : SET( STRING )[0..5]
+\end{code} 
+
+The syntax for multiplicity constraints is taken from UML.  The table
+below shows the different forms of syntax, and the interpretations:
+
+\begin{center}
+  \begin{tabular}{ | c | c | c | c |}
+    \hline
+    \textbf{Description} & \textbf{Syntax Example} & \textbf{Min. Multiplicity} & \textbf{Max. Multiplicity} \\ \hline
+    Min. and Max. & \verb|[3 .. 5]| & 3 & 5 \\ \hline
+    Max. only & \verb|[ .. 5]| & 0 & 5 \\ \hline
+    Min. only & \verb|[3 .. ]| & 3 & No Maximum \\ \hline
+    Min. only & \verb|[3 .. *]| & 3 & No Maximum \\ \hline
+    Fixed & \verb|[3]| & 3 & 3 \\ \hline
+    Any & \verb|[*]| & 0 & No Maximum \\ \hline
+
+  \end{tabular}
+\end{center}
+
+Attribute types are discussed in more detail in the next subsection.
+One attribute type of particular interest is a reference-valued
+attribute, which is a key concept in object-oriented programming.  An
+attribute may hold values of references to other objects in the
+system.  For example, the attribute \verb|supervisors| of class
+\verb|Student| may refer to one or more objects of type \verb|Staff|.
+In Booster, this would be defined as follows:
+
+\begin{code}
+  class Student
+    attributes
+      ...
+      supervisors : SET(Staff) [1 .. *]
+      ...
+\end{code}
+
+The final constraint we might wish to add to an attribute is that of
+\emph{symmetry}.  This is the property that defines two attributes as
+\emph{opposites}, we declare this pair of attributes as representing a
+\emph{bi-directional association}.  To illustrate, we assume the
+attribute \verb|supervisors| defined in class \verb|Student| as above;
+we define the opposite attribute \verb|supervisees| in class
+\verb|Staff|.  The constraint we wish to capture is that given a
+\verb|Student| object \verb|s1|, for every \verb|Staff| object
+referenced in its attribute \verb|supervisors|, \verb|s1| is contained
+within its \verb|supervisees|.
+
+To define such a bi-directional association, we simply add the
+opposite attribute name as part of the type definition.  For example,
+the following code fragment implements the paired association
+described above:
+
+\begin{code}
+  class Student {
+    attributes
+      ...
+      supervisors : SET(Staff . supervisees) [1 .. *]
+      ...
+  }
+
+  class Staff {
+    attributes
+      ...
+      supervisees : SET(Student . supervisors) [0 .. *]
+      ...
+  }
+\end{code}
+
+This ensures the symmetry property between the attributes
+\verb|supervisors| and \verb|supervisees|.
 
 \section{Types and user-defined enumerations}
 
+Booster has four built-in primitive types: \verb|STRING|, \verb|INT|,
+\verb|BOOLEAN|, and \verb|DATETIME|.  Section~\ref{sec:addNewType}
+describes how to add additional primitive types to the language.  
+Class references may also be used as types---as illustrated in the
+symmetry description above.
+
+It is often the case that enumerations are required to capture values
+of a particular attribute.  In Booster, these enumerations can be
+specified using the \verb|set| notation.  A \verb|set| may be defined
+in a system for use anywhere within it, and is defined outside of any
+class or workflow definitions.
+
+The following example show the definition and use of an enumerated
+value:
+
+\begin{code}
+system Calendar
+
+set Weekday { Monday, Tuesday, Wednesday, Thursday, Friday}
+
+class Appointment {
+  attributes
+    ...
+    dayOfWeek : WeekDay
+    ...
+}
+\end{code}
+
+The elements of the set may be used as values in the definition of
+methods or invariants---see the next section for details.  It is
+customary to use upper-case camel case for set names and values.
+
+In the future, it is intended that sets be more flexible: that they
+may be extended at runtime.  Values defined in the model may be used
+in constraints within the model, but additional values may be added to
+the running system.
+
 \section{Methods}
+
+All modifications to the data in a Booster-generated system must be
+performed through method calls: where it can be guaranteed that all
+business rules and invariants are maintained.  Methods are defined in
+the context of classes, and consist of a name and a constraint upon
+values in the before- and after-states of the method call.  Methods
+should be contained within a \verb|methods| section, inside the class
+definition.
+
+The simplest method is the one which is always available, and always
+succeeds, defined here within a class \verb|C|, and given the name \verb|m1|:
+
+\begin{code}
+class C {
+  ...
+  methods
+    m1 { true }
+}    
+\end{code}
+
+\subsection{Constraints}
+Within the curly brackets is a simple logical constraint.  This may be
+the basic constraints \verb|true| and \verb|false| (although typically
+these do not appear in real-life systems), or may be the conbination
+of other constraints using the familiar conjunction (\verb|&|),
+disjunction(\verb|or|), implication (\verb|=>|), or negation
+(\verb|not|).  The relational composition operator \verb|;| is also
+available for more complex method specifications.  The table below
+shows the complete set of logical operators:
+
+\begin{center}
+  \begin{tabular} { | c | c | } 
+  \hline
+  \textbf{Description} & \textbf{Booster Syntax} \\ \hline
+  True & \verb|true| \\ \hline
+  False & \verb|false| \\ \hline
+  Negation & \verb|not| \\ \hline
+  Conjunction & \verb|&| \\ \hline
+  Disjunction & \verb|or| \\ \hline
+  Implication & \verb|=>| \\ \hline
+  Composition & \verb|;| \\ \hline
+  \end{tabular}
+\end{center}
+The simplest form of constraint is a comparison between two
+expressions.  There are a number of comparison operators: equality
+(\verb|=|), less than (\verb|<|) and greater than (\verb|>|) being the
+most frequently used.  A complete list of comparison operators is
+given in the table below:
+
+\begin{center}
+  \begin{tabular} { | c | c | } 
+  \hline
+  \textbf{Description} & \textbf{Booster Syntax} \\ \hline
+  Equal & \verb|=| \\ \hline
+  Not equal & \verb|/=| \\ \hline
+  Set membership & \verb|:| \\ \hline
+  Set non-membership & \verb|/:| \\ \hline
+  Less than & \verb|<| \\ \hline
+  Less than or equal & \verb|<=| \\ \hline
+  Greater than & \verb|>| \\ \hline
+  Greater than or equal & \verb|>=| \\ \hline
+  Strict subset & \verb|<:| \\ \hline
+  Subset & \verb|<<:| \\ \hline
+  Strict superset & \verb|:>| \\ \hline
+  Superset & \verb|:>>| \\ \hline
+  \end{tabular}
+\end{center}
+
+\subsection{Expressions}
+
+Expressions make up the two sides of any comparison.  The simplest
+form of expressions are defined as \emph{value expressions},
+corresponding to those expressions whose value may be simply
+evaluated.  For example, the integer \verb|1| or the string
+\verb|"Hello, World"| are both examples of value expressions.
+
+Expressions may also refer to the values of attributes in the model:
+for example we may refer to \verb|o.a| to
+refer to the values stored in the attribute \verb|a| for the object
+\verb|o|.  Path expressions may be created using the dot (\verb|.|)
+notation: if \verb|o.a| is also an object reference, we might refer to
+\verb|o.a.b|.  The familiar keyword \verb|this| is used to refer to
+the current object.
+
+Methods may also make use of input values (typically identifying
+parameters to a method), and output values (typically specifying
+objects created during the execution of a method).  Inputs and
+outputs are denoted by the syntax \verb|?| and \verb|!| respectively.
+For example, \verb|a?| represents an input named \verb|a|.  Input and
+ouptut parameters do not need to be declared; instead the compiler
+finds all inputs and outputs for a given method and deduces their
+types from their usage.  This is explained in more detail in
+Chapter~\ref{sec:typeDeduction}.
+
+Methods may constrain values in both the before- and after-states.
+For example, a method \verb|m1| may constrain the attribute \verb|a|
+to be less than \verb|7| before the method is called and to be
+incremented by 1 after the method is called.  In Booster, we denote
+values in the post-state with the decoration ``\verb|'|'', which will
+be familiar to users of the Z notation.  The constraint described
+above might be written as:
+
+\begin{code}
+  m1 { a < 7 & a' = a + 1 }
+\end{code}
+
+This states that the value of \verb|a| before the
+method is called is less than 7, and the the value of \verb|a| after
+the method is called is equal of the value of \verb|a| before the
+method is called, incremented by one.
+
+There is no need to order predicates within a method constraint, but
+it is conventional to place those applying just to the precondition
+first, for ease of reading.
+
+The complete set of possible value expressions are given in the table
+below:
+
+\begin{center}
+  \begin{tabular} { | c | c | } 
+  \hline
+  \textbf{Description} & \textbf{Booster Syntax Example} \\ \hline
+  Primitive value, such as a string or integer & \verb|13|,
+  \verb|"Hello World!"| \\ \hline
+  Value taken from a defined set & \verb|Tuesday| \\ \hline
+  Null value: an undefined optional attribute & \verb|null| \\ \hline
+  Type name: the set of all instances of that type & \verb|INT|, \verb|Student|, \verb|Weekday| \\ \hline
+  Method input or output & \verb|a?|, \verb|b!| \\ \hline
+  Path expression & \verb|this . a . b|, \verb|a? . c| \\ \hline
+  Set of expressions & \verb|{ 1 , 3 , 5 , 7 }|, \verb|{}| \\ \hline
+  \end{tabular}
+\end{center}
+
+Expressions may be combined through the use of operators.  The list of
+operators is constantly changing, and should be adapted to fit the
+collection of primitive types in use.  This is explained in more
+detail in Section~\ref{sec:addNewExpressionOp}. A default set of
+common operators are shown in the table below:
+\begin{center}
+  \begin{tabular} { | c | c | } 
+  \hline
+  \textbf{Description} & \textbf{Booster Syntax Example} \\ \hline
+  Head element of a sequence, or a string & \verb|head(e)| \\ \hline
+  Last element of a sequence, or a string & \verb|tail(e)| \\ \hline
+  Size of a set, sequence, or string & \verb|card(e)| \\ \hline
+  Negation of a numeric value & \verb| -e | \\ \hline
+  Addition of two values & \verb| e1 + e2 | \\ \hline
+  Difference between two values & \verb| e1 - e2 | \\ \hline 
+  Muliplication of two numeric values & \verb| e1 * e2 | \\ \hline 
+  Division of two numeric values & \verb| e1 / e2 | \\ \hline 
+  Maximum of two values & \verb| e1 max e2 | \\ \hline 
+  Minimum of two values & \verb| e1 min e2 | \\ \hline 
+  Intersection of two set values & \verb| e1 /\ e2 | \\ \hline 
+  Union of two set values & \verb| e1 \/ e2 | \\ \hline 
+  Concatenation of two sequence or string values & \verb| e1 ++ e2 | \\ \hline 
+ \end{tabular}
+\end{center}
+
+The full syntax of expressions can be found in the appendices.
+
+
+\subsection{Method References}
+
+In order to simplify and rationalize the definition of method
+constraints, Booster allows the re-use of one method constraint inside
+the definition of another method.  In this simplest case, this just
+requires using the method name in place of a predicate.  For example,
+we might define the method \verb|increment| as follows:
+
+\begin{code}
+  increment { a' = a + 1 }
+\end{code}
+
+and then re-use it in the subsequent method \verb|maybeIncrement|:
+
+\begin{code}
+  maybeIncrement { a < 5 => increment() }
+\end{code}
+
+which performs the increment method if the value of attribute \verb|a|
+has a value less than five before the method is called.
+
+The rounded brackets indicate that we may also pass parameters to this
+method definition: essentially determining the values of any inputs to
+the method being referred to.  For example, given the method
+specifications:
+
+\begin{code}
+  increment { a' = a + i? }
+
+  maybeIncrement { a < 5 => increment(i? = 5) }
+\end{code}
+
+the method \verb|maybeIncrement| would be equivalent to the following
+definition:
+
+\begin{code}
+  maybeIncrement { a < 5 => a' = a + 5 }
+\end{code}
+
+The parameter list is a comma-separated list of input names, and the
+expressions that are to be substituted, using the \verb|=| sign to
+assert their equivalence.
+
+We may also refer to a method of another object, by substituting a
+value for \verb|this|.  By convention, the notation is slightly
+different here - we place a path expression in front of the method
+name.  For example, we might define:
+
+\begin{code}
+  maybeIncrementOther { a < 5 => obj? . increment(i? = 5) }
+\end{code}
+
+which includes the specification of \verb|increment| from the class of which
+\verb|obj?| is a member.  Note that this is equivalent to the more verbose:
+
+\begin{code}
+  maybeIncrementOther { a < 5 => increment(this = obj?, i? = 5) }
+\end{code}
+
+which may prove confusing where a method named \verb|increment| may be
+defined on multiple classes.
+
+
 
 \section{Invariants: Static and Dynamic}
 
 \section{Inheritance}
+
+\section{Workflows}
