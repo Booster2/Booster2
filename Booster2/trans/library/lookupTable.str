@@ -70,4 +70,7 @@ rules
 				<replaceMethod(\ ((cn, mn), (c, gc, exts', done)) -> ((cn, mn), (And(c, constraint), gc, <union>([extcname], <union>(exts', exts)), done)) \)> (cname, mname);
 				log(|Error(), "update Class Method", (cname, mname)) \)
 				
+
+	addClassInvariant = (\ (cname, inv) -> (cname, inv) where
+				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, a ,m,<union>(c, [inv]),w))\)> cname \) 
 				

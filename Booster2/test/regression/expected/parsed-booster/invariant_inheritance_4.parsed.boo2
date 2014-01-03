@@ -1,0 +1,5 @@
+system Test 
+ 
+
+
+	class A  { 		attributes			a  : INT		invariants 			a > 0		methods 	}	class B extends A { 		attributes		invariants 			a < 10		methods 	}	class C extends A { 		attributes		invariants 			a < 20		methods 	}	class D extends B, C { 		attributes		invariants 		methods 	}

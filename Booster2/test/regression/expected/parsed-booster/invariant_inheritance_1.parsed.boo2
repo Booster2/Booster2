@@ -1,0 +1,5 @@
+system S 
+ 
+
+
+	class a  { 		attributes			a  : INT		invariants 			a > 0		methods 	}	class b extends a { 		attributes		invariants 		methods 	}

@@ -15,7 +15,7 @@ rules
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
 			//<normaliseInheritance> system ;
-			<repeat( inheritance-attributes <+ inheritance-methods)> system
+			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants)> system
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
 	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done)) -> ((cn, mn), (c, gc', exts', True())) \)
@@ -115,29 +115,29 @@ rules
 
 		
 
-			
-			
 	inheritance-invariants:
 		system -> system
 			where
-		
-		newInvariants := <map(try(\((cname, mname),(c,gc,e,False())) -> ((cname, mname),(c,gc,e,True())) 
-							where [] := <filter(\ cname' -> <lookup>((cname', mname), <LookupTable>"Method") \)>
-										<\(is,as,a,m,c,w) -> as\><lookup>(cname, <LookupTable>"Class") \))><LookupTable> "Method";
-		//log(|Error(), "New Methods", newMethods);
-		rules(
-			LookupTable :+ "Method" -> newMethods
-		);
-		meths := <filter(methods-can-be-percolated)> <LookupTable> "Method";
-		<not(equal)>(meths, []);
-		<map(percolate-method)> meths;
-		<filter(mark-method-as-done)> <LookupTable> "Method"
-
-		
-
+		/* log(|Error(), "Invs",  <concat><map(\ (cname, (is,as,a,m,c,w)) -> <cart(id)>([cname], c)\)> <LookupTable> "Class"); */
+		invs := <filter(invariants-can-be-percolated)><concat><map(\ (cname, (is,as,a,m,c,w)) -> <cart(id)>([cname], c)\)> <LookupTable> "Class";
+		<not(equal)>(invs, []);
+		<map(percolate-invariant)> invs /* ;
+		log(|Error(), atts) */
 			
 			
+	invariants-can-be-percolated:
+		(cname, inv) 
+			-> (cname, cnames, inv)
+		where
+			cnames := <concat><filter(\ (n, (is,as,a,m,c,w)) -> [n] where <elem>(cname, as); <not(elem)>(inv, c)\)> <LookupTable> "Class";
+			<not(equal)> (cnames, [])
 			
+			
+	percolate-invariant:
+		(cname, cnames, inv)
+			-> []
+		where
+			<map(\cname' -> <addClassInvariant> (cname', inv) \)> cnames		
 			
 /*			
 	expandInheritance:

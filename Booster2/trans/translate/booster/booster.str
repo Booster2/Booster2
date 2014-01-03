@@ -42,7 +42,7 @@ outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mde
 
 	class:
 		(classname, (immsubclasses, allsubclasses, atts, meths, invs, wfs))
-			-> $[["\t"]class [classname] [<extends> (immsubclasses)] { ["\r\t\t"]attributes["\r"][<outputAttributes> classname]["\r\t\t"]invariants [<foldout(constraint)> (invs, "\r\t\t")]["\r\t\t"]methods["\r"] [<outputMethods> classname]["\r\t"]}]
+			-> $[["\t"]class [classname] [<extends> (immsubclasses)] { ["\r\t\t"]attributes["\r"][<outputAttributes> classname]["\r\t\t"]invariants["\r"] [<foldout(invariant)> (invs, "\r")]["\r\t\t"]methods["\r"] [<outputMethods> classname]["\r\t"]}]
 				
 	extends:
 		[] -> $[]
@@ -91,6 +91,10 @@ outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mde
 
 	opposite:
 		() -> $[]
+
+	invariant:
+		(constraint)
+			-> $[["\t\t\t"][<constraint> constraint]]
 
 	
 	method:
