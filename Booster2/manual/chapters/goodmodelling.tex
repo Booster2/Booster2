@@ -1,0 +1,83 @@
+\chapter{Good Modelling}
+
+\section{Bi-directional associations}
+
+Mandatory-to-mandatory associations are difficult to work with, and
+often imply there is something wrong with the model!
+Object can't be created, except in pairs; they can't be deleted, except
+in pairs, and unless some careful swapping is arranged, links are
+difficult to update.  Usually mandatory-to-mandatory associations can
+be refactored into one conjoined class, or may be better expressed as
+an optional-mandatory relationship.
+
+Using bi-directional associations is usually the right thing to do.
+It's very rare that you want to know what's in a set, but you don't
+want to know what set a thing is in.  Navigation on a website is so
+much better if it works both ways.  There are some extreme examples
+though - consider the model:
+
+\begin{code}
+class Country {
+  attributes
+    name : STRING
+}
+
+class Person {
+  attributes
+    bornIn : Country
+}
+\end{code}
+
+Here, it may be appropriate to ignore the back-link, since it's
+unlikely to ever require the set of all people who were born in a
+country.  This illustrates cases where the use of a class is really as
+an extensible enumeration, perhaps with extra attributes.
+
+If backward-navigability is not required in the interface, it's more
+appropriate to disable this at the interface level, rather than
+constraining the model.
+
+
+\section{Inheritance and extension}
+
+Designed to capture the 'is-a' relationship, not a generic mechanism
+for extension.  For example, a square is a rectangle, and so the
+extension is appropriate:
+
+\begin{code}
+class Rectangle {
+  attributes
+    width : INT
+    height : INT
+}
+
+class Square extends Rectangle {
+  invariants
+    width = height
+}
+\end{code}
+
+Compare this with the following extension of Rectangle, which doesn't
+conform to the 'is-a' relationship:
+
+\begin{code}
+class Cuboid extends Rectangle {
+  attributes
+    depth : INT
+}
+\end{code}
+
+Whilst this makes sense in its current state, imagine a later revision
+to include the derived attribute \verb|area| in class
+\verb|Rectangle|:
+
+\begin{code}
+class Rectangle {
+  attributes
+    ...
+    area = width * height
+}
+\end{code}
+
+This makes sense for the class \verb|Square| but doesn't make sense
+for the class \verb|Cuboid|.

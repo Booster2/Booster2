@@ -184,6 +184,27 @@ described above:
 This ensures the symmetry property between the attributes
 \verb|supervisors| and \verb|supervisees|.
 
+Finally, we may wish to specify interface-specific annotations that
+help interfaces present the information.  Eventually, we'd expect this
+information to end up in a separate file.
+
+Decorations are specified in the definition of an attribute,
+immediately after the attribute name.  At the moment the only
+annotation we have is the 'identity' annotation, which specifies that
+we'd like to identify objects in the database using these attributes.
+Note that this does not imply any uniqueness constraints.  For
+example, we might specify that objects of type \verb|Person| can be
+identified by the components of their name.  E.g.:
+
+\begin{code}
+class Person {
+  attributes
+    firstName (ID) : STRING
+    lastName (ID) : STRING
+    dateOfBirth : [DATETIME]
+}
+\end{code}
+
 \section{Types and user-defined enumerations}
 
 Booster has four built-in primitive types: \verb|STRING|, \verb|INT|,
@@ -447,10 +468,241 @@ which includes the specification of \verb|increment| from the class of which
 which may prove confusing where a method named \verb|increment| may be
 defined on multiple classes.
 
+\section{Invariants}
+
+Invariants can be implicit, such as the constraints upon type,
+multiplicity and symmetry, as defined above.  Alternatively, they can
+be user-defined, in one of the three forms: \emph{static},
+\emph{dynamic}, and \emph{derived attributes}.  The first of these is
+the most generic, allowing arbitrary constraints to be placed on
+inter-connected classes.  Dynamic invariants are a special form of
+static invariants, whose structure allows the heuristics to enhance
+the behaviour of methods, rather than constraining their
+availability.  The effect of these is discussed fully in
+Section~\ref{sec:dynamicInvs}.  Finally, derived attributes are a
+particular class of dynamic invariant whose use is common enough to
+warrant a special syntax.
 
 
-\section{Invariants: Static and Dynamic}
 
-\section{Inheritance}
+\subsection{Static Constraints}
+An invariant provides a constraint upon the class in which it is
+defined.  Such a constraint is defined in the \verb|invariants|
+section of a class, and again, multiple sections may be defined within a
+single class definition.  Invariants are defined using the same constraint
+language used for methods, described above.
+
+For example, we may wish to express a constraint that the radius of a
+circle is always non-negative.  Such an invariant could be defined as
+follows:
+
+\begin{code}
+class Circle {
+  attributes
+    radius : INT
+  invariants
+    radius >= 0
+}
+\end{code}
+
+Note that within an invariants clause, the context of any path is
+always \verb|this|, and there is an implicit quantification which
+states that this constraint holds for all objects \verb|this| of the
+class.
+
+Multiple invariants may be defined using conjunction, but for
+convenience, the Booster language allows a list of invariants which
+are implicitly conjoined.  For example, consider the
+further-constrained definition:
+
+\begin{code}
+class Circle {
+  attributes
+    radius : INT
+  invariants
+    radius >= 0
+    radius < 100
+}
+\end{code}
+
+Which describes a class of \verb|Circle| whose objects must have an
+attribute whose radius is both non-negative and less than \verb|100|.
+
+\subsection{Dynamic Invariants}
+
+TODO!
+
+\begin{itemize}
+\item Dynamic invariants may refer to post-state attributes.
+\item There's an implication, where the antecedent gives a condition,
+  and the consequent specifies a further constraint which applies.
+  Typically, this consequent is intended as a postcondition which can
+  be translated into an extra guarded command.
+\end{itemize}
+
+There's an example where if we put something into a set \verb|S|, then
+we must take it out of \verb|T|:
+\begin{code}
+class A
+  dynamic invariants
+    S' \/ T' /= {} => T' = T' \ S'
+\end{code}
+
+Another example might be something inspired by aspect-oriented
+programming.  Changing the 'last updated' attribute is fairly easy:
+
+\begin{code}
+class A {
+  attributes
+    x : INT
+    y : INT
+    lastUpdated : DATETIME
+  dynamic invariants
+    x /= x' or y /= y' => lastUpdated' = CurrentDateTime
+}
+\end{code}
+
+  
+\subsection{Derived attributes}
+
+TODO!
+
+A derived attribute is a special form of dynamic invariant.  When an
+attribute's value may always be calculated from the value of other
+attributes, we could write this as a dynamic invariant with a
+\verb|true| antecedent.  For example, to assert that the value of the
+attribute \verb|noOfChildren| is always equal to the size of the set
+of children denoted by the attribute \verb|children|, we could state
+a dynamic invariant:
+
+\begin{code}
+invariants
+  ...
+  true => noOfChildren' = card(children')
+\end{code}
+
+In the case where the attribute \verb|noOfChildren| is not updated in
+any other way, Booster allows the constraint to be declared as part of
+the attribute declaration.  For example, the constraint above may be
+specified as:
+
+\begin{code}
+class Parent {
+  attributes
+    children : SET(Child)[*]
+    noOfChildren = card(children)
+}
+\end{code}
+
+Note that for these derived attributes, the type of the attribute is
+deduced automtically.
+
+\section{Extension}
+
+Extension in Booster allows the modeller to capture the 'is a'
+relationship between classes.  Put simply, if a class \verb|B| extends
+a class \verb|A|, then any attributes, methods and constraints that
+describe \verb|A| also describe \verb|B|.  Class \verb|B| may also
+have additional attributes, methods or constraints that describe the
+differences between it and class \verb|A|.
+
+For example, consider the following intuitive example:
+
+\begin{code}
+class Rectangle {
+  attributes
+    width : INT
+    height : INT
+}
+
+class Square extends Rectangle {
+  invariants
+    width = height
+}
+\end{code}
+
+In practical terms, this would be equivalent to the following
+definition for \verb|Square|:
+
+\begin{code}
+class Square {
+  attributes
+    width : INT
+    height : INT
+  invariants
+    width = height
+}
+\end{code}
+
+This notion of extension is a good way of structuring models to
+maximise re-use.  However, it's also beneficial because any method
+which was applicable to the class \verb|Rectangle| is equally
+applicable to the type \verb|Square|, for example in the following
+method:
+
+\begin{code}
+addShapeToCollection { s? : myShapes' }
+\end{code}
+
+the input parameter \verb|s?| may be an object of either type
+\verb|Rectangle|, or type \verb|Square|.
+
+Methods in a sub-class may further constrain the method defined in a
+super-class.  For example:
+
+\begin{code}
+class A {
+  ...
+  methods
+    m1 { x' = 5 }
+}
+class B extends A {
+
+  methods
+    m1 { x < 5 }
+}
+\end{code}
+
+In this example, the method \verb|m1| in class \verb|B| receives the
+following constraint:
+
+\begin{code}
+    m1 { x < 5 & x' = 5 }
+\end{code}
+
+Note that methods and invariants cannot be weakened in a sub-class:
+this enforces the 'is-a' relationship and enables a compositional
+approach to factorizing code.
+
+In Booster it makes sense to allow multiple inheritance.  In this
+case, attributes, methods and invariants from all super-classes are
+propagated to the sub-class.  For example, consider the following
+model:
+
+\begin{code}
+class Staff {
+  attributes
+    supervisees : SET(Student . supervisor)[*]
+}
+
+class Student {
+  attributes
+    supervisor : Staff . supervisees
+
+}
+
+class TA extends Student, Staff {
+  invariants
+    supervisor /= this
+}
+\end{code}
+
+Where an attribute is inherited multiple times (imagine classes
+\verb|Staff| and \verb|Student| both extend a common class
+\verb|Person|), then each attribute appears only once.
+
+
 
 \section{Workflows}
+
+
