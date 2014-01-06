@@ -4,6 +4,10 @@
 
 System something
 	
-
+class A {
+	methods
+		m1 { a? < 10}
+	
+}
 
 

@@ -15,7 +15,7 @@ rules
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
 			//<normaliseInheritance> system ;
-			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants)> system
+			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference)> system
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
 	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done)) -> ((cn, mn), (c, gc', exts', True())) \)
@@ -138,6 +138,22 @@ rules
 			-> []
 		where
 			<map(\cname' -> <addClassInvariant> (cname', inv) \)> cnames		
+
+
+	type-inference:
+		system -> system
+			where
+		methods := <LookupTable> "Method";
+		newMethods := <map(\((cname, mname),(c,gc,e,d)) -> ((cname, mname),(c',gc,e,d))
+			where c' := <bottomup(try(infer-types))> c \)> methods;
+		<not(equal)> (methods, newMethods);
+		rules(
+			LookupTable :+ "Method" -> newMethods
+		);
+		log(|Error(), "newMethods", newMethods)
+			
+	infer-types:
+		Input(name) -> Input(name) { "Hello" }
 			
 /*			
 	expandInheritance:

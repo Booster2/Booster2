@@ -196,7 +196,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
    		filename := <guarantee-extension(|extension)> path;
-   		result :=   <output-to-booster>
+   		result :=   <output>
    						<elaborate>
    				          <parse> 
    				            selected   
@@ -205,7 +205,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
    		filename := <guarantee-extension(|extension)> path;
-   		result :=   <output-lookup-table>
+   		result :=   <output>
    						<compile>
 	   						<elaborate>
 	   				          <parse> 
@@ -215,7 +215,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
    		filename := <guarantee-extension(|extension)> path;
-   		result :=   <output-lookup-table>
+   		result :=   <output>
    						<simplify-main>
 	   						<compile>
 		   						<elaborate>
