@@ -145,7 +145,9 @@ rules
 			where
 		methods := <LookupTable> "Method";
 		newMethods := <map(\((cname, mname),(c,gc,e,d)) -> ((cname, mname),(c',gc,e,d))
-			where c' := <bottomup(try(infer-types))> c \)> methods;
+			where c' := <bottomup(try(infer-types 
+										<+ induce-types
+										<+ try(\ Input(n) {annot} -> ((cname, mname), Input(n) {annot} ) \) ; record-input))> c \)> methods;
 		<not(equal)> (methods, newMethods);
 		rules(
 			LookupTable :+ "Method" -> newMethods
@@ -153,7 +155,18 @@ rules
 		log(|Error(), "newMethods", newMethods)
 			
 	infer-types:
-		Input(name) -> Input(name) { "Hello" }
+		BasicValue(Integer(i)) -> BasicValue(Integer(i)) { [Int(), Optional(Int())] }
+		
+	induce-types:
+		BinOp(expr { types }, op, expr2)
+			-> BinOp(expr { types }, op, expr2 { types })
+		
+	record-input:
+		((cname, mname), Input(s) {types})
+			-> Input(s) {types}
+		where
+			
+		
 			
 /*			
 	expandInheritance:

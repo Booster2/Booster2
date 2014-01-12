@@ -6,7 +6,7 @@ System something
 	
 class A {
 	methods
-		m1 { a? < 10}
+		m1 { 10 + a? < 10}
 	
 }
 
