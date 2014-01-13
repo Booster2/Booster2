@@ -90,7 +90,7 @@ rules
 
  	organise-method:
  		(className, Method(methName, constraint))
- 			-> ((className, methName), (constraint, guardedCommand, exts, False()))
+ 			-> ((className, methName), (constraint, guardedCommand, exts, False(), [], []))
  		where
  			guardedCommand := ();
  			exts := []

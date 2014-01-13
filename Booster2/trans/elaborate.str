@@ -15,10 +15,11 @@ rules
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
 			//<normaliseInheritance> system ;
-			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference)> system
+			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference)> system;
+			<record-parameter-types> system
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
-	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done)) -> ((cn, mn), (c, gc', exts', True())) \)
+	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done, ins, outs)) -> ((cn, mn), (c, gc', exts', True(), ins, outs)) \)
 	
 			
 	unrollSubclass: 
@@ -55,7 +56,7 @@ rules
 	inheritance-methods:
 		system -> system
 			where
-		newMethods := <map(try(\((cname, mname),(c,gc,e,False())) -> ((cname, mname),(c,gc,e,True())) 
+		newMethods := <map(try(\((cname, mname),(c,gc,e,False(), ins, outs)) -> ((cname, mname),(c,gc,e,True(), ins, outs)) 
 							where [] := <filter(\ cname' -> <lookup>((cname', mname), <LookupTable>"Method") \)>
 										<\(is,as,a,m,c,w) -> as\><lookup>(cname, <LookupTable>"Class") \))><LookupTable> "Method";
 		//log(|Error(), "New Methods", newMethods);
@@ -71,15 +72,15 @@ rules
 		
 
 	mark-method-as-done:
-		((cname, mname),(constraint, gc, exts, False()))
-			-> ((cname, mname), (constraint, gc, exts, False()))
+		((cname, mname),(constraint, gc, exts, False(), inputs, outputs))
+			-> ((cname, mname), (constraint, gc, exts, False(), inputs, outputs))
 		where
 			[] := <filter(\ cname' -> cname' where <lookup>((cname', mname), <LookupTable> "Method")\)><\ (is, as, atts, meths, cons, wfs) -> as \><lookup> (cname, <LookupTable> "Class");
 			<updateDone> (cname, mname)
 
 	mark-method-as-done:
-		((cname, mname), (constraint, gc, exts, False()))
-			-> ((cname, mname), (constraint, gc, exts, False()))
+		((cname, mname), (constraint, gc, exts, False(), inputs, outputs))
+			-> ((cname, mname), (constraint, gc, exts, False(), inputs, outputs))
 		where
 			submethod-classes := <filter(\ cname' -> cname' where <lookup>((cname', mname), <LookupTable> "Method")\)><\ (is, as, atts, meths, cons, wfs) -> as \><lookup> (cname, <LookupTable> "Class");
 			<set-eq>(exts, submethod-classes);
@@ -87,30 +88,30 @@ rules
 
 
 	methods-can-be-percolated:
-		((cname, mname), (constraint, gc, exts, True())) 
-			-> ((cname, mname), (cnames, constraint, gc, exts, True()))
+		((cname, mname), (constraint, gc, exts, True(), inputs, outputs)) 
+			-> ((cname, mname), (cnames, constraint, gc, exts, True(), inputs, outputs))
 		where
 			cnames := <concat>
 				<filter(\ 
 					(n, (is,as,a,m,c,w)) -> [n] 
 						where <elem>(cname, is); 
 							  (<not(elem)>(mname, m) <+ 
-							   <not(elem)>(cname, <\ (constraint, gc, exts, False()) -> exts \><lookup>((n, mname), <LookupTable>"Method")))\)> 
+							   <not(elem)>(cname, <\ (constraint, gc, exts, False(), inputs, outputs) -> exts \><lookup>((n, mname), <LookupTable>"Method")))\)> 
 							   	<LookupTable> "Class";
 			<not(equal)> (cnames, [])
 
 	
 	percolate-method:
-		((cname, mname), (cnames, c,gc,e, done))
+		((cname, mname), (cnames, c,gc,e, done, inputs, outputs))
 			-> []
 		where
 			<map(\ cname' -> cname' where
-				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False()) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
+				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False(), inputs, outputs) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
 				//log(|Error(), "submethods", submethods);
 				<equal>([],submethods);
 				//log(|Error(), "submethods", submethods);
-					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), done)) 
-					<+ <updateClassMethod> (cname', mname, c, cname, e))
+					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), done, inputs, outputs)) 
+					<+ <updateClassMethod> (cname', mname, c, cname, e, inputs, outputs))
 			 \)> cnames
 
 		
@@ -144,10 +145,9 @@ rules
 		system -> system
 			where
 		methods := <LookupTable> "Method";
-		newMethods := <map(\((cname, mname),(c,gc,e,d)) -> ((cname, mname),(c',gc,e,d))
+		newMethods := <map(\((cname, mname),(c,gc,e,d, is,os)) -> ((cname, mname),(c',gc,e,d,is,os))
 			where c' := <bottomup(try(infer-types 
-										<+ induce-types
-										<+ try(\ Input(n) {annot} -> ((cname, mname), Input(n) {annot} ) \) ; record-input))> c \)> methods;
+										<+ induce-types ))> c \)> methods;
 		<not(equal)> (methods, newMethods);
 		rules(
 			LookupTable :+ "Method" -> newMethods
@@ -160,11 +160,30 @@ rules
 	induce-types:
 		BinOp(expr { types }, op, expr2)
 			-> BinOp(expr { types }, op, expr2 { types })
+
+
+	record-parameter-types:
+		system -> system
+			where
+		methods := <LookupTable> "Method";
+		newMethods := <map(\((cname, mname),(c,gc,e,d, is,os)) -> ((cname, mname),(c',gc,e,d,is,os))
+						where c' := <bottomup(try((\ Input(n) {annot} -> ((cname, mname), Input(n) {annot}) \) ; 
+													(\ Output(n) {annot} -> ((cname, mname), Output(n) {annot}) \) ; 
+													record-parameter))> c \)> methods
+
+
 		
-	record-input:
+	record-parameter:
 		((cname, mname), Input(s) {types})
 			-> Input(s) {types}
 		where
+			<addInput> (cname, mname, s, Int())
+
+	record-parameter:
+		((cname, mname), Output(s) {types})
+			-> Output(s) {types}
+		where
+			<addOutput> (cname, mname, s, Int())
 			
 		
 			

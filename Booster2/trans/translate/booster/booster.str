@@ -98,13 +98,13 @@ outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mde
 
 	
 	method:
-		((classname, methodname), (constraint, guardedCommand, exts, done))
+		((classname, methodname), (constraint, guardedCommand, exts, done, inputs, outputs))
 			-> $[["\t\t\t"][methodname] { [<guardedCommand> guardedCommand] }]
 		where
 			<not(equal)>(guardedCommand, ())
 
 	method:
-		((classname, methodname), (constraint, guardedCommand, exts, done))
+		((classname, methodname), (constraint, guardedCommand, exts, done, inputs, outputs))
 			-> $[["\t\t\t"][methodname] { [<constraint> constraint] }]
 
 

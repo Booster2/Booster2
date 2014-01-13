@@ -29,7 +29,18 @@ rules
 			rules(
 				LookupTable :+ "Method" -> newMethods
 			)
-
+			
+	addInput:
+		(cname, mname, input, type)
+			-> (cname, mname, input, type)
+		where 
+			<replaceMethod(\ ((c,a),(co,gc,e,d,is,os)) -> ((c,a),(co,gc,e,d,<union>(is, [(input, type)]),os)) \)> (cname, mname)
+	addOutput:
+		(cname, mname, output, type)
+			-> (cname, mname, output, type)
+		where 
+			<replaceMethod(\ ((c,a),(co,gc,e,d,is,os)) -> ((c,a),(co,gc,e,d,is, <union>(os, [(output, type)]))) \)> (cname, mname)
+			
 	/*insertIntoLookupTable(|tname):
 		tdef
 			-> tdef
