@@ -126,10 +126,11 @@ These are the fields that are originally stored in the lookup table.
 "Attribute" -> ((cname, aname), (decorations, type, 
                                          (opposite), minmult, maxmult)) 
 
-"Method" -> ((cname, mname), (constraint, guardedCommand, exts))
+"Method" -> ((cname, mname), (constraint, guardedCommand, exts, done, 
+                                         inputs, outputs))
 
 \end{verbatim}
 
-Where \verb|exts| in \verb|method| is used solely in the elaboration
+Where \verb|exts| and \verb|done| in \verb|method| are used solely in the elaboration
 phase, to keep track of which constraints from subclasses have been
 conjoined into the method definition.
