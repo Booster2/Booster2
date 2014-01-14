@@ -73,12 +73,10 @@ rules
 				newTable := <union>(prevTable, [((cname, mname), mdef)]);
 				rules(
 					LookupTable :+ "Method" -> newTable
-				);
-				log(|Error(), "add Class Method", (cname, mname)) \)
+				) \)
 				
-	updateClassMethod = (\ (cname, mname, constraint, extcname, exts) -> (cname, mname, constraint, extcname, exts) where
-				<replaceMethod(\ ((cn, mn), (c, gc, exts', done)) -> ((cn, mn), (And(c, constraint), gc, <union>([extcname], <union>(exts', exts)), done)) \)> (cname, mname);
-				log(|Error(), "update Class Method", (cname, mname)) \)
+	updateClassMethod = (\ (cname, mname, constraint, extcname, exts, inputs, outputs) -> (cname, mname, constraint, extcname, exts, inputs, outputs) where
+				<replaceMethod(\ ((cn, mn), (c, gc, exts', done, is, os)) -> ((cn, mn), (And(c, constraint), gc, <union>([extcname], <union>(exts', exts)), done, is, os)) \)> (cname, mname) \)
 				
 
 	addClassInvariant = (\ (cname, inv) -> (cname, inv) where

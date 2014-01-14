@@ -106,7 +106,6 @@ rules
 		where
 			<map(\ cname' -> cname' where
 				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False(), inputs, outputs) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
-				//log(|Error(), "submethods", submethods);
 				<equal>([],submethods);
 				//log(|Error(), "submethods", submethods);
 					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), done, inputs, outputs)) 
@@ -143,7 +142,7 @@ rules
 	type-inference:
 		system -> system
 			where
-		methodConstraints := <map(\((cname, mname),(c,gc,e,d, is,os)) -> (cname, mname, c) \)> <LookupTable> "Method";
+		methodConstraints := <filter(\((cname, mname),(c,gc,e,True(), is,os)) -> (cname, mname, c) \)> <LookupTable> "Method";
 		newMethodConstraints := <map(\ (cname, mname,c) -> (cname, mname, c')
 			where c' := <bottomup(try(
 								try((\ Input(n) {annot} -> ((cname, mname), Input(n) {annot}) \) <+ 
@@ -165,6 +164,12 @@ rules
 	induce-types:
 		BinOp(expr { types }, op, expr2)
 			-> BinOp(expr { types }, op, expr2 { types })
+
+	induce-types:
+		BinOp(expr { types1 }, op, expr2 {types2})
+			-> BinOp(expr { types }, op, expr2 { types })
+		where
+			types := <isect>(types1, types2)
 
 
 	infer-types:
