@@ -15,8 +15,7 @@ rules
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
 			//<normaliseInheritance> system ;
-			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference)> system;
-			<record-parameter-types> system
+			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference)> system
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
 	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done, ins, outs)) -> ((cn, mn), (c, gc', exts', True(), ins, outs)) \)
@@ -144,46 +143,59 @@ rules
 	type-inference:
 		system -> system
 			where
-		methods := <LookupTable> "Method";
-		newMethods := <map(\((cname, mname),(c,gc,e,d, is,os)) -> ((cname, mname),(c',gc,e,d,is,os))
-			where c' := <bottomup(try(infer-types 
-										<+ induce-types ))> c \)> methods;
-		<not(equal)> (methods, newMethods);
-		rules(
-			LookupTable :+ "Method" -> newMethods
-		);
-		log(|Error(), "newMethods", newMethods)
+		methodConstraints := <map(\((cname, mname),(c,gc,e,d, is,os)) -> (cname, mname, c) \)> <LookupTable> "Method";
+		newMethodConstraints := <map(\ (cname, mname,c) -> (cname, mname, c')
+			where c' := <bottomup(try(
+								try((\ Input(n) {annot} -> ((cname, mname), Input(n) {annot}) \) <+ 
+								(\ Output(n) {annot} -> ((cname, mname), Output(n) {annot}) \)  <+
+								(\ Input(n) -> ((cname, mname), Input(n) ) \) <+ 
+								(\ Output(n) -> ((cname, mname), Output(n)) \)); 
+										( infer-types 
+										<+ induce-types
+										<+ record-parameter) ))> c  ; 
+										(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c')) \)> methodConstraints;
+		<not(equal)> (methodConstraints, newMethodConstraints)
 			
 	infer-types:
 		BasicValue(Integer(i)) -> BasicValue(Integer(i)) { [Int(), Optional(Int())] }
+
+	infer-types:
+		BasicValue(String(s)) -> BasicValue(String(s)) { [String(), Optional(String())] }
 		
 	induce-types:
 		BinOp(expr { types }, op, expr2)
 			-> BinOp(expr { types }, op, expr2 { types })
 
 
-	record-parameter-types:
-		system -> system
-			where
-		methods := <LookupTable> "Method";
-		newMethods := <map(\((cname, mname),(c,gc,e,d, is,os)) -> ((cname, mname),(c',gc,e,d,is,os))
-						where c' := <bottomup(try((\ Input(n) {annot} -> ((cname, mname), Input(n) {annot}) \) ; 
-													(\ Output(n) {annot} -> ((cname, mname), Output(n) {annot}) \) ; 
-													record-parameter))> c \)> methods
+	infer-types:
+		((cname, mname), Input(s))
+			-> Input(s) {types}
+		where
+		types := <getInputType>(cname, mname, s);
+		<not(equal)>(types, [])
 
+	infer-types:
+		((cname, mname), Output(s))
+			-> Output(s) {types}
+		where
+		types := <getOutputType>(cname, mname, s);
+		<not(equal)>(types, [])
 
-		
+			
 	record-parameter:
 		((cname, mname), Input(s) {types})
 			-> Input(s) {types}
 		where
-			<addInput> (cname, mname, s, Int())
+			<not(equal)> (types, <getInputType>(cname, mname, s));
+			<addInput> (cname, mname, s, types)
+
 
 	record-parameter:
 		((cname, mname), Output(s) {types})
 			-> Output(s) {types}
 		where
-			<addOutput> (cname, mname, s, Int())
+			<not(equal)> (types, <getOutputType>(cname, mname, s));
+			<addOutput> (cname, mname, s, types)
 			
 		
 			

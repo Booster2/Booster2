@@ -3,7 +3,6 @@ module lookupTable
 imports
   include/Booster2  
   
-  library/lookupTable
  
 
 rules
@@ -84,4 +83,28 @@ rules
 
 	addClassInvariant = (\ (cname, inv) -> (cname, inv) where
 				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, a ,m,<union>(c, [inv]),w))\)> cname \) 
+
+	updateMethodConstraint = (\ (cname, mname, newConstraint) -> (cname, mname, newConstraint) where
+				<replaceMethod(\ ((c,m),(co,gc,e,d,is,os)) -> ((c,m),(newConstraint,gc,e,d,is,os)) \)> (cname, mname) \)
+				
+
+	getInputType:
+		(cname, mname, iname)
+			-> types
+		where
+			types := <lookup>(iname, (<\(c,gc,e,d, is,os) -> is \> <lookup> ((cname, mname), <LookupTable> "Method")))
+	
+	getInputType:
+		(cname, mname, iname) -> []
+
+
+	getOutputType:
+		(cname, mname, oname)
+			-> types
+		where
+			types := <lookup>(oname, (<\(c,gc,e,d, is,os) -> os \> <lookup> ((cname, mname), <LookupTable> "Method")))
+			
+	getOutputType:
+		(cname, mname, oname) -> []
+			
 				
