@@ -32,31 +32,15 @@ rules
 	addInput:
 		(cname, mname, input, type)
 			-> (cname, mname, input, type)
-		where 
+		where
 			<replaceMethod(\ ((c,a),(co,gc,e,d,is,os)) -> ((c,a),(co,gc,e,d,<union>(is, [(input, type)]),os)) \)> (cname, mname)
+			
 	addOutput:
 		(cname, mname, output, type)
 			-> (cname, mname, output, type)
 		where 
 			<replaceMethod(\ ((c,a),(co,gc,e,d,is,os)) -> ((c,a),(co,gc,e,d,is, <union>(os, [(output, type)]))) \)> (cname, mname)
 			
-	/*insertIntoLookupTable(|tname):
-		tdef
-			-> tdef
-		where
-			prevTable := <LookupTable> tname;
-			newTable := <union>(prevTable, [tdef]);
-			rules(
-				LookupTable :+ tname -> newTable
-			);
-			log(|Error(), ("Inserting into lookup table", tname, newTable, <LookupTable> tname))
-*/
-
-/*	addSubClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
-				<replaceClass(\ (superclass, (s,s',a,m,c,w)) -> (superclass, (<union>(s, [subclass]),s',a,m,c,w))\)> superclass \)		
-	addSuperClassRelation = (\ (subclass, superclass) -> (subclass, superclass) where
-				<replaceClass(\ (subclass, (s,s',a,m,c,w)) -> (subclass, (s, <union>(s', [superclass]),a,m,c,w))\)> subclass \)		
-*/			
 	addClassAttribute = (\ (cname, aname, adef) -> (cname, aname, adef) where
 				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, <union>(a, [aname]),m,c,w))\)> cname ;
 				prevTable := <LookupTable> "Attribute";
@@ -67,7 +51,6 @@ rules
 				
 	addClassMethod = (\ (cname, mname, mdef) -> (cname, mname, mdef) where
 				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is, as, a, <union>(m, [mname]),c,w))\)> cname ;
-//				<insertIntoLookupTable(|"Method")> ((cname, mname), mdef)
 				prevTable := <LookupTable> "Method";
 				<not(lookup)>((cname, mname), prevTable);
 				newTable := <union>(prevTable, [((cname, mname), mdef)]);

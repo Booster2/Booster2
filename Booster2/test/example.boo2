@@ -1,13 +1,15 @@
-/**
-* Example Booster2 program.
-*/  
+system S
 
-System something
-	
 class A {
+	attributes
+		a : INT
 	methods
-		m1 { 10 + a? < 10}
+		m1 { 3 + in? = 5 }
 	
 }
 
-
+class B extends A{
+	methods
+		m1 { a' = 3 & in? + in2? = 17}
+	
+}

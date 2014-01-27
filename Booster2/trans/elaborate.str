@@ -14,8 +14,8 @@ rules
 		where
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
-			//<normaliseInheritance> system ;
-			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference)> system
+			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference))> system
+			
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
 	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done, ins, outs)) -> ((cn, mn), (c, gc', exts', True(), ins, outs)) \)
@@ -25,7 +25,6 @@ rules
 	cname -> allSubClasses 
 		where 
 			allSubClasses := <nub><concat><\ set -> <union>([set], <map(unrollSubclass)> set) \><\ (is,as,a,m,c,w) -> is \><lookup>(cname, <LookupTable> "Class");
-			/*log(|Error(),  "allSubClasses", allSubClasses) */
 			<replaceClass(\ (cname, (is,as,a,m,c,w)) -> (cname, (is,allSubClasses,a,m,c,w)) \)> cname 		
 
 	inheritance-attributes:
@@ -33,8 +32,7 @@ rules
 			where
 		atts := <filter(attributes-can-be-percolated)> <LookupTable> "Attribute";
 		<not(equal)>(atts, []);
-		<map(percolate-attribute)> atts /* ;
-		log(|Error(), atts) */
+		<map(percolate-attribute)> atts
 
 
 	attributes-can-be-percolated:
@@ -58,7 +56,6 @@ rules
 		newMethods := <map(try(\((cname, mname),(c,gc,e,False(), ins, outs)) -> ((cname, mname),(c,gc,e,True(), ins, outs)) 
 							where [] := <filter(\ cname' -> <lookup>((cname', mname), <LookupTable>"Method") \)>
 										<\(is,as,a,m,c,w) -> as\><lookup>(cname, <LookupTable>"Class") \))><LookupTable> "Method";
-		//log(|Error(), "New Methods", newMethods);
 		rules(
 			LookupTable :+ "Method" -> newMethods
 		);
@@ -107,7 +104,6 @@ rules
 			<map(\ cname' -> cname' where
 				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False(), inputs, outputs) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
 				<equal>([],submethods);
-				//log(|Error(), "submethods", submethods);
 					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), done, inputs, outputs)) 
 					<+ <updateClassMethod> (cname', mname, c, cname, e, inputs, outputs))
 			 \)> cnames
@@ -117,11 +113,9 @@ rules
 	inheritance-invariants:
 		system -> system
 			where
-		/* log(|Error(), "Invs",  <concat><map(\ (cname, (is,as,a,m,c,w)) -> <cart(id)>([cname], c)\)> <LookupTable> "Class"); */
 		invs := <filter(invariants-can-be-percolated)><concat><map(\ (cname, (is,as,a,m,c,w)) -> <cart(id)>([cname], c)\)> <LookupTable> "Class";
 		<not(equal)>(invs, []);
-		<map(percolate-invariant)> invs /* ;
-		log(|Error(), atts) */
+		<map(percolate-invariant)> invs 
 			
 			
 	invariants-can-be-percolated:
@@ -142,25 +136,46 @@ rules
 	type-inference:
 		system -> system
 			where
-		methodConstraints := <filter(\((cname, mname),(c,gc,e,True(), is,os)) -> (cname, mname, c) \)> <LookupTable> "Method";
-		newMethodConstraints := <map(\ (cname, mname,c) -> (cname, mname, c')
-			where c' := <bottomup(try(
+		oldMethods := <LookupTable> "Method";
+		methodConstraints := <map(\((cname, mname),(constraint,gc,e,True(), is,os)) -> (cname, mname, constraint) \)> oldMethods;
+		<map(do-type-inference)> methodConstraints;
+		newMethods := <LookupTable> "Method";
+		<not(equal)> (oldMethods, newMethods)
+			
+			
+	do-type-inference:
+		(cname, mname,c) -> (cname, mname, c')
+			where
+				c' := <bottomup(try(
 								try((\ Input(n) {annot} -> ((cname, mname), Input(n) {annot}) \) <+ 
 								(\ Output(n) {annot} -> ((cname, mname), Output(n) {annot}) \)  <+
 								(\ Input(n) -> ((cname, mname), Input(n) ) \) <+ 
 								(\ Output(n) -> ((cname, mname), Output(n)) \)); 
 										( infer-types 
 										<+ induce-types
-										<+ record-parameter) ))> c  ; 
-										(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c')) \)> methodConstraints;
-		<not(equal)> (methodConstraints, newMethodConstraints)
+										<+ record-parameter) ))> c  ;
+				(<equal>(c, c')  <+ <updateMethodConstraint> (cname, mname, c'))
+										
 			
 	infer-types:
 		BasicValue(Integer(i)) -> BasicValue(Integer(i)) { [Int(), Optional(Int())] }
 
 	infer-types:
 		BasicValue(String(s)) -> BasicValue(String(s)) { [String(), Optional(String())] }
+
+	infer-types:
+		TypeExtent(Boolean()) -> TypeExtent(Boolean()) { [Set(Boolean())] }
+
+	infer-types:
+		TypeExtent(String()) -> TypeExtent(String()) { [Set(String())] }
+
+	infer-types:
+		TypeExtent(Int()) -> TypeExtent(Int()) { [Set(Int())] }
+
+	infer-types:
+		TypeExtent(DateTime()) -> TypeExtent(DateTime()) { [Set(DateTime())] }
 		
+				
 	induce-types:
 		BinOp(expr { types }, op, expr2)
 			-> BinOp(expr { types }, op, expr2 { types })
@@ -176,8 +191,8 @@ rules
 		((cname, mname), Input(s))
 			-> Input(s) {types}
 		where
-		types := <getInputType>(cname, mname, s);
-		<not(equal)>(types, [])
+			types := <getInputType>(cname, mname, s);
+			<not(equal)>(types, [])
 
 	infer-types:
 		((cname, mname), Output(s))

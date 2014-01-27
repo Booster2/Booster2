@@ -3,6 +3,8 @@
 \section{Introduction}
 
 A 'staged compilation process', similar to that described on Page 8 of \cite{KatsVisser2010}.
+A series of top-level transformations are defined, that  
+
 
 \section{Structure}
 
@@ -40,6 +42,9 @@ A 'staged compilation process', similar to that described on Page 8 of \cite{Kat
   \item Translate
 \end{itemize}
 
+
+\subsection{Main}
+
 \subsection{Parse}
 
 In this initial stage of the process, the tree of abstract terms which
@@ -48,11 +53,43 @@ later reference.  At this point, only simple inferences are made; any
 complicated inferences are left until the 'elaborate' part of the
 process.
 
-Before the lookup table can be created, it must first be initialised,
-which is useful in later steps: when the lookup-table is
-pretty-printed after a stage, perhaps for debugging purposes, there is
-no danger of an uninitialised part of the table.
- 
+At this point, it is important that the entire domain of the lookup
+table is initialised with a value. This ensures that any time a part
+of the lookup table is read - for example in a pretty-printing of the
+table for debugging purposes - the lookup is guaranteed to succeed and
+handling the case of an unsuccessful lookup is not necessary.
+
+The top-level parse transformation is show below.  The transformation
+matches the entirety of a system definition, and returns it
+un-modified.
+
+
+\begin{code}
+parse: 
+  System(name, components) -> 
+    System(name, components)
+  with  
+    // retrieve the system information, component by component 
+    sets := <map(organise-set)> <getSets> components;
+    classes := <getClasses> components;
+    classes' := <map(organise-class)> classes;
+    attributes := <map(organise-attribute)>
+                    <concat><map(arrangeClassAttributes)> classes;
+    methods := <map(organise-method)>
+                    <concat><map(arrangeClassMethods)> classes;
+
+    // insert all the retrieved values into the lookup table
+    rules(
+      LookupTable :+ "Name" ->  name
+      LookupTable :+ "SetDef" -> sets 
+      LookupTable :+ "Class" ->  classes'
+      LookupTable :+ "Attribute" ->  attributes
+      LookupTable :+ "Method" ->  methods
+    )
+\end{code}
+
+
+
 \subsection{Elaborate}
 \subsection{Compile}
 \subsection{Simplify}
@@ -100,8 +137,19 @@ function which may be updated to reflect the latest understanding and
 is always available within any context.
 
 The second is that the use of annotations in transformations such as
-this is not immediately useful.  Annotations will need re-using and  
- 
+this is not immediately useful.  Annotations will need re-using and
+consistently updating across the entire tree whenever a new piece of
+information is discovered.  Without the knowledge of where you are in
+the tree, you cannot know how to update the rest of it.  
+
+This results in a style of transformations which is typically driven
+by \emph{side-effects}.  A typical top-level transformation may match
+the definition of a system as a whole, and will return it unmodified.
+However, upon matching a system definition, information will be taken
+from the current state of the lookup table, and the lookup table will
+be updated with any new information.  In such transformations, the
+value returned is irrelevant, since it will be typically unused by any
+subsequent transformations.
 
 
 
