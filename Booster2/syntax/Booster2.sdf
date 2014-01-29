@@ -218,16 +218,12 @@ Relation -> BoosterTerm
 
     
 %% An expression is either a simple value expression, or is formed of sub
-%% expressions: either unary operators (\emph{head}, \emph{tail},
-%% \emph{card}, or \emph{unary minus}.  Or, expressions can be combined
-%% with a binary operator - the list of these is defined below.  Brackets
-%% are also permitted to declare precedence.    
+%% expressions: either through a unary operator or a binary operator -
+%% the lists of these are defined below.  Brackets are also permitted to
+%% declare precedence.    
     
 ValueExpression 	-> Expression
-'head' Expression	-> Expression {cons("Head")}
-'tail' Expression 	-> Expression {cons("Tail")}
-'card' Expression 	-> Expression {cons("Cardinality")}
-'-' Expression 		-> Expression {cons("Negative")}
+UnOp Expression 	-> Expression {cons("UnOp"), left}
 
 "(" Expression ")" 	-> Expression {bracket}
 
@@ -318,6 +314,13 @@ ID Primed? -> PathComponent {cons("PathComponent")}
  -> PathComponent {cons("PathComponent"), deprecated}
 
 PathComponent -> BoosterTerm
+
+%% The list of unary expression operators is given below:
+
+'head' -> UnOp {cons("Head")}
+'tail' -> UnOp {cons("Tail")}
+'card' -> UnOp {cons("Cardinality")}
+'-'    -> UnOp {cons("Negative")}
 
 
 %% The list of binary expression operators is given below:

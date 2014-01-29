@@ -293,11 +293,11 @@ rules
 
 			
 	simplify:
-		Cardinality(BinOp(a,Union(), b))
-			-> BinOp(Cardinality(a), Plus(), Cardinality(b))
+		UnOp(Cardinality(),BinOp(a,Union(), b))
+			-> BinOp(UnOp(Cardinality(),a), Plus(), UnOp(Cardinality(),b))
 	
 	simplify:
-		Cardinality(SetExtent([]))
+		UnOp(Cardinality(),SetExtent([]))
 			-> BasicValue(Integer(0))	
 
 
@@ -307,25 +307,25 @@ rules
 	//
 	// The cardinality of anything is always greater than 0
 	simplify:
-		BinRel(Cardinality(something), GreaterThanEquals(), BasicValue(Integer(v)))
+		BinRel(UnOp(Cardinality(),something), GreaterThanEquals(), BasicValue(Integer(v)))
 			-> True()
 		where
 			<lt>(v,0)	
 
 	simplify:
-		BinRel(Cardinality(something), GreaterThan(), BasicValue(Integer(v)))
+		BinRel(UnOp(Cardinality(),something), GreaterThan(), BasicValue(Integer(v)))
 			-> True()
 		where
 			<lt>(v,0)	
 
 	simplify:
-		BinRel(Cardinality(something), LessThanEquals(), BasicValue(Integer(v)))
+		BinRel(UnOp(Cardinality(),something), LessThanEquals(), BasicValue(Integer(v)))
 			-> False()
 		where
 			<lt>(v,0)	
 
 	simplify:
-		BinRel(Cardinality(something), LessThan(), BasicValue(Integer(v)))
+		BinRel(UnOp(Cardinality(),something), LessThan(), BasicValue(Integer(v)))
 			-> False()
 		where
 			<lt>(v,0)	
@@ -338,10 +338,10 @@ rules
 			-> BasicValue(Integer(1))
 */			
 	simplify:
-		Cardinality(SetExtent([a, as*]))
+		UnOp(Cardinality(),SetExtent([a, as*]))
 			-> BasicValue(Integer(k))
 		where
-			BasicValue(Integer(i)) := <simplify> Cardinality(SetExtent([as*]));
+			BasicValue(Integer(i)) := <simplify> UnOp(Cardinality(),SetExtent([as*]));
 			k := <add>(i,1)
 			
 

@@ -6,6 +6,7 @@ imports
   library/lookupTable
   library/basicTypes
   library/binOp
+  library/unOp
   library/binRel 
 
  rules
@@ -164,16 +165,7 @@ outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mde
 
 
 	expression:
-		Head(expr1) -> $[head([<expression> expr1])]
-
-	expression:
-		Tail(expr1)	-> $[tail([<expression> expr1])]
-
-	expression:
-		Negative(expr1) -> $[-[<expression> expr1]]
-
-	expression:
-		Cardinality(expr1) -> $[card([<expression> expr1])]
+		UnOp(unop,expr1) -> $[[<get-unop-booster-notation> unop] ( [<expression> expr1] ) ]
 
 	expression:
 		BinOp(expr1, op, expr2) -> $[[<expression> expr1] [<get-binop-booster-notation> op] [<expression> expr2]]

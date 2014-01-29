@@ -20,28 +20,11 @@ rules
 */
 
  	get-mentioned-attributes:
-		(name, maybename, Head(expr), env)
+		(name, maybename, UnOp(unop, expr), env)
 			-> atts
 		with
 			atts := <get-mentioned-attributes> (name, maybename, expr, env)
  
- 	get-mentioned-attributes:
-		(name, maybename, Tail(expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-attributes> (name, maybename, expr, env)
- 
- 	get-mentioned-attributes:
-		(name, maybename, Negative(expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-attributes> (name, maybename, expr, env)
- 
- 	get-mentioned-attributes:
-		(name, maybename, Cardinality(expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-attributes> (name, maybename, expr, env)
  
  	get-mentioned-attributes:
 		(name, maybename, BinOp(expr1, op, expr2), env)
@@ -58,25 +41,7 @@ rules
 */
 
 	is-old:
-		Head(expr1)
-			-> True()
-		where
-			True() := <is-old> (expr1)
-
-	is-old:
-		Tail(expr1)
-			-> True()
-		where
-			True() := <is-old> (expr1)
-
-	is-old:
-		Cardinality(expr1)
-			-> True()
-		where
-			True() := <is-old> (expr1)
-
-	is-old:
-		Negative(expr1)
+		UnOp(unop, expr1)
 			-> True()
 		where
 			True() := <is-old> (expr1)
@@ -93,43 +58,43 @@ rules
 */
 
 	get-expression-type:
-		(Head(expr1), classname, methodname, env)
+		(UnOp(Head(), expr1), classname, methodname, env)
 			-> String()
 		where
 			String() := <get-expression-type> (expr1, classname, methodname, env)
 			
 	get-expression-type:
-		(Head(expr1), classname, methodname, env)
+		(UnOp(Head(),expr1), classname, methodname, env)
 			-> type1
 		where
 			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
 				
 	get-expression-type:
-		(Tail(expr1), classname, methodname, env)
+		(UnOp(Tail(),expr1), classname, methodname, env)
 			-> String()
 		where
 			String() := <get-expression-type> (expr1, classname, methodname, env)
 			
 	get-expression-type:
-		(Tail(expr1), classname, methodname, env)
+		(UnOp(Tail(),expr1), classname, methodname, env)
 			-> type1
 		where
 			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(Negative(expr1), classname, methodname, env)
+		(UnOp(Negative(),expr1), classname, methodname, env)
 			-> Int()
 		where
 			Int() := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(Cardinality(expr1), classname, methodname, env)
+		(UnOp(Cardinality(),expr1), classname, methodname, env)
 			-> Int()
 		where
 			String() := <get-expression-type> (expr1, classname, methodname, env)
 
 	get-expression-type:
-		(Cardinality(expr1), classname, methodname, env)
+		(UnOp(Cardinality(),expr1), classname, methodname, env)
 			-> Int()
 		where
 			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
@@ -143,26 +108,8 @@ rules
 			t3 := <binop-type-matching> (t1, op, t2)
 
 	literal-substitute:
-		 (classname, methodname, Head(expression1), paths, expression, env)
-		 	-> Head(expression2)
-		 where
-		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
-
-	literal-substitute:
-		 (classname, methodname, Tail(expression1), paths, expression, env)
-		 	-> Tail(expression2)
-		 where
-		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
-
-	literal-substitute:
-		 (classname, methodname, Cardinality(expression1), paths, expression, env)
-		 	-> Cardinality(expression2)
-		 where
-		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
-
-	literal-substitute:
-		 (classname, methodname, Negative(expression1), paths, expression, env)
-		 	-> Negative(expression2)
+		 (classname, methodname, UnOp(unop, expression1), paths, expression, env)
+		 	-> UnOp(unop,expression2)
 		 where
 		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
 
@@ -180,26 +127,8 @@ rules
 */
 
 	make-old:
-		Head(expr1)
-			-> Head(expr2)
-		where
-			expr2 := <make-old> (expr1)
-
-	make-old:
-		Tail(expr1)
-			-> Tail(expr2)
-		where
-			expr2 := <make-old> (expr1)
-
-	make-old:
-		Negative(expr1)
-			-> Negative(expr2)
-		where
-			expr2 := <make-old> (expr1)
-
-	make-old:
-		Cardinality(expr1)
-			-> Cardinality(expr2)
+		UnOp(unop,expr1)
+			-> UnOp(unop,expr2)
 		where
 			expr2 := <make-old> (expr1)
 
@@ -219,26 +148,8 @@ rules
 */
 
 	make-post-state:
-		Head(expr1)
-			-> Head(expr2)
-		where
-			expr2 := <make-post-state> (expr1)
-
-	make-post-state:
-		Tail(expr1)
-			-> Tail(expr2)
-		where
-			expr2 := <make-post-state> (expr1)
-
-	make-post-state:
-		Negative(expr1)
-			-> Negative(expr2)
-		where
-			expr2 := <make-post-state> (expr1)
-
-	make-post-state:
-		Cardinality(expr1)
-			-> Cardinality(expr2)
+		UnOp(unop,expr1)
+			-> UnOp(unop,expr2)
 		where
 			expr2 := <make-post-state> (expr1)
 
@@ -258,25 +169,7 @@ rules
 */
 
  	get-mentioned-paths:
-		(name, maybename, Head(expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-paths> (name, maybename, expr, env)
- 
- 	get-mentioned-paths:
-		(name, maybename, Tail(expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-paths> (name, maybename, expr, env)
- 
- 	get-mentioned-paths:
-		(name, maybename, Negative(expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-paths> (name, maybename, expr, env)
- 
- 	get-mentioned-paths:
-		(name, maybename, Cardinality(expr), env)
+		(name, maybename, UnOp(unop, expr), env)
 			-> atts
 		with
 			atts := <get-mentioned-paths> (name, maybename, expr, env)

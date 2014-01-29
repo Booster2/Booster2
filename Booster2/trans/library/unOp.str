@@ -1,0 +1,19 @@
+module library/unOp
+
+imports
+  include/Booster2
+    
+ 
+ rules
+
+	get-unop-booster-notation:
+		Head() -> "head"
+
+	get-unop-booster-notation:
+		Tail() -> "tail"
+
+	get-unop-booster-notation:
+		Cardinality() -> "head"
+
+	get-unop-booster-notation:
+		Negative() -> "-"

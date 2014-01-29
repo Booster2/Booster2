@@ -6,86 +6,79 @@ imports
  
  rules
 
-	get-binrel-booster-notation:
-		Equal() -> $[=]
-		
-		
-	get-binrel-type:
-		(type, Equal(), type) -> []
-		
-	get-binrel-type:
-		(type, Equal()) -> type
-		
-	get-binrel-type:
-		(Equal(), type) -> type
+
+/****
+Given a binary relation between two expressions, and we know the type of the expression
+on one side, what type should be given to the other side?
+right-to-left version, and left-to-right version, because it's not always symmetrical
+*****/
+
+binrel-rtol-type:
+	(In(), types) -> <map(\ Set(t) -> t \)> types	
+
+binrel-ltor-type:
+	(In(), types) -> <map(\ t -> Set(t) \)> types
+
+binrel-rtol-type:
+	(NotIn(), types) -> <map(\ Set(t) -> t \)> types	
+
+binrel-ltor-type:
+	(NotIn(), types) -> <map(\ t -> Set(t) \)> types
+	
+
+/**** 
+The default is, of course, that for any relational operator, the types are the same
+and that the relationship is symmetrical 
+****/	
+
+binrel-rtol-type:
+	(op, types) -> types	
+
+binrel-ltor-type:
+	(op, types) -> types	
 	
 	
+
+/****
+Given a relational operator, how do we display it in the Booster notation.
+This functionality has been separated to make some other transformations easier 
+to define 
+****/	
+
+get-binrel-booster-notation:
+	Equal() -> $[=]
+
+get-binrel-booster-notation:
+	NotEqual() -> $[/=]
+
+get-binrel-booster-notation:
+	In() -> $[:]		
 	
+get-binrel-booster-notation:
+	NotIn() -> $[/:]
 	
-		
-	get-binrel-booster-notation:
-		NotEqual() -> $[/=]
-
-	get-binrel-type:
-		(type, NotEqual(), type) -> []
-		
-	get-binrel-type:
-		(type, NotEqual()) -> type
-		
-	get-binrel-type:
-		(NotEqual(), type) -> type
-
-
-
-	get-binrel-booster-notation:
-		In() -> $[:]		
-		
-	get-binrel-type:
-		(type, In(), Set(type)) -> []
-		
-	get-binrel-type:
-		(type, In()) -> Set(type)
-		
-	get-binrel-type:
-		(In(), Set(type)) -> type
+get-binrel-booster-notation:
+	LessThan() -> $[<]
 	
-		
-		
-		
-		
-	get-binrel-booster-notation:
-		NotIn() -> $[/:]
-		
-	get-binrel-booster-notation:
-		LessThan() -> $[<]
-		
-	get-binrel-booster-notation:
-		GreaterThan() -> $[>]
+get-binrel-booster-notation:
+	GreaterThan() -> $[>]
 
-	get-binrel-booster-notation:
-		LessThanEquals() -> $[<=]
+get-binrel-booster-notation:
+	LessThanEquals() -> $[<=]
 
-	get-binrel-booster-notation:
-		GreaterThanEquals() -> $[>=]
+get-binrel-booster-notation:
+	GreaterThanEquals() -> $[>=]
 
-	get-binrel-booster-notation:
-		Subset() -> $[<<]
+get-binrel-booster-notation:
+	Subset() -> $[<<]
 
-	get-binrel-booster-notation:
-		SubsetEquals() -> $[<<:]
+get-binrel-booster-notation:
+	SubsetEquals() -> $[<<:]
 
-	get-binrel-booster-notation:
-		Superset() -> $[>>]
+get-binrel-booster-notation:
+	Superset() -> $[>>]
 
-	get-binrel-booster-notation:
-		SupersetEquals() -> $[:>>]
+get-binrel-booster-notation:
+	SupersetEquals() -> $[:>>]
 
 
-	get-binrel-type:
-		(type, Equal(), type) -> []
-		
-	get-binrel-type:
-		(type, Equal()) -> []
-		
-	get-binrel-type:
-		(Equal(), type) -> []	
