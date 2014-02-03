@@ -22,6 +22,12 @@ foldout(s): ([x|xs*], sep) -> $[[<s> x][sep][<foldout(s)>([xs*], sep)]]
 outputAttributes = (\ classname -> <foldout(attribute)>(<filter(\ ((cname, aname), adef) -> ((cname, aname), adef) where <eq>(cname, classname)\)><LookupTable>"Attribute", "\r") \)
 outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mdef) -> ((cname, mname), mdef) where <eq>(cname, classname)\)><LookupTable>"Method", "\r") \)
 
+// workflow begin
+outputSeqWorkflows = (\ classname -> <foldout(seqwf)>(<filter(\ ((cname, aname), adef) -> ((cname, aname), adef) where <eq>(cname, classname)\)><LookupTable>"SeqWorkflows", "\r") \)
+outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname), adef) -> ((cname, aname), adef) where <eq>(cname, classname)\)><LookupTable>"ParWorkflows", "\r") \)
+// workflows end
+
+
 	output-to-booster:
 	 	system
 	 		-> $[system [<LookupTable> "Name"] 
@@ -43,7 +49,9 @@ outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mde
 
 	class:
 		(classname, (immsubclasses, allsubclasses, atts, meths, invs, wfs))
-			-> $[["\t"]class [classname] [<extends> (immsubclasses)] { ["\r\t\t"]attributes["\r"][<outputAttributes> classname]["\r\t\t"]invariants["\r"] [<foldout(invariant)> (invs, "\r")]["\r\t\t"]methods["\r"] [<outputMethods> classname]["\r\t"]}]
+			-> $[["\t"]class [classname] [<extends> (immsubclasses)] { ["\r\t\t"]attributes["\r"][<outputAttributes> classname]["\r\t\t"]invariants["\r"] [<foldout(invariant)> (invs, "\r")]["\r\t\t"]methods["\r"] [<outputMethods> classname] 
+			    ["\r\t\t"]Workflows["\r"] [<outputSeqWorkflows> classname] ["\r"] [<outputParWorkflows> classname] ["\r\t"]}]
+			    // TODO: include a check a section is empty 
 				
 	extends:
 		[] -> $[]
@@ -58,7 +66,46 @@ outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mde
 		((classname, attname), (decs, type, opposite, minmult, maxmult)) 
 			-> $[["\t\t\t"][attname] [<foldout(decorator)>(decs, ", ")] : [<type>(type, opposite, minmult, maxmult)] ]
 			//[<output-to-booster-attribute-type>(classname, attname)]]
-				
+	
+	// workflow begin
+	seqwf : ((classname, sname), expr) -> $[["\t\t\t"]seq [sname] : [<seqWfNotation> expr]]
+	
+	seqWfNotation : Skip() -> "SKIP"
+	seqWfNotation : Prefix(ga,wf) -> $[[<guardedActionNotation> ga] -> [<seqWfNotation> wf]]
+	seqWfNotation : Choice(ga1,wf1,ga2,wf2) -> $[[<guardedActionNotation> ga1] [<seqWfNotation> wf1] ["[]"] [<guardedActionNotation> ga2] [<seqWfNotation> wf2]]
+	seqWfNotation : Wait(from,to,wf) -> $[WAIT.[from].[to] -> [<seqWfNotation> wf]]
+	
+	seqWfNotation : t -> "???"
+	where log(|Error(),"notation not known: ",t)
+	
+	parwf : ((classname, sname), expr) -> $[["\t\t\t"]par [sname] : [<parWfNotation> expr]]
+	
+	parWfNotation: Single(wfr) -> wfr
+	parWfNotation: Multiple(wfr,par) -> $[[wfr] ||| [<parWfNotation> par]]
+	
+	parWfNotation : t -> "???"
+	where log(|Error(),"notation not known: ",t)
+	
+	
+	
+	guardedActionNotation: GA(guard,methodRef) -> $[[<guardNotation> guard] & [<methodReferenceNotation> methodRef]]
+	
+	guardedActionNotation: t -> "???"
+	where log(|Error(),"notation not known: ",t)
+	
+	guardNotation: Normal(constr) -> $[Normal([<constraint> constr])]
+	guardNotation: Delayed(constr) -> $[Delayed([<constraint> constr])]
+	
+	guardNotation: t -> "???"
+	where log(|Error(),"notation not known: ",t)
+	
+	methodReferenceNotation: MethodReference(PathStart(name,_),_) -> $[[name]()]
+	
+	methodReferenceNotation: t -> "???"
+	where log(|Error(),"notation not known: ",t)
+	
+	// workflow end
+	
 	decorator:
 		Identity() -> $[(ID)]
 		
