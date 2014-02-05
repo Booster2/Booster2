@@ -19,7 +19,8 @@ imports
 	 		// workflow begin
 	 		,
 	 		"SeqWorkflows:", <LookupTable> "SeqWorkflows",
-	 		"ParWorkflows:", <LookupTable> "ParWorkflows"
+	 		"ParWorkflows:", <LookupTable> "ParWorkflows",
+	 		"PrecondParWorkflows:", <LookupTable> "PrecondParWorkflows"
 	 		// workflow end
 	 		)
  	

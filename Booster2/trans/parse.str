@@ -54,6 +54,7 @@ rules
 			// workflow begin
 			LookupTable :+ "SeqWorkflows" -> seqWorkflows
 			LookupTable :+ "ParWorkflows" -> parWorkflows
+			LookupTable :+ "PrecondParWorkflows" -> []
 			// workflow end
 		)
 
@@ -74,9 +75,10 @@ rules
 	arrangeClassAttributes = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getAttributes> Class(n, e, c)) \
 	arrangeClassMethods = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getMethods> Class(n, e, c)) \
 	
+	// workflow begin
 	arrangeClassSeqWorkflows = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getSeqWfs> Class(n, e, c)) \
     arrangeClassParWorkflows = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getParWfs> Class(n, e, c)) \
-	    
+	// wokflow end
 		
 	organise-set:
 		SetDef(name, elements) -> (name, elements)
@@ -123,8 +125,12 @@ rules
 /* getSeq/ParWorfklows
 
 */
+    // make a usual list from a concurrent workflow 
+	makeParList: Single(name) -> [name]
+	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)
+
 	organise-seqWf : (cname, SeqWf(n,expr)) -> ((cname,n),expr)
-	organise-parWf : (cname, ParWf(n,expr)) -> ((cname,n),expr)
+	organise-parWf : (cname, ParWf(n,expr)) -> ((cname,n),<makeParList> expr)
 	
     getWfs = <concat> <filter(\ Workflows(wfs) -> wfs \)>
 

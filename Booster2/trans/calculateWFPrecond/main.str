@@ -18,14 +18,17 @@ rules
 	// the main strategy from the precondition calculation
 	precond-main: system -> system
 	where
-		ParWfs := <LookupTable> "ExpandedParWorkflows";
-		<map(\(cname,classParWfs) ->  <precond-class> (cname,classParWfs) \)> ParWfs
+		ParWfs := <LookupTable> "ParWorkflows";
+		<map(\((cname,pname),expr) ->  <precondClass> ((cname,pname),expr) \)> ParWfs
 		
-	precond-class: (cname,namedef_list) -> (cname,namedef_list)
+	precondClass: ((cname,pname),name_list) -> ((cname,pname),name_list)
 	where
-		namedPreconds := <currymap(precond)> (cname,namedef_list);
-		oldPreconds := <LookupTable> "ParWorkflows_Precond";
-		newPreconds := <union>(oldPreconds,[(cname,namedPreconds)]);
-		rules( LookupTable :+ "ParWorkflows_Precond" -> newPreconds)
+		expandedParWf := <map(\ wfn -> <lookup>((cname,wfn),<LookupTable> "SeqWorkflows") \)> name_list;
+		form := <precond> (cname,(pname,expandedParWf));
+		oldPreconds := <LookupTable> "PrecondParWorkflows";
+		newPreconds := <union>(oldPreconds,[((cname,pname),form)]);
+		rules( LookupTable :+ "PrecondParWorkflows" -> newPreconds)
 
+	
+	
 	

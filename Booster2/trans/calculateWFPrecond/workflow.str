@@ -20,7 +20,7 @@ rules
 	wait_d: Wait(i,j,w) -> Wait(i,j,w)
 	
 	// check whether a sequential workflow is a choice node
-	choide_d: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
+	choice_d: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
 	
 	
 	// selectors for prefix node

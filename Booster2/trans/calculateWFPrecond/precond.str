@@ -31,13 +31,12 @@ rules
 	
 	// calculate the precondition of the concurrent workflow pdef
 	// with name pname being defined in class cname
-	precond: (cname,(pname,pdef)) -> (pname,form)
+	precond: (cname,(pname,pdef)) -> form
 	where
 		<resetMap> ();
-		if not(<equal>(<wf_lut> "map",[])) then log(|Error(),"wf_lut ist nicht leer") end;
+		if not(<equal>(<wf_lut> "map",[])) then log(|Error(),"wf_lut is not empty") end;
 		<pre> (cname,pname,pdef);
 		form := <innermost(simplify)> (<lookupMap> pdef)
-	
 	
 	/* **************************************
 	   main precondition function
@@ -118,7 +117,7 @@ rules
 	       
 	// prefix at position i
 	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
-	where wi := <getPos> ([wfs*],i) ;
+	where wi := <getPos> ([wfs*],i);
 	       <prefix_d> wi;
 	       gi1 := <sel_g1>(wi);
 		   ai1 := <sel_a1>(wi);
@@ -134,7 +133,7 @@ rules
 	// Choice case
 	preIter: ((cname,pname,[wfs*]),i,t) -> formset
 	where  wi := <getPos>([wfs*],i);
-			<choide_d> wi;
+			<choice_d> wi;
 	       gi1 := <sel_g1>(wi);
 		   ai1 := <sel_a1>(wi);
 		   wi1 := <sel_w1>(wi);
@@ -175,8 +174,21 @@ rules
 							 if <equal>(wi_from,wi_to) then log(|Error(), (cname,pname),"self references in wait constructs not allowed") end;
 							 if <gt>(wi_from,t) then log(|Error(), (cname,pname),"source of wait not in range") end;
 							 if <gt>(wi_to,t) then log(|Error(), (cname,pname),"target of wait not in range") end
+	    else log(|Error(), (cname,pname),"For some unknown reason, the precondition could not be calculated")
 		end
            
+           
+        
+    // currently it's only fake   
+	wp: ((cname,MethodReference(path,[substs*])),post) -> constraint
+	where
+		m := <getMethodName> path;
+		constraint := ("wp(", m , post ,")")
+     
+	// get the method name from a path
+	getMethodName: Path(path,PathComponent(name,[decorators*])) -> name
+	getMethodName: PathStart(name,[decorators*]) -> name
+     
            /*
            getGuard: Guard(expr,prog) -> expr
 		   getGuard: t -> True()
@@ -197,17 +209,14 @@ rules
 				//cond := ("wp(", m , post ,")")
 			*/
 			
-			
-			// get the method name from a path
-			getMethodName: Path(path,PathComponent(name,[decorators*])) -> name
-			getMethodName: PathStart(name,[decorators*]) -> name
+			/*
 			
 			// do the wp-calculation
 			wp : ((cname,MethodReference(path,[substs*])),post) -> constraint7
 		   	where
 		   	    constraints := <LookupTable> "Constraints";
 		   		classname := cname;
-		   		//log(|Error(),"check",path);
+		   		log(|Error(),"check",path);
 		   		//log(|Error(),"mname",<getMethodName> path);
 		   		methname := <getMethodName> path;
 		   		
@@ -245,4 +254,5 @@ rules
 		             lookup-invariants :+ "" -> ""
 		             conjoin-constraints :+ "" -> ""
 		             make-old :+ "" -> "")
+		 */
 	

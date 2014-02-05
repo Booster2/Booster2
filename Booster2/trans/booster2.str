@@ -50,6 +50,10 @@ rules
 
   java-elaborate-booster = main(elaborateToBooster)
   java-elaborate-lut = main(elaborateToLookupTable)
+  
+  // workflow begin
+  precondToLookupTable = (\ x -> <builder-precond(output-lookup-table)> ("precond.table", x) \)
+  // workflow end
 
   
   main(s) =
@@ -269,16 +273,16 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
  /* *************************
  *** Workflow Stuff Begin ***
  ************************* */
-	 builder-precond-debug: (selected, position, ast, path, project-path) -> (filename,result)
+	 builder-precond(output):
+	 	(extension, (selected, position, ast, path, project-path)) -> (filename, result)
 	 where
-	  <precond-main>
-	 	<simplify-main> 
-	 	  <compile> 
-	 	    <elaborate> 
-	 	      <parse> 
-	 	        selected;
-	 	filename := "precond_debug";
-	 	result := <output-lookup-table>
+	 	filename := <guarantee-extension(|extension)> path;
+	 	result :=
+	 		<output>
+	  			<precond-main>
+	 	    		<elaborate> 
+	 	      			<parse> 
+	 	        			selected
 /* *************************
 *** Workflow Stuff End *****
 ************************* */				   

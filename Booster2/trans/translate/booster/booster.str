@@ -80,8 +80,9 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	
 	parwf : ((classname, sname), expr) -> $[["\t\t\t"]par [sname] : [<parWfNotation> expr]]
 	
-	parWfNotation: Single(wfr) -> wfr
-	parWfNotation: Multiple(wfr,par) -> $[[wfr] ||| [<parWfNotation> par]]
+	parWfNotation: [] -> ""
+	parWfNotation: [wfr] -> wfr
+	parWfNotation: [wfr|list] -> $[[wfr] ||| [<parWfNotation> list]]
 	
 	parWfNotation : t -> "???"
 	where log(|Error(),"notation not known: ",t)
