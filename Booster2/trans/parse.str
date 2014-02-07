@@ -35,6 +35,12 @@ rules
 		attributes := <map(organise-attribute)><concat><map(arrangeClassAttributes)> classes;
 		methods := <map(organise-method)><concat><map(arrangeClassMethods)> classes;
 
+		// workflow begin
+		//wfs := <map(getClassWfs)> classes;
+		seqWorkflows := <map(organise-seqWf)><concat><map(arrangeClassSeqWorkflows)> classes; 
+		parWorkflows := <map(organise-parWf)><concat><map(arrangeClassParWorkflows)> classes; 
+		// workflow end
+
 		// insert all the retrieved values into the lookup table
 		// IMPORTANT: Any table not initialised here might not be accessible 
 		// when it is later read (for example, as part of a table output)
@@ -45,6 +51,11 @@ rules
 			LookupTable :+ "Class" ->  classes'
 			LookupTable :+ "Attribute" ->  attributes
 			LookupTable :+ "Method" ->  methods
+			// workflow begin
+			LookupTable :+ "SeqWorkflows" -> seqWorkflows
+			LookupTable :+ "ParWorkflows" -> parWorkflows
+			LookupTable :+ "PrecondParWorkflows" -> []
+			// workflow end
 		)
 
 
@@ -63,11 +74,11 @@ rules
 	getClassName = \ Class(n, _, _) -> n \
 	arrangeClassAttributes = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getAttributes> Class(n, e, c)) \
 	arrangeClassMethods = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getMethods> Class(n, e, c)) \
-
-	    
-
-
-				
+	
+	// workflow begin
+	arrangeClassSeqWorkflows = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getSeqWfs> Class(n, e, c)) \
+    arrangeClassParWorkflows = \ Class(n, e, c) -> <cart(id)>([n], <getClassComponents; getParWfs> Class(n, e, c)) \
+	// wokflow end
 		
 	organise-set:
 		SetDef(name, elements) -> (name, elements)
@@ -108,37 +119,31 @@ rules
 			
 			
 
+
+// workflow begin
 			
 /* getSeq/ParWorfklows
 
 */
-			
-	get-class-wfs: 
-		Class(name, extends,  classComponents)
-			-> ((name,seqWfs),(name,parWfs))
-		with
-			allWfs := <get-class-wf_sections> Class(name, extends, classComponents);
-			seqWfs := <filter(isSeqWf)> allWfs;
-			parWfs := <filter(isParWf)> allWfs
-	
-	get-class-wf_sections:
- 		Class(name, extends, classComponents)
- 			-> meths
- 		where
- 			wfSections := <filter(isWorkflowSection)> classComponents;
- 			meths := <foldr([], union)> wfSections
+    // make a usual list from a concurrent workflow 
+	makeParList: Single(name) -> [name]
+	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)
 
-	isWorkflowSection:
-		 Workflows(wfs) -> wfs
+	organise-seqWf : (cname, SeqWf(n,expr)) -> ((cname,n),expr)
+	organise-parWf : (cname, ParWf(n,expr)) -> ((cname,n),<makeParList> expr)
+	
+    getWfs = <concat> <filter(\ Workflows(wfs) -> wfs \)>
+
+    getSeqWfs = <filter(isSeqWf)> <getWfs>
+    getParWfs = <filter(isParWf)> <getWfs>
 		 
-	isSeqWf:
+    isSeqWf:
 		SeqWf(n,expr) -> SeqWf(n,expr)  
 		
 	isParWf:
-		ParWf(n,expr) -> ParWf(n,expr)  
-	
-
-
+		ParWf(n,expr) -> ParWf(n,expr)
+		
+// workflow end
 
 		
  /* get-max-mult:

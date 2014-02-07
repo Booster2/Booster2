@@ -10,15 +10,16 @@ class C1 {
   	  invariants
   	    x >= 2 & x <= 4 
   	  workflows
-  	    seq w0: Normal true & add1() -> SKIP
-  	    seq w1:  Normal true & sub1() -> SKIP
+  	    seq a0: Normal true & add1() -> a1
+  	    seq a1:  Normal true & add2() -> a2
   	  workflows
-  	    seq w2: Normal true & add1() -> Normal true & add1() -> SKIP
+  	    seq a2: Normal true & add3() -> Normal true & add4() -> SKIP
   	    //par p: w2 
   	    //par p: w0 ||| w1
   	  workflows
-  	    //par p1: w0 ||| w1
+  	    par p1: a2 ||| a2
 }
+
 
 class C2 {
 	attributes
@@ -35,3 +36,4 @@ class C2 {
   	  workflows
   	    par p: w0 ||| w1
 }
+

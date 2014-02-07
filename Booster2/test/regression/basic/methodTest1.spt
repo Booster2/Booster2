@@ -6,9 +6,6 @@ module template
 
 language Booster2
 
-
-
-
 test Method test 1 [[
   
 system methodTest
@@ -27,7 +24,8 @@ System(
   "methodTest"
 , [ Class(
       "class1"
-    , [ Attributes([Attribute("att1", BasicType(Int()))])
+    , None()
+    , [ Attributes([Attribute("att1", [], BasicType(Int()))])
       , Methods(
           [ Method(
               "m1"

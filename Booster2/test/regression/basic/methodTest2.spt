@@ -27,7 +27,8 @@ System(
   "methodTest"
 , [ Class(
       "class1"
-    , [ Attributes([Attribute("att1", BasicType(Int()))])
+    , None()
+    , [ Attributes([Attribute("att1", [], BasicType(Int()))])
       , Methods(
           [ Method(
               "m1"

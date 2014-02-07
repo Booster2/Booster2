@@ -15,7 +15,14 @@ imports
 	 		"SetDef:", <LookupTable> "SetDef",
 	 		"Class:", <LookupTable> "Class",
 	 		"Attribute:", <LookupTable> "Attribute",
-	 		"Method:", <LookupTable> "Method")
+	 		"Method:", <LookupTable> "Method"
+	 		// workflow begin
+	 		,
+	 		"SeqWorkflows:", <LookupTable> "SeqWorkflows",
+	 		"ParWorkflows:", <LookupTable> "ParWorkflows",
+	 		"PrecondParWorkflows:", <LookupTable> "PrecondParWorkflows"
+	 		// workflow end
+	 		)
  	
 /* 	
 output-list(s) : ([], sep) -> $[]
