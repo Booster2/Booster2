@@ -264,7 +264,15 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		(selected, position, ast, path, project-path) -> (filename, result)
    		with
 	   		filename := <guarantee-extension(|"test")> path;
-	   		result :=  (<subsets> [1,2,3],<subsets> [3,2,1])   
+	   		// test some pattern matching on some annotations
+	   		result := ( <try(\ String() 			-> Int() \)> 				String(),
+	   					<try(\ String() {something}	-> Int() \)> 				String(), 
+	   					<try(\ String() {}			-> Int() \)> 				String(), 
+	   					<try(\ String() 			-> Int() \)> 				String() { True() },
+	   					<try(\ String() {something}	-> Int() \)> 				String() { True() },
+	   					<try(\ String() 			-> String() \)> 			String() { True() }, 
+	   					<try(\ something		    -> something\)> 			String() { True() }, 
+	   					<try(\ something		    -> something {False()}\)> 	String() { True() })   
    		
  /* *************************
  *** Workflow Stuff Begin ***

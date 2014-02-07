@@ -75,17 +75,9 @@ rules
 		where
 			types := <lookup>(iname, (<\(c,gc,e,d, is,os) -> is \> <lookup> ((cname, mname), <LookupTable> "Method")))
 	
-	getInputType:
-		(cname, mname, iname) -> []
-
-
 	getOutputType:
 		(cname, mname, oname)
 			-> types
 		where
 			types := <lookup>(oname, (<\(c,gc,e,d, is,os) -> os \> <lookup> ((cname, mname), <LookupTable> "Method")))
-			
-	getOutputType:
-		(cname, mname, oname) -> []
-			
-				
+							

@@ -1,11 +1,14 @@
 module elaborate
 
 imports
-  include/Booster2  
+
+include/Booster2  
   
-  library/lookupTable
-  library/binRel
- 
+library/lookupTable
+library/binRel
+library/binOp
+library/unOp
+library/basicTypes
 
 rules
 	
@@ -148,152 +151,149 @@ rules
 		(cname, mname,c) -> (cname, mname, c')
 			where
 				c' := <topdown(try(
-								try((\ Input(n) {annot} -> ((cname, mname), Input(n) {annot}) \) <+ 
-								(\ Output(n) {annot} -> ((cname, mname), Output(n) {annot}) \)  <+
-								(\ Input(n) -> ((cname, mname), Input(n) ) \) <+ 
-								(\ Output(n) -> ((cname, mname), Output(n)) \)); 
+								try(\ term -> ((cname, mname), term) \); 
 										( infer-types 
 										<+ induce-types
 										<+ record-parameter) ))> c  ;
-				(<equal>(c, c')  <+ <updateMethodConstraint> (cname, mname, c'))
+				(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c'))
 										
 			
 	infer-types:
-		BasicValue(Integer(i)) -> BasicValue(Integer(i)) { [Int(), Optional(Int())] }
+		(context, BasicValue(Integer(i))) -> BasicValue(Integer(i)) { Optional(BasicType(Int())) }
 
 	infer-types:
-		BasicValue(String(s)) -> BasicValue(String(s)) { [String(), Optional(String())] }
+		(context, BasicValue(String(s))) -> BasicValue(String(s)) { Optional(BasicType(String())) }
 
 	infer-types:
-		TypeExtent(Boolean()) -> TypeExtent(Boolean()) { [Set(Boolean())] }
+		(context, TypeExtent(Boolean())) -> TypeExtent(Boolean()) { Set(BasicType(Boolean())) }
 
 	infer-types:
-		TypeExtent(String()) -> TypeExtent(String()) { [Set(String())] }
+		(context, TypeExtent(String())) -> TypeExtent(String()) { Set(BasicType(String())) }
 
 	infer-types:
-		TypeExtent(Int()) -> TypeExtent(Int()) { [Set(Int())] }
+		(context, TypeExtent(Int())) -> TypeExtent(Int()) { Set(BasicType(Int())) }
 
 	infer-types:
-		TypeExtent(DateTime()) -> TypeExtent(DateTime()) { [Set(DateTime())] }
+		(context, TypeExtent(DateTime())) -> TypeExtent(DateTime()) { Set(BasicType(DateTime())) }
+
+	infer-types:
+		((cname, mname), Input(s) {})
+			-> Input(s) {type}
+		where
+			type := <getInputType>(cname, mname, s)
+
+	infer-types:
+		((cname, mname), Output(s) {})
+			-> Output(s) {type}
+		where
+		type := <getOutputType>(cname, mname, s)
+
+	infer-types:
+		((cname, mname), This())
+			-> This() {Reference(cname)}
+
+	infer-types:
+		((cname, mname), ThisPrimed())
+			-> ThisPrimed() {Reference(cname)}
+
+	infer-types:
+		((cname, mname), PathStart(att, maybePrimed))
+			-> PathStart(att, maybePrimed) {type}
+		where
+			type := <\ (ds,t,o,min,max) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
+
+	infer-types:
+		(context, Path(pathstart {Reference(c)}, PathComponent(attname, maybeprimed)) {})
+			-> Path(pathstart {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
+		where
+			type := <\ (ds,t,o,min,max) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
+
+
+
+
+	// Binary relations: pushing types left to right
+	induce-types:
+		(context, BinRel(lexpr {type}, op,  rexpr {}))
+			-> BinRel(lexpr {type}, op,  rexpr {type'})
+		where
+			type' := <binrel-ltor-type> (op, type)
 		
+	// Binary relations: pushing types right to left
+	induce-types:
+		(context, BinRel(lexpr {}, op,  rexpr {type}))
+			-> BinRel(lexpr {type'}, op,  rexpr {type})
+		where
+			type' := <binrel-rtol-type> (op, type)
+		
+
+
+	// Binary operations: pushing types left to right
+	induce-types:
+		(context, BinOp(lexpr {type}, op,  rexpr {}) {})
+			-> BinOp(lexpr {type}, op,  rexpr {type'}) {type''}
+		where
+			type' := <binop-ltor-type> (op, type);
+			type'' := <binop-btot-type> (op, type, type')
 			
+	// Binary operations: pushing types right to left
 	induce-types:
-		BinRel(expr1 {types}, op, expr2)
-			-> BinRel(expr1 {types}, op, expr2 {types'})
+		(context, BinOp(lexpr {}, op,  rexpr {type}) {})
+			-> BinOp(lexpr {type'}, op,  rexpr {type}) {type''}
 		where
-			types' := <binrel-ltor-type> (op, types)
+			type' := <binop-rtol-type> (op, type);
+			type'' := <binop-btot-type> (op, type, type')
 
+	// Binary operations: pushing types top to bottom
 	induce-types:
-		BinRel(expr1, op, expr2 {types})
-			-> BinRel(expr1 {types'}, op, expr2 {types})
+		(context, BinOp(lexpr {}, op,  rexpr {}) {type})
+			-> BinOp(lexpr {type'}, op,  rexpr {type''}) {type}
 		where
-			types' := <binrel-rtol-type> (op, types)
+			(type', type'') := <binop-ttob-type> (op, type)
 
+	// Unary operations: pushing types bottom to top
 	induce-types:
-		BinRel(expr1 {types1}, op, expr2 {types2})
-			-> BinRel(expr1 {types3}, op, expr2 {types4})
-		where
-			types3 := <isect>(types1, <binrel-ltor-type> (op, types2));
-			types4 := <isect>(types2, <binrel-ltor-type> (op, types1))
+		(context, UnOp(op, expr {type}) {})
+			-> UnOp(op, expr {type}) {type}
 
-
-			
+	// Unary operations: pushing types top to bottom
 	induce-types:
-		BinOp(expr { types }, op, expr2)
-			-> BinOp(expr { types }, op, expr2 { types })
+		(context, UnOp(op, expr {}) {type})
+			-> UnOp(op, expr {type}) {type}
+		
+	
 
-	induce-types:
-		BinOp(expr { types1 }, op, expr2 {types2})
-			-> BinOp(expr { types }, op, expr2 { types })
-		where
-			types := <isect>(types1, types2)
-
-
-	infer-types:
-		((cname, mname), Input(s))
-			-> Input(s) {types}
-		where
-			types := <getInputType>(cname, mname, s);
-			<not(equal)>(types, [])
-
-	infer-types:
-		((cname, mname), Output(s))
-			-> Output(s) {types}
-		where
-		types := <getOutputType>(cname, mname, s);
-		<not(equal)>(types, [])
 
 			
 	record-parameter:
-		((cname, mname), Input(s) {types})
-			-> Input(s) {types}
+		((cname, mname), Input(s) {type})
+			-> Input(s) {type}
 		where
-			<not(equal)> (types, <getInputType>(cname, mname, s));
-			<addInput> (cname, mname, s, types)
-
+			<is-more-general-than> (type, <getInputType>(cname, mname, s));
+			<addInput> (cname, mname, s, type)
 
 	record-parameter:
-		((cname, mname), Output(s) {types})
-			-> Output(s) {types}
+		((cname, mname), Input(s) {type})
+			-> Input(s) {type}
 		where
-			<not(equal)> (types, <getOutputType>(cname, mname, s));
-			<addOutput> (cname, mname, s, types)
+			<not(getInputType)>(cname, mname, s);
+			<addInput> (cname, mname, s, type)
+
+	record-parameter:
+		((cname, mname), Output(s) {type})
+			-> Input(s) {type}
+		where
+			<is-more-general-than> (type, <getOutputType>(cname, mname, s));
+			<addOutput> (cname, mname, s, type)
+
+	record-parameter:
+		((cname, mname), Output(s) {type})
+			-> Output(s) {type}
+		where
+			<not(getOutputType)>(cname, mname, s);
+			<addOutput> (cname, mname, s, type)
 			
 		
 			
-/*			
-	expandInheritance:
-		system 
-			-> system
-		where
-			attributes := <LookupTable> "Attribute";
-			attributes' := <filter(canBeExpanded)> attributes;
-			<not(equal)> (attributes', [])
-			
-	canBeExpanded:
-		((cname, aname), (d,t,o,min, max))
-			-> ((cname, aname), (d,t,o,min, max))
-		where
-			
-			
-			
-			
-			<elem>((superclassname, aname), <LookupTable> "Attribute") 
-			<lookup>(subclassname, <LookupTable> "Class")
-*/
-
-/*
-	elaborate:
-		system -> system
-	where */
-				/*<combine-invariants> 
-   				<calculate-class-invariants> 
-   				<create-constraint-for-each-attribute> 
-   				*/
-   				/*< generate-inputs-and-outputs > 
-   				<insert-this-main>
-  				system ;
-  				invariants := <LookupTable> "Invariants";
-  				qualified-invariants := <map(qualify-invariant)> invariants;
-  				rules(			
-					LookupTable :+ "QualifiedInvariants" -> qualified-invariants
-				);
- 				invs-atts := <map(get-mentioned-attributes-in-invariant)> qualified-invariants;
- 				att-invs := <currymap(getattributes)> (invs-atts, <LookupTable> "Type");
-  				rules(			
-					LookupTable :+ "ClassBasedInvariants" -> att-invs
-				) ;
-				
-				seqwfs' := <map(expandSeqWorkflows)>(<LookupTable> "SeqWorkflows");
-  				rules(			
-					LookupTable :+ "ExpandedSeqWorkflows" -> seqwfs'
-				);
-				parwfs' := <map(expandParWorkflows)>(<LookupTable> "ParWorkflows");
-  				rules(			
-					LookupTable :+ "ExpandedParWorkflows" -> parwfs'
-				)
- */ 		
-  
   
   // Workflow Begin
  

@@ -2,7 +2,8 @@ module library/basicTypes
 
 imports
   include/Booster2
-    
+ 
+  library/lookupTable   
  
  rules
 
@@ -72,3 +73,61 @@ imports
 	get-type-name-for-metadata:
 		Boolean() -> "Boolean"
 		
+		
+/****
+At some point, we're going to need a type hierarchy.
+The full lattice would be difficult to encode, so we'll use a simple 
+function to calculate whether two types satisfy a hierarchical
+relationship.
+****/
+
+is-more-general-than:
+	(Optional(type), type)
+		-> True()
+
+is-more-general-than:
+	(Optional(BasicType(String())), Optional(BasicType(Int())))
+		-> True()
+
+is-more-general-than:
+	(BasicType(String()), BasicType(Int()))
+		-> True()
+
+is-more-general-than:
+	(Optional(BasicType(String())), BasicType(Int()))
+		-> True()
+
+is-more-general-than:
+	(Set(BasicType(String())), Set(BasicType(Int())))
+		-> True()
+
+
+is-more-general-than:
+	(Reference(a), Reference(b))
+		-> True()
+	where
+		<lookup> (b ,<\ (n, ds,as, a,m,c,w) -> as \> <lookup>(a, <LookupTable> "Class"))
+
+is-more-general-than:
+	(Optional(Reference(a)), Optional(Reference(b)))
+		-> True()
+	where
+		<lookup> (b ,<\ (n, ds,as, a,m,c,w) -> as \> <lookup>(a, <LookupTable> "Class"))
+
+is-more-general-than:
+	(Optional(Reference(a)), Reference(b))
+		-> True()
+	where
+		<lookup> (b ,<\ (n, ds,as, a,m,c,w) -> as \> <lookup>(a, <LookupTable> "Class"))
+
+is-more-general-than:
+	(Set(Reference(a)), Set(Reference(b)))
+		-> True()
+	where
+		<lookup> (b ,<\ (n, ds,as, a,m,c,w) -> as \> <lookup>(a, <LookupTable> "Class"))
+
+// Any other pairs of types are incomparable.
+
+// then there's the less-than or equal function, which we might find useful.
+is-eq-more-general-than = (\ (t1,t2) -> True() where <equal>(t1,t2) <+ <is-more-general-than>(t1,t2) \) 
+

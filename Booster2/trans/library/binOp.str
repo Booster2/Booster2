@@ -2,68 +2,76 @@ module library/binOp
 
 imports
   include/Booster2
-    
+  library/basicTypes  
  
  rules
 
-	get-binop-booster-notation:
-		Plus() -> "+"
 
-	get-binop-booster-notation:
-		Minus() -> "-"
+/**** 
+The default is, of course, that for any binary expression operator, the types are the same
+and that the relationship is symmetrical 
+****/	
 
-	get-binop-booster-notation:
-		Times() -> "*"
+binop-rtol-type:
+	(op, type) -> type	
 
-	get-binop-booster-notation:
-		Divide() -> "/"
+binop-ltor-type:
+	(op, type) -> type	
 
-	get-binop-booster-notation:
-		Maximum() -> "max"
+/****
+If we have both types of the expressions in an operator, what is the type of the overall expression?
+(bottom-to-top)
+And if we have the type of the overall expression, what are the types of the component expressions?
+(top-to-bottom)
+****/
 
-	get-binop-booster-notation:
-		Minimum() -> "min"
+binop-btot-type:
+	(op, type1, type2) -> 
+		type1	
+	where
+		<is-eq-more-general-than>(type1, type2)
 
-	get-binop-booster-notation:
-		Union() -> "\\/"
+binop-btot-type:
+	(op, type1, type2) -> 
+		type2
+	where
+		<is-eq-more-general-than>(type2, type1)
 
-	get-binop-booster-notation:
-		Intersection() -> "/\\"
+binop-ttob-type:
+	(op, type) -> (type, type)	
 
-	get-binop-booster-notation:
-		Concat() -> "++"
-		
+	
+	
+/****
+Given a binary expression operator, how do we display it in the Booster notation.
+This functionality has been separated to make some other transformations easier 
+to define 
+****/	
 
+get-binop-booster-notation:
+	Plus() -> "+"
 
-	binop-type-matching:
-		BinOp(BasicValue(Int()), Plus(), BasicValue(Int())) -> BasicValue(Int())
+get-binop-booster-notation:
+	Minus() -> "-"
 
-	binop-type-matching:
-		BinOp(BasicValue(Int()), Minus(), BasicValue(Int())) -> BasicValue(Int())
+get-binop-booster-notation:
+	Times() -> "*"
 
-	binop-type-matching:
-		BinOp(BasicValue(Int()), Times(), BasicValue(Int())) -> BasicValue(Int())
+get-binop-booster-notation:
+	Divide() -> "/"
 
-	binop-type-matching:
-		BinOp(BasicValue(Int()), Divide(), BasicValue(Int())) -> BasicValue(Int())
+get-binop-booster-notation:
+	Maximum() -> "max"
 
-	binop-type-matching:
-		BinOp(BasicValue(Int()), Maximum(), BasicValue(Int())) -> BasicValue(Int())
+get-binop-booster-notation:
+	Minimum() -> "min"
 
-	binop-type-matching:
-		BinOp(BasicValue(Int()), Minimum(), BasicValue(Int())) -> BasicValue(Int())
+get-binop-booster-notation:
+	Union() -> "\\/"
 
-	binop-type-matching:
-		BinOp(BasicValue(String()), Maximum(), BasicValue(String())) -> BasicValue(String())
+get-binop-booster-notation:
+	Intersection() -> "/\\"
 
-	binop-type-matching:
-		BinOp(BasicValue(String()), Minimum(), BasicValue(String())) -> BasicValue(String())
-
-	binop-type-matching:
-		BinOp(Set(t), Union(), Set(t)) -> Set(t)
-
-	binop-type-matching:
-		BinOp(Set(t), Intersection(), Set(t)) -> Set(t)
-
-	binop-type-matching:
-		BinOp(BasicValue(String()), Concat(), BasicValue(String())) -> BasicValue(String())
+get-binop-booster-notation:
+	Concat() -> "++"
+	

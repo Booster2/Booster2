@@ -14,16 +14,16 @@ right-to-left version, and left-to-right version, because it's not always symmet
 *****/
 
 binrel-rtol-type:
-	(In(), types) -> <map(\ Set(t) -> t \)> types	
+	(In(), Set(type)) -> type	
 
 binrel-ltor-type:
-	(In(), types) -> <map(\ t -> Set(t) \)> types
+	(In(), type) -> Set(type)
 
 binrel-rtol-type:
-	(NotIn(), types) -> <map(\ Set(t) -> t \)> types	
+	(NotIn(), Set(type)) -> type	
 
 binrel-ltor-type:
-	(NotIn(), types) -> <map(\ t -> Set(t) \)> types
+	(NotIn(), type) -> Set(type)
 	
 
 /**** 
@@ -32,10 +32,10 @@ and that the relationship is symmetrical
 ****/	
 
 binrel-rtol-type:
-	(op, types) -> types	
+	(op, type) -> type	
 
 binrel-ltor-type:
-	(op, types) -> types	
+	(op, type) -> type	
 	
 	
 

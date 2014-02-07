@@ -99,13 +99,13 @@ rules
 		where
 			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
 
-	get-expression-type:
+/*	get-expression-type:
 		(BinOp(expr1, op, expr2), classname, methodname, env)
 			-> t3
 		where
 			t1 := <get-expression-type> (expr1, classname, methodname, env);
 			t2 := <get-expression-type> (expr1, classname, methodname, env);
-			t3 := <binop-type-matching> (t1, op, t2)
+			t3 := <binop-type-matching> (t1, op, t2) */
 
 	literal-substitute:
 		 (classname, methodname, UnOp(unop, expression1), paths, expression, env)
