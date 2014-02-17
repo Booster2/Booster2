@@ -2,14 +2,15 @@ system S
 
 class A {
 	attributes
-		a : INT
+		b : B
 	methods
-		m1 { 3 + in? = 5 }
+		m1 { b . updateA (in? = 5)}		
 	
 }
 
-class B extends A{
+class B {
+	attributes
+		a : INT
 	methods
-		m1 { a' = 3 & in? + in2? = 17}
-	
+		updateA { a' = a + in?}
 }

@@ -18,8 +18,9 @@ rules
 		where
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
-			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference <+ method-expansion))> system;
-			<expandSeqWfs> system
+			<insert-this> system;
+			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+  type-inference  <+  method-expansion ))> system /*;
+			<expandSeqWfs> system */
 			
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
@@ -160,22 +161,22 @@ rules
 										
 			
 	infer-types:
-		(context, BasicValue(Integer(i))) -> BasicValue(Integer(i)) { Optional(BasicType(Int())) }
+		(context, BasicValue(Integer(i)) {} ) -> BasicValue(Integer(i)) { Optional(BasicType(Int())) }
 
 	infer-types:
-		(context, BasicValue(String(s))) -> BasicValue(String(s)) { Optional(BasicType(String())) }
+		(context, BasicValue(String(s)) {} ) -> BasicValue(String(s)) { Optional(BasicType(String())) }
 
 	infer-types:
-		(context, TypeExtent(Boolean())) -> TypeExtent(Boolean()) { Set(BasicType(Boolean())) }
+		(context, TypeExtent(Boolean()) {} ) -> TypeExtent(Boolean()) { Set(BasicType(Boolean())) }
 
 	infer-types:
-		(context, TypeExtent(String())) -> TypeExtent(String()) { Set(BasicType(String())) }
+		(context, TypeExtent(String()) {} ) -> TypeExtent(String()) { Set(BasicType(String())) }
 
 	infer-types:
-		(context, TypeExtent(Int())) -> TypeExtent(Int()) { Set(BasicType(Int())) }
+		(context, TypeExtent(Int()) {} ) -> TypeExtent(Int()) { Set(BasicType(Int())) }
 
 	infer-types:
-		(context, TypeExtent(DateTime())) -> TypeExtent(DateTime()) { Set(BasicType(DateTime())) }
+		(context, TypeExtent(DateTime()) {} ) -> TypeExtent(DateTime()) { Set(BasicType(DateTime())) }
 
 	infer-types:
 		((cname, mname), Input(s) {})
@@ -190,23 +191,24 @@ rules
 		type := <getOutputType>(cname, mname, s)
 
 	infer-types:
-		((cname, mname), This())
+		((cname, mname), This() {} )
 			-> This() {Reference(cname)}
 
 	infer-types:
-		((cname, mname), ThisPrimed())
+		((cname, mname), ThisPrimed() {})
 			-> ThisPrimed() {Reference(cname)}
 
 	infer-types:
-		((cname, mname), PathStart(att, maybePrimed))
+		((cname, mname), PathStart(att, maybePrimed) {} )
 			-> PathStart(att, maybePrimed) {type}
 		where
 			type := <\ (ds,t,o,min,max) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
 
 	infer-types:
-		(context, Path(pathstart {Reference(c)}, PathComponent(attname, maybeprimed)) {})
-			-> Path(pathstart {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
+		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ) {})
+			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
+			log(|Error(), "Calling this method again...", Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ));
 			type := <\ (ds,t,o,min,max) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 
@@ -306,24 +308,16 @@ rules
 	do-method-expansion:
 		(cname, mname,c) -> (cname, mname, c')
 			where
-				c' := <topdown(try(
-								try(\ term -> <expand-method> (cname, term) \) ))> c  ;
+				c' := <topdown(try(\ trm -> <expand-method> (cname, trm) \) )> c  ;
 				(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c'))
-		
+
 
 	expand-method:
-		(thisclassname, MethodReference(PathStart(mname, None()), substs))
-			-> constraint'
-		where
-			(constraint,gc,e,f, is,os) := <lookup>((thisclassname, mname), <LookupTable> "Method");
-			constraint' := <literal-substitute> (constraint, substs)
-
-	expand-method:
-		(thisclassname, MethodReference(Path(path {Reference(cname)}, PathComponent(mname, None())), substs))
+		(thisclassname, MethodReference(Path(path {Reference(cname)}, PathComponent(mname, None())) {}, substs))
 			-> constraint'
 		where
 			(constraint,gc,e,f, is,os) := <lookup>((cname, mname), <LookupTable> "Method");
-			substs' := <union>(substs, [(This(), path)]);
+			substs' := <union>(substs, [(This(), path{Reference(cname)})]);
 			constraint' := <literal-substitute> (constraint, substs')
 		
 	literal-substitute:
@@ -332,6 +326,20 @@ rules
 		where 
 			substs' := <map(\ (t, e) -> (t {} , e)\)> substs;
 			constraint' := <topdown(try(\ trm -> <lookup>(trm {}, substs')\))> constraint
+
+	insert-this:
+		system -> system
+			where
+		oldMethods := <LookupTable> "Method";
+		methodConstraints := <map(\((cname, mname),(constraint,gc,e,True(), is,os)) -> (cname, mname, constraint) \)> oldMethods;
+		<map(do-insert-this)> methodConstraints
+
+	do-insert-this:
+		(cname, mname,c) -> (cname, mname, c')
+			where
+				c' := <topdown(try(\ PathStart(aname, maybePrimed) -> Path(This(), PathComponent(aname, maybePrimed)) \))> c ;
+				<updateMethodConstraint> (cname, mname, c')
+	
 			
   
   // Workflow Begin	

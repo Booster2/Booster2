@@ -19,6 +19,8 @@ foldout(s): ([x], sep) -> $[[<s> x]]
 foldout(s): ([x|xs*], sep) -> $[[<s> x][sep][<foldout(s)>([xs*], sep)]]
 //foldout(s): something -> $[] where log(|Error(), "foldoutError", something)
 
+substs: s -> <foldout(\ (inp, expr) -> $[[<expression> inp] = [<expression> expr]]\)> (s, ",")
+
 outputAttributes = (\ classname -> <foldout(attribute)>(<filter(\ ((cname, aname), adef) -> ((cname, aname), adef) where <eq>(cname, classname)\)><LookupTable>"Attribute", "\r") \)
 outputMethods = (\ classname -> <foldout(method)>(<filter(\ ((cname, mname), mdef) -> ((cname, mname), mdef) where <eq>(cname, classname)\)><LookupTable>"Method", "\r") \)
 
@@ -234,6 +236,9 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 										
 	constraint:
 		BinRel(expr1, rel, expr2) -> $[[ <expression> expr1] [<get-binrel-booster-notation> rel] [<expression> expr2]]
+
+	constraint:
+		MethodReference(path, substs) -> $[[<expression> path] ( [<substs> substs]) ]
 
 
 	expression:
