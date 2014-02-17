@@ -2,4 +2,4 @@ system University
  
 
 
-	class Person  { 		attributes			firstName  : STRING			lastName  : STRING		invariants 		methods 	}	class Staff extends Person { 		attributes			supervisees  : set ( Student. supervisor )  [0 .. *]		invariants 		methods 	}	class Student extends Person { 		attributes			supervisor  : Staff . supervisees		invariants 		methods 	}	class TA extends Student, Staff { 		attributes		invariants supervisor /= this		methods 	}
+	class Person  { 		attributes			firstName  : STRING			lastName  : STRING	}	class Staff extends Person { 		attributes			supervisees  : set ( Student. supervisor )  [0 .. *]	}	class Student extends Person { 		attributes			supervisor  : Staff . supervisees	}	class TA extends Student, Staff { 		invariants supervisor /= this	}

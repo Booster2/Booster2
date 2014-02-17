@@ -18,7 +18,7 @@ rules
 		where
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
-			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference))> system;
+			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ type-inference <+ method-expansion))> system;
 			<expandSeqWfs> system
 			
 			
@@ -293,7 +293,45 @@ rules
 			<not(getOutputType)>(cname, mname, s);
 			<addOutput> (cname, mname, s, type)
 			
+
+	method-expansion:
+		system -> system
+			where
+		oldMethods := <LookupTable> "Method";
+		methodConstraints := <map(\((cname, mname),(constraint,gc,e,True(), is,os)) -> (cname, mname, constraint) \)> oldMethods;
+		<map(do-method-expansion)> methodConstraints;
+		newMethods := <LookupTable> "Method";
+		<not(equal)> (oldMethods, newMethods)
+
+	do-method-expansion:
+		(cname, mname,c) -> (cname, mname, c')
+			where
+				c' := <topdown(try(
+								try(\ term -> <expand-method> (cname, term) \) ))> c  ;
+				(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c'))
 		
+
+	expand-method:
+		(thisclassname, MethodReference(PathStart(mname, None()), substs))
+			-> constraint'
+		where
+			(constraint,gc,e,f, is,os) := <lookup>((thisclassname, mname), <LookupTable> "Method");
+			constraint' := <literal-substitute> (constraint, substs)
+
+	expand-method:
+		(thisclassname, MethodReference(Path(path {Reference(cname)}, PathComponent(mname, None())), substs))
+			-> constraint'
+		where
+			(constraint,gc,e,f, is,os) := <lookup>((cname, mname), <LookupTable> "Method");
+			substs' := <union>(substs, [(This(), path)]);
+			constraint' := <literal-substitute> (constraint, substs')
+		
+	literal-substitute:
+		(constraint, substs) 
+			-> constraint'
+		where 
+			substs' := <map(\ (t, e) -> (t {} , e)\)> substs;
+			constraint' := <topdown(try(\ trm -> <lookup>(trm {}, substs')\))> constraint
 			
   
   // Workflow Begin	

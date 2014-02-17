@@ -2,4 +2,4 @@ system S
  
 
 
-	class a  { 		attributes			a  : INT		invariants 			a > 0		methods 	}	class b extends a { 		attributes		invariants 			a < 10		methods 	}
+	class a  { 		attributes			a  : INT		invariants 			a > 0	}	class b extends a { 		invariants 			a < 10	}

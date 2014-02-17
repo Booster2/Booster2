@@ -2,4 +2,4 @@ system methodTest
  
 
 
-	class class1  { 		attributes			att1  : INT		invariants 		methods 			m1 { att1' = att1 + 5 }	}
+	class class1  { 		attributes			att1  : INT		methods 			m1 { att1' = att1 + 5 }	}

@@ -2,4 +2,4 @@ system attributeInheritance
  
 
 
-	class a  { 		attributes			a  : INT		invariants 		methods 	}	class b extends a { 		attributes		invariants 		methods 	}
+	class a  { 		attributes			a  : INT	}	class b extends a { 	}

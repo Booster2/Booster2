@@ -188,7 +188,7 @@ Constraint ';' Constraint 	-> Constraint { cons("Then"), assoc}
 %% The final type of constraint is that of a method reference, which is
 %% defined later.
 
-MethodReference -> Constraint {cons("MethodRef")}
+MethodReference -> Constraint 
   	 
 Constraint -> BoosterTerm 
 
@@ -342,7 +342,7 @@ PathComponent -> BoosterTerm
 %% expression it is to be replaced with, separated by an equals
 %% (\verb|=|) sign.    
 
-Path '(' { ( ID '?' '=' Expression) "," }* ')' -> MethodReference {cons("MethodReference")}
+Path '(' { ( Input '=' Expression) "," }* ')' -> MethodReference {cons("MethodReference")}
 
 MethodReference -> BoosterTerm
   

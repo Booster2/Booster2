@@ -2,4 +2,4 @@ system methodTest
  
 
 
-	class Parent  { 		attributes			children  : set ( Child. parents )  [0 .. *]		invariants 		methods 			m1 { c? : children' }	}	class Child  { 		attributes			parents  : set ( Parent. children )  [0 .. *]		invariants 		methods 	}
+	class Parent  { 		attributes			children  : set ( Child. parents )  [0 .. *]		methods 			m1 { c? : children' }	}	class Child  { 		attributes			parents  : set ( Parent. children )  [0 .. *]	}

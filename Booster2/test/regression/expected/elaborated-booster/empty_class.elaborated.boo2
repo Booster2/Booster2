@@ -2,4 +2,4 @@ system EmptyClass
  
 
 
-	class EmptyClass  { 		attributes		invariants 		methods 	}
+	class EmptyClass  { 	}
