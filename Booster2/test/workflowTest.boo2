@@ -10,12 +10,13 @@ class C1 {
   	  invariants
   	    x >= 2 & x <= 4 
   	  workflows
-  	    seq a0: Normal true & add1() -> a1
-  	    seq a1:  Normal true & add2() -> a2
-  	  workflows
-  	    seq a2: Normal true & add3() -> Normal true & add4() -> SKIP
-  	    //par p: w2 
-  	    //par p: w0 ||| w1
+  	    seq a1: true & m1() -> true & m1() -> a2
+  	            []
+  	            true & m1() -> a2
+  	    seq a2: true & m2() -> a4
+  	    seq a3: true & m3() -> a2
+  	    seq a4: true & m4() -> SKIP
+  	    
   	  workflows
   	    par p1: a2 ||| a2
 }
@@ -31,8 +32,8 @@ class C2 {
   	  invariants
   	    x >= 2 & x <= 4 
   	  workflows
-  	    seq w0: Normal true & add1() -> Wait.0.1 ->                          Wait.1.0 -> Normal true & add1() -> SKIP
-  	    seq w1:                          Wait.0.1 -> Normal true & sub1() -> Wait.1.0 -> SKIP
+  	    seq w0: true & add1() -> Wait.0.1 ->                  Wait.1.0 -> true & add1() -> SKIP
+  	    seq w1:                  Wait.0.1 -> true & sub1() -> Wait.1.0 -> SKIP
   	  workflows
   	    par p: w0 ||| w1
 }

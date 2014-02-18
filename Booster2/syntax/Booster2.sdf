@@ -386,12 +386,15 @@ GuardedAction '->' SeqWfExpression 	-> SeqWfExpression {cons("Prefix")}
 %% reference:
 
 Guard '&' MethodReference					-> GuardedAction {cons("GA")}
+"(" GuardedAction ")"						-> GuardedAction {bracket}
 
   
-%% And a guard is a constraint preceded by the keyword \verb|Normal| or
-%% \verb|Delayed|.  A guard may also be bracketed to resolve ambiguities.  
+%% And a guard is just a constraint or may be tagged with the keyword
+%% \verb|Delayed|. This is only used in the precondition calculation - at least
+%% once we support prioritisable guarded actions. 
+%% A guard may also be bracketed to resolve ambiguities.  
 
-'Normal' Constraint 						-> Guard {cons("Normal")}
+Constraint			 						-> Guard {cons("Normal")}
 'Delayed' Constraint 						-> Guard {cons("Delayed")}
 "(" Guard ")"								-> Guard {bracket}
   
@@ -402,6 +405,12 @@ Guard '&' MethodReference					-> GuardedAction {cons("GA")}
 ID						 -> ParWfExpression {cons("Single")}
 ID '|||' ParWfExpression -> ParWfExpression {cons("Multiple")}
   
+
+context-free priorities
+	GuardedAction '->' SeqWfExpression 		-> SeqWfExpression
+	> GuardedAction '->' SeqWfExpression
+      '[]' 
+      GuardedAction '->' SeqWfExpression	-> SeqWfExpression
      
 context-free priorities
 	 'not' Constraint		-> Constraint 

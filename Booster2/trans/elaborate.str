@@ -19,8 +19,8 @@ rules
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
 			<insert-this> system;
-			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+  type-inference  <+  method-expansion ))> system /*;
-			<expandSeqWfs> system */
+			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+  type-inference  <+  method-expansion ))> system;
+			<expandSeqWfs> system
 			
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
@@ -325,7 +325,7 @@ rules
 			-> constraint'
 		where 
 			substs' := <map(\ (t, e) -> (t {} , e)\)> substs;
-			constraint' := <topdown(try(\ trm -> <lookup>(trm {}, substs')\))> constraint
+			constraint' := <bottomup(try(\ trm -> <lookup>(trm {}, substs')\))> constraint
 
 	insert-this:
 		system -> system
@@ -362,18 +362,19 @@ rules
 	organise-seqWf : (cname,(n,expr)) -> ((cname,n),expr)
 		
 		
-		
 	expandClassSeqWfs: (cname,prop) -> (cname,prop)
 	where
-		classWfs := <filter(\ ((name,wfname), expr) -> SeqWf(wfname,expr) where <eq>(name,cname) \)> (<LookupTable> "SeqWorkflows");
-		<expandSeqWfList> (cname,classWfs)
+		classSeqWfs := <filter(\ ((name,wfname), expr) -> SeqWf(wfname,expr) where <eq>(name,cname) \)> (<LookupTable> "SeqWorkflows");
+		<expandSeqWfList> (cname,classSeqWfs)
+	
+	outermost-many(s) = repeat(sometd(s))	
 		
     expandSeqWfList: (cname, seqwfs) -> (cname, seqwfs)
     where
     	rules(
     		ExpandedLookupTable :+ "tmp" -> []
-    	);
-    	<outermost(expandSeqWf)> (<innermost(expandSeqWf)> seqwfs);
+    	); 
+    	<outermost-many(expandSeqWf)> seqwfs;
     	blub := <ExpandedLookupTable> "tmp";
     	rules(
     		ExpandedLookupTable :+ cname -> blub		// if blub was exchanged with <ExpandedLookupTable> "tmp" then

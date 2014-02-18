@@ -98,8 +98,9 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	
 	seqWfNotation : Skip() -> "SKIP"
 	seqWfNotation : Prefix(ga,wf) -> $[[<guardedActionNotation> ga] -> [<seqWfNotation> wf]]
-	seqWfNotation : Choice(ga1,wf1,ga2,wf2) -> $[[<guardedActionNotation> ga1] [<seqWfNotation> wf1] ["[]"] [<guardedActionNotation> ga2] [<seqWfNotation> wf2]]
+	seqWfNotation : Choice(ga1,wf1,ga2,wf2) -> $[([<guardedActionNotation> ga1] -> ([<seqWfNotation> wf1]) ["[]"] [<guardedActionNotation> ga2] -> ([<seqWfNotation> wf2]))]
 	seqWfNotation : Wait(from,to,wf) -> $[WAIT.[from].[to] -> [<seqWfNotation> wf]]
+	seqWfNotation : WorkflowReference(n) -> n
 	
 	seqWfNotation : t -> "???"
 	where log(|Error(),"notation not known: ",t)
@@ -120,7 +121,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	guardedActionNotation: t -> "???"
 	where log(|Error(),"notation not known: ",t)
 	
-	guardNotation: Normal(constr) -> $[Normal([<constraint> constr])]
+	guardNotation: Normal(constr) -> <constraint> constr
 	guardNotation: Delayed(constr) -> $[Delayed([<constraint> constr])]
 	
 	guardNotation: t -> "???"

@@ -92,8 +92,9 @@ rules
 			attributes := <map(\ Attribute(name, _,_) -> name \)><getAttributes> classComponents;			
 			methods := <map(\ Method(name, _ ) -> name \)><getMethods> classComponents;	
 			constraints := <getInvariants> classComponents;
-			workflows := []/*;
-		log(|Error(), (name, (extends, attributes, methods, constraints, workflows))) */
+			  seqWfNames := <map(\ SeqWf(name, _ ) -> name \)> <getSeqWfs> classComponents;
+			  parWfNames := <map(\ ParWf(name, _ ) -> name \)> <getParWfs> classComponents;
+			  workflows := (seqWfNames,parWfNames) // one list for sequential and one for concurrent workflows 
 	
 	
  	organise-attribute:
@@ -134,15 +135,9 @@ rules
 	
     getWfs = <concat> <filter(\ Workflows(wfs) -> wfs \)>
 
-    getSeqWfs = <filter(isSeqWf)> <getWfs>
-    getParWfs = <filter(isParWf)> <getWfs>
+    getSeqWfs = <filter(\ SeqWf(n,expr) -> SeqWf(n,expr) \)> <getWfs>
+    getParWfs = <filter(\ ParWf(n,expr) -> ParWf(n,expr) \)> <getWfs>
 		 
-    isSeqWf:
-		SeqWf(n,expr) -> SeqWf(n,expr)  
-		
-	isParWf:
-		ParWf(n,expr) -> ParWf(n,expr)
-		
 // workflow end
 
 		

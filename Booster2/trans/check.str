@@ -194,9 +194,21 @@ rules
   	    (cname,SeqWf(name,definition)) -> (name, $[Duplicate (sequential) workflow: [name]])
   	where
   		not(<bagof-SeqWfs> (cname,name) => [_])
-
+  	
   constraint-error-workflow:
-		(cname, ParWf(name, definition)) -> (name, $[Duplicate (parallel) workflow name: [name]])
+  		(cname,SeqWf(name,definition)) -> (name,error)
+  where error := <collect-all(check(!cname,!name))> definition;
+         not(<equal>([],error))
+
+  check(cname,name): WorkflowReference(ref) -> $[Sequential workflow name [ref] not defined.]
+  where not(<SeqWfs> (<cname>,ref))
+
+  //check(cname,name): MethodReference(path,args) -> $[Method name not defined]
+  //where
+  //	<equal>(<name>,"hallo")
+  
+  constraint-error-workflow:
+		(cname, ParWf(name, definition)) -> (name, $[Duplicate (parallel) workflow: [name]])
 	where
 		not(<bagof-ParWfs>(cname,name) => [_])
 	
