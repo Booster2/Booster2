@@ -18,8 +18,7 @@ rules
 		where
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
-			<insert-this> system;
-			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+  type-inference  <+  method-expansion ))> system;
+			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ insert-this <+ type-inference  <+  method-expansion ))> system;
 			<expandSeqWfs> system
 			
 			
@@ -208,7 +207,6 @@ rules
 		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ) {})
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
-			log(|Error(), "Calling this method again...", Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ));
 			type := <\ (ds,t,o,min,max) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 
@@ -332,7 +330,10 @@ rules
 			where
 		oldMethods := <LookupTable> "Method";
 		methodConstraints := <map(\((cname, mname),(constraint,gc,e,True(), is,os)) -> (cname, mname, constraint) \)> oldMethods;
-		<map(do-insert-this)> methodConstraints
+		newMethodConstraints := <map(do-insert-this)> methodConstraints;
+		<not(equal)>(methodConstraints, newMethodConstraints)
+
+
 
 	do-insert-this:
 		(cname, mname,c) -> (cname, mname, c')

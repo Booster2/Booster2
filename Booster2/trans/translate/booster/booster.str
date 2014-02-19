@@ -72,10 +72,11 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		(classname, meths) -> $[["\r\t\t"]methods["\r"] [<outputMethods> classname]]	
 
 	workflows-section:
-		(classname, []) -> $[]
+		(classname, ([],[])) -> $[]
 		
 	workflows-section:
-		(classname, wfs) -> $[["\r\t\t"]workflows["\r"] [<outputSeqWorkflows> classname] ["\r"] [<outputParWorkflows> classname]]	
+		
+		(classname, wfs) -> $[["\r\t\t"]workflows["\r"] [<outputSeqWorkflows> classname] ["\r"] [<outputParWorkflows> classname]] where log(|Error(), "Workflows", wfs)	
 	
 
 				
@@ -289,12 +290,13 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	expression:
 		PathStart(st, Some(Primed())) -> $[[st]']
 
-	expression:
+// I'm not sure these rules are necessary any more! 
+/*	expression:
 		PathStart(st, None()) -> $[[<expression> st]]
 			
 	expression:
 		PathStart(st, Some(Primed())) -> $[[<expression> st]']
-
+*/
 	expression:
 		SetExtent(exprs) -> $[{[<foldout(expression)>(exprs, ", ")]}]
 		
