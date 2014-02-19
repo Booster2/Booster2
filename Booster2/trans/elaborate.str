@@ -354,12 +354,12 @@ rules
 		);
 		
 		expWf := <map(\(cname,prop) -> <cart(id)>([cname], <ExpandedLookupTable> cname) \)> classes;
-		expWf':= <map(organise-seqWf)><concat>expWf;
+		expWf':= <map(organise-seqWf_elab)><concat>expWf;
 		rules(
 			LookupTable :+ "SeqWorkflows" -> expWf'
 		)
 		
-	organise-seqWf : (cname,(n,expr)) -> ((cname,n),expr)
+	organise-seqWf_elab : (cname,(n,expr)) -> ((cname,n),expr)
 		
 		
 	expandClassSeqWfs: (cname,prop) -> (cname,prop)
@@ -402,7 +402,7 @@ rules
 	fullyExpanded: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
 	where <fullyExpanded> wf1;
 	      <fullyExpanded> wf2
-	fullyExpanded: Wait(i,j,wf) -> Wait(i,j,wf)
+	fullyExpanded: Wait(xs,wf) -> Wait(xs,wf)
 	where <fullyExpanded> wf
 	fullyExpanded: Prefix(ga,wf) -> Prefix(ga,wf)
 	where <fullyExpanded> wf

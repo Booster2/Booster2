@@ -99,7 +99,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	seqWfNotation : Skip() -> "SKIP"
 	seqWfNotation : Prefix(ga,wf) -> $[[<guardedActionNotation> ga] -> [<seqWfNotation> wf]]
 	seqWfNotation : Choice(ga1,wf1,ga2,wf2) -> $[([<guardedActionNotation> ga1] -> ([<seqWfNotation> wf1]) ["[]"] [<guardedActionNotation> ga2] -> ([<seqWfNotation> wf2]))]
-	seqWfNotation : Wait(from,to,wf) -> $[WAIT.[from].[to] -> [<seqWfNotation> wf]]
+	seqWfNotation : Wait(list,wf) -> $[WAIT{[<foldout(id)> (list, ",") ]} -> [<seqWfNotation> wf]]
 	seqWfNotation : WorkflowReference(n) -> n
 	
 	seqWfNotation : t -> "???"

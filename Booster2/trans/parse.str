@@ -37,7 +37,7 @@ rules
 
 		// workflow begin
 		//wfs := <map(getClassWfs)> classes;
-		seqWorkflows := <map(organise-seqWf)><concat><map(arrangeClassSeqWorkflows)> classes; 
+		seqWorkflows := <map(organise-seqWf)><concat><map(arrangeClassSeqWorkflows)> classes;
 		parWorkflows := <map(organise-parWf)><concat><map(arrangeClassParWorkflows)> classes; 
 		// workflow end
 
@@ -127,10 +127,13 @@ rules
 
 */
     // make a usual list from a concurrent workflow 
+    makeIntList: Wait([xs*],wf) -> Wait(xs',wf) 
+    where xs' := <map(string-to-int)> xs*
+    
 	makeParList: Single(name) -> [name]
 	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)
 
-	organise-seqWf : (cname, SeqWf(n,expr)) -> ((cname,n),expr)
+	organise-seqWf : (cname, SeqWf(n,expr)) -> ((cname,n),<bottomup(try(makeIntList))>expr)
 	organise-parWf : (cname, ParWf(n,expr)) -> ((cname,n),<makeParList> expr)
 	
     getWfs = <concat> <filter(\ Workflows(wfs) -> wfs \)>
@@ -252,7 +255,6 @@ rules
  
  */
  
-
 	get-minimal-type:
 		BasicType(t) -> BasicType(t)
 

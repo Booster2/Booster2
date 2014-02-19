@@ -35,12 +35,17 @@ rules
 	where
 		<resetMap> ();
 		if not(<equal>(<wf_lut> "map",[])) then log(|Error(),"wf_lut is not empty") end;
-		<pre> (cname,pname,pdef);
-		form := <innermost(simplify)> (<lookupMap> pdef)
+		pdef' := <reduceWaits> pdef;
+		<pre> (cname,pname,pdef');
+		form := <innermost(simplify)> (<lookupMap> pdef')
+		
 	
 	/* **************************************
 	   main precondition function
 	   ************************************** */
+	
+	// it is assumed that calls of <pre> only occur
+	// with "waitReduced" workflows 
 	
 	// if the concurrent workflow "[wfs*]" is already defined in 
 	// the lookup-table we finish
@@ -79,41 +84,13 @@ rules
 	where wi := <getPos> ([wfs*],i) ;
 	       <skip_d> wi;
 	       formset := <preIter>((cname,pname,[wfs*],changed),<addi>(i,1),t)
-	
-	// Wait at position i
+	       
+	// wait at position i can be ignored, because it cannot be further reduced
+	// as ensured by the previous calls to "reduceWaits"
 	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
-	where
-		wi := <getPos> ([wfs*],i);
-		<wait_d> wi;
-		wi_from := <string-to-int>(<sel_from> wi);
-		wi_to := <string-to-int>(<sel_to> wi);
-		wi_sub := <sel_w1> wi;
-		
-		// from and to id have to be different and in the range
-		not(<equal>(wi_from,wi_to));
-		<leq>(wi_from,t);
-		<leq>(wi_to,t);
-		
-		//log(|Error(),"check2" ,([wfs*],wi_to,i,t));
-		wj := <getPos> ([wfs*],wi_to) ;
-		
-		//log(|Error(),"before if" ,wj);
-		
-		if <wait_d> wj;
-		   //log(|Error(),"after wait_d check1" ,[wfs*]);
-		   wj_from := <string-to-int>(<sel_from> wj);
-		   wj_to := <string-to-int>(<sel_to> wj);
-		   wj_sub := <sel_w1> wj;
-		   <equal>(i,wi_from); 
-		   <equal>(wi_from,wj_from);
-		   <equal>(wi_to,wj_to)
-		then par1 := <listUpdate>((<listUpdate>([wfs*],i,wi_sub)),wi_to,wj_sub);
-			 //log(|Error(),"par1" ,par1); 
-		     <pre> (cname,pname,par1);
-		     p := <lookupMap> par1;
-		     formset := [p] 
-		else formset := <preIter> ((cname,pname,[wfs*],changed),<addi>(i,1),t) 
-		end
+	where wi := <getPos> ([wfs*],i);
+		  <wait_d> wi;
+		  formset := <preIter>((cname,pname,[wfs*],changed),<addi>(i,1),t)
 	       
 	// prefix at position i
 	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
@@ -123,7 +100,7 @@ rules
 		   ai1 := <sel_a1>(wi);
 		   wi1 := <sel_w1>(wi);
 		   
-		   par1 := <listUpdate> ([wfs*], i, wi1);
+		   par1 := <reduceWaits> (<listUpdate> ([wfs*], i, wi1));
 		   <pre> (cname,pname,par1);
 		   
 		   loc_cond := And(<get> gi1,<wp> ((cname,ai1) , <lookupMap> par1));
@@ -141,8 +118,8 @@ rules
 		   ai2 := <sel_a2>(wi);
 		   wi2 := <sel_w2>(wi);
 		
-		   par1 := <listUpdate> ([wfs*], i, wi1); 
-		   par2 := <listUpdate> ([wfs*], i, wi2); 
+		   par1 := <reduceWaits> (<listUpdate> ([wfs*], i, wi1)); 
+		   par2 := <reduceWaits> (<listUpdate> ([wfs*], i, wi2)); 
 
            if not(<guard_false> gi1) then <pre> (cname,pname,par1) end;
            if not(<guard_false> gi2) then <pre> (cname,pname,par2) end;
@@ -162,21 +139,6 @@ rules
           
            formset_rest := <preIter> ((cname,pname,[wfs*],True()),<addi>(i,1),t);
            formset := <conc> ([loc_cond], formset_rest)
-    
-    // no matching case   
-    preIter: ((cname,pname,[wfs*],changed),i,t) -> [False()]
-	where
-		wi := <getPos> ([wfs*],i);
-		
-		if <wait_d> wi then wi_from := <string-to-int>(<sel_from> wi);
-							 wi_to := <string-to-int>(<sel_to> wi);
-							 wi_sub := <sel_w1> wi;
-							 if <equal>(wi_from,wi_to) then log(|Error(), (cname,pname),"self references in wait constructs not allowed") end;
-							 if <gt>(wi_from,t) then log(|Error(), (cname,pname),"source of wait not in range") end;
-							 if <gt>(wi_to,t) then log(|Error(), (cname,pname),"target of wait not in range") end
-	    else log(|Error(), (cname,pname),"For some unknown reason, the precondition could not be calculated")
-		end
-           
            
         
     // currently it's only fake   

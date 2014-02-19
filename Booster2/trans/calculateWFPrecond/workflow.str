@@ -2,6 +2,8 @@ module workflow
 
 imports
   include/Booster2
+  trans/calculateWFPrecond/misc
+  library/strategy
   
 rules
 	// check whether a guard is a normal one and equal false
@@ -17,7 +19,7 @@ rules
 	prefix_d: Prefix(ga,p) -> Prefix(ga,p) 
 	
 	// check whether a sequential workflow is a wait node
-	wait_d: Wait(i,j,w) -> Wait(i,j,w)
+	wait_d: Wait(xs,w) -> Wait(xs,w)
 	
 	// check whether a sequential workflow is a choice node
 	choice_d: Choice(ga1,wf1,ga2,wf2) -> Choice(ga1,wf1,ga2,wf2)
@@ -30,9 +32,14 @@ rules
 	sel_w1:  Prefix( GA(wg1,wa1) , wf1) -> wf1
 	
 	// selectors for a wait node
-	sel_from: Wait(i,j,w) -> i
-	sel_to: Wait(i,j,w) -> j
-	sel_w1: Wait(i,j,w) -> w
+	sel_waits: Wait(xs,w) -> xs
+	sel_w1: Wait(_,w) -> w
+	
+	rem_wait: (Wait(xs,w),i) -> w
+	where <equal>(xs,[i])
+	
+	rem_wait: (Wait(xs,w),i) -> Wait(xs',w)
+	where xs' := <remove>(xs,i)	
 	
 	// selectors for choice node
 	sel_ga1: Choice( GA(wg1,wa1) , wf1 , 
@@ -51,3 +58,58 @@ rules
 	                 GA(wg2,wa2) , wf2) -> wa2
 	sel_w2: Choice( GA(wg1,wa1) , wf1 , 
 	                 GA(wg2,wa2) , wf2) -> wf2
+	                 
+	                 
+	
+	// reduce all top-level waits as much as possible                 
+	reduceWaits: [wfs*] -> wfs'
+	where wfs' := <reduceIter> (wfs*,0,<subti>(<length> wfs* , 1))
+	
+	
+	// we have reached the end of the list
+	reduceIter : ([wfs*],i,t) -> wfs*
+	where <gt>(i,t)
+	
+	// no wait at position i
+	reduceIter: (wfs*,i,t) -> <reduceIter>([wfs*],<addi>(i,1),t)
+	where
+		wi := <getPos> ([wfs*],i);
+		not(<wait_d> wi)
+		
+	// wait at pos i
+	reduceIter: (wfs*,i,t) -> <reduceIter>(wfs',<addi>(i,1),t)
+	where
+		wi := <getPos> ([wfs*],i);
+		waits := <sel_waits> wi;
+		wfs' := <waitListIter> (wfs*,(wi,i),waits)
+	
+	// consider all referenced processes in the wait-list of process i
+	//	all references have been considered
+	waitListIter: (wfs*,(wi,i),[]) -> wfs*
+	
+	// the referenced process is itself not waiting
+	waitListIter: (wfs*,(wi,i),[j,xs*]) -> <waitListIter>(wfs*,(wi,i),xs*)
+	where
+		wj := <getPos> (wfs*,<string-to-int>j);
+		not(<wait_d> wj)
+	
+	// the referenced process wj is itself waiting for (among others) i
+	// so we can eliminate j from i and vice versa
+	waitListIter: (wfs*,(wi,i),[j,xs*]) -> wfs''
+	where
+		wj := <getPos> (wfs*,j);
+		waits_j := <sel_waits> wj;
+		<elem>(i,waits_j);
+		wi' := <rem_wait> (wi,j);
+		wj' := <rem_wait> (wj,i);
+		wfs' := <listUpdate> (<listUpdate> (wfs*,i,wi'), j , wj');
+		wfs'' := <waitListIter> (wfs',(wi',i),xs*)
+	
+	// the referenced process is itself waiting, but not for i	
+	waitListIter: (wfs*,(wi,i),[j,xs*]) -> <waitListIter> (wfs*,(wi,i),xs*)
+		
+		
+	
+	
+	
+	        

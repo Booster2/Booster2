@@ -369,7 +369,7 @@ GuardedAction '->' SeqWfExpression
 '[]' 
 GuardedAction '->' SeqWfExpression 			-> SeqWfExpression{cons("Choice")}
   
-'WAIT.' INT '.' INT '->' SeqWfExpression	-> SeqWfExpression {cons("Wait")}
+'WAIT{' { INT "," }+ '}' '->' SeqWfExpression	-> SeqWfExpression {cons("Wait")}
 
 
 %% A sequential workflow may also be defined as a reference to another

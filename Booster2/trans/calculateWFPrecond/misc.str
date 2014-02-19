@@ -4,6 +4,10 @@ imports
 	include/Booster2
 	
 rules
+	// remove an element from a list
+	remove: (xs,i) -> xs'
+	where xs' := <filter(\j -> <not(<equal>(i,j))> \)> xs
+	
 	// checks whether a list is an empty list
 	listEmpty : [] -> []
 	
