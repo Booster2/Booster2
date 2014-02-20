@@ -128,7 +128,7 @@ rules
 */
     // make a usual list from a concurrent workflow 
     makeIntList: Wait([xs*],wf) -> Wait(xs',wf) 
-    where xs' := <map(string-to-int)> xs*
+    where xs' := <nub>(<map(string-to-int)> xs*)
     
 	makeParList: Single(name) -> [name]
 	makeParList: Multiple(name,rest) -> <conc>([name],<makeParList> rest)

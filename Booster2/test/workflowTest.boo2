@@ -32,8 +32,8 @@ class C2 {
   	  invariants
   	    x >= 2 & x <= 4 
   	  workflows
-  	    seq w0: true & add1() -> Wait.0.1 ->                  Wait.1.0 -> true & add1() -> SKIP
-  	    seq w1:                  Wait.0.1 -> true & sub1() -> Wait.1.0 -> SKIP
+  	    seq w0: true & add1() -> Wait{1} ->                   Wait{1} -> true & add1() -> SKIP
+  	    seq w1:                   Wait{0} -> true & sub1() -> Wait{0} -> SKIP
   	  workflows
   	    par p: w0 ||| w1
 }
