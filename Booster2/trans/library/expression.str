@@ -13,46 +13,6 @@ rules
 	
 	
 
-/* 	get-mentioned-attributes:
-		takes an expression, in the context of a class, maybe a method name,
-		and a model, and returns the list of attributes that it
-		constrains.			
-*/
-
- 	get-mentioned-attributes:
-		(name, maybename, UnOp(unop, expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-attributes> (name, maybename, expr, env)
- 
- 
- 	get-mentioned-attributes:
-		(name, maybename, BinOp(expr1, op, expr2), env)
-			-> <union> (atts1, atts2)
-		with
-			atts1 := <get-mentioned-attributes> (name, maybename, expr1, env);
-			atts2 := <get-mentioned-attributes> (name, maybename, expr2, env)
-
-
-/* 	is-old:
-		takes an expression, and returns True() or False()
-		depending on whether the expression can be evaluated in the pre-state
-		or not. 			
-*/
-
-	is-old:
-		UnOp(unop, expr1)
-			-> True()
-		where
-			True() := <is-old> (expr1)
-
-	is-old:
-		BinOp(expr1, op, expr2)
-			-> True()
-		where
-			True() := <is-old> expr1;
-			True() := <is-old> expr2
-			
 			
 /* get-expression-type
 */

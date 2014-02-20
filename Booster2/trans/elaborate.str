@@ -198,13 +198,13 @@ rules
 			-> ThisPrimed() {Reference(cname)}
 
 	infer-types:
-		((cname, mname), PathStart(att, maybePrimed) {} )
+		((cname, mname), PathStart(att, maybePrimed) )
 			-> PathStart(att, maybePrimed) {type}
 		where
 			type := <\ (ds,t,o,min,max) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
 
 	infer-types:
-		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ) {})
+		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
 			type := <\ (ds,t,o,min,max) -> t\><lookup>((c, attname), <LookupTable>"Attribute")

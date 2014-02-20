@@ -2,11 +2,8 @@ system S
 
 class A {
 	attributes
-		b : B
+		a : INT
 	methods
-		m1 { false }		
-		m2 { true }		
-		m3 { not(1 = 2) }		
-		m4 { 1 = 2 & 2 = 1 }		
-		m5 { 1 = 2 or 2 = 1 }		
+		m1 { a' = 3 }		
+	
 }

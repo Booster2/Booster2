@@ -13,69 +13,6 @@ imports
  	
  	
 
-/* 	get-mentioned-attributes:
-		takes a constraint, in the context of a class, maybe a method name,
-		and a model, and returns the list of attributes that it
-		constrains.			
-*/
-
-	get-mentioned-attributes:
-		(name, maybename, True(), env)
-			-> []
-			
-	get-mentioned-attributes:
-		(name, maybename, False(), env)
-			-> []
-			
-	get-mentioned-attributes:
-		(name, maybename, Not(constraint), env)
-			-> atts
-		with
-			atts := <get-mentioned-attributes> (name, maybename, constraint, env)
-			
-	get-mentioned-attributes:
-		(name, maybename, And(constraint1, constraint2), env)
-			-> <union> (atts1, atts2)
-		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
-
-	get-mentioned-attributes:
-		(name, maybename, Or(constraint1, constraint2), env)
-			-> <union> (atts1, atts2)
-		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
-
-	get-mentioned-attributes:
-		(name, maybename, Implies(constraint1, constraint2), env)
-			-> <union> (atts1, atts2)
-		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
-
-	get-mentioned-attributes:
-		(name, maybename, Then(constraint1, constraint2), env)
-			-> <union> (atts1, atts2)
-		with
-			atts1 := <get-mentioned-attributes> (name, maybename, constraint1, env);
-			atts2 := <get-mentioned-attributes> (name, maybename, constraint2, env)
-
-	get-mentioned-attributes:
-		(classname, maybename, Forall(varname, expression, constraint), env)
-			-> <union> (atts1, atts2)
-		with
-			env' := <add-var-to-environment> (varname, (classname, maybename, expression), env);
-			atts1 := <get-mentioned-attributes> (classname, maybename, expression, env');
-			atts2 := <get-mentioned-attributes> (classname, maybename, constraint, env')
-		
-	get-mentioned-attributes:
-		(classname, maybename, Exists(varname, expression, constraint), env)
-			-> <union> (atts1, atts2)
-		with
-			env' := <add-var-to-environment> (varname, (classname, maybename, expression), env);
-			atts1 := <get-mentioned-attributes> (classname, maybename, expression, env');
-			atts2 := <get-mentioned-attributes> (classname, maybename, constraint, env')
 			
 /*	is-defined:
 */ 	
@@ -352,24 +289,7 @@ imports
 		 	expr2 := <literal-substitute>	(classname, methodname, expr1, paths, expression, env);
 			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
 		 	constraint2 := <literal-substitute>	(classname, methodname, constraint1, paths, expression, env')
-			
-
-		 	
-	conjoin-constraints:
-		[] 
-			-> True()
-			
-	conjoin-constraints:
-		[constraint]
-			-> constraint
-			
-	conjoin-constraints:
-		[constraint, constraints*]
-			-> And(constraint, constraint1)
-		where
-			constraint1 := <conjoin-constraints>[constraints*]
-			
-			
+	
 	
 /*	combine-invariants:
 		([invs1*],[invs2*])

@@ -2,6 +2,8 @@ module library/strategy
 
 strategies
 
+
+
 // CurryMap: applies the map function to a list, where the mapping function takes an additional parameter
 
   currymap(rule) : (value, []) -> []

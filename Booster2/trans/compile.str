@@ -5,9 +5,8 @@ imports
   
   library/LookupTable
   
-  
-  // Get rid of these if we can...
   library/constraint
+  // Get rid of these if we can...
 
   library/abstractBoosterModel
   library/environment
@@ -16,10 +15,20 @@ imports
 
 rules
 
-	compile:
-		system -> system
-	where
-		<map(\ ((cname, mname), (constraint, gc, exts, done, inputs, outputs)) -> <run-program> (cname, mname, constraint)\)>(<LookupTable> "Method")
+/* get-modified-paths:
+	Takes a program and returns all the paths that may be modified by it
+*/
+	get-modified-paths = collect(\ Assign(path, expression) -> path \)
+	
+	get-modified-attributes = collect(\ Assign(path, expression) -> <get-path-attribute> path \)
+
+	conjoin-constraints = foldr1(!True(), (\ (x,y) -> And(x,y) \)) <+ !True()	 	
+
+
+compile:
+	system -> system
+where
+	<map(\ ((cname, mname), (constraint, gc, exts, done, inputs, outputs)) -> <run-program> (cname, mname, constraint) \) >(<LookupTable> "Method")
 						
 		
 
@@ -33,14 +42,14 @@ rules
 				
 			with
 				program := <program> (classname, methname, constraint);
-				[paths*] := <get-modified-paths>(program);
-				constraint2a :=  <get-type-constraint> ([paths*], classname, methname, <new-environment>[]);
-				constraint2b :=  <get-multiplicity-constraint> ([paths*], classname, methname, <new-environment>[]);
+				paths := <get-modified-paths> program;
+				constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
+				constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
 				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
 				
-				[atts*] := <get-modified-attributes>(program, classname, methname, <new-environment>[]);
-				invs := <lookup-invariants>([atts*]);
-				constraint4 := <make-post-state><conjoin-constraints>(invs);
+				mod-atts := <get-modified-attributes> program;
+				invs := <conjoin-constraints><map(lookup-invariant)> mod-atts;
+				constraint4 := <conjoin-constraints ; make-post-state> invs ;
 				
 				constraint5 := And(constraint4, constraint3);
 				
@@ -115,46 +124,6 @@ rules
 
 
 rules
-/* get-modified-paths:
-	Takes a program and returns all the paths that may be modified by it
-*/
-	get-modified-paths:
-		Skip()
-			-> []
-			
-	get-modified-paths:
-		Assign(path, expression)
-			-> [path]	
-
-	get-modified-paths:
-		New(name, class)
-			-> []	
-
-
-	get-modified-paths:
-		Guard(constraint, program)
-			-> <get-modified-paths> (program)
-			
-	get-modified-paths:
-		Parallel(program1, program2)
-			-> [paths1*, paths2*]
-		where
-			[paths1*] := <get-modified-paths> (program1);
-			[paths2*] := <get-modified-paths> (program2)
-
-	get-modified-paths:
-		Choice(program1, program2)
-			-> [paths1*, paths2*]
-		where
-			[paths1*] := <get-modified-paths> (program1);
-			[paths2*] := <get-modified-paths> (program2)
-
-	get-modified-paths:
-		Sequence(program1, program2)
-			-> [paths1*, paths2*]
-		where
-			[paths1*] := <get-modified-paths> (program1);
-			[paths2*] := <get-modified-paths> (program2)
 
 /* 	program:
 		takes a constraint, in the context of a class, and a method name,
@@ -227,28 +196,12 @@ rules
 
 
 	program:
-		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
-			-> Assign(path1, expression)
+		(classname, methodname, BinRel(Path(a,b) {type}, Equal(), expression))
+			-> Assign(path1 {type}, expression)
 		where
+			<not(is-pre-state)> Path(a,b) ;
 			path1 := <make-pre-state> Path(a,b);
-			False() := <is-old> Path(a,b) ;
-			BasicType(t) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []) 
-
-	program:
-		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
-			-> Assign(path1, expression)
-		where
-			path1 := <make-pre-state> Path(a,b);
-			False() := <is-old> Path(a,b) ;
-			Optional(BasicType(t)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []) 
-
-	program:
-		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
-			-> Assign(path1, expression)
-		where
-			path1 := <make-pre-state> Path(a,b);
-			False() := <is-old> Path(a,b) ;
-			Set(BasicType(t)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []) 
+			<?BasicType(t) <+ ?Optional(BasicType(t)) <+ Set(BasicType(t))> type 
 
 
 	program:
@@ -256,7 +209,7 @@ rules
 			-> Assign(path1, expression)
 		where
 			path1 := <make-pre-state> Path(a,b);
-			False() := <is-old> Path(a,b) ;
+			<not(is-pre-state)> Path(a,b) ;
 			Reference(name) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name2 := <lookup-set-name> name;
 			<equal>(name, name2) 
@@ -266,7 +219,7 @@ rules
 			-> Assign(path1, expression)
 		where
 			path1 := <make-pre-state> Path(a,b);
-			False() := <is-old> Path(a,b) ;
+			<not(is-pre-state)> Path(a,b) ;
 			Optional(Reference(name)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
 			name2 := <lookup-set-name> name;
 			<equal>(name, name2) 
@@ -278,7 +231,7 @@ rules
 		where
 			/*log(|Warning(), "Matching new"); */
 			path1 := <make-pre-state> PathStart(cl,Some(Primed()));
-			False() := <is-old> PathStart(cl,Some(Primed())) ;
+			<not(is-pre-state)> PathStart(cl,Some(Primed())) ;
 			Set(Reference(cl)) := <resolve-path-type> (classname, PathStart(cl,Some(Primed())), (classname, methodname), <new-environment> [])  
 
 
@@ -304,7 +257,7 @@ rules
 			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 
  /* Optional-to-Optional */
 	program:			
@@ -324,7 +277,7 @@ rules
 			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 	
  /* Optional-to-Set-valued */
 	program:			
@@ -347,7 +300,7 @@ rules
 			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))		
+			<not(is-pre-state)> (Path(a,b))		
 
  /* Set-valued-to-Mandatory */
 	program:			
@@ -367,7 +320,7 @@ rules
 			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 			
  /* Set-valued-to-Optional */
 	program:			
@@ -387,7 +340,7 @@ rules
 			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 			
 
  /* Set-valued-to-Set-valued */
@@ -409,7 +362,7 @@ rules
 			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 
 /* Mandatory-to-Mandatory */
 	program:
@@ -428,7 +381,7 @@ rules
 			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b)) ;
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 			
 /* Mandatory-to-Optional */
 	program:
@@ -447,7 +400,7 @@ rules
 			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 			
 /* Mandatory-to-Set-valued */
 	program:			
@@ -473,7 +426,7 @@ rules
 			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 
 /* Optional-to-mandatory */
 	program:			
@@ -501,7 +454,7 @@ rules
 			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state>(Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 			
 /* Optional-to-optional */
 	program:			
@@ -540,7 +493,7 @@ rules
 			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b)) 	
+			<not(is-pre-state)> (Path(a,b)) 	
 	
 /* Optional-to-Set-valued */
 	program:			
@@ -584,7 +537,7 @@ rules
 			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 
 		
 /* Set-valued-to-Mandatory */
@@ -616,7 +569,7 @@ rules
 			Reference(name5) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 
 /* Set-valued-to-Optional */
 	program:			
@@ -645,7 +598,7 @@ rules
 			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 		
 /* Set-valued-to-Set-valued */
 	program:			
@@ -667,7 +620,7 @@ rules
 			Set(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal>(name4, name5);
 			path3 := <make-pre-state> (Path(a,b));
-			False() := <is-old> (Path(a,b))
+			<not(is-pre-state)> (Path(a,b))
 
 					
 /* Default */
@@ -706,5 +659,52 @@ rules
 						   (\ PathStart(name, None()) -> PathStart(name, Some(Primed())) \) <+
 						   (\ This() -> ThisPrimed() \)  
 						   		))> constraint 	
+
+/*	is-pre-state
+		takes a constraint, and returns if can be entirely evaluated in the pre-state.  Ie. there are no primes 
+*/
+	is-pre-state:
+		constraint ->
+			<equal>([], <collect(?PathComponent(name, Some(Primed())) <+ 
+								?PathStart(name, Some(Primed())) <+
+								?ThisPrimed() <+
+								?Output(s))> constraint)
+			 
+
+
+
+/* 	get-mentioned-attributes:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/		
+
+	get-mentioned-attributes:
+		(cname, mname,expr, env)
+			-> <collect((\ term -> (cname, mname, term, env)\) ; _get-mentioned-attributes)>
+
+	
+	_get-mentioned-attributes:
+		(cname, mname, PathStart(attname, maybeprimed), env)
+			-> (cname, attname)
+		where
+			type := <lookup-attribute-type> ((cname, attname))
+		// i.e. the attribute does exist
+		
+
+	_get-mentioned-attributes:
+		(cname, mname, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> (otherclassname, attname)
+		where
+			Reference(otherclassname) := <resolve-path-type>(cname, path, (cname, mname), env);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+
+	_get-mentioned-attributes:
+		(cname, mname, Path(path, PathComponent(attname, maybeprimed)), env)
+			-> (otherclassname, attname)
+		where
+			Optional(Reference(otherclassname)) := <resolve-path-type>(cname, path, (cname, mname), env);
+			type := <lookup-attribute-type> ((otherclassname, attname))
+			
 
 	

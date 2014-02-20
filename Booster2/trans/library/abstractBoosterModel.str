@@ -60,10 +60,8 @@ imports
 */
 
 	lookup-attribute-type:
-		(classname, attname)
-			-> type
-		where
-			type := <lookup>((classname, attname), <LookupTable> "Type" )
+		(cname, aname)
+			-> <\ (ds, t, opp, minmult, maxmult) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
 			
 /* 	lookup-input-type:
 		Takes a class name, and a method name, and an input name,
@@ -108,151 +106,59 @@ imports
 			(classname1, attname1) := <lookup>((classname, attname), <LookupTable> "Opposites")
 			
 			
-
-										
-	get-modified-attributes:
-		(Skip(), classname, methodname, env)
-			-> []	
+		
 			
-	get-modified-attributes:
-		(Parallel(p1, p2), classname, methodname, env)
-			-> <union> (as1, as2)
-		where
-			as1 := <get-modified-attributes>(p1, classname, methodname, env);
-			as2 := <get-modified-attributes>(p2, classname, methodname, env)
-	
-	get-modified-attributes:
-		(Choice(p1, p2), classname, methodname, env)
-			-> <union> (as1, as2)
-		where
-			as1 := <get-modified-attributes>(p1, classname, methodname, env);
-			as2 := <get-modified-attributes>(p2, classname, methodname, env)
-			
-	get-modified-attributes:
-		(Sequence(p1, p2), classname, methodname, env)
-			-> <union> (as1, as2)
-		where
-			as1 := <get-modified-attributes>(p1, classname, methodname, env);
-			as2 := <get-modified-attributes>(p2, classname, methodname, env)
-			
-	get-modified-attributes:
-		(Guard(constraint, program), classname, methodname, env)
-			-> as1
-		where
-			as1 := <get-modified-attributes>(program, classname, methodname, env)
-			
-/*	get-modified-attributes:
-		(Assign(path, expression), classname, methodname, abm)
-			-> [(classname1, attname)]
-		where
-			Reference(classname1) := <resolve-path-type>(classname, path, abm, Some(methodname));
-			attname := <get-path-attribute-name> (path, abm)
-*/
-			
-	get-modified-attributes:
-		(Assign(Path(exp, PathComponent(attname, maybeprimed)), expression), classname, methodname, env)
-			-> [((classname2, attname2), exp)]
-		where
-			[(classname2, attname2)] := <get-path-attribute>(classname, methodname, Path(exp, PathComponent(attname, maybeprimed)), env)
-			
-
-	get-modified-attributes:
-		(New(o, cl), classname, methodname, env)
-			-> []
-			
-			
-	get-type-constraint:
-		([], classname, methodname, env) -> True()
 		
 	get-type-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(BinRel(path, In(), typeExtent), constraint1 )
-		where
-			BasicType(t) := <resolve-path-type>(classname, path, (classname, methodname), env);
-			constraint1 := <get-type-constraint>([paths*], classname, methodname, env);
-			typeExtent := <get-type-extent> t
+		path { BasicType(t) } 
+			-> BinRel(path, In(), <get-type-extent> t)
 
 	get-type-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(Or(BinRel(path, In(), typeExtent), BinRel(path, Equal(), Null())), constraint1 )
-		where
-			Optional(BasicType(t)) := <resolve-path-type>(classname, path, (classname, methodname), env);
-			constraint1 := <get-type-constraint>([paths*], classname, methodname, env);
-			typeExtent := <get-type-extent> t
+		path { Optional(BasicType(t)) } 
+			-> Or(BinRel(path, In(), <get-type-extent> t), BinRel(path, Equal(), Null()))
 			
 
 	get-type-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(BinRel(path, SubsetEquals(), typeExtent), constraint1 )
-		where
-			Set(BasicType(t)) := <resolve-path-type>(classname, path, (classname, methodname), env);
-			constraint1 := <get-type-constraint>([paths*], classname, methodname, env);
-			typeExtent := <get-type-extent> t
+		path { Set(BasicType(t)) }
+			-> BinRel(path, SubsetEquals(), <get-type-extent> t)
+
+
+	get-type-constraint:
+		path { Reference(name1) }
+			-> BinRel(path, In(), PathStart(name1, None()))
+
 	
 	get-type-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(BinRel(path, In(), PathStart(name1, None())), constraint1 )
-		where
-			Optional(Reference(name1)) := <resolve-path-type>(classname, path, (classname, methodname), env);
-			constraint1 := <get-type-constraint>([paths*], classname, methodname, env)
-
-	get-type-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(BinRel(path, SubsetEquals(), PathStart(name1, None())), constraint1 )
-		where
-			Set(Reference(name1)) := <resolve-path-type>(classname, path, (classname, methodname), env);
-			constraint1 := <get-type-constraint>([paths*], classname, methodname, env)
-
-	get-type-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(BinRel(path, In(), PathStart(name1, None())), constraint1 )
-		where
-			Reference(name1) := <resolve-path-type>(classname, path, (classname, methodname), env);
-			constraint1 := <get-type-constraint>([paths*], classname, methodname, env)
+		path { Optional(Reference(name1)) } 
+			-> Or(BinRel(path, In(), PathStart(name1, None())), BinRel(path, Equal(), Null()))
 			
-				
+
+	get-type-constraint:
+		path { Optional(Reference(name1)) }
+			-> BinRel(path, SubsetEquals(), PathStart(name1, None()))
+							
 										
 			
 			
 			
-	lookup-invariants:
-		[] 
-			-> []
-		
-	lookup-invariants:
-		[((classname, attname), path), atts*]
-			-> [invs*]
+
+
+	lookup-invariant:
+		(classname, attname)
+			->  inv
 		where
-			True() := <get-attribute-constraint> (classname, attname);
-			[invs*] := <lookup-invariants>[atts*]
-
-
-
-	lookup-invariants:
-		[((classname, attname), path), atts*]
-			->  [inv, invs*]
-		where
-			inv := <get-attribute-constraint> (classname, attname);
-			[invs*] := <lookup-invariants>[atts*]
+			inv := <get-attribute-constraint> (classname, attname)
+			
 	
 
-	get-multiplicity-constraint:
-		([], classname, methodname, env) -> True()
 		
 	get-multiplicity-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> And(constraint2, constraint1 )
+		path 
+			-> constraint
 		where
-			[att] := <get-path-attribute>(classname, methodname, path, env);
+			att := <get-path-attribute> path;
 			Set(s) := <lookup-attribute-type> att;
-			constraint2 := <get-mult-constraint>(path, att);
-			constraint1 := <get-multiplicity-constraint>([paths*], classname, methodname, env)
-
-	get-multiplicity-constraint:
-		([path, paths*], classname, methodname, env) 
-			-> constraint1
-		where
-			constraint1 := <get-multiplicity-constraint>([paths*], classname, methodname, env)
+			constraint := <get-mult-constraint>(path, att)
 
 
 	get-mult-constraint:
@@ -354,6 +260,9 @@ imports
 		where
 			elems := <LookupTable> "Ids"
 			
+
+/***** TODO *****/
+/*
 	get-attribute-constraint:
 		(classname, attname) -> constraint
 			where		
@@ -362,4 +271,6 @@ imports
 	get-attribute-constraint:
 		(classname, attname) -> True()
 				
-				
+*/				
+	get-attribute-constraint:
+		(classname, attname) -> True()

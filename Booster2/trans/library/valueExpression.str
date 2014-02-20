@@ -13,178 +13,10 @@ imports
  rules
  	
 	
-/* 	get-mentioned-attributes:
-		takes an expression, in the context of a class, maybe a method name,
-		and a model, and returns the list of attributes that it
-		constrains.			
-*/		
-	get-mentioned-attributes:
-		(name, maybename, BasicValue(t), env)
-			-> []
-			
 
-	get-mentioned-attributes:
-		(name, maybename, TypeExtent(t), env)
-			-> []
-
-	get-mentioned-attributes:
-		(name, maybename, Null(), env)
-			-> []
-
-	get-mentioned-attributes:
-		(name, maybename, This(), env)
-			-> []
-
-	get-mentioned-attributes:
-		(name, maybename, ThisPrimed(), env)
-			-> []
-					
-	get-mentioned-attributes:
-		(name, maybename, Input(i), env)
-			-> []
-					
-	get-mentioned-attributes:
-		(name, maybename, Output(o), env)
-			-> []
-					
-	get-mentioned-attributes:
-		(name, maybename, SetExtent([]), env)
-			-> []
-
-	get-mentioned-attributes:
-		(name, maybename, SetExtent([expr, exprs*]), env)
-			-> <union>(atts1, atts2)
-		where
-			atts1 := <get-mentioned-attributes>(name, maybename, expr, env);
-			atts2 := <get-mentioned-attributes>(name, maybename, SetExtent([exprs*]), env)
-			
-	get-mentioned-attributes:
-		(classname, maybename, PathStart(attname, maybeprimed), env)
-			-> [(classname, attname)]
-		where
-			type := <lookup-attribute-type> ((classname, attname))
-		// i.e. the attribute does exist
-		
-/*	get-mentioned-attributes:
-		(classname, maybename, PathComponent(attname, maybeprimed), env)
-			-> [(classname, attname)]
-		where
-			type := <lookup-attribute-type> ((classname, attname))
-		// i.e. the attribute does exist
-*/
-
-	get-mentioned-attributes:
-		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
-			-> <union>(atts1, [(otherclassname, attname)])
-		where
-			atts1 := <get-mentioned-attributes>(classname, maybename, path, env);
-			Reference(otherclassname) := <resolve-path-type>(classname, path, (classname, maybename), env);
-			type := <lookup-attribute-type> ((otherclassname, attname))
-			
-	get-mentioned-attributes:
-		(classname, maybename, Path(path, PathComponent(attname, maybeprimed)), env)
-			-> <union>(atts1, [(otherclassname, attname)])
-		where
-			atts1 := <get-mentioned-attributes>(classname, maybename, path, env);
-			Optional(Reference(otherclassname)) := <resolve-path-type>(classname, path, (classname, maybename) , env);
-			type := <lookup-attribute-type> ((otherclassname, attname))
-	
-	get-mentioned-attributes:
-		(classname, maybename, PathStart(name, maybeprimed), env)
-			-> []
-		where
-			setname := <lookup-set-name> name;
-			<equal>(setname, name)
-
-	get-mentioned-attributes:
-		(classname, maybename, PathStart(name, maybeprimed), env)
-			-> []
-		where
-			setname := <lookup-set-value> name
-
-	get-mentioned-attributes:
-		(classname, maybename, PathStart(varname, maybeprimed), env)
-			-> atts
-		where
-			atts := <lookup-environment-mentioned-attributes> (varname, env)
 			
 	
-/* 	is-old:
-		takes a value expression, and returns True() or False()
-		depending on whether the expression can be evaluated in the pre-state
-		or not. 			
-*/
-
-
-	is-old:
-		BasicValue(t) 
-			-> True()
 			
-	is-old:
-		TypeExtent(t)
-			-> True()
-
-			
-	is-old:
-		Null()
-			-> True()
-			
-	is-old:
-		Input(inputname)
-			-> True()
-			
-	is-old:
-		Output(outputname)
-			-> False()
-			
-	is-old:
-		This()
-			-> True()
-			
-	is-old:
-		ThisPrimed()
-			-> False()
-
-	is-old:
-		Path(a,b)
-			-> True()
-		where
-			True() := <is-old> (a);
-			True() := <is-old> (b)		
-	
-	is-old:
-		PathComponent(name, Some(Primed()))
-			-> False()
-
-	is-old:
-		PathComponent(name, None())
-			-> True()
-
-	is-old:
-		PathStart(name, Some(Primed()))
-			-> False()
-
-	is-old:
-		PathStart(name, None())
-			-> True()
-			
-	is-old:
-		SetExtent([])
-			-> True()
-
-	is-old:
-		SetExtent([expr1, exprs1*])
-			-> True()
-		where
-			True() := <is-old> expr1;
-			True() := <is-old> SetExtent([exprs1*])
-			
-	// default
-	
-	is-old:
-		anything
-			-> False()
-
 
 /* 	get-path-initial-path:
 		takes a path, and returns the path of the owner object			
@@ -238,27 +70,15 @@ imports
 /* 	get-path-attribute:
 		
 */
-	get-path-attribute:
-		(classname, methodname, Output(name), env)
-			-> []
 
 	get-path-attribute:
-		(classname, methodname, Input(name), env)
-			-> []
+		Path(a {Reference(cname2)},PathComponent(aname, maybePrimed))
+			-> (cname2, aname)
 
 	get-path-attribute:
-		(classname, methodname, Path(a,b), env)
-			-> [(classname2, attname)]
-		where
-			Reference(classname2) := <resolve-path-type> (classname, a, (classname, methodname), env);
-			attname := <get-path-attribute-name> (Path(a,b))
+		Path(a {Optional(Reference(cname2))},PathComponent(aname, maybePrimed))
+			-> (cname2, aname)
 
-	get-path-attribute:
-		(classname, methodname, Path(a,b), env)
-			-> [(classname2, attname)]
-		where
-			Optional(Reference(classname2)) := <resolve-path-type> (classname, a, (classname, methodname), env);
-			attname := <get-path-attribute-name> (Path(a,b))
 			
 /* 	get-expression-type
 */
@@ -432,6 +252,11 @@ imports
 		and optionally a method where it is found, and returns its type 	
 */
 
+	resolvePathType:
+		(classname, path {type}, method, env)
+		 	-> type
+
+
 	resolve-path-type:
 		(classname, This(), method, env) 
 			-> Reference(classname)
@@ -568,13 +393,7 @@ imports
 			type := <lookup-attribute-type> ((classname, attname))
 		// i.e. the attribute does exist
 		
-/*	get-mentioned-attributes:
-		(classname, maybename, PathComponent(attname, maybeprimed), env)
-			-> [(classname, attname)]
-		where
-			type := <lookup-attribute-type> ((classname, attname))
-		// i.e. the attribute does exist
-*/
+
 
 	get-mentioned-paths:
 		(classname, methodname, Path(path, PathComponent(attname, maybeprimed)), env)
