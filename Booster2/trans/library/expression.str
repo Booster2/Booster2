@@ -121,46 +121,9 @@ rules
 		 	expression4 := <literal-substitute>	(classname, methodname, expression2, paths, expression, env)
 			 	
 
-/* 	make-old:
-		takes an expression, and returns its representation in the 
-		pre-state of a method 			
-*/
-
-	make-old:
-		UnOp(unop,expr1)
-			-> UnOp(unop,expr2)
-		where
-			expr2 := <make-old> (expr1)
-
-
-	make-old:
-		BinOp(expr1, op, expr2)
-			-> BinOp(expr3, op, expr4)
-		where
-			expr3 := <make-old> (expr1);
-			expr4 := <make-old> (expr2)
 
 			
 			
-/* 	make-post-state:
-		takes an expression, and returns its representation in the 
-		pre-state of a method 			
-*/
-
-	make-post-state:
-		UnOp(unop,expr1)
-			-> UnOp(unop,expr2)
-		where
-			expr2 := <make-post-state> (expr1)
-
-
-	make-post-state:
-		BinOp(expr1, op, expr2)
-			-> BinOp(expr3, op, expr4)
-		where
-			expr3 := <make-post-state> (expr1);
-			expr4 := <make-post-state> (expr2)
-
 
 /* 	get-mentioned-paths:
 		takes an expression, in the context of a class, maybe a method name,

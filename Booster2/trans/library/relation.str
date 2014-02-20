@@ -119,32 +119,9 @@ imports
 			-> None()
 		
 		 	
-			 	
-/* 	make-post-state:
-		takes a relation, and returns its representation in the 
-		pre-state of a method 			
-*/
-
-	make-post-state:
-		BinRel(expr1, binrel, expr2)
-			-> BinRel(expr3, binrel, expr4)
-		where
-			expr3 := <make-post-state> expr1;
-			expr4 := <make-post-state> expr2
+			 
 
 
-
-/* 	make-old:
-		takes a relation, and returns its representation in the 
-		pre-state of a method 			
-*/
-
-	make-old:
-		BinRel(expr1, binrel, expr2)
-			-> BinRel(expr3, binrel, expr4)
-		where
-			expr3 := <make-old> expr1;
-			expr4 := <make-old> expr2
 
 /* 	is-defined:
 		takes an expression in the context of a model, a classname, 

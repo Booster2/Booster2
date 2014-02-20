@@ -2,22 +2,23 @@ module simplify
 
 imports
   include/Booster2
-  
-  simplify
 
+library/lookupTable
+  
 rules
 
 	simplify-main:
 		system -> system
 		with
-			simp-programs := <map(simp)> <LookupTable> "Programs"; 
-			rules(
-				LookupTable :+ "Programs" -> simp-programs
-			)
+			simp-programs := <map(\((cname, mname), (constraint, gc, exts, done, ins, outs)) -> <simp> (cname, mname, gc)\)> <LookupTable> "Method"
 			
 	simp:
-		((classname, progname), prog) 
-			-> ((classname, progname), <innermost(simplify)> prog)
+		(cname, mname, prog) 
+			-> (cname, mname, prog) 
+		where 
+			prog' := <innermost(simplify)> prog;
+			<updateMethodProgram>(cname, mname, prog')
+			
 			
 			// Some normalisation rules?
 /*	simplify:

@@ -4,13 +4,9 @@ class A {
 	attributes
 		b : B
 	methods
-		m1 { b . updateA (in? = 5)}		
-	
-}
-
-class B {
-	attributes
-		a : INT
-	methods
-		updateA { a' = a + in?}
+		m1 { false }		
+		m2 { true }		
+		m3 { not(1 = 2) }		
+		m4 { 1 = 2 & 2 = 1 }		
+		m5 { 1 = 2 or 2 = 1 }		
 }

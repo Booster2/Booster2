@@ -67,6 +67,9 @@ rules
 
 	updateMethodConstraint = (\ (cname, mname, newConstraint) -> (cname, mname, newConstraint) where
 				<replaceMethod(\ ((c,m),(co,gc,e,d,is,os)) -> ((c,m),(newConstraint,gc,e,d,is,os)) \)> (cname, mname) \)
+
+	updateMethodProgram = (\ (cname, mname, newProgram) -> (cname, mname, newProgram) where
+				<replaceMethod(\ ((c,m),(co,gc,e,d,is,os)) -> ((c,m),(co,newProgram,e,d,is,os)) \)> (cname, mname) \)
 				
 
 	getInputType:
