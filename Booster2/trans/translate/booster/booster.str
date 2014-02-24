@@ -157,7 +157,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 
 	type:
 		(Optional(Reference(name)), opposite, minmult, maxmult)
-			-> $[ [name] [<opposite>opposite] ]
+			-> ${[ {name} {<opposite>opposite} ]}
 
 	type:
 		(Set(Reference(name)), opposite, minmult, maxmult)

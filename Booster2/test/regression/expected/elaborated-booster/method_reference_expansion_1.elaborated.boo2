@@ -1,0 +1,5 @@
+system S 
+ 
+
+
+	class A  { 		attributes			a  : INT		methods 			updateA { this.a' = this.a + 1 }			m1 { (this.a' = this.a + 1 & this.a > 3) }	}

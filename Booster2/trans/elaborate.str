@@ -204,6 +204,19 @@ rules
 			type := <\ (ds,t,o,min,max) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
 
 	infer-types:
+		((cname, mname), PathStart(cname', maybePrimed) )
+			-> PathStart(cname', maybePrimed) {Set(Reference(cname'))}
+		where
+			<lookup>(cname, <LookupTable>"Class")
+
+	infer-types:
+		((cname, mname), PathStart(sname, maybePrimed) )
+			-> PathStart(sname, maybePrimed) {Set(Reference(sname))}
+		where
+			<lookup>(sname, <LookupTable>"Set")
+
+
+	infer-types:
 		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
@@ -338,7 +351,8 @@ rules
 	do-insert-this:
 		(cname, mname,c) -> (cname, mname, c')
 			where
-				c' := <topdown(try(\ PathStart(aname, maybePrimed) -> Path(This(), PathComponent(aname, maybePrimed)) \))> c ;
+				c' := <topdown(try(\ PathStart(aname, maybePrimed) -> Path(This(), PathComponent(aname, maybePrimed)) 
+							where <lookup>((cname, aname), <LookupTable> "Attribute") <+ <lookup>((cname, aname), <LookupTable> "Method") \))> c ;
 				<updateMethodConstraint> (cname, mname, c')
 	
 			

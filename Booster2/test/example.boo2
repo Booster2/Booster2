@@ -1,5 +1,7 @@
 system S
 
+set DayOfWeek { Monday, Tuesday, Wednesday }
+
 class A {
 	attributes
 		a : INT
@@ -14,4 +16,33 @@ class B {
 	methods
 		m2 { 5 : b'}
 	
+}
+
+class C {
+	attributes
+		c1 : DayOfWeek
+		c2 : [DayOfWeek]
+	methods
+		m3 { c1' = d? }
+		m4 { c2' = d? }
+	
+}
+
+class D {
+	attributes
+		a : INT
+	methods
+		m5 { o! : D' }
+}
+
+class E {
+	attributes
+		f : [F . e]
+	methods
+		m6 {f' = null}
+}
+
+class F {
+	attributes
+		e : E . f
 }

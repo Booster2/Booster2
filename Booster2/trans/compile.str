@@ -35,6 +35,13 @@ rules
 	conjoin-constraints = foldr1((\ [x] -> x\),(\ (x,y) -> And(x,y) \)) <+ !True()	 	
 
 
+	get-mentioned-paths = collect( 	?Path(p, pc) <+ 
+									?This() <+ 
+									?ThisPrimed() <+
+									?Input(i) <+
+									?Output(o))
+
+
 compile:
 	system -> system
 where
@@ -52,7 +59,9 @@ where
 				
 			with
 				program := <program> (classname, methname, constraint);
+				log(|Error(), "program", program);
 				paths := <get-modified-paths> program;
+				log(|Error(), "paths", paths);
 				constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
 				constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
 				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
@@ -93,7 +102,9 @@ where
 			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()), <new-environment>[])
 
 
-	// Thomas: Why is the guard "constraint1" never used subsequently?			
+	// Thomas: Why is the guard "constraint1" never used subsequently?
+	// James: Good question!
+		
 	calculate-wp:
 		(Guard(constraint1, program1), constraint2, classname, methname)
 			-> (And(constraint4, constraint3), Guard(constraint1, program2))
@@ -223,32 +234,29 @@ rules
 
 
 	program:
-		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
-			-> Assign(path1, expression)
+		(classname, methodname, BinRel(Path(a,b) {Reference(name)} , Equal(), expression))
+			-> Assign(path1 {Reference(name)} , expression)
 		where
-			path1 := <make-pre-state> Path(a,b);
 			<not(is-pre-state)> Path(a,b) ;
-			Reference(name) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			path1 := <make-pre-state> Path(a,b);
 			<is-set-name> name
 
 	program:
-		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
-			-> Assign(path1, expression)
+		(classname, methodname, BinRel(Path(a,b) { Optional(Reference(name)) }, Equal(), expression))
+			-> Assign(path1 { Optional(Reference(name)) }, expression)
 		where
-			path1 := <make-pre-state> Path(a,b);
 			<not(is-pre-state)> Path(a,b) ;
-			Optional(Reference(name)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
+			path1 := <make-pre-state> Path(a,b);
 			<is-set-name> name
 			
 			
 	program:
-		(classname, methodname, BinRel(Output(o), In(), PathStart(cl,Some(Primed()))))
+		(classname, methodname, BinRel(Output(o), In(), PathStart(cl,Some(Primed())) { Set(Reference(cl)) }))
 			-> New(Output(o), cl) 
 		where
 			/*log(|Warning(), "Matching new"); */
-			path1 := <make-pre-state> PathStart(cl,Some(Primed()));
-			<not(is-pre-state)> PathStart(cl,Some(Primed())) ;
-			Set(Reference(cl)) := <resolve-path-type> (classname, PathStart(cl,Some(Primed())), (classname, methodname), <new-environment> [])  
+			<not(is-pre-state)> PathStart(cl,Some(Primed()));
+			path1 := <make-pre-state> PathStart(cl,Some(Primed()))  
 
 
 			
@@ -256,23 +264,23 @@ rules
  
  /* Optional-to-Mandatory */
 	program:			
-		(classname, methodname, BinRel(Path(a,b), Equal(), Null()))
-			-> Parallel(Assign(path3, Null()),
-						Guard(BinRel(path3, NotEqual(), Null()),
-							  Assign(name2,
-							  		 BinOp(name2, Minus(),
-							  		 	   SetExtent([path3])))))
+		(classname, methodname, BinRel(Path(a {Reference(name4) },b) { Optional(Reference(name2)) }, Equal(), Null()))
+			-> Parallel(Assign(path3 { Optional(Reference(name2)) }, Null()),
+						Guard(BinRel(path3 { Optional(Reference(name2)) } , NotEqual(), Null() ),
+							  Assign(PathStart(name2, None()) {Set(Reference(name2))},
+							  		 BinOp(PathStart(name2, None()) {Set(Reference(name2))}, Minus(),
+							  		 	   SetExtent([path3 { Optional(Reference(name2)) }]) { Set(Reference(name2))}))))
 		where
-			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
-			name3 := <get-path-attribute-name> (Path(a,b));
-			path1 := <get-path-initial-path> (Path(a,b));
-			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
-			(name2, name6) := <lookup-opposite> ((name4, name3));
-			Reference(name5) := <lookup-attribute-type> ((name2, name6));
+			name3 := <get-path-attribute-name> Path(a,b);
+			path1 := <get-path-initial-path> Path(a,b);
+			(name2, name6) := <lookup-opposite> (name4, name3);
+			Reference(name5) := <lookup-attribute-type> (name2, name6);
 			<equal>(name4, name5);
-			path3 := <make-pre-state> (Path(a,b));
-			<not(is-pre-state)> (Path(a,b))
+			path3 := <make-pre-state> (Path(a,b))
+
+
 
  /* Optional-to-Optional */
 	program:			
@@ -656,9 +664,9 @@ rules
 
 	make-post-state:
 		constraint ->
-			<bottomup(try( (\ PathComponent(name, None()) -> PathComponent(name, Some(Primed())) \) <+
-						   (\ PathStart(name, None()) -> PathStart(name, Some(Primed())) \) <+
-						   (\ This() -> ThisPrimed() \)  
+			<bottomup(try( (\ PathComponent(name, None()) {type} -> PathComponent(name, Some(Primed())) {type}  \) <+
+						   (\ PathStart(name, None()) {type}  -> PathStart(name, Some(Primed())) {type}  \) <+
+						   (\ This() {type}  -> ThisPrimed() {type}  \)  
 						   		))> constraint 	
 
 /*	is-pre-state

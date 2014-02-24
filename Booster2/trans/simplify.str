@@ -301,6 +301,21 @@ rules
 		UnOp(Cardinality(),SetExtent([]))
 			-> BasicValue(Integer(0))	
 
+	// F - {this.f} <<: F
+	
+	simplify:
+		BinRel(BinOp(exp1, Minus(), exp2), SubsetEquals(), exp1) -> True()
+
+	simplify:
+		BinRel(BinOp(exp1, Minus(), exp2), Subset(), exp1) -> True()
+	
+	
+	
+	simplify:
+		BinRel(exp1, SubsetEquals(), exp1) -> True()
+		
+	
+	
 
 	// if n < 0 and 
 	//     card(something) >= n

@@ -18,50 +18,9 @@ imports
 /* get-modified-attributes:
 	Takes a program and returns all the attributes that may be modified by it
 */
-	get-mentioned-paths = collect( 	?Path(p, pc) <+ 
-									?This() <+ 
-									?ThisPrimed() <+
-									?Input(i) <+
-									?Output(o))
 
 
 	
-	aliasing-substitute:
-		 (classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env)
-		 	-> constraint
-		 where
-		 	//log(|Error(), "Aliasing Subst - classname, methodname:", (classname, methodname));
-		 	//log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
-		 	//log(|Error(), "Aliasing Subst - path", Path(ps, pc));
-		 	//log(|Error(), "Aliasing Subst - expression", expression);
-		 	paths1 := <get-mentioned-paths> expression1;
-		 	//log(|Error(), "Aliasing Subst - paths1", paths1);
-		 	paths2 := <get-mentioned-paths> expression2;
-		 	//log(|Error(), "Aliasing Subst - paths2", paths2);
-		 	paths := <union>(paths1, paths2);
-		 	//log(|Error(), "Aliasing Subst - paths", paths);
-		 	type := <resolve-path-type>(classname, ps, (classname, methodname), env);
-		 	//log(|Error(), "Aliasing Subst - type", type);
-		 	filtered-paths := <curryfilter(is-correct-type)> ((type, classname, methodname, env), paths);
-		 	//log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
-		 	subsets := <subsets> filtered-paths;
-		 	//log(|Error(), "Aliasing Subst - subset",subsets);
-		 	/* log(|Error(), "subsets", subsets); */
-			constraint := <conjoin-constraints><currymap(generate-aliasing-constraint)> ((classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env, filtered-paths), subsets) //; 
-			//log(|Error(), "Aliasing Subst - constraint", constraint)
-		 	
-
-	generate-aliasing-constraint:
-		((classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env,all-paths), paths)
-			-> Implies(And(ant1,ant2), con2)
-		where
-			ant1 := <conjoin-constraints><currymap(\ (p1, p2) -> BinRel(p1, Equal(), p2)\)>(ps, paths);
-			paths2 := <diff>(all-paths, paths); 
-			ant2 := <conjoin-constraints><currymap(\ (p1, p2) -> BinRel(p1, NotEqual(), p2)\)>(ps, paths2);
-			//log(|Error(), "Something", (paths, ps));
-			substs := <map(\p -> (p, ps)\)> paths;	
-			con := <literal-substitute> (BinRel(expression1, binrel, expression2), substs);
-			con2 := <literal-substitute> (con, [(Path(ps, pc), expression)])
 					
 
 	is-correct-type:

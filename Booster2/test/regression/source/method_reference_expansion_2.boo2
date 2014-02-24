@@ -1,0 +1,10 @@
+system S
+
+class A {
+	attributes
+		a : INT
+	methods
+		updateA { a' = a + 1 }
+		m1 { updateA () & a > 3}		
+	
+}

@@ -128,3 +128,13 @@ rules
 		(classname, attname)
 			-> <\ (ds, t, opp, min, max) -> min \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
+/* 	lookup-opposite:
+		Takes a class name, and an attribute name
+		and returns the class name, attribute name pair that is its opposite 	
+*/
+	lookup-opposite:
+		(classname, attname)
+			-> <\ (ds, t, opp, min, max) -> opp \> <lookup>((classname, attname), <LookupTable> "Attribute")
+
+
+

@@ -44,16 +44,6 @@ imports
 			type := <lookup>(outputname,<lookup>((classname, methname), <LookupTable> "Outputs"))
 			
 			
-/* 	lookup-opposite:
-		Takes a class name, and an attribute name, and a model, 
-		and returns the class name, attribute name pair that is its opposite 	
-*/
-
-	lookup-opposite:
-		((classname, attname))
-			-> (classname1, attname1)
-		where
-			(classname1, attname1) := <lookup>((classname, attname), <LookupTable> "Opposites")
 			
 			
 		
@@ -80,14 +70,16 @@ imports
 	
 	get-type-constraint:
 		path { Optional(Reference(name1)) } 
-			-> Or(BinRel(path, In(), PathStart(name1, None())), BinRel(path, Equal(), Null()))
+			-> Or(BinRel(path, In(), PathStart(name1, None()){ Set(Reference(name1)) }), BinRel(path, Equal(), Null()))
 			
 
 	get-type-constraint:
-		path { Optional(Reference(name1)) }
-			-> BinRel(path, SubsetEquals(), PathStart(name1, None()))
+		path { Set(Reference(name1)) }
+			-> BinRel(path, SubsetEquals(), PathStart(name1, None()){ Set(Reference(name1)) })
 							
-										
+	get-type-constraint:
+		something -> True()
+			where log(|Error(), "get-type-constraint problem", something)									
 			
 			
 			
