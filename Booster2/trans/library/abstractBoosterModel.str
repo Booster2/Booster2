@@ -2,7 +2,6 @@ module library/abstractBoosterModel
 
 imports
   include/Booster2
-  library/setDef
   library/constraint
   library/valueExpression
   library/strategy
@@ -12,56 +11,7 @@ imports
   
  rules
  	
-/* 	lookup-set-name:
-		Takes an identifier, and a model, and returns it back again
-		if the identifier is the name of a set in the model 	
-*/
-
-	lookup-set-name:
-		setname -> setname
-		where
-			<elem>(setname, <map(get-setdef-name)> <LookupTable> "Sets")
-
-/* 	lookup-set-value:
-		Takes an identifier, and a model, and returns the 
-		name of the set it appears in 	
-*/
-
-	lookup-set-value:
-		setvalue -> setname
-		where
-			setname := <lookup-value-in-sets> (setvalue, <LookupTable> "Sets") 
 			
-/* 	lookup-class-name:
-		Takes an identifier, and a model, and returns it back again
-		if the identifier is the name of a class in the model 	
-*/
-
-	lookup-class-name:
-		classname
-			-> classname
-		where
-			<elem>(classname, <LookupTable> "Classes")
-
-
-/* 	lookup-class-attributes:
-		Takes an identifier, and a model, and returns it back again
-		if the identifier is the name of a class in the model 	
-*/
-
-	lookup-class-attributes:
-		classname
-			-> <lookup>(classname, <LookupTable> "Attributes")
-
-			
-/* 	lookup-attribute-type:
-		Takes a class name, and an attribute name, and a model, 
-		and returns the type of that attribute in the model 	
-*/
-
-	lookup-attribute-type:
-		(cname, aname)
-			-> <\ (ds, t, opp, minmult, maxmult) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
 			
 /* 	lookup-input-type:
 		Takes a class name, and a method name, and an input name,
@@ -152,41 +102,6 @@ imports
 	
 
 		
-	get-multiplicity-constraint:
-		path 
-			-> constraint
-		where
-			att := <get-path-attribute> path;
-			Set(s) := <lookup-attribute-type> att;
-			constraint := <get-mult-constraint>(path, att)
-
-
-	get-mult-constraint:
-		(path, att)
-			-> BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), BasicValue(Integer(min)))
-		where
-			"*" := <lookup-max-mult> att ;
-			min := <lookup-min-mult> att
-
-	get-mult-constraint:
-		(path, att)
-			-> And(BinRel(UnOp(Cardinality(),path), LessThanEquals(), BasicValue(Integer(max))), BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), Integer(min)))
-		where
-			max := <lookup-max-mult> att;
-			min := <lookup-min-mult> att
-
-
-	lookup-max-mult:
-		(classname, attname)
-			-> n
-		where
-			n := <lookup>((classname, attname), <LookupTable> "MaxMults")
-
-	lookup-min-mult:
-		(classname, attname)
-			-> n
-		where
-			n := <lookup>((classname, attname), <LookupTable> "MinMults")
 
 
 /*	lookup-invariants:

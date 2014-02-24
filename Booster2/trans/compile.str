@@ -20,23 +20,33 @@ rules
 */
 	get-modified-paths = collect(\ Assign(path, expression) -> path \)
 	
+/* get-modified-attributes:
+	Takes a program and returns all the attributes that may be modified by it
+*/
 	get-modified-attributes = collect(\ Assign(path, expression) -> <get-path-attribute> path \)
 
-	conjoin-constraints = foldr1(!True(), (\ (x,y) -> And(x,y) \)) <+ !True()	 	
+/* conjoin-constraints:
+	Takes a list of constraints and returns their conjunction.
+	foldr1 isn't documented - it's like a foldr1 from Haskell
+	First argument is a function to deal with the singleton list
+	Second argument joins two elements
+	foldr1 fails on the empty list - provide an exception case.
+*/
+	conjoin-constraints = foldr1((\ [x] -> x\),(\ (x,y) -> And(x,y) \)) <+ !True()	 	
 
 
 compile:
 	system -> system
 where
-	<map(\ ((cname, mname), (constraint, gc, exts, done, inputs, outputs)) -> <run-program> (cname, mname, constraint) \) >(<LookupTable> "Method")
+	<map(\ ((cname, mname), (constraint, gc, exts, done, inputs, outputs)) -> <compile-each> (cname, mname, constraint) \) >(<LookupTable> "Method")
 						
 		
 
-/* 	run-program:
-		Applies program to each constraint, with the abstract booster machine for reference
+/* 	compile-each:
+		Generates a program for each constraint, calculates the invariants and performs the WP. 
 */
 			
-	run-program:
+	compile-each:
 			(classname, methname, constraint)
 				-> (classname, methname, constraint) 
 				
@@ -203,6 +213,14 @@ rules
 			path1 := <make-pre-state> Path(a,b);
 			<?BasicType(t) <+ ?Optional(BasicType(t)) <+ Set(BasicType(t))> type 
 
+	program:
+		(classname, methodname, BinRel(expression, In(), Path(a,b) {type} ))
+			-> Assign(path1 {type}, BinOp(path1, Union(), SetExtent([expression])))
+		where
+			<not(is-pre-state)> Path(a,b) ;
+			path1 := <make-pre-state> Path(a,b);
+			<?Set(BasicType(t))> type 
+
 
 	program:
 		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
@@ -211,8 +229,7 @@ rules
 			path1 := <make-pre-state> Path(a,b);
 			<not(is-pre-state)> Path(a,b) ;
 			Reference(name) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name2 := <lookup-set-name> name;
-			<equal>(name, name2) 
+			<is-set-name> name
 
 	program:
 		(classname, methodname, BinRel(Path(a,b), Equal(), expression))
@@ -221,8 +238,7 @@ rules
 			path1 := <make-pre-state> Path(a,b);
 			<not(is-pre-state)> Path(a,b) ;
 			Optional(Reference(name)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name2 := <lookup-set-name> name;
-			<equal>(name, name2) 
+			<is-set-name> name
 			
 			
 	program:
@@ -248,8 +264,7 @@ rules
 							  		 	   SetExtent([path3])))))
 		where
 			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name> (name2);
-			<equal>(name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -268,8 +283,7 @@ rules
 							  		 Null())))
 		where
 			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name> (name2);
-			<equal>(name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -291,8 +305,7 @@ rules
 							  		 	   SetExtent([path1])))))
 		where
 			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name> (name2);
-			<equal>(name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -311,8 +324,7 @@ rules
 					    	   		 SetExtent([path3]))))
 		where
 			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name> (name2);
-			<equal>(name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -331,8 +343,7 @@ rules
 							   Null()))
 		where
 			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name> (name2);
-			<equal> (name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -353,8 +364,7 @@ rules
 							   		 SetExtent([path1]))))
 		where
 			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name> (name2);
-			<equal> (name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -372,8 +382,7 @@ rules
 						 Assign(Path(expression,PathComponent(name6, None())),path1)))
 		where
 			Reference(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal> (name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type>(classname, path1, (classname, methodname), <new-environment> [] );
@@ -391,8 +400,7 @@ rules
 						Assign(Path(path3, PathComponent(name6, None())), Null()) )
 		where
 			Reference(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal> (name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type>(classname, path1, (classname, methodname), <new-environment> []);
@@ -417,8 +425,7 @@ rules
 								 
 		where
 			Reference(name2) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal> (name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name>(Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -445,8 +452,7 @@ rules
 					 		  	     path1)))
 		where
 			Optional(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal>(name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path>(Path(a,b));	
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -484,8 +490,7 @@ rules
 								 		path1)))
 		where
 			Optional(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal>(name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name>(Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -528,8 +533,7 @@ rules
 			
 		where
 			Optional(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal>(name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name>(Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -560,8 +564,7 @@ rules
 								 	   			   	SetExtent([expression]))))))
 		where
 			Set(Reference(name2)) := <resolve-path-type> (classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal>(name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -589,8 +592,7 @@ rules
 							   path1))
 		where
 			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal>(name, name2);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -611,8 +613,7 @@ rules
 							   		 SetExtent([path1]))))
 		where
 			Set(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
-			name := <lookup-class-name>(name2);
-			<equal>(name2, name);
+			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
 			path1 := <get-path-initial-path> (Path(a,b));
 			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
@@ -693,18 +694,40 @@ rules
 		
 
 	_get-mentioned-attributes:
-		(cname, mname, Path(path, PathComponent(attname, maybeprimed)), env)
+		(cname, mname, Path(path{ Reference(otherclassname)}, PathComponent(attname, maybeprimed)), env)
 			-> (otherclassname, attname)
 		where
-			Reference(otherclassname) := <resolve-path-type>(cname, path, (cname, mname), env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 
 	_get-mentioned-attributes:
-		(cname, mname, Path(path, PathComponent(attname, maybeprimed)), env)
+		(cname, mname, Path(path { Optional(Reference(otherclassname)) }, PathComponent(attname, maybeprimed)), env)
 			-> (otherclassname, attname)
 		where
-			Optional(Reference(otherclassname)) := <resolve-path-type>(cname, path, (cname, mname), env);
 			type := <lookup-attribute-type> ((otherclassname, attname))
 			
+
+	get-multiplicity-constraint:
+		path 
+			-> constraint
+		where
+			att := <get-path-attribute> path;
+			Set(s) := <lookup-attribute-type> att;
+			constraint := <get-mult-constraint>(path, att)
+
+
+	get-mult-constraint:
+		(path, att)
+			-> BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), BasicValue(Integer(min)))
+		where
+			"*" := <lookup-max-mult> att ;
+			min := <lookup-min-mult> att
+
+	get-mult-constraint:
+		(path, att)
+			-> And(BinRel(UnOp(Cardinality(),path), LessThanEquals(), BasicValue(Integer(max))), BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), Integer(min)))
+		where
+			max := <lookup-max-mult> att;
+			min := <lookup-min-mult> att
+
 
 	

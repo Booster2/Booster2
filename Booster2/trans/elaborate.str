@@ -322,8 +322,8 @@ rules
 		(constraint, substs) 
 			-> constraint'
 		where 
-			substs' := <map(\ (t, e) -> (t {} , e)\)> substs;
-			constraint' := <bottomup(try(\ trm -> <lookup>(trm {}, substs')\))> constraint
+			//substs' := <map(\ (t, e) -> (t {} , e)\)> substs;
+			constraint' := <bottomup(try(\ trm -> <lookup>(trm , substs)\))> constraint
 
 	insert-this:
 		system -> system

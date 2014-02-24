@@ -234,7 +234,7 @@ rules
 				]
 		where 
 			Reference(name) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-class-name> name);
+			<is-class-name> name;
 			not(<lookup-opposite>(classname, attname))
 
 	attribute-java:
@@ -249,7 +249,7 @@ rules
 				]
 		where 
 			Reference(name) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-class-name> name)
+			<is-class-name> name
 						
 
 	attribute-java:
@@ -276,7 +276,7 @@ rules
 				]
 		where 
 			Optional(Reference(name)) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-class-name> name);
+			<is-class-name> name;
 			not(<lookup-opposite>(classname, attname))
 
 	attribute-java:
@@ -291,7 +291,7 @@ rules
 				]
 		where 
 			Optional(Reference(name)) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-class-name> name)
+			<is-class-name> name
 
 
 	attribute-java:
@@ -319,7 +319,7 @@ rules
 				]
 		where 
 			Set(Reference(name)) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-class-name> name)
+			<is-class-name> name
 		
 	attribute-java:
 		(classname, attname)
@@ -345,7 +345,7 @@ rules
 				]
 		where 
 			Reference(name) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-set-name> name)
+			<is-set-name> name
 
 	attribute-java:
 		(classname, attname)
@@ -371,7 +371,7 @@ rules
 				]
 		where 
 			Optional(Reference(name)) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-set-name> name)
+			<is-set-name> name
 
 	attribute-java:
 		(classname, attname)
@@ -398,5 +398,5 @@ rules
 				]
 		where 
 			Set(Reference(name)) := <lookup-attribute-type> (classname, attname);
-			<equal>(name, <lookup-set-name> name)
+			<is-set-name> name
 */

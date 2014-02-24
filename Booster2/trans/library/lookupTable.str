@@ -83,4 +83,48 @@ rules
 			-> types
 		where
 			types := <lookup>(oname, (<\(c,gc,e,d, is,os) -> os \> <lookup> ((cname, mname), <LookupTable> "Method")))
-							
+			
+			
+/* 	is-set-name:
+		Returns if the name provided is the name of a defined set in the model 	
+*/
+	is-set-name = (\ sname -> <lookup>(sname, <LookupTable>"SetDef") \)
+	
+/* 	lookup-set-value:
+		Returns the name of a set which contains the given name as a value
+*/
+	lookup-set-value:
+		svalue -> sname
+			where
+				[sname] := <filter(\ (n, vs) -> n where <elem>(svalue, vs)\)> <LookupTable> "SetDef"
+				
+/* 	is-class-name:
+		Returns if the name provided is the name of a class in the model 	
+*/
+	is-class-name = (\ cname -> <lookup>(cname, <LookupTable>"Class") \)
+
+
+
+/* 	lookup-class-attributes:
+		Given a classname, returns a list of (classname, attributename) pairs 	
+*/
+	lookup-class-attributes:
+		cname -> <map(\ (aname, attdetails) -> (cname, aname)\)><LookupTable> "Attributes"
+
+/* 	lookup-attribute-type:
+		Takes a class name, and an attribute name and returns the type of that attribute 	
+*/
+	lookup-attribute-type:
+		(cname, aname)
+			-> <\ (ds, t, opp, minmult, maxmult) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
+
+
+
+	lookup-max-mult:
+		(classname, attname)
+			-> <\ (ds, t, opp, min, max) -> max \> <lookup>((classname, attname), <LookupTable> "Attribute")
+
+	lookup-min-mult:
+		(classname, attname)
+			-> <\ (ds, t, opp, min, max) -> min \> <lookup>((classname, attname), <LookupTable> "Attribute")
+

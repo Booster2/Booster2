@@ -3,6 +3,7 @@ module library/valueExpression
 imports
   include/Booster2
   
+  library/lookupTable
   library/abstractBoosterModel
   library/constraint
   library/relation
@@ -143,19 +144,19 @@ imports
 		(PathStart(name, maybePrimed), classname, methodname, env)
 			-> Set(Reference(name))
 			where
-				<equal>(name, <lookup-class-name> name)
+				<is-class-name> name
 
 	get-expression-type:
-		(PathStart(name, maybePrimed), classname, methodname, env)
-			-> Reference(name)
+		(PathStart(svalue, maybePrimed), classname, methodname, env)
+			-> Reference(sname)
 			where
-				<equal>(name, <lookup-set-value> name)
+				sname := <lookup-set-value> svalue
 
 	get-expression-type:
 		(PathStart(name, maybePrimed), classname, methodname, env)
 			-> Set(Reference(name))
 			where
-				<equal>(name, <lookup-set-name> name)
+				<is-set-name> name
 
 	get-expression-type:
 		(Path(ps, PathComponent(attname, maybeprimed)), classname, methodname, env)
@@ -179,72 +180,6 @@ imports
 			where
 				log(|Error(), "Get Expression Type", something)
 
-	/*literal-substitute:
-		(classname, methodname, path, paths, expression, env)
-		 	-> expression
-		 where
-		 	log(|Error(), "literal-subst", (path, paths)) */
-
-	literal-substitute:
-		(classname, methodname, path, paths, expression, env)
-		 	-> expression
-		 where
-		 	<elem>(path, paths)
-
-
-
-	literal-substitute:
-		(classname, methodname, BasicValue(t), paths, expression, env)
-		 	-> BasicValue(t)
-		 	
-	literal-substitute:
-		(classname, methodname, TypeExtent(t), paths, expression, env)
-			-> TypeExtent(t)
-
-	literal-substitute:
-		(classname, methodname, Null(), paths, expression, env)
-			-> Null()
-
-	literal-substitute:
-		(classname, methodname, This(), paths, expression, env)
-			-> This()
-
-	literal-substitute:
-		(classname, methodname, PathStart(a, b), paths, expression, env)
-			-> PathStart(a,b)
-
-
-	literal-substitute:
-		(classname, methodname, Path(a, b), paths, expression, env)
-			-> Path(path1,b)
-		where 
-			path1 := <literal-substitute>(classname, methodname, a, paths, expression, env)
-			
-	literal-substitute:
-		(classname, methodname, Input(i), paths, expression, env)
-			-> Input(i)
-
-	literal-substitute:
-		(classname, methodname, Output(i), paths, expression, env)
-			-> Output(i)
-
-	literal-substitute:
-		(classname, methodname, SetExtent([]), paths, expression, env)
-			-> SetExtent([])
-
-	literal-substitute:
-		(classname, methodname, SetExtent([exp, exps*]), paths, expression, env)
-			-> SetExtent([exp1, exps1*])
-		where
-			exp1 := <literal-substitute>(classname, methodname, exp, paths, expression, env);
-			SetExtent([exps1*]) := <literal-substitute>(classname, methodname, SetExtent([exps*]), paths, expression, env)
-						
-/*	literal-substitute:
-		(classname, methodname, expression1, paths, expression2, env)
-			-> expression1
-		where
-			log(|Error(), "Literal Substitute nightmare", (classname, methodname, expression1, paths, expression2, env))
-*/			
 			
 			
 /* 	resolve-path-type:
@@ -280,23 +215,22 @@ imports
 
 	
 	resolve-path-type:
-		(classname, PathStart(attname, None()), method, env)
-			-> (Reference(attname))
+		(classname, PathStart(name, None()), method, env)
+			-> (Reference(name))
 		where
-			<equal>(attname, <lookup-set-name>attname)
+			<is-set-name> name
 
 	resolve-path-type:
-		(classname, PathStart(attname, None()), method, env)
-			-> Reference(setname)
+		(classname, PathStart(svalue, None()), method, env)
+			-> Reference(sname)
 		where
-			setname := <lookup-set-value> (attname);
-			not(<equal>(setname, ()))
+			sname := <lookup-set-value> (svalue)
 
 	resolve-path-type:
 		(classname, PathStart(attname, maybeprimed), method, env)
 			-> Set(Reference(attname))
 		where
-			<equal>(attname, <lookup-class-name>(attname))
+			<is-class-name> attname
 						
 	resolve-path-type:
 		(classname, PathStart(attname, maybeprimed), method, env)
@@ -415,14 +349,13 @@ imports
 		(classname, maybename, PathStart(name, maybeprimed), env)
 			-> []
 		where
-			setname := <lookup-set-name> name;
-			<equal>(setname, name)
+			<is-set-name> name
 
 	get-mentioned-paths:
 		(classname, maybename, PathStart(name, maybeprimed), env)
 			-> []
 		where
-			setname := <lookup-set-value> name
+			sname := <lookup-set-value> name
 
 	get-mentioned-paths:
 		(classname, maybename, PathStart(varname, maybeprimed), env)

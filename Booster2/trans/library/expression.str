@@ -67,20 +67,6 @@ rules
 			t2 := <get-expression-type> (expr1, classname, methodname, env);
 			t3 := <binop-type-matching> (t1, op, t2) */
 
-	literal-substitute:
-		 (classname, methodname, UnOp(unop, expression1), paths, expression, env)
-		 	-> UnOp(unop,expression2)
-		 where
-		 	expression2 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env)
-
-	literal-substitute:
-		 (classname, methodname, BinOp(expression1, op, expression2), paths, expression, env)
-		 	-> BinOp(expression3, op, expression4)
-		 where
-		 	expression3 := <literal-substitute>	(classname, methodname, expression1, paths, expression, env);
-		 	expression4 := <literal-substitute>	(classname, methodname, expression2, paths, expression, env)
-			 	
-
 
 			
 			

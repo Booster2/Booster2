@@ -31,6 +31,8 @@ imports
   
 rules  
   
+  conjoin-constraints = foldr1((\ [x] -> x\),(\ (x,y) -> And(x,y) \)) <+ !True()	
+  
   parseToBooster = (\ x -> <builder-parse(output-to-booster)> ("parsed.boo2", x) \)
   parseToLookupTable = (\ x -> <builder-parse(output-lookup-table)> ("parsed.table", x) \)
 
@@ -264,7 +266,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 						selected 
 */
 
-   builder-test: 
+/*   builder-test: 
    		(selected, position, ast, path, project-path) -> (filename, result)
    		with
 	   		filename := <guarantee-extension(|"test")> path;
@@ -277,6 +279,17 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 	   					<try(\ String() 			-> String() \)> 			String() { True() }, 
 	   					<try(\ something		    -> something\)> 			String() { True() }, 
 	   					<try(\ something		    -> something {False()}\)> 	String() { True() })   
+*/
+   builder-test: 
+   		(selected, position, ast, path, project-path) -> (filename, result)
+   		with
+	   		filename := <guarantee-extension(|"test")> path;
+	   		// test some pattern matching on some annotations
+	   		result := ( <conjoin-constraints>[],
+	   		<conjoin-constraints>[BinRel(Input("a"),In(),Input("b"))],
+	   		<conjoin-constraints>[BinRel(Input("a"),In(),Input("b")),BinRel(Input("a"),In(),Input("b"))],
+	   		<conjoin-constraints>[BinRel(Input("a"),In(),Input("b")),BinRel(Input("a"),In(),Input("b")),BinRel(Input("a"),In(),Input("b"))])   
+
    		
  /* *************************
  *** Workflow Stuff Begin ***

@@ -8,19 +8,12 @@ imports
   
   library/strategy
   library/constraint
- 
+  
+  compile
+  elaborate
+  
  rules
  	 
-
-
-
-	literal-substitute:
-		 (classname, methodname, BinRel(expression1, binrel, expression2), paths, expression, env)
-		 	-> BinRel(expression1', binrel, expression2')
-		 where
-		 	expression1' := <literal-substitute> (classname, methodname, expression1, paths, expression, env);
-		 	expression2' := <literal-substitute> (classname, methodname, expression2, paths, expression, env)
-
 
 
 
@@ -54,20 +47,14 @@ imports
 		((classname, methodname, BinRel(expression1, binrel, expression2), Path(ps, pc), expression, env,all-paths), paths)
 			-> Implies(And(ant1,ant2), con2)
 		where
-			ant1 := <conjoin-constraints><currymap(make-equal)>(ps, paths);
+			ant1 := <conjoin-constraints><currymap(\ (p1, p2) -> BinRel(p1, Equal(), p2)\)>(ps, paths);
 			paths2 := <diff>(all-paths, paths); 
-			ant2 := <conjoin-constraints><currymap(make-unequal)>(ps, paths2);	
-			con := <literal-substitute> (classname, methodname, BinRel(expression1, binrel, expression2), paths, ps, env);
-			con2 := <literal-substitute> (classname, methodname, con, [Path(ps, pc)], expression, env)
-			
-	make-equal:
-		(path1, path2)
-			-> BinRel(path1, Equal(), path2)		
-
-	make-unequal:
-		(path1, path2)
-			-> BinRel(path1, NotEqual(), path2)		
-			
+			ant2 := <conjoin-constraints><currymap(\ (p1, p2) -> BinRel(p1, NotEqual(), p2)\)>(ps, paths2);
+			//log(|Error(), "Something", (paths, ps));
+			substs := <map(\p -> (p, ps)\)> paths;	
+			con := <literal-substitute> (BinRel(expression1, binrel, expression2), substs);
+			con2 := <literal-substitute> (con, [(Path(ps, pc), expression)])
+					
 
 	is-correct-type:
 		((type, classname, methodname, env), path)

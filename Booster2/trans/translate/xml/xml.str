@@ -80,11 +80,12 @@ rules
 	type-xml:
 		Reference(name) -> ("ClassRef","Mandatory",name,"")
 		where 
-			<equal>(name, <lookup-class-name> name)
+			<is-class-name> name
+			
 	type-xml:
 		Reference(name) -> ("SetValue","Mandatory","",name)
 		where 
-			<equal>(name, <lookup-set-name> name)
+			<is-set-name> name
 
 	type-xml:
 		Optional(Int()) -> ("Integer","Optional","","")
@@ -93,11 +94,12 @@ rules
 	type-xml:
 		Optional(Reference(name)) -> ("ClassRef","Optional",name,"")
 		where 
-			<equal>(name, <lookup-class-name> name)
+			<is-class-name> name
+			
 	type-xml:
 		Optional(Reference(name)) -> ("SetValue","Optional","",name)
 		where 
-			<equal>(name, <lookup-set-name> name)
+			<is-set-name> name
 	
 	type-xml:
 		Set(Int()) -> ("Integer","Set","","")
@@ -106,10 +108,11 @@ rules
 	type-xml:
 		Set(Reference(name)) -> ("ClassRef","Set",name,"")
 		where 
-			<equal>(name, <lookup-class-name> name )
+			<is-class-name> name 
+			
 	type-xml:
 		Set(Reference(name)) -> ("SetValue","Set","",name)
 		where 
-			<equal>(name, <lookup-set-name> name)
+			<is-set-name> name
 	
 	*/
