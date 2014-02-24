@@ -38,7 +38,7 @@ get-unop-booster-notation:
 	Tail() -> "tail"
 
 get-unop-booster-notation:
-	Cardinality() -> "head"
+	Cardinality() -> "card"
 
 get-unop-booster-notation:
 	Negative() -> "-"

@@ -724,7 +724,7 @@ rules
 
 	get-mult-constraint:
 		(path, att)
-			-> And(BinRel(UnOp(Cardinality(),path), LessThanEquals(), BasicValue(Integer(max))), BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), Integer(min)))
+			-> And(BinRel(UnOp(Cardinality(),path), LessThanEquals(), BasicValue(Integer(max))), BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), BasicValue(Integer(min))))
 		where
 			max := <lookup-max-mult> att;
 			min := <lookup-min-mult> att

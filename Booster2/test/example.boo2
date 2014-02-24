@@ -7,3 +7,11 @@ class A {
 		m1 { a' = 3 }		
 	
 }
+
+class B {
+	attributes
+		b : SET(INT)[0..15]
+	methods
+		m2 { 5 : b'}
+	
+}

@@ -69,26 +69,6 @@ rules
 
 
 			
-			
-
-/* 	get-mentioned-paths:
-		takes an expression, in the context of a class, maybe a method name,
-		and a model, and returns the list of attributes that it
-		constrains.			
-*/
-
- 	get-mentioned-paths:
-		(name, maybename, UnOp(unop, expr), env)
-			-> atts
-		with
-			atts := <get-mentioned-paths> (name, maybename, expr, env)
- 
- 	get-mentioned-paths:
-		(name, maybename, BinOp(expr1, op, expr2), env)
-			-> <union> (atts1, atts2)
-		with
-			atts1 := <get-mentioned-paths> (name, maybename, expr1, env);
-			atts2 := <get-mentioned-paths> (name, maybename, expr2, env)
 /* 	is-defined:
 		takes an expression in the context of a model, a classname, 
 		and a methodname, and returns a constraint

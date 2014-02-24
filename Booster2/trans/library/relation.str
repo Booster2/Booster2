@@ -15,6 +15,14 @@ imports
  rules
  	 
 
+/* get-modified-attributes:
+	Takes a program and returns all the attributes that may be modified by it
+*/
+	get-mentioned-paths = collect( 	?Path(p, pc) <+ 
+									?This() <+ 
+									?ThisPrimed() <+
+									?Input(i) <+
+									?Output(o))
 
 
 	
@@ -26,9 +34,9 @@ imports
 		 	//log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
 		 	//log(|Error(), "Aliasing Subst - path", Path(ps, pc));
 		 	//log(|Error(), "Aliasing Subst - expression", expression);
-		 	paths1 := <get-mentioned-paths> (classname, methodname, expression1, env);
+		 	paths1 := <get-mentioned-paths> expression1;
 		 	//log(|Error(), "Aliasing Subst - paths1", paths1);
-		 	paths2 := <get-mentioned-paths> (classname, methodname, expression2, env);
+		 	paths2 := <get-mentioned-paths> expression2;
 		 	//log(|Error(), "Aliasing Subst - paths2", paths2);
 		 	paths := <union>(paths1, paths2);
 		 	//log(|Error(), "Aliasing Subst - paths", paths);
