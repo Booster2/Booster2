@@ -3,7 +3,8 @@ module compile
 imports
   include/Booster2
   
-  library/LookupTable
+  // Thomas: I had to lower-case the name "LookupTable"
+  library/lookupTable
   
   library/constraint
   // Get rid of these if we can...

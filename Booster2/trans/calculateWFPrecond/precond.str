@@ -141,36 +141,71 @@ rules
            formset := <conc> ([loc_cond], formset_rest)
            
         
-    // currently it's only fake   
-	wp: ((cname,MethodReference(path,[substs*])),post) -> constraint
+	wp: ((cname,MethodReference(path,[substs*])),post) -> constraint7
 	where
-		m := <getMethodName> path;
-		constraint := ("wp(", m , post ,")")
+		class_name := cname;					// should be replaced by the class to which the method reference refers
+		method_name := <getMethodName> path;	// the method name should be calculated properly
+		// as we call the precondition calculation after compile, we shoud get here a non-empty guarded command
+		(constraint, Guard(g,prog), exts, done, inputs, outputs) := <lookup>((class_name,method_name), <LookupTable> "Method");
+		
+		program := prog;
+		log(|Error(),"program method reference", program);
+		paths := <get-modified-paths> program;
+		constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
+		constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
+		constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
+				
+		mod-atts := <get-modified-attributes> program;
+		invs := <conjoin-constraints><map(lookup-invariant)> mod-atts;
+		constraint4 := <conjoin-constraints ; make-post-state> invs ;
+				
+		constraint5 := And(constraint4, constraint3);
+		
+		post-new := <make-post-state> post;
+		post-constraint := And(constraint5,post-new);
+				
+		(constraint6, program2) := <calculate-wp>(program, post-constraint, class_name, method_name);
+		log(|Error(),"check_constraint6",constraint6);
+		log(|Error(),"check_program2",program2);
+		constraint7 := <make-pre-state> constraint6
+		
+		// for testing
+		;constraint7' := ("wp(",method_name,",",post,")")
+		
      
 	// get the method name from a path
-	getMethodName: Path(path,PathComponent(name,[decorators*])) -> name
-	getMethodName: PathStart(name,[decorators*]) -> name
-     
-           /*
-           getGuard: Guard(expr,prog) -> expr
-		   getGuard: t -> True()
-           
-		   wp : (m,post) -> cond
-		   where
-		   	    programs := <LookupTable> "Programs";
-		   		classname := "C1"; // for testing
-		   		methname := "add1"; // for testing
-		   		program := <lookup> ((classname,methname),programs);
-		   		log(|Error(),"program from lut" ,program);
-		   		log(|Error(),"given postcondition", <innermost(simplify)> post);
-		    	(cond1,program') := <calculate-wp> (program,post,classname,methname);
-		    	log(|Error(),"precondition1", <innermost(simplify)> cond1);
-		   		cond2 := <getGuard> program';
-		   		cond := (And(cond1,cond2));
-		   		log(|Error(),"calculated condition",cond) 
-				//cond := ("wp(", m , post ,")")
-			*/
-			
+	// PathComponent(name,[decorators*])
+	getMethodName: Path(path,path_component) -> <getMethodName> path_component
+	getMethodName: PathComponent(name,_) -> name
+	// this seems to be very dirty
+	getMethodName: PathStart(name,_) -> name
+	
+    
+    
+/*    
+    compile-each:
+			(classname, methname, constraint)
+				-> (classname, methname, constraint) 
+				
+			with
+				program := <program> (classname, methname, constraint);
+				paths := <get-modified-paths> program;
+				constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
+				constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
+				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
+				
+				mod-atts := <get-modified-attributes> program;
+				invs := <conjoin-constraints><map(lookup-invariant)> mod-atts;
+				constraint4 := <conjoin-constraints ; make-post-state> invs ;
+				
+				constraint5 := And(constraint4, constraint3);
+				
+				(constraint6, program2) := <calculate-wp>(program, constraint5, classname, methname);
+				constraint7 := <make-pre-state> constraint6; 
+				<updateMethodProgram> (classname, methname, Guard(constraint7, program2))
+*/				
+				
+						
 			/*
 			
 			// do the wp-calculation
@@ -200,6 +235,8 @@ rules
 				
 				(constraint6, program2) := <calculate-wp>(program, post-constraint, classname, methname);
 				constraint7 := <make-old> constraint6
+				
+				*/
 		
 		// never used!! Just declared to prevent undefinedness error
 		cheat : t -> t
@@ -213,8 +250,8 @@ rules
 		             get-multiplicity-constraint :+ "" -> ""
 		             make-post-state :+ "" -> ""
 		             get-modified-attributes :+ "" -> ""
-		             lookup-invariants :+ "" -> ""
+		             lookup-invariant :+ "" -> ""
 		             conjoin-constraints :+ "" -> ""
-		             make-old :+ "" -> "")
-		 */
+		             make-pre-state :+ "" -> "")
+		 
 	
