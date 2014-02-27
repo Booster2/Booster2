@@ -396,7 +396,6 @@ Guard '&' MethodReference					-> GuardedAction {cons("GA")}
 
 Constraint			 						-> Guard {cons("Normal")}
 'Delayed' Constraint 						-> Guard {cons("Delayed")}
-"(" Guard ")"								-> Guard {bracket}
   
 %% Parallel workflows may be a reference to another workflow, or the
 %% parallel combination of another workflow and a parallel workflow

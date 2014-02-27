@@ -143,13 +143,20 @@ rules
         
 	wp: ((cname,MethodReference(path,[substs*])),post) -> constraint7
 	where
+		// TODO: in order to cope with proper methd reference, it is necessary to
+		// redo the elaborate phase for method references in workflows
+		
+		// TODO: another issue is that the type information needs to be present 
+		// in guards within guarded actions
+		
+		log(|Error(),"post",post);
+		
 		class_name := cname;					// should be replaced by the class to which the method reference refers
 		method_name := <getMethodName> path;	// the method name should be calculated properly
 		// as we call the precondition calculation after compile, we shoud get here a non-empty guarded command
 		(constraint, Guard(g,prog), exts, done, inputs, outputs) := <lookup>((class_name,method_name), <LookupTable> "Method");
 		
 		program := prog;
-		log(|Error(),"program method reference", program);
 		paths := <get-modified-paths> program;
 		constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
 		constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;

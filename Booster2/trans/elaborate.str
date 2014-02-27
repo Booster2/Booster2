@@ -19,7 +19,8 @@ rules
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
 			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ insert-this <+ type-inference  <+  method-expansion ))> system;
-			<expandSeqWfs> system
+			<expandSeqWfs> system;
+			<type-inference-wf> system
 			
 			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
@@ -357,7 +358,43 @@ rules
 	
 			
   
-  // Workflow Begin	
+  // Workflow Begin
+    // TODO
+    type-inference-wf: system -> system
+	where
+		seqWfs := <LookupTable> "SeqWorkflows";
+		seqWfs' := <map(\ ((cname,wfname),wfexpr) -> ((cname,wfname),<topdown(try(type_inference_guards(!cname,!wfname)))> wfexpr) \)> seqWfs;
+		rules(
+			LookupTable :+ "SeqWorkflows" -> seqWfs'
+		)
+		
+	
+	type_inference_guards(cname,wfname): Normal(constr) -> Normal(constr')
+	where
+		constr'  := <outermost-many( type_loop(infer-types <+ induce-types,cname,wfname) )> constr
+		                            
+	type_loop(s,cname,wfname): term -> term'
+	where
+		term' := <s> ((<cname>, <wfname>), term);
+		not(<equal>(term,term'))
+		                            
+		                         
+		                            
+			/*
+			<topdown(try( try(\ term -> ((<cname>, <wfname>), term) \);
+								 infer-types))> constr
+								 */
+			
+	do-type-inference-wf: (cname, mname,c) -> (cname, mname, c')
+			where
+				c' := <topdown(try(
+								try(\ term -> ((cname, mname), term) \); 
+										( infer-types 
+										<+ induce-types) ))> c  ;
+				(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c'))
+  
+  
+  
 
     expandSeqWfs : system -> system
     where
