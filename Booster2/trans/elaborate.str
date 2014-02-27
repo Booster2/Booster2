@@ -359,7 +359,10 @@ rules
 			
   
   // Workflow Begin
-    // TODO
+    // try to apply strategy s as many times as possible to subterms
+    outermost-many(s) = repeat(sometd(s))	
+    
+    // calculates the types of terms in guards within sequential workflows
     type-inference-wf: system -> system
 	where
 		seqWfs := <LookupTable> "SeqWorkflows";
@@ -368,34 +371,22 @@ rules
 			LookupTable :+ "SeqWorkflows" -> seqWfs'
 		)
 		
-	
-	type_inference_guards(cname,wfname): Normal(constr) -> Normal(constr')
+	// include 'this' before attributes and perform the type calculation
+	type_inference_guards(cname,wfname): Normal(constr) -> Normal(constr'')
 	where
-		constr'  := <outermost-many( type_loop(infer-types <+ induce-types,cname,wfname) )> constr
-		                            
+		constr'  := <topdown(try(\ PathStart(aname, maybePrimed) -> Path(This(), PathComponent(aname, maybePrimed)) 
+							where <lookup>((<cname>, aname), <LookupTable> "Attribute") \))> constr;
+		constr'' := <outermost-many( type_loop(infer-types <+ induce-types,cname,wfname) )> constr'
+		                        
 	type_loop(s,cname,wfname): term -> term'
 	where
+		// actually it is a bit dirty to provide "wfname" here;
+		// this only works because we assume that in guards (within workflows), 
+		// no inputs or outputs are used
 		term' := <s> ((<cname>, <wfname>), term);
 		not(<equal>(term,term'))
-		                            
-		                         
-		                            
-			/*
-			<topdown(try( try(\ term -> ((<cname>, <wfname>), term) \);
-								 infer-types))> constr
-								 */
-			
-	do-type-inference-wf: (cname, mname,c) -> (cname, mname, c')
-			where
-				c' := <topdown(try(
-								try(\ term -> ((cname, mname), term) \); 
-										( infer-types 
-										<+ induce-types) ))> c  ;
-				(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c'))
   
   
-  
-
     expandSeqWfs : system -> system
     where
     	classes := <LookupTable> "Class";
@@ -418,8 +409,6 @@ rules
 	where
 		classSeqWfs := <filter(\ ((name,wfname), expr) -> SeqWf(wfname,expr) where <eq>(name,cname) \)> (<LookupTable> "SeqWorkflows");
 		<expandSeqWfList> (cname,classSeqWfs)
-	
-	outermost-many(s) = repeat(sometd(s))	
 		
     expandSeqWfList: (cname, seqwfs) -> (cname, seqwfs)
     where
