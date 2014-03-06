@@ -168,14 +168,14 @@ These are the fields that are originally stored in the lookup table.
 
 "SetDef" -> (name, [elements])
 
-"Class" -> (name, ([subclasses], [attributes], [methods], 
-                                         [constraints], [workflows]))
+"Class" -> (name, ([directsubclasses], [allsubclasses], [attributes],  
+                                 [methods], [constraints], [workflows]))
 
 "Attribute" -> ((cname, aname), (decorations, type, 
-                                         (opposite), minmult, maxmult)) 
+                                 (opposite), minmult, maxmult)) 
 
 "Method" -> ((cname, mname), (constraint, guardedCommand, exts, done, 
-                                         inputs, outputs))
+                                 inputs, outputs))
 
 \end{verbatim}
 
