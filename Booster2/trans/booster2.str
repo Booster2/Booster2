@@ -301,9 +301,10 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 	 	result :=
 	 		<output>
 	  			<precond-main>
-	 	    		<elaborate> 
-	 	      			<parse> 
-	 	        			selected
+	  				<compile>
+	 	    			<elaborate> 
+	 	      				<parse> 
+	 	        				selected
 /* *************************
 *** Workflow Stuff End *****
 ************************* */				   

@@ -1,0 +1,33 @@
+system workflowTest
+
+class C1 {
+  attributes
+  	a: Int
+  	c2 : C2
+  methods
+  	m0{ a' = a+1 }
+  	m1{ c2.m0(in_c2? = in? + 1) }
+  invariants 
+  	a <= 5	
+	
+  workflows
+    // we need type information in the guards --> DONE
+    seq w0: true & m0() -> (a>0 & c2.b>0) & m0() -> SKIP
+  	// we would like to be able to pass arguments to methods
+    seq w1: true & m0() -> true & m1(in? = a) -> SKIP
+    // we would like to be able to call methods on other objects
+    seq w2: true & m0() -> true & c2.m0(in_c2? = a) -> SKIP
+  workflows
+    par p: w0
+}
+
+
+class C2 {
+  attributes
+    b : INT
+  methods
+    m0{ b' = b - in_c2? }
+  invariants
+    b >= 2
+}
+

@@ -117,7 +117,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	
 	
 	
-	guardedActionNotation: GA(guard,methodRef) -> $[[<guardNotation> guard] & [<methodReferenceNotation> methodRef]]
+	guardedActionNotation: GA(guard,methodRef) -> $[[<guardNotation> guard] & [<constraint> methodRef]]
 	
 	guardedActionNotation: t -> "???"
 	where log(|Error(),"notation not known: ",t)
@@ -126,11 +126,6 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	guardNotation: Delayed(constr) -> $[Delayed([<constraint> constr])]
 	
 	guardNotation: t -> "???"
-	where log(|Error(),"notation not known: ",t)
-	
-	methodReferenceNotation: MethodReference(PathStart(name,_),_) -> $[[name]()]
-	
-	methodReferenceNotation: t -> "???"
 	where log(|Error(),"notation not known: ",t)
 	
 	// workflow end
