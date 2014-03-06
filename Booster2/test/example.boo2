@@ -1,6 +1,6 @@
 system S
 
-set DayOfWeek { Monday, Tuesday, Wednesday }
+/* set DayOfWeek { Monday, Tuesday, Wednesday }
 
 class A {
 	attributes
@@ -45,4 +45,17 @@ class E {
 class F {
 	attributes
 		e : E . f
+}
+
+*/
+class G {
+	attributes
+		h : [H . g]
+	methods
+		m7 {h' = null}
+}
+
+class H {
+	attributes
+		g : [ G . h ]
 }

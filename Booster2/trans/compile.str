@@ -13,6 +13,8 @@ imports
   library/expression
   library/valueExpression
 
+	translate/booster/booster
+	
 rules
 
 /* get-modified-paths:
@@ -59,20 +61,29 @@ where
 				
 			with
 				program := <program> (classname, methname, constraint);
-				log(|Error(), "program", program);
+				log(|Error(), "program", <guardedCommand> program);
 				paths := <get-modified-paths> program;
-				log(|Error(), "paths", paths);
+				log(|Error(), "modified paths", <foldout(expression)> (paths, ","));
 				constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
+				log(|Error(), "constraint 2a", <constraint> constraint2a);
 				constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
+				log(|Error(), "constraint 2b", <constraint> constraint2b);
 				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
+				log(|Error(), "constraint 3", <constraint> constraint3);
 				
 				mod-atts := <get-modified-attributes> program;
 				invs := <conjoin-constraints><map(lookup-invariant)> mod-atts;
-				constraint4 := <conjoin-constraints ; make-post-state> invs ;
+				log(|Error(), "invs", <constraint> invs);
+				constraint4 := <make-post-state> invs ;
+				log(|Error(), "constraint 4", <constraint> constraint4);
 				
 				constraint5 := And(constraint4, constraint3);
+				log(|Error(), "constraint 5", <constraint> constraint5);
 				
 				(constraint6, program2) := <calculate-wp>(program, constraint5, classname, methname);
+				log(|Error(), "constraint 6", <constraint> constraint6);
+				log(|Error(), "program 2", <guardedCommand> program2);
+				
 				constraint7 := <make-pre-state> constraint6; 
 				<updateMethodProgram> (classname, methname, Guard(constraint7, program2))
 			
@@ -274,7 +285,6 @@ rules
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
 			name3 := <get-path-attribute-name> Path(a,b);
-			path1 := <get-path-initial-path> Path(a,b);
 			(name2, name6) := <lookup-opposite> (name4, name3);
 			Reference(name5) := <lookup-attribute-type> (name2, name6);
 			<equal>(name4, name5);
@@ -284,22 +294,20 @@ rules
 
  /* Optional-to-Optional */
 	program:			
-		(classname, methodname, BinRel(Path(a,b), Equal(), Null()))
-			-> Parallel(Assign(path3, Null()),
-						Guard(BinRel(path3, NotEqual(), Null()),
-							  Assign(Path(path3, PathComponent(name6, None())),
-							  		 Null())))
+		(classname, methodname, BinRel(Path(a { Reference(name4) },b) { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }))
+			-> Parallel(Assign(path3 { Optional(Reference(name2)) }, Null(){ Optional(Reference(name2)) }),
+						Choice(Guard(BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null(){ Optional(Reference(name2)) }),
+							  Assign(Path(path3 { Optional(Reference(name2)) }, PathComponent(name6, None())) { Optional(Reference(name5)) },
+							  		 Null())),
+							  Guard(BinRel(path3 { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }),Skip())))
 		where
-			Optional(Reference(name2)) := <resolve-path-type>(classname, Path(a,b), (classname, methodname), <new-environment> []);
+			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
 			name3 := <get-path-attribute-name> (Path(a,b));
-			path1 := <get-path-initial-path> (Path(a,b));
-			Reference(name4) := <resolve-path-type> (classname, path1, (classname, methodname), <new-environment> []);
 			(name2, name6) := <lookup-opposite> ((name4, name3));
 			Optional(Reference(name5)) := <lookup-attribute-type> ((name2, name6));
 			<equal> (name4, name5);
-			path3 := <make-pre-state> (Path(a,b));
-			<not(is-pre-state)> (Path(a,b))
+			path3 := <make-pre-state> (Path(a,b))
 	
  /* Optional-to-Set-valued */
 	program:			
