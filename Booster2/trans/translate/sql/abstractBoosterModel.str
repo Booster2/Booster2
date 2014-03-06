@@ -16,16 +16,16 @@ imports
  		booster-to-relational:	
 		x -> Schema(<LookupTable> "Name", [ metatables*, settables*, tables*, tables'* ], [procedures*], StatementList([metaStatements*, statements*]))
 		 where
-			[metatables*] := <booster-to-metatables> <LookupTable> "Classes"; 
-			[tables*] := <booster-to-relational-classes> <LookupTable> "Classes" ;
-			[tables'*] := <booster-to-relational-assocs> x   ;
-			[settables*] := <booster-to-relational-enumerations> <LookupTable> "Sets" ;
-			[procedures*] := <booster-to-relational-procedures> <LookupTable> "Programs" ;
+			[metatables*] := <booster-to-metatables> x; 
+			[tables*] := <map(booster-to-relational-class)> <LookupTable> "Class" ;
+			[tables'*] := <filter(get-assoc-table)> <LookupTable> "Attribute" ;
+			[settables*] := <map(get-set-table)> <LookupTable> "SetDef" ;
+			[procedures*] := <map(booster-to-relational-procedure)> <LookupTable> "Method" ;
 			[metaStatements*] := <booster-to-metadata> x;
-			[statements*] := <booster-to-data-inserts> <LookupTable> "Sets" 
+			[statements*] := <concat><map(booster-to-data-inserts)> <LookupTable> "SetDef" 
 			 
 	booster-to-metatables:
-		classes ->
+		x ->
 			[Table("_Meta_Classes", [idColumn, nameColumn, tableColumn]),
 			 Table("_Meta_Sets", [idColumn, setColumn, tableColumn, columnColumn]),
 			 Table("_Meta_Attributes", [idColumn, classColumn, attNameColumn, primTypeColumn, typeMultiplicityColumn, classNameColumn, setNameColumn, directionColumn, tableNameColumn, oppAttColumn, isIdColumn]),
@@ -63,64 +63,55 @@ imports
 		x ->
 			[setnames*, classnames*]
 		where
-			[setnames*] := <flatten-list><map(booster-to-metadata-sets)> <LookupTable> "Sets";
-			[classnames*] := <flatten-list><map(booster-to-metadata-classes)> <LookupTable> "Classes"
+			[setnames*] := <flatten-list><map(booster-to-metadata-sets)> <LookupTable> "SetDef";
+			[classnames*] := <flatten-list><map(booster-to-metadata-classes)> <LookupTable> "Class"
 
 	booster-to-metadata-sets:
-		SetDef(setname, values) ->
+		(setname, values) ->
 			[ Insert(None(), None(), Into(), "_Meta_Sets", ["setName","tablename","columnName"], [String(setname),String(setname),String(setname)], None())] 
 
 	booster-to-metadata-classes:
-		classname ->
+		(classname, cdef) ->
 			[ Insert(None(), None(), Into(), "_Meta_Classes", ["className","tablename"], [String(classname),String(classname)], None()),
 				attStmts*, methStmts*, paramStmts*] 
 		where
 			classAtts := <lookup-class-attributes> classname;
-			[attStmts*] := <currymap(booster-to-metadata-attributes)> (classname, classAtts);
+			[attStmts*] := <map(booster-to-metadata-attributes)> classAtts;
 			classMeths := <lookup-class-methods> classname;
-			[methStmts*] := <currymap(booster-to-metadata-method)> (classname, classMeths);
-			[paramStmts*] := <currymap(booster-to-metadata-method-params)> (classname, classMeths)
+			[methStmts*] := <map(booster-to-metadata-method)> classMeths;
+			[paramStmts*] := <map(booster-to-metadata-method-params)> classMeths
 			
 
 	booster-to-metadata-attributes:
-		(classname, attname) ->
+		((classname, attname), (ds, t, opp, min, max)) ->
 			Insert(None(), None(), Into(), "_Meta_Attributes", 
 						["class","attName","primType","typeMultiplicity","oppAttName","className","setName","direction","tableName","isId"], 
 						[String(classname),String(attname),String(primType),String(typeMultiplicity),oppAttName,String(className),String(setName),String(direction),String(tableName),Int(isId)], None())
 		where
-			attType := <lookup-attribute-type> (classname, attname);
-			(primType, typeMultiplicity,className,setName) := <attribute-type-metadata> attType;
+			(primType, typeMultiplicity,className,setName) := <attribute-type-metadata> t;
 			(direction, oppAttName) := <get-direction> (classname, attname);
 			tableName := <get-attribute-table-name>(classname, attname);
-			isId := <get-attribute-is-id>(classname, attname)
+			isId := <((<elem> (Identity(), ds) ; !1 ) <+ !0)> ds
 
 	booster-to-metadata-method:
-		(classname, methodname) ->
+		((classname, methodname), (c, gc, es, d, is, os))  ->
 			Insert(None(), None(), Into(), "_Meta_Methods", 
 						["class","methodName","isObjectMethod"], 
-						[String(classname),String(methodname),True()], None())
+						[String(classname),String(methodname),isObjectMethod], None())
 		where
-			<elem>(("this", Reference(classname)), <lookup>((classname, methodname), <LookupTable> "Inputs"))
-
-	booster-to-metadata-method:
-		(classname, methodname) ->
-			Insert(None(), None(), Into(), "_Meta_Methods", 
-						["class","methodName","isObjectMethod"], 
-						[String(classname),String(methodname),False()], None())
+			isObjectMethod := <((<elem> (("this", Reference(classname)), is) ; !True() ) <+ !False())> is
 
 
 	booster-to-metadata-method-params:
-		(classname, methodname) ->
+		((classname, methodname), (c, gc, es, d, is, os)) ->
 			[istmts*,ostmts*]
 		where
-			i* := <lookup>((classname, methodname), <LookupTable> "Inputs");
-			[istmts*] := <currymap(booster-to-metadata-param)> (((classname, methodname),"input"), [i*]);
-			o* := <lookup>((classname, methodname), <LookupTable> "Outputs");
-			[ostmts*] := <currymap(booster-to-metadata-param)> (((classname, methodname),"output"), [o*])
+			[istmts*] := <map((\ i -> ((classname, methodname), "input", i) \) ; booster-to-metadata-param)> is ;
+			[ostmts*] := <map((\ o -> ((classname, methodname), "output", o) \) ; booster-to-metadata-param)> os 
 			/*log(|Error(),i*) */			
 
 	booster-to-metadata-param:
-		(((classname, methodname), inout), (name, type)) ->
+		((classname, methodname), inout, (name, type)) ->
 			Insert(None(), None(), Into(), "_Meta_Method_Params", 
 						["class", "methodName", "paramName","paramType","paramMultiplicity","paramInOut","paramClassName", "paramSetName"], 
 						[String(classname), String(methodname), String(name),String(paramPrimType), String(paramTypeMultiplicity),String(inout), String(paramClassName), String(paramSetName)], None())
@@ -128,15 +119,6 @@ imports
 		where
 			(paramPrimType, paramTypeMultiplicity,paramClassName,paramSetName) := <attribute-type-metadata> type
 						
-
-
-	get-attribute-is-id:
-			(classname, attname) -> 1
-				where
-			<elem>(attname, <lookup> (classname, <LookupTable> "Ids"))
-
-	get-attribute-is-id:
-			(classname, attname) -> 0
 
 
 	get-direction:
@@ -200,391 +182,173 @@ imports
 
 
 
-	booster-to-relational-classes:
-		[]
-		 -> []
+	booster-to-relational-class:
+		(cname, (dscs, ascs, as, ms, cs, wfs)) 
+			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*])
+		where 
+			[columns*] := <filter(get-attribute-column)><filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute";
+			log(|Error(), "columns", <filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute"); 
+			identity := <concat-strings> [cname, "Id"]
+
+			
 		
-	booster-to-relational-classes:
-		[name, names*]
-			-> [Table(name, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*]), tables*]
-		where 
-			tables* := <booster-to-relational-classes> [names*];
-			[columns*] := <get-table-columns>(name, <LookupTable> "Attributes", <LookupTable> "Type", <LookupTable> "MaxMults", <LookupTable> "MinMults"); 
-			identity := <concat-strings> [name, "Id"]
-
-	booster-to-relational-enumerations:
-		[]
-			-> []
-
-	booster-to-relational-enumerations:
-		[set, sets*]
-			-> [table, tables*]
-		where 
-			tables* := <booster-to-relational-enumerations> [sets*];
-			table := <get-set-table> set
-			
-	booster-to-relational-procedures:
-		[]
-			-> []
-			
-	booster-to-relational-procedures:
-		[((classname, procname), gc), programs*]
-			-> [p, ps*]
+	booster-to-relational-procedure:
+		((cname, mname), (c,gc,exts,d,is,os))
+			-> Procedure(name, params, DeclareList([]), StatementList(statements))
 		where
-			ps* := <booster-to-relational-procedures> [programs*];
-			name := <concat-strings> [classname, "_", procname];
-			[procinputs*] := <booster-to-relational-inputs> (classname, procname, <LookupTable> "Inputs");
-			[procoutputs*] := <booster-to-relational-outputs> (classname, procname, <LookupTable> "Outputs");
-			statements := <booster-to-relational-guarded-command> (classname, procname, gc);
-			p := Procedure(name, [procinputs*, procoutputs*], DeclareList([]), StatementList(statements))
+			name := <concat-strings> [cname, "_", mname];
+			params := <union> (<map(convert-input)>is, <map(convert-output)> os);
+			statements := <booster-to-relational-guarded-command> (cname, mname, gc)
 
 	booster-to-data-inserts:
-		sets
-			-> [stmts*]
+		(name,values) 
+			-> <union>([Insert(None(), None(), Into(), name, [name], [String("unassigned")], None())], stmts)
 		where
-			[stmts*] := <get-enumeration-data> sets				
+			stmts := <map(\ value -> Insert(None(), None(), Into(), name, [name], [String(value)], None()) \)> values
 			
-	get-enumeration-data:
-		[] -> []
-
-	get-enumeration-data:
-		[SetDef(name, []), sets* ] -> [stmt, stmts*]
-			where
-				stmt := Insert(None(), None(), Into(), name, [name], [String("unassigned")], None());
-				[stmts*] := <get-enumeration-data> [sets*]
- 
-	get-enumeration-data:
-		[SetDef(name, [value, values* ]), sets* ] 
-			-> [stmt, stmts* ]
-		where
-			stmt :=  Insert(None(), None(), Into(), name, [name], [String(value)], None());
-			[stmts*] := <get-enumeration-data> [SetDef(name, [values* ]), sets* ]
-
-			
-	get-table-columns:
-		(name, [], types, maxmults, minmults)
-			-> []
 	
-	get-table-columns:
-		(name, [(name, []), atts*], types, maxmults, minmults)
-			-> <get-table-columns> (name, [atts*], types, maxmults, minmults)
-
 			
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "", False(), t', NoExtra(), NoKey(), None()), columns*]
+	get-attribute-column:
+		((cname, attname), (ds, BasicType(t), opp, 1, 1))
+			-> Column(attname, "", False(), t', NoExtra(), NoKey(), None())
 		where
-			BasicType(t) := <lookup> ((name,attname1), types);
-			1 := <lookup>((name, attname1), maxmults);			
-			1 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults);
+			[] := <set-attribute-table-name> (cname, attname, cname);
 			t' := <get-type-booster-to-sql> t
 
 
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname]))), columns*]
+	get-attribute-column:
+		((cname, attname), (ds, Reference(tname), opp, 1, 1))
+			-> Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
 		where
-			Reference(cname) := <lookup> ((name,attname1), types);
-			<is-set-name> cname;
-			1 := <lookup>((name, attname1), maxmults);			
-			1 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1,name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+			<is-set-name> tname;
+			[] := <set-attribute-table-name> (cname, attname,cname)
 
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])]))), columns*]
+	get-attribute-column:
+		((cname, attname), (ds, Reference(tname), opp, 1, 1))
+			-> Column(attname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))
 		where
-			Reference(cname) := <lookup> ((name,attname1), types);
-			<is-class-name> cname;
-			not(<lookup-opposite>(name, attname1));
-			1 := <lookup>((name, attname1), maxmults);			
-			1 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1,name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
-
-
+			<is-class-name> tname;
+			not(<lookup-opposite>(cname, attname));
+			[] := <set-attribute-table-name> (cname, attname,cname)
 	
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "null", True(), t', NoExtra(), NoKey(), None()), columns*]
+	get-attribute-column:
+		((cname, attname), (ds, Optional(BasicType(t)), opp, 0, 1))
+			-> Column(attname, "null", True(), t', NoExtra(), NoKey(), None())
 		where
-			Optional(BasicType(t)) := <lookup> ((name,attname1), types);
-			1 := <lookup>((name, attname1), maxmults);			
-			0 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults);
+			[] := <set-attribute-table-name> (cname, attname, cname);
 			t' := <get-type-booster-to-sql> t
 
 
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "null", True(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname]))), columns*]
+	get-attribute-column:
+		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1))
+			-> Column(attname, "null", True(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
 		where
-			Optional(Reference(cname)) := <lookup> ((name,attname1), types);
-			<is-set-name> cname;
-			1 := <lookup>((name, attname1), maxmults);			
-			0 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1,name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+			<is-set-name> tname;
+			[] := <set-attribute-table-name> (cname, attname,cname)
 
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [Column(attname1, "null", True(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])]))), columns*]
+	get-attribute-column:
+		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1))
+			-> Column(attname, "null", True(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))
 		where
-			Optional(Reference(cname)) := <lookup> ((name,attname1), types);
-			<is-class-name> cname;
-			not(<lookup-opposite>(name, attname1));
-			1 := <lookup>((name, attname1), maxmults);			
-			0 := <lookup>((name, attname1), minmults);
-			[] := <set-attribute-table-name> (name, attname1, name);
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
+			<is-class-name> tname;
+			not(<lookup-opposite>(cname, attname));
+			[] := <set-attribute-table-name> (cname, attname, cname)
 
-		
-
+				
 			
-	get-table-columns:
-		(name, [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults)
-			-> [columns*]
+	get-assoc-table:
+		((cname, attname), ds, t, (oname, oaname), min, max)
+			-> Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(), None()), 
+								 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
+								 Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))])
 		where
-			[columns*] := <get-table-columns> (name, [(name, [attnames*]), attrs*], types, maxmults, minmults)
-		
-	get-table-columns:
-		(name, [(name1, [attnames*]), atts*], types, maxmults, minmults)
-			-> <get-table-columns> (name, [atts*], types, maxmults, minmults)
-			
-	booster-to-relational-assocs:
-		x
-			-> <get-table-assocs> (<LookupTable> "Attributes", <LookupTable> "Type", <LookupTable> "MaxMults", <LookupTable> "MinMults", <LookupTable> "Opposites")
-
-
-	get-table-assocs:
-		([], types, maxmults, minmults, opposite)
-			-> []
-	
-	get-table-assocs:
-		( [(name, []), atts*], types, maxmults, minmults, opposite)
-			-> <get-table-assocs> ([atts*], types, maxmults, minmults, opposite)
-
-			
-	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(), None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
-		where
-			Reference(oname) := <lookup> ((name, attname1), types);
-			(oname, oaname) := <lookup> ((name, attname1), opposite);
-			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*] ) ;
-			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
-			firstcolname := <concat-strings> [name, "_", attname1];			
+			<? Reference(oname)> t <+ <? Optional(Reference(oname))> t <+ <? Set(Reference(oname))> t;
+			tablename := <concat-strings> [cname, "_", attname];
+			firstcolname := <concat-strings> [cname, "_", attname];			
 			secondcolname := <concat-strings> [oname, "_", oaname];
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[] := <set-attribute-table-name> (oname, oaname, tablename);
-			[tables*] := <get-table-assocs> (attrs2*, types, maxmults, minmults, opposite)
+			[] := <set-attribute-table-name> (cname, attname, tablename)
 
-	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
-		where
-			Optional(Reference(oname)) := <lookup> ((name, attname1), types);
-			(oname, oaname) := <lookup> ((name, attname1), opposite);
-			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*]  );
-			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
-			firstcolname := <concat-strings> [name, "_", attname1];			
-			secondcolname := <concat-strings> [oname, "_", oaname];
-			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[] := <set-attribute-table-name> (oname, oaname, tablename);
-			[tables*] := <get-table-assocs> (attrs2*, types, maxmults, minmults, opposite)
-
-	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()), Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))]), tables*]
-		where
-			Set(Reference(oname)) := <lookup> ((name, attname1), types);
-			(oname, oaname) := <lookup> ((name, attname1), opposite);
-			attrs2* := <remove-attribute-from-list>((oname, oaname), [(name, [attnames*]), attrs*] ) ;
-			tablename := <concat-strings> [name, "_", attname1, "_", oname, "_", oaname];
-			firstcolname := <concat-strings> [name, "_", attname1];			
-			secondcolname := <concat-strings> [oname, "_", oaname];
-			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[] := <set-attribute-table-name> (oname, oaname, tablename);
-			[tables*] := <get-table-assocs> (attrs2*, types, maxmults, minmults, opposite)
-
-	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, 
+	get-assoc-table:
+		((cname, attname), ds, Set(BasicType(t)), opp, min, max)
+			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
-				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
-				 Column(attname1, "", False(), t', NoExtra(), NoKey(),None())]), tables*]
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
+				 Column(attname, "", False(), t', NoExtra(), NoKey(),None())])
 		where
-			Set(BasicType(t)) := <lookup> ((name, attname1), types);
-			tablename := <concat-strings> [name, "_", attname1];
-			firstcolname := <concat-strings> [name, "Id"];			
+			tablename := <concat-strings> [cname, "_", attname];
+			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite);
+			[] := <set-attribute-table-name> (cname, attname, tablename);
 			t' := <get-type-booster-to-sql> t
 			
 
-/*	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, 
+	get-assoc-table:
+		((cname, attname), ds, Set(Reference(tname)), opp, min, max)
+			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
-				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
-				 Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),None())]), tables*]
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
+				 Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(tname, [tname])))])
 		where
-			Set(String()) := <lookup> ((name, attname1), types);
-			tablename := <concat-strings> [name, "_", attname1];
-			firstcolname := <concat-strings> [name, "Id"];			
+			<is-set-name> tname;
+			tablename := <concat-strings> [cname, "_", attname];
+			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
-*/
-	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, 
+			[] := <set-attribute-table-name> (cname, attname, tablename)
+			
+	get-assoc-table:
+		((cname, attname), ds, Set(Reference(tname)), opp, min, max)
+			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
-				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
-				 Column(attname1, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))]), tables*]
+				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
+				 Column(attname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(tname, [<concat-strings>([tname, "Id"])])))])
 		where
-			Set(Reference(cname)) := <lookup> ((name, attname1), types);
-			<is-set-name> cname;
-			tablename := <concat-strings> [name, "_", attname1];
-			firstcolname := <concat-strings> [name, "Id"];			
+			<is-class-name> tname;
+			tablename := <concat-strings> [cname, "_", attname];
+			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
-			
-	get-table-assocs:
-		( [(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [Table(tablename, 
-				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
-				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(name, [<concat-strings>[name, "Id"]]))), 
-				 Column(attname1, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))]), tables*]
-		where
-			Set(Reference(cname)) := <lookup> ((name, attname1), types);
-			<is-class-name> cname;
-			tablename := <concat-strings> [name, "_", attname1];
-			firstcolname := <concat-strings> [name, "Id"];			
-			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (name, attname1, tablename);
-			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
+			[] := <set-attribute-table-name> (cname, attname, tablename)
 
 
-
-	get-table-assocs:
-		([(name, [attname1,attnames*]), attrs*], types, maxmults, minmults, opposite)
-			-> [tables*]
-		where
-			[tables*] := <get-table-assocs> ([(name, [attnames*]), attrs*], types, maxmults, minmults, opposite)
-			
-			
-			
-	remove-attribute-from-list:
-		((cname,aname), [])
-			-> []
-			
-	remove-attribute-from-list:
-		((cname, aname), [(cname, [atts*]), attrs*])
-			-> [(cname, [atts2*]), attrs*]
-		where
-			[atts2*] := <remove-attribute-from-list> ( aname, [atts*])
-
-	remove-attribute-from-list:
-		((cname, aname), [(name, [atts*]), attrs*])
-			-> [(name, [atts*]), attrs2*]
-		where
-			[attrs2*] := <remove-attribute-from-list> ((cname, aname), [attrs*])
-			
-	remove-attribute-from-list:
-		(aname, [aname, atts*])
-			-> 	[atts*]
-			
-	remove-attribute-from-list:
-		(aname, [name, atts*])
-			-> [name, atts2*]
-		where
-			[atts2*] := <remove-attribute-from-list> (aname, [atts*]) 
 			
 	get-set-table:
-		SetDef(name, [values*])
+		(name, [values*])
 			-> Table(name, [Column(name, "unassigned", False(), Varchar(100), NoExtra(), Primary(),None())])
-			
-	booster-to-relational-inputs:
-		(classname, procname, inputs)
-			-> [ins*]
-		where
-			i* := <lookup>((classname, procname), inputs);
-			[ins*] := <convert-inputs> [i*]
-
-	booster-to-relational-outputs:
-		(classname, procname, outputs)
-			-> [outs*]
-		where
-			o* := <lookup>((classname, procname), outputs);
-			[outs*] := <convert-outputs> [o*]
-
 
 			
-	convert-inputs:
-		[] -> []
-		
-	convert-inputs:
-		[(name, BasicType(t)), ins*]
-			-> [Input(name, t'), inputs*]
+	convert-input:
+		(name, BasicType(t))
+			-> Input(name, t')
 		where
-			[inputs*] := <convert-inputs> [ins*];
 			t' := <get-type-booster-to-sql> t
 
-	convert-inputs:
-		[(name, Reference(cname)), ins*]
-			-> [Input(name, Varchar(1000)), inputs*]
+	convert-input:
+		(name, Reference(tname))
+			-> Input(name, Varchar(100))
 		where
-			<is-set-name> cname; 
-			[inputs*] := <convert-inputs> [ins*]
+			<is-set-name> tname
 
-	convert-inputs:
-		[(name, Reference(cname)), ins*]
-			-> [Input(name, Int()), inputs*]
-		where
-			[inputs*] := <convert-inputs> [ins*]
+	convert-input:
+		(name, Reference(cname))
+			-> Input(name, Int())
 
-/*	convert-inputs:
-		[(name, Int()), ins*]
-			-> [Input(name, Int()), inputs*]
+	convert-output:
+		(name, BasicType(t))
+			-> Output(name, t')
 		where
-			[inputs*] := <convert-inputs> [ins*] */
+			t' := <get-type-booster-to-sql> t
 
-	convert-outputs:
-		[] -> []
-		
-	convert-outputs:
-		[(name, String()), outs*]
-			-> [Output(name, Varchar(100)), outputs*]
+	convert-output:
+		(name, Reference(tname))
+			-> Output(name, Varchar(100))
 		where
-			[outputs*] := <convert-outputs> [outs*]
+			<is-set-name> tname
 
-	convert-outputs:
-		[(name, Reference(cname)), outs*]
-			-> [Output(name, Int()), outputs*]
-		where
-			[outputs*] := <convert-outputs> [outs*]
+	convert-output:
+		(name, Reference(cname))
+			-> Output(name, Int())
 
-	convert-outputs:
-		[(name, Int()), outs*]
-			-> [Output(name, Int()), outputs*]
-		where
-			[outputs*] := <convert-outputs> [outs*]
 
-	convert-outputs:
-		[(name, Set(Reference(cname))), outs*]
-			-> [Output(name, Int()), outputs*]
-		where
-			[outputs*] := <convert-outputs> [outs*]
 
 			 	
 	booster-to-relational-guarded-command:
