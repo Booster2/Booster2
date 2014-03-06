@@ -10,8 +10,6 @@ rules
 // Main editor interface (defined by editor/Booster-Builders and -References.esv)
   
       
-/* pp-install
-*/
 
 	pp-install:
 	 	Schema(name, tables, procedures, statements)
@@ -19,40 +17,30 @@ rules
 				 create database [name];
 	 		     use [[name]];
 	 		     SET autocommit=0;
-	 		[<pp-install> tables]
-	 		[<pp-install> procedures]
+	 		[<map(pp-install-table)> tables]
+	 		[<map(pp-install-procedure)> procedures]
 			[<proc-statements> statements]
 			[<standard-stuff> name]]
 	 		
-	 pp-install:
-	 	[Table(name, [column, columns*]), tables*]
+	 pp-install-table:
+	 	Table(name, [column, columns*])
 	 	
 	 		-> $[drop table if exists [name];
-	 			 create table [name] ([<pp-install>(name, column)]);
-	 			[<pp-install> tables*]
-	 			[<pp-install> (name, [columns*])]]
+	 			 create table [name] ([<pp-install-column> column]);
+	 			[<map((\ c -> (name, c) \) ; pp-install-columns)> [columns*]]]
 	 			
-	 pp-install:
-	 	[]
-	 		-> []
 
-	 pp-install:
-	 	(name, [])
-	 		-> $[ ]
-	 
-	 pp-install:
-	 	(name, [column, columns*])
+
+	 pp-install-columns:
+	 	(name, coldef)
 	 		-> $[ alter table [name]
-	 				add column [coldef];
-	 			[<pp-install> (name, [columns*])]]
-	 		where
-	 			coldef := <pp-install> (name, column)
+	 				add column [<pp-install-column> coldef];
+	 			]
 	 
-	 pp-install:
-	 	(name, Column(columnName, default, nullable, type, extra, key, reference))
-	 	
-	 		-> $[ [columnName] [<column-type> type] [<column-null> nullable] [<column-default> default] [<column-extra> extra] [<column-key> key] [<reference> (columnName, reference)]]
-
+	pp-install-column:
+		Column(columnName, default, nullable, type, extra, key, reference)
+			->  $[[columnName] [<column-type> type] [<column-null> nullable] [<column-default> default] [<column-extra> extra] [<column-key> key] [<reference> (columnName, reference)]]
+			
 	reference:
 		(columnname, None()) -> []
 
@@ -60,8 +48,8 @@ rules
 		(columnname, Some(Reference(name, [names*])))
 			-> $[, add foreign key ([columnname]) references [name] ( [<column-names> [names*]])] 
 	 		
-	 pp-install:
-	 	[Procedure(name, inputs, DeclareList(declares), statements), procedures*]
+	 pp-install-procedure:
+	 	Procedure(name, inputs, DeclareList(declares), statements)
 	 		-> $[ drop procedure if exists [name];
 	 			  delimiter //
 	 			  create procedure [name] ( [<proc-params> inputs])
@@ -75,9 +63,7 @@ rules
 	 			    [<proc-statements> statements]
 	 			    commit;
 	 			  	end //
-	 			  delimiter ;
-	 			  
-	 			[<pp-install>[procedures*]]]
+	 			  delimiter ;]
 	 			
 	 column-type:
 	 	Varchar(n)

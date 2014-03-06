@@ -102,15 +102,6 @@ imports
 		where
 			debug */ 
 			
-	lookup-class-attributes:
-		classname
-		->
-			<lookup>(classname, <LookupTable> "Attributes")
-
-	lookup-class-methods:
-		classname
-		->
-			<lookup>(classname, <LookupTable> "Operations")
 
 	lookup-system-name:
 		x -> <LookupTable> "Name"
@@ -118,29 +109,7 @@ imports
 	lookup-classes:
 		x -> <LookupTable> "Classes"
 
-	set-attribute-table-name:
-		(classname, attname, tablename) ->
-			[]
-		where
-			tableNames := (<LookupTable> "TableNames");
-			tableNames' := <union>(tableNames, [((classname, attname), tablename)]);
-			rules(
-				LookupTable :+ "TableNames" -> tableNames'
-			)
 
-	set-attribute-table-name:
-		(classname, attname, tablename) ->
-			[]
-		where
-			rules(
-				LookupTable :+ "TableNames" -> [((classname, attname), tablename)]
-			)
-
-	get-attribute-table-name:
-		(classname, attname)
-			-> elem
-		where
-			elem := <lookup>((classname, attname), <LookupTable> "TableNames")
 
 
 	add-class-id:

@@ -287,6 +287,12 @@ rules
 			<addInput> (cname, mname, s, type)
 
 	record-parameter:
+		((cname, mname), This() {type})
+			-> This() {type}
+		where
+			<addInput> (cname, mname, "this", type)
+
+	record-parameter:
 		((cname, mname), Input(s) {type})
 			-> Input(s) {type}
 		where
@@ -295,7 +301,7 @@ rules
 
 	record-parameter:
 		((cname, mname), Output(s) {type})
-			-> Input(s) {type}
+			-> Output(s) {type}
 		where
 			<is-more-general-than> (type, <getOutputType>(cname, mname, s));
 			<addOutput> (cname, mname, s, type)

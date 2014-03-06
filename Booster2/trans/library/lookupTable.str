@@ -109,7 +109,11 @@ rules
 		Given a classname, returns a list of (classname, attributename) pairs 	
 */
 	lookup-class-attributes:
-		cname -> <map(\ (aname, attdetails) -> (cname, aname)\)><LookupTable> "Attributes"
+		cname -> <filter(\ ((cname, aname), attdetails) -> ((cname, aname), attdetails)\)><LookupTable> "Attribute"
+
+	lookup-class-methods:
+		cname -> <filter(\ ((cname, mname), mdetails) -> ((cname, mname), mdetails)\)><LookupTable> "Method"
+
 
 /* 	lookup-attribute-type:
 		Takes a class name, and an attribute name and returns the type of that attribute 	
@@ -138,3 +142,26 @@ rules
 
 
 
+	set-attribute-table-name:
+		(classname, attname, tablename) ->
+			[]
+		where
+			tableNames := (<LookupTable> "TableNames");
+			tableNames' := <union>(tableNames, [((classname, attname), tablename)]);
+			rules(
+				LookupTable :+ "TableNames" -> tableNames'
+			)
+
+	set-attribute-table-name:
+		(classname, attname, tablename) ->
+			[]
+		where
+			rules(
+				LookupTable :+ "TableNames" -> [((classname, attname), tablename)]
+			)
+
+	get-attribute-table-name:
+		(classname, attname)
+			-> elem
+		where
+			elem := <lookup>((classname, attname), <LookupTable> "TableNames")
