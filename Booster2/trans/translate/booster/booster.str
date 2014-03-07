@@ -8,16 +8,14 @@ imports
   library/binOp
   library/unOp
   library/binRel 
+  
+  translate/helpers
 
  rules
  	
 /* output-to-booster:
 */
 
-foldout(s): ([], sep) -> $[ ]
-foldout(s): ([x], sep) -> $[[<s> x]]
-foldout(s): ([x|xs*], sep) -> $[[<s> x][sep][<foldout(s)>([xs*], sep)]]
-//foldout(s): something -> $[] where log(|Error(), "foldoutError", something)
 
 substs: s -> <foldout(\ (inp, expr) -> $[[<expression> inp] = [<expression> expr]]\)> (s, ",")
 

@@ -62,28 +62,28 @@ where
 				
 			with
 				program := <program> (classname, methname, constraint);
-				log(|Error(), "program", <guardedCommand> program);
+				/* log(|Error(), "program", <guardedCommand> program); */
 				paths := <get-modified-paths> program;
-				log(|Error(), "modified paths", <foldout(expression)> (paths, ","));
+				/*log(|Error(), "modified paths", <foldout(expression)> (paths, ","));*/
 				constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
-				log(|Error(), "constraint 2a", <constraint> constraint2a);
+				/*log(|Error(), "constraint 2a", <constraint> constraint2a);*/
 				constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
-				log(|Error(), "constraint 2b", <constraint> constraint2b);
+				/* log(|Error(), "constraint 2b", <constraint> constraint2b); */
 				constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
-				log(|Error(), "constraint 3", <constraint> constraint3);
+				/* log(|Error(), "constraint 3", <constraint> constraint3); */
 				
 				mod-atts := <get-modified-attributes> program;
 				invs := <conjoin-constraints><map(lookup-invariant)> mod-atts;
-				log(|Error(), "invs", <constraint> invs);
+				/* log(|Error(), "invs", <constraint> invs); */
 				constraint4 := <make-post-state> invs ;
-				log(|Error(), "constraint 4", <constraint> constraint4);
+				/* log(|Error(), "constraint 4", <constraint> constraint4); */
 				
 				constraint5 := And(constraint4, constraint3);
-				log(|Error(), "constraint 5", <constraint> constraint5);
+				/* log(|Error(), "constraint 5", <constraint> constraint5); */
 				
 				(constraint6, program2) := <calculate-wp>(program, constraint5, classname, methname);
-				log(|Error(), "constraint 6", <constraint> constraint6);
-				log(|Error(), "program 2", <guardedCommand> program2);
+				/* log(|Error(), "constraint 6", <constraint> constraint6); */
+				/* log(|Error(), "program 2", <guardedCommand> program2); */
 				
 				constraint7 := <make-pre-state> constraint6; 
 				<updateMethodProgram> (classname, methname, Guard(constraint7, program2))

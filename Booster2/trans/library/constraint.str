@@ -230,9 +230,9 @@ imports
 			substs := <map(\p -> (p, pathstart {type})\)> paths;
 	
 			con := <literal-substitute> (BinRel(expression1, binrel, expression2), substs);
-			log(|Error(), "con", <constraint> con);
-			con2 := <literal-substitute> (con, [(path, expression)]);
-			log(|Error(), "con2", <constraint> con2)
+			/* log(|Error(), "con", <constraint> con); */
+			con2 := <literal-substitute> (con, [(path, expression)]) /*;
+			log(|Error(), "con2", <constraint> con2) */
 			
 	
 /*	combine-invariants:

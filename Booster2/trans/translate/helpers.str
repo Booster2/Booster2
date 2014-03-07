@@ -1,0 +1,12 @@
+module translate/helpers
+
+imports
+
+rules
+	
+foldout(s): ([], sep) -> $[ ]
+foldout(s): ([x], sep) -> $[[<s> x]]
+foldout(s): ([x|xs*], sep) -> $[[<s> x][sep][<foldout(s)>([xs*], sep)]]
+//foldout(s): something -> $[] where log(|Error(), "foldoutError", something)
+ 
+maybe-output(s) = (\None() -> $[]\) <+ s

@@ -1,4 +1,4 @@
-module translate/booster/lookupTable
+module translate/lookupTable
 
 imports
   include/Booster2

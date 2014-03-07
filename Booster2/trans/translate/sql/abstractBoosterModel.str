@@ -187,7 +187,7 @@ imports
 			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*])
 		where 
 			[columns*] := <filter(get-attribute-column)><filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute";
-			log(|Error(), "columns", <filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute"); 
+			/* log(|Error(), "columns", <filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute"); */ 
 			identity := <concat-strings> [cname, "Id"]
 
 			

@@ -3,7 +3,7 @@ module translate/sql/sql
 imports
   include/Booster2
   
-
+  translate/helpers
 
 rules 
 
@@ -12,14 +12,14 @@ rules
       
 
 	pp-install:
-	 	Schema(name, tables, procedures, statements)
+	 	Schema(name, tables, procedures, StatementList(statements))
 	 		-> $[drop database if exists [name];
 				 create database [name];
 	 		     use [[name]];
 	 		     SET autocommit=0;
 	 		[<map(pp-install-table)> tables]
 	 		[<map(pp-install-procedure)> procedures]
-			[<proc-statements> statements]
+			[<foldout(proc-stmt)> (statements, ";")]
 			[<standard-stuff> name]]
 	 		
 	 pp-install-table:
@@ -45,22 +45,22 @@ rules
 		(columnname, None()) -> []
 
 	reference:
-		(columnname, Some(Reference(name, [names*])))
-			-> $[, add foreign key ([columnname]) references [name] ( [<column-names> [names*]])] 
+		(columnname, Some(Reference(name, names)))
+			-> $[, add foreign key ([columnname]) references [name] ( [<foldout(column-name)> (names, ", ")])] 
 	 		
 	 pp-install-procedure:
-	 	Procedure(name, inputs, DeclareList(declares), statements)
+	 	Procedure(name, inputs, DeclareList(declares), StatementList(statements))
 	 		-> $[ drop procedure if exists [name];
 	 			  delimiter //
-	 			  create procedure [name] ( [<proc-params> inputs])
+	 			  create procedure [name] ( [<foldout(proc-param)> (inputs, ",")])
 	 				begin
 	 				declare exit handler for sqlwarning, sqlexception, not found 
 	 				begin
 					rollback;
 					end; 
 					start transaction;
-	 			    [<declare-statements> declares]
-	 			    [<proc-statements> statements]
+	 			    [<foldout(declare-statement)> (declares, "; ")]
+	 			    [<foldout(proc-stmt)> (statements, ";")]
 	 			    commit;
 	 			  	end //
 	 			  delimiter ;]
@@ -120,78 +120,54 @@ rules
 	column-key:
 		NoKey() -> $[]	
 		
-	proc-params: 
-		[] -> $[] 
 
-	proc-params:
-		[Input(name, type)]
+	proc-param:
+		Input("this", type)
+			-> $[in this [<column-type> type]]
+
+	proc-param:
+		Input(name, type)
 			-> $[in [name]_in [<column-type> type]]
 		
 	proc-params:
-		[Input(name, type), params*]
-			-> $[in [name]_in [<column-type> type], [ins*]]
-		where
-			[ins*] := <proc-params> [params*]
-
-	proc-params:
-		[Output(name, type)]
+		Output(name, type)
 			-> $[out [name]_out [<column-type> type]]
 		
 	proc-params:
-		[Output(name, type), params*]
-			-> $[out [name]_out [<column-type> type], [ins*]]
-		where
-			[ins*] := <proc-params> [params*]
-
-	proc-params:
-		[InOut(name, type)]
+		InOut(name, type)
 			-> $[inout [name]_inout [<column-type> type]]
 		
-	proc-params:
-		[InOut(name, type), params*]
-			-> $[inout [name]_inout [<column-type> type], [ins*]]
-		where
-			[ins*] := <proc-params> [params*]
-
-			
-	proc-statements:
-		StatementList([]) -> $[]
-		
-	proc-statements:
-		StatementList([stmt, stmts*])
-			->	$[[<proc-stmt> stmt] ;
-				  [<proc-statements> StatementList([stmts*])] ]
 
 	proc-stmt:
 		BeginEnd(DeclareList(declares), StatementList(stmts)) 
 			-> $[begin
-				 [<declare-statements> declares]
-				 [<proc-statements> StatementList(stmts)]
+				 [<foldout(declare-statement)> (declares, "; ")]
+				 [<foldout(proc-stmt)> (stmts, ";")]
 				 end]
 	proc-stmt:
 		IfThen(expr, StatementList(stmts), elseifs, None()) 
 			-> $[if [<expression> expr]
-				 then [<proc-statements> StatementList(stmts)]
-				 [<elseifs> elseifs]
+				 then [<foldout(proc-stmt)> (stmts, ";")]
+				 [<foldout(elseif)> (elseifs, "\n")]
 				 end if]
 
 	proc-stmt:
 		Update(uo,tr,us,wp,obp,lp) 
-			-> $[update [<update-options> uo] [<table-reference> tr]
-				set [<update-set> us]
-				[<where-part> wp]
-				[<order-by-part> obp]
+			-> $[update [<foldout(update-option)> (uo, " ")] [<table-reference> tr]
+				set [<foldout(update)> (us, ",")]
+				[<maybe-output(where-part)> wp]
+				[<maybe-output(order-by-part)> obp]
 				[<limit-part> lp]]
 
 	proc-stmt:
 		Insert( ip , ig, into ,tn,cns, es, od) 
-			-> $[insert [<insert-priority> ip] [<ignore> ig]
-				[<into> into]
+			-> $[insert [<maybe-output(insert-priority)> ip] [<maybe-output(ignore)> ig]
+				[<maybe-output(into)> into]
 				[tn]
-				([<column-names> cns])
+				([<foldout(column-name)> (cns, ", ")])
 				values
-				([<expression-list>es])
-				[<on-duplicate> od]]
+				([<foldout(expression)> (es, ", ")])
+				[<maybe-output(on-duplicate)> od]]
 
 	proc-stmt:
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
@@ -206,53 +182,25 @@ rules
 		
 	insert-priority:
 		Some(HighPriority()) -> $[high_priority]
-	
-	insert-priority:
-		None() -> $[]
-		
-	ignore:
-		None() -> $[]
-	
+				
 	ignore:
 		Some(Ignore()) -> $[ignore]
-		
-	into:
-		None() -> $[]
-		
+				
 	into:
 		Into() -> $[into]
 		
-	column-names:
-		[] -> $[]
 
-	column-names:
-		[Output(o)] -> $[[o]_out]
+	column-name:
+		Output(o) -> $[[o]_out]
 		
-	column-names:
-		[cn] -> $[[cn]]
+	column-name:
+		cn -> $[[cn]]
 		
-	column-names:
-		[Output(o), cns*] -> $[[o]_out, [<column-names> [cns*]]]
-
-	column-names:
-		[cn, cns*] -> $[[cn], [<column-names> [cns*]]]
-
-	on-duplicate:
-		None() -> $[]
 			
 	on-duplicate:
 		OnDuplicate(ups)
-			-> $[on duplicate key update [<update-parts> ups]]
+			-> $[on duplicate key update [<foldout(update-part)> (ups, ", ")]]
 			
-	update-parts:
-		[] -> $[]
-		
-	update-parts:
-		[up] -> $[[<update-part> up]]
-
-	update-parts:
-		[up, ups*] -> $[[<update-part> up] , [<update-parts> [ups*]]]
-
 	update-part:
 		UpdatePart(cn, expr)
 			-> $[[cn] = [<expression> expr]]
@@ -265,58 +213,35 @@ rules
 				log(|Error(), "cannot pretty-print statement", stmt)
 */		
 			
-	elseifs:
-		[]	
-			-> $[]		 	
 			
-	elseifs:
-		[ElseIf(expr, StatementList(stmts)), elseifs*]	
+	elseif:
+		ElseIf(expr, StatementList(stmts))	
 			-> $[else if [<expression> expr]
-				 then [<proc-statements> StatementList(stmts)]
-				 [<elseifs>[elseifs*]]]
+				 then [<foldout(proc-stmt)> (stmts, ";")]
+				 ]
 				 
-	update-options:
-		[]
-			-> $[]
+	update-option:
+		LowPriority()
+			-> $[LOW_PRIORITY]
 			
-	update-options:
-		[LowPriority(), uos*]
-			-> $[LOW_PRIORITY [<update-options> [uos*]]]
-			
-	update-options:
-		[Ignore(), uos*]
-			-> $[IGNORE [<update-options> [uos*]]]
+	update-option:
+		Ignore()
+			-> $[IGNORE]
 			
 	table-reference:
 		 TableName(name)
 		 	-> $[[name]]	
 		 	
-	update-set:
-		[]
-			-> $[]
-
-	update-set:
-		[(name, expr)]
+	update:
+		(name, expr)
 			-> $[[name] = [<expression> expr]]
 
-	update-set:
-		[(name, expr), sets]
-			-> $[[name] = [<expression> expr], 
-				 [<update-set> [sets]]]
-
 			
-	where-part:
-		None()
-			-> $[]
-
 	where-part:
 		Where(exp)
 			-> $[where [<expression> exp]]
 
 			
-	order-by-part:
-		None()
-			-> $[]
 
 	limit-part:
 		None()
@@ -410,15 +335,15 @@ rules
 
 	expression:
 		InQuery(expr, maybenot, query)
-			-> $[[<expression> expr] [<maybenot> maybenot] in [<query> query]]
+			-> $[[<expression> expr] [<maybe-output(maybenot)> maybenot] in [<query> query]]
 
 	expression:
 		InSet(expr, maybenot, exprs)
-			-> $[[<expression> expr] [<maybenot> maybenot] in [<expression-list> exprs]]
+			-> $[[<expression> expr] [<maybe-output(maybenot)> maybenot] in [<foldout(expression)> (exprs, ",")]]
 	
 	expression:
 		Between(expr1, maybenot, expr2, expr3)
-			-> $[[<expression> expr1] [<maybenot> maybenot] between [<expression> expr2] and [<expression> expr3]]
+			-> $[[<expression> expr1] [<maybe-output(maybenot)> maybenot] between [<expression> expr2] and [<expression> expr3]]
 
 	expression:
 		SoundsLike(expr1, expr2)
@@ -426,11 +351,11 @@ rules
 
 	expression:
 		Like(expr1, maybenot, expr2, escape)
-			-> $[[<expression> expr1] [<maybenot> maybenot] like [<expression> expr2] [<maybeescape> escape]]
+			-> $[[<expression> expr1] [<maybe-output(maybenot)> maybenot] like [<expression> expr2] [<maybe-output(maybeescape)> escape]]
 
 	expression:
 		Regexp(expr1, maybenot, expr2)
-			-> $[[<expression> expr1] [<maybenot> maybenot] regexp [<expression> expr2]]
+			-> $[[<expression> expr1] [<maybe-output(maybenot)> maybenot] regexp [<expression> expr2]]
 
 	expression:
 		BitOr(expr1, expr2)
@@ -518,11 +443,11 @@ rules
 
 	expression:
 		SetExpression(exprs)
-			-> $[([<expression-list> exprs])]
+			-> $[([<foldout(expression)> (exprs, ", ")])]
 
 	expression:
 		Row(expr, exprs)
-			-> $[row [<expression> expr], [<expression-list> exprs]]
+			-> $[row [<expression> expr], [<foldout(expression)> (exprs, ", ")]]
 			
 	expression:
 		Exists(query)
@@ -599,31 +524,31 @@ rules
 			
 	expression:
 		MatchExpression(ids, expr, modifier)
-			->$[match ([<id-list>ids]) against ([<expression>expr] [<search-modifier> modifier])]
+			->$[match ([<foldout(output-id)> (ids, ", ")]) against ([<expression>expr] [<maybe-output(search-modifier)> modifier])]
 
 	expression:
-		CaseExpression(expr, [cws*], ce)
+		CaseExpression(expr, cws, ce)
 			->
 				$[case [<expression> expr]
-				    [<case-whens> [cws*]]
-				    [<case-else> ce]
+				    [<foldout(case-when)> (cws, "\n")]
+				    [<maybe-output(case-else)> ce]
 				  end]
 			
 	expression:
 		FunctionCall(name, params)
-			-> $[[name]([<expression-list> params])]
+			-> $[[name]([<foldout(expression)> (params, ", ")])]
 				
 	expression:
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
-			-> $[(select [<select-type> sts] [<select-exprs> ses] [<from-part> fp]
-			   [<where-part> wp]
-			   [<group-by-part> gbp]
-			   [<having-part> hp]
-			   [<order-by-part> obp]
+			-> $[(select [<select-type> sts] [<foldout(expression)> (ses, " ")] [<maybe-output(from-part)> fp]
+			   [<maybe-output(where-part)> wp]
+			   [<maybe-output(group-by-part)> gbp]
+			   [<maybe-output(having-part)> hp]
+			   [<maybe-output(order-by-part)> obp]
 			   [<limit-part> lp]
-			   [<procedure-part> pp]
-			   [<into-part> ip]
-			   [<mode-part> mp])]
+			   [<maybe-output(procedure-part)> pp]
+			   [<maybe-output(into-part)> ip]
+			   [<maybe-output(mode-part)> mp])]
 	
 
 /*				
@@ -633,18 +558,9 @@ rules
 		where
 			log(|Error(), "cannot pretty-print expression:", expr)
 */		  
-	case-whens:
+	case-when:
 		[CaseWhen(expr1, expr2)]
 			-> $[when [<expression> expr1] then [<expression> expr2]]
-
-	case-whens:
-		[CaseWhen(expr1, expr2), cws*]
-			-> $[when [<expression> expr1] then [<expression> expr2]
-				[<case-whens> [cws*]]]
-			 
-	case-else:
-		None() 
-			-> $[]
 			
 	case-else:
 		CaseElse(expr) 
@@ -653,19 +569,10 @@ rules
 		 
 	
 
-	id-list:
-		[] -> $[]
-	
-	id-list:
+	output-id:
 		[i]
 			-> $[[i]]
 	
-	id-list:
-		[i,is*]
-			-> $[[i],[<id-list>[is*]]]
-
-	search-modifier:
-		None() -> $[]
 		
 	search-modifier:
 		InBooleanMode() 
@@ -676,27 +583,10 @@ rules
 			-> $[with query expansion]
 			
 
-	maybenot:
-		None() -> $[]
-		
 
 	maybenot:
 		Not() -> $[not]
-	
-	expression-list:
-		[] -> $[]
-		
-	expression-list:
-		[expr]
-			->$[[<expression> expr]]
-
-	expression-list:
-		[expr, exprs*]
-			->$[[<expression> expr],[<expression-list> exprs*]]
-
-	maybeescape:
-		None() -> $[]
-		
+			
 	maybeescape:
 		Escape(expr)
 			-> $[escape [<expression> expr]]
@@ -837,14 +727,6 @@ rules
 	select-type:
 		CalcFoundRows() -> "sql_calc_found_rows"
 
-	select-exprs:
-		[] -> ""
-		
-	select-exprs:
-		[e, es*] -> $[ [<expression> e] [<select-exprs> [es*]]]
-
-	from-part:
-		None() -> ""
 		
 	from-part:
 		Some(FromPart(trs))
@@ -932,15 +814,15 @@ rules
 
 	index-hint:
 		Use(ik, fc)
-			-> $[use [<index-key> ik] [<for-clause> fc]]
+			-> $[use [<index-key> ik] [<maybe-output(for-clause)> fc]]
 
 	index-hint:
 		Ignore(ik, fc)
-			-> $[ignore [<index-key> ik] [<for-clause> fc]]
+			-> $[ignore [<index-key> ik] [<maybe-output(for-clause)> fc]]
 
 	index-hint:
 		Force(ik, fc)
-			-> $[force [<index-key> ik] [<for-clause> fc]]
+			-> $[force [<index-key> ik] [<maybe-output(for-clause)> fc]]
 
 
 	index-key:
@@ -948,13 +830,10 @@ rules
 
 	index-key:
 		Key() -> "Key"
-
-	for-clause:
-		None() -> $[]
 		
 	for-clause:
 		Some(ForClause(jog, ns))
-			-> $[for [<jog> jog] [<names> ns]]
+			-> $[for [<jog> jog] [<foldout(column-name)> (ns, ", ")]]
 
 	jog:
 		Join() -> "join"
@@ -964,93 +843,60 @@ rules
 
 	jog:
 		GroupBy() -> "group by"
-		
-	names:
-		[] -> ""
-	
-	names:
-		[n] -> $[n]
-	
-	names:
-		[n,ns*] -> $[[n], [<names> [ns*]]]
-	
+			
 	join-condition:
 		On(expr)
 			-> $[on [<expression> expr]]
 			
 	join-condition:
 		Using(ns)
-			-> $[using [<names> ns]]
-
-	group-by-part:
-		None() -> ""
+			-> $[using [<foldout(column-name)> (ns, ", ")]]
 		
 	group-by-part:
 		Some(GroupByPart(expr, o, r))
-			-> $[group by [<expression> expr] [<order> o] [<rollup> r]]
- 
- 	order:
- 		None() -> ""
+			-> $[group by [<expression> expr] [<maybe-output(order)> o] [<maybe-output(rollup)> r]]
  
  	order:
  		Some(Ascending()) -> "asc"
 
  	order:
  		Some(Descending()) -> "desc"
- 		
- 	rollup:
- 		None() -> ""
- 		
+ 		 		
  	rollup:
  		Some(Rollup())
  			-> "with rollup"
 
 	having-part:
-		None() -> ""
-		
-	having-part:
 		Some(HavingPart(expr))
 			-> $[having [<expression> expr]]
 	
 	order-by-part:
-		None() -> ""
-
-	order-by-part:
 		Some(OrderByPart(expr, o))
-			-> $[order by [<expression> expr] [<order> o]]
+			-> $[order by [<expression> expr] [<maybe-output(order)> o]]
 	
-	procedure-part:
-		None() -> ""
 			
 	procedure-part:
 		Some(ProcedurePart(n, ps))
-			-> $[procedure [n] ([<expression-list> ps])]
-
-     into-part:
-     	None() -> ""
+			-> $[procedure [n] ([<foldout(expression)> (ps, ", ")])]
      
     into-part:
     	Some(IntoOutFile(s,cs,eo))
-    		-> $[into outfile [s] [<charset> cs] [<export-options> eo]] 
+    		-> $[into outfile [s] [<charset> cs] [<maybe-output(export-options)> eo]] 
 
     into-part:
     	Some(Into(vars))
-    		-> $[into [<column-names> vars]] 
+    		-> $[into [<foldout(column-name)> (vars, ", ")]] 
 
 
 	charset:
 		CharSet(name)
 			-> $[character set [name]]      
 			
-	export-options:
-		None() -> ""
 
 	export-options:
 		Some(ExportOptions())
 			-> "export options unknown"
 			
-	mode-part:
-		None() -> ""
 		
 	mode-part:
 		Some(ForUpdate()) -> "for update"
@@ -1058,21 +904,11 @@ rules
 	mode-part:
 		Some(LockShareMode()) -> "lock in share mode"
 		
-	declare-statements:
-		[] -> $[]
-		
-	declare-statements:
-		[Declare(names, type, default)] 
-			-> $[declare [<column-names> names] [<column-type> type] [<declare-default> default]]
-
-	declare-statements:
-		[Declare(names, type, default), ds*] 
-			-> $[declare [<column-names> names] [<column-type> type] [<declare-default> default] ;
-			[<declare-statements> [ds*]]]
+	declare-statement:
+		Declare(names, type, default) 
+			-> $[declare [<foldout(column-name)> (names, ", ")] [<column-type> type] [<maybe-output(declare-default)> default]]
 
 		
-	declare-default:
-		None() -> $[]
 		
 	declare-default:
 		DefaultDeclare(expr)
