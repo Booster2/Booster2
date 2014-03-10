@@ -19,7 +19,7 @@ rules
 	 		     SET autocommit=0;
 	 		[<map(pp-install-table)> tables]
 	 		[<map(pp-install-procedure)> procedures]
-			[<foldout(proc-stmt)> (statements, ";")]
+			[<map(proc-stmt)> statements]
 			[<standard-stuff> name]]
 	 		
 	 pp-install-table:
@@ -60,7 +60,7 @@ rules
 					end; 
 					start transaction;
 	 			    [<foldout(declare-statement)> (declares, "; ")]
-	 			    [<foldout(proc-stmt)> (statements, ";")]
+	 			    [<map(proc-stmt)> statements]
 	 			    commit;
 	 			  	end //
 	 			  delimiter ;]
@@ -142,14 +142,14 @@ rules
 		BeginEnd(DeclareList(declares), StatementList(stmts)) 
 			-> $[begin
 				 [<foldout(declare-statement)> (declares, "; ")]
-				 [<foldout(proc-stmt)> (stmts, ";")]
-				 end]
+				 [<map(proc-stmt)> stmts]
+				 end;["\r\r"]]
 	proc-stmt:
 		IfThen(expr, StatementList(stmts), elseifs, None()) 
 			-> $[if [<expression> expr]
-				 then [<foldout(proc-stmt)> (stmts, ";")]
+				 then [<map(proc-stmt)> stmts]
 				 [<foldout(elseif)> (elseifs, "\n")]
-				 end if]
+				 end if;["\r\r"]]
 
 	proc-stmt:
 		Update(uo,tr,us,wp,obp,lp) 
@@ -157,7 +157,7 @@ rules
 				set [<foldout(update)> (us, ",")]
 				[<maybe-output(where-part)> wp]
 				[<maybe-output(order-by-part)> obp]
-				[<limit-part> lp]]
+				[<limit-part> lp];["\r\r"]]
 
 	proc-stmt:
 		Insert( ip , ig, into ,tn,cns, es, od) 
@@ -167,11 +167,11 @@ rules
 				([<foldout(column-name)> (cns, ", ")])
 				values
 				([<foldout(expression)> (es, ", ")])
-				[<maybe-output(on-duplicate)> od]]
+				[<maybe-output(on-duplicate)> od];["\r\r"]]
 
 	proc-stmt:
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
-			-> $[[<expression> Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)]]
+			-> $[[<expression> Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)];["\r\r"]]
 
 
 	insert-priority:
@@ -206,18 +206,12 @@ rules
 			-> $[[cn] = [<expression> expr]]
 
 
-/*	
-	proc-stmt:
-		stmt -> $[show tables;]
-			where
-				log(|Error(), "cannot pretty-print statement", stmt)
-*/		
 			
 			
 	elseif:
 		ElseIf(expr, StatementList(stmts))	
 			-> $[else if [<expression> expr]
-				 then [<foldout(proc-stmt)> (stmts, ";")]
+				 then [<map(proc-stmt)> stmts]
 				 ]
 				 
 	update-option:
