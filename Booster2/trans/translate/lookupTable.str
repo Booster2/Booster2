@@ -77,7 +77,7 @@ attributes: [<output-list>(attributes, ",")]
 methods:    [<output-list>(methods, ",")]]
   
 output-attribute:
-	((cname, aname), (decorations, type, opposite, minmult, maxmult))
+	((cname, aname), (decorations, type, opposite, minmult, maxmult, tname))
 		->
 $[name: [cname] . [aname]]
 

@@ -83,14 +83,14 @@ imports
 			
 
 	booster-to-metadata-attributes:
-		((classname, attname), (ds, t, opp, min, max)) ->
+		((classname, attname), (ds, t, opp, min, max, tname)) ->
 			Insert(None(), None(), Into(), "_Meta_Attributes", 
 						["class","attName","primType","typeMultiplicity","oppAttName","className","setName","direction","tableName","isId"], 
 						[String(classname),String(attname),String(primType),String(typeMultiplicity),oppAttName,String(className),String(setName),String(direction),String(tableName),Int(isId)], None())
 		where
 			(primType, typeMultiplicity,className,setName) := <attribute-type-metadata> t;
 			(direction, oppAttName) := <get-direction> (classname, attname);
-			tableName := <get-attribute-table-name>(classname, attname);
+			tableName := <lookup-attribute-table-name>(classname, attname);
 			isId := <((<elem> (Identity(), ds) ; !1 ) <+ !0)> ds
 
 	booster-to-metadata-method:
@@ -186,7 +186,8 @@ imports
 		(cname, (dscs, ascs, as, ms, cs, wfs)) 
 			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*])
 		where 
-			[columns*] := <filter(get-attribute-column)><filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute";
+			[columns*] := <filter(get-attribute-column)><filter(\((cname',aname), adef) -> ((cname',aname), adef) where <equal>(cname', cname) \)> <LookupTable> "Attribute";
+			log(|Error(), "columns", [columns*]);
 			/* log(|Error(), "columns", <filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute"); */ 
 			identity := <concat-strings> [cname, "Id"]
 
@@ -209,55 +210,55 @@ imports
 	
 			
 	get-attribute-column:
-		((cname, attname), (ds, BasicType(t), opp, 1, 1))
+		((cname, attname), (ds, BasicType(t), opp, 1, 1, tablename))
 			-> Column(attname, "", False(), t', NoExtra(), NoKey(), None())
 		where
-			[] := <set-attribute-table-name> (cname, attname, cname);
+			<updateAttributeTableName> (cname, attname, cname);
 			t' := <get-type-booster-to-sql> t
 
 
 	get-attribute-column:
-		((cname, attname), (ds, Reference(tname), opp, 1, 1))
+		((cname, attname), (ds, Reference(tname), opp, 1, 1, tablename))
 			-> Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
 		where
 			<is-set-name> tname;
-			[] := <set-attribute-table-name> (cname, attname,cname)
+			<updateAttributeTableName> (cname, attname,cname)
 
 	get-attribute-column:
-		((cname, attname), (ds, Reference(tname), opp, 1, 1))
+		((cname, attname), (ds, Reference(tname), opp, 1, 1, tablename))
 			-> Column(attname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))
 		where
 			<is-class-name> tname;
 			not(<lookup-opposite>(cname, attname));
-			[] := <set-attribute-table-name> (cname, attname,cname)
+			<updateAttributeTableName> (cname, attname,cname)
 	
 	get-attribute-column:
-		((cname, attname), (ds, Optional(BasicType(t)), opp, 0, 1))
+		((cname, attname), (ds, Optional(BasicType(t)), opp, 0, 1, tablename))
 			-> Column(attname, "null", True(), t', NoExtra(), NoKey(), None())
 		where
-			[] := <set-attribute-table-name> (cname, attname, cname);
+			<updateAttributeTableName> (cname, attname, cname);
 			t' := <get-type-booster-to-sql> t
 
 
 	get-attribute-column:
-		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1))
+		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1, tablename))
 			-> Column(attname, "null", True(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
 		where
 			<is-set-name> tname;
-			[] := <set-attribute-table-name> (cname, attname,cname)
+			<updateAttributeTableName> (cname, attname,cname)
 
 	get-attribute-column:
-		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1))
+		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1, tablename))
 			-> Column(attname, "null", True(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>([cname, "Id"])])))
 		where
 			<is-class-name> tname;
 			not(<lookup-opposite>(cname, attname));
-			[] := <set-attribute-table-name> (cname, attname, cname)
+			<updateAttributeTableName> (cname, attname, cname)
 
 				
 			
 	get-assoc-table:
-		((cname, attname), ds, t, (oname, oaname), min, max)
+		((cname, attname), ds, t, (oname, oaname), min, max, tname)
 			-> Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(), None()), 
 								 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
 								 Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))])
@@ -267,10 +268,10 @@ imports
 			firstcolname := <concat-strings> [cname, "_", attname];			
 			secondcolname := <concat-strings> [oname, "_", oaname];
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (cname, attname, tablename)
+			<updateAttributeTableName> (cname, attname, tablename)
 
 	get-assoc-table:
-		((cname, attname), ds, Set(BasicType(t)), opp, min, max)
+		((cname, attname), ds, Set(BasicType(t)), opp, min, max, tname)
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
@@ -279,12 +280,12 @@ imports
 			tablename := <concat-strings> [cname, "_", attname];
 			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (cname, attname, tablename);
+			<updateAttributeTableName> (cname, attname, tablename);
 			t' := <get-type-booster-to-sql> t
 			
 
 	get-assoc-table:
-		((cname, attname), ds, Set(Reference(tname)), opp, min, max)
+		((cname, attname), ds, Set(Reference(tname)), opp, min, max, tname)
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
@@ -294,10 +295,10 @@ imports
 			tablename := <concat-strings> [cname, "_", attname];
 			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (cname, attname, tablename)
+			<updateAttributeTableName> (cname, attname, tablename)
 			
 	get-assoc-table:
-		((cname, attname), ds, Set(Reference(tname)), opp, min, max)
+		((cname, attname), ds, Set(Reference(tname)), opp, min, max, tname)
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
@@ -307,7 +308,7 @@ imports
 			tablename := <concat-strings> [cname, "_", attname];
 			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			[] := <set-attribute-table-name> (cname, attname, tablename)
+			<updateAttributeTableName> (cname, attname, tablename)
 
 
 			
@@ -403,7 +404,7 @@ imports
 				attname := <get-path-attribute-name> path;
 				path' := <get-path-initial-path> path;
 				Reference(classname') := <resolve-path-type>(classname, path', (classname, progname), <new-environment> []);
-				tablename := <get-attribute-table-name>(classname', attname);
+				tablename := <lookup-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
 				column2 := <concat-strings>[classname'', "_", attname''];

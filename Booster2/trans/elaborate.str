@@ -202,7 +202,7 @@ rules
 		((cname, mname), PathStart(att, maybePrimed) )
 			-> PathStart(att, maybePrimed) {type}
 		where
-			type := <\ (ds,t,o,min,max) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
+			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
 
 	infer-types:
 		((cname, mname), PathStart(cname', maybePrimed) )
@@ -221,7 +221,7 @@ rules
 		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
-			type := <\ (ds,t,o,min,max) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
+			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 
 

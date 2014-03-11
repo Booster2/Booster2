@@ -28,6 +28,17 @@ rules
 			rules(
 				LookupTable :+ "Method" -> newMethods
 			)
+
+	replaceAttribute(s):
+		(cname, aname)
+			-> (cname, aname)
+		where
+			currentlyKnownAttributes := <LookupTable> "Attribute";
+			oldAttribute := <lookup>((cname, aname), currentlyKnownAttributes);
+			newAttributes := <union>(<diff>(currentlyKnownAttributes, [((cname, aname), oldAttribute)]), [<s>((cname, aname), oldAttribute)]);
+			rules(
+				LookupTable :+ "Attribute" -> newAttributes
+			)
 			
 	addInput:
 		(cname, mname, input, type)
@@ -70,6 +81,9 @@ rules
 
 	updateMethodProgram = (\ (cname, mname, newProgram) -> (cname, mname, newProgram) where
 				<replaceMethod(\ ((c,m),(co,gc,e,d,is,os)) -> ((c,m),(co,newProgram,e,d,is,os)) \)> (cname, mname) \)
+
+	updateAttributeTableName = (\ (cname, aname, newtname) -> (cname, aname, newtname) where
+				<replaceAttribute(\ ((c,a),(ds, t, opp, min, max, tname)) -> ((c,a),(ds, t, opp, min, max, newtname)) \)> (cname, aname) \)
 				
 
 	getInputType:
@@ -120,17 +134,17 @@ rules
 */
 	lookup-attribute-type:
 		(cname, aname)
-			-> <\ (ds, t, opp, minmult, maxmult) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
 
 
 
 	lookup-max-mult:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max) -> max \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname) -> max \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 	lookup-min-mult:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max) -> min \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname) -> min \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 /* 	lookup-opposite:
 		Takes a class name, and an attribute name
@@ -138,10 +152,14 @@ rules
 */
 	lookup-opposite:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max) -> opp \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname) -> opp \> <lookup>((classname, attname), <LookupTable> "Attribute")
+
+	lookup-attribute-table-name:
+		(classname, attname)
+			-> <\ (ds, t, opp, min, max, tname) -> tname \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 
-
+/*
 	set-attribute-table-name:
 		(classname, attname, tablename) ->
 			[]
@@ -159,9 +177,4 @@ rules
 			rules(
 				LookupTable :+ "TableNames" -> [((classname, attname), tablename)]
 			)
-
-	get-attribute-table-name:
-		(classname, attname)
-			-> elem
-		where
-			elem := <lookup>((classname, attname), <LookupTable> "TableNames")
+*/

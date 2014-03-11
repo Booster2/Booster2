@@ -4,126 +4,118 @@ create database ClassicCars;
  SET autocommit=0;
 drop table if exists _Meta_Classes;
 create table _Meta_Classes (id int   auto_increment primary key );
+alter table _Meta_Classes
+	add column className varchar(500)     ;
+alter table _Meta_Classes
+	add column tableName varchar(500)     ;
 drop table if exists _Meta_Sets;
 create table _Meta_Sets (id int   auto_increment primary key );
+alter table _Meta_Sets
+	add column setName varchar(500)     ;
+alter table _Meta_Sets
+	add column tableName varchar(500)     ;
+alter table _Meta_Sets
+	add column columnName varchar(500)     ;
 drop table if exists _Meta_Attributes;
 create table _Meta_Attributes (id int   auto_increment primary key );
+alter table _Meta_Attributes
+	add column class varchar(500)     ;
+alter table _Meta_Attributes
+	add column attName varchar(500)     ;
+alter table _Meta_Attributes
+	add column primType varchar(500)     ;
+alter table _Meta_Attributes
+	add column typeMultiplicity varchar(500)     ;
+alter table _Meta_Attributes
+	add column className varchar(500)     ;
+alter table _Meta_Attributes
+	add column setName varchar(500)     ;
+alter table _Meta_Attributes
+	add column direction varchar(500)     ;
+alter table _Meta_Attributes
+	add column tableName varchar(500)     ;
+alter table _Meta_Attributes
+	add column oppAttName varchar(500)     ;
+alter table _Meta_Attributes
+	add column isId bit     ;
 drop table if exists _Meta_Methods;
 create table _Meta_Methods (id int   auto_increment primary key );
+alter table _Meta_Methods
+	add column class varchar(500)     ;
+alter table _Meta_Methods
+	add column methodName varchar(500)     ;
+alter table _Meta_Methods
+	add column isObjectMethod bit     ;
 drop table if exists _Meta_Method_Params;
 create table _Meta_Method_Params (id int   auto_increment primary key );
+alter table _Meta_Method_Params
+	add column class varchar(500)     ;
+alter table _Meta_Method_Params
+	add column methodName varchar(500)     ;
+alter table _Meta_Method_Params
+	add column paramName varchar(500)     ;
+alter table _Meta_Method_Params
+	add column paramType varchar(500)     ;
+alter table _Meta_Method_Params
+	add column paramMultiplicity varchar(500)     ;
+alter table _Meta_Method_Params
+	add column paramInOut varchar(10)     ;
+alter table _Meta_Method_Params
+	add column paramClassName varchar(500)     ;
+alter table _Meta_Method_Params
+	add column paramSetName varchar(500)     ;
 drop table if exists ProductLine;
 create table ProductLine (ProductLineId int   auto_increment primary key );
+alter table ProductLine
+	add column productLine varchar(1000)     ;
+alter table ProductLine
+	add column textDescription varchar(1000)     ;
+alter table ProductLine
+	add column htmlDescription varchar(1000)     ;
+alter table ProductLine
+	add column image varchar(1000)     ;
 drop table if exists Product;
 create table Product (ProductId int   auto_increment primary key );
+alter table Product
+	add column productName varchar(1000)     ;
+alter table Product
+	add column productCode varchar(1000)     ;
+alter table Product
+	add column productScale varchar(1000)     ;
+alter table Product
+	add column productVendor varchar(1000)     ;
+alter table Product
+	add column productDescription varchar(1000)     ;
+alter table Product
+	add column quantityInStock int     ;
+alter table Product
+	add column buyPrice varchar(1000)     ;
+alter table Product
+	add column MSRP varchar(1000)     ;
 drop table if exists PurchaseOrderDetails;
 create table PurchaseOrderDetails (PurchaseOrderDetailsId int   auto_increment primary key );
+alter table PurchaseOrderDetails
+	add column quantityOrdered int     ;
+alter table PurchaseOrderDetails
+	add column priceEach varchar(1000)     ;
+alter table PurchaseOrderDetails
+	add column orderLineNumber int     ;
 drop table if exists PurchaseOrder;
 create table PurchaseOrder (PurchaseOrderId int   auto_increment primary key );
+alter table PurchaseOrder
+	add column orderNumber int     ;
+alter table PurchaseOrder
+	add column orderDate varchar(1000)     ;
+alter table PurchaseOrder
+	add column requiredDate varchar(1000)     ;
+alter table PurchaseOrder
+	add column shippedDate varchar(1000)     ;
+alter table PurchaseOrder
+	add column status varchar(1000)     ;
+alter table PurchaseOrder
+	add column comments varchar(1000)     ;
 drop table if exists Customer;
 create table Customer (CustomerId int   auto_increment primary key );
-drop table if exists Payment;
-create table Payment (PaymentId int   auto_increment primary key );
-drop table if exists Employee;
-create table Employee (EmployeeId int   auto_increment primary key );
-drop table if exists Office;
-create table Office (OfficeId int   auto_increment primary key );
-drop table if exists ProductLine_products_Product_productLine;
-create table ProductLine_products_Product_productLine (ProductLine_products_Product_productLineId int   auto_increment primary key );
-drop table if exists Product_forPurchaseOrders_PurchaseOrderDetails_product;
-create table Product_forPurchaseOrders_PurchaseOrderDetails_product (Product_forPurchaseOrders_PurchaseOrderDetails_productId int   auto_increment primary key );
-drop table if exists PurchaseOrderDetails_purchaseOrder_PurchaseOrder_details;
-create table PurchaseOrderDetails_purchaseOrder_PurchaseOrder_details (PurchaseOrderDetails_purchaseOrder_PurchaseOrder_detailsId int   auto_increment primary key );
-drop table if exists PurchaseOrder_customer_Customer_orders;
-create table PurchaseOrder_customer_Customer_orders (PurchaseOrder_customer_Customer_ordersId int   auto_increment primary key );
-drop table if exists Customer_salesRepEmployee_Employee_salesRepFor;
-create table Customer_salesRepEmployee_Employee_salesRepFor (Customer_salesRepEmployee_Employee_salesRepForId int   auto_increment primary key );
-drop table if exists Customer_payments_Payment_customer;
-create table Customer_payments_Payment_customer (Customer_payments_Payment_customerId int   auto_increment primary key );
-drop table if exists Employee_office_Office_employees;
-create table Employee_office_Office_employees (Employee_office_Office_employeesId int   auto_increment primary key );
-drop table if exists Employee_reportsTo_Employee_inChargeOf;
-create table Employee_reportsTo_Employee_inChargeOf (Employee_reportsTo_Employee_inChargeOfId int   auto_increment primary key );
-
-alter table Employee_reportsTo_Employee_inChargeOf
-	add column Employee_reportsTo int     , add foreign key (Employee_reportsTo) references Employee ( EmployeeId);
-alter table Employee_reportsTo_Employee_inChargeOf
-	add column Employee_inChargeOf int     , add foreign key (Employee_inChargeOf) references Employee ( EmployeeId);
-
-alter table Employee_office_Office_employees
-	add column Employee_office int     , add foreign key (Employee_office) references Employee ( EmployeeId);
-alter table Employee_office_Office_employees
-	add column Office_employees int     , add foreign key (Office_employees) references Office ( OfficeId);
-
-alter table Customer_payments_Payment_customer
-	add column Customer_payments int     , add foreign key (Customer_payments) references Customer ( CustomerId);
-alter table Customer_payments_Payment_customer
-	add column Payment_customer int     , add foreign key (Payment_customer) references Payment ( PaymentId);
-
-alter table Customer_salesRepEmployee_Employee_salesRepFor
-	add column Customer_salesRepEmployee int     , add foreign key (Customer_salesRepEmployee) references Customer ( CustomerId);
-alter table Customer_salesRepEmployee_Employee_salesRepFor
-	add column Employee_salesRepFor int     , add foreign key (Employee_salesRepFor) references Employee ( EmployeeId);
-
-alter table PurchaseOrder_customer_Customer_orders
-	add column PurchaseOrder_customer int     , add foreign key (PurchaseOrder_customer) references PurchaseOrder ( PurchaseOrderId);
-alter table PurchaseOrder_customer_Customer_orders
-	add column Customer_orders int     , add foreign key (Customer_orders) references Customer ( CustomerId);
-
-alter table PurchaseOrderDetails_purchaseOrder_PurchaseOrder_details
-	add column PurchaseOrderDetails_purchaseOrder int     , add foreign key (PurchaseOrderDetails_purchaseOrder) references PurchaseOrderDetails ( PurchaseOrderDetailsId);
-alter table PurchaseOrderDetails_purchaseOrder_PurchaseOrder_details
-	add column PurchaseOrder_details int     , add foreign key (PurchaseOrder_details) references PurchaseOrder ( PurchaseOrderId);
-
-alter table Product_forPurchaseOrders_PurchaseOrderDetails_product
-	add column Product_forPurchaseOrders int     , add foreign key (Product_forPurchaseOrders) references Product ( ProductId);
-alter table Product_forPurchaseOrders_PurchaseOrderDetails_product
-	add column PurchaseOrderDetails_product int     , add foreign key (PurchaseOrderDetails_product) references PurchaseOrderDetails ( PurchaseOrderDetailsId);
-
-alter table ProductLine_products_Product_productLine
-	add column ProductLine_products int     , add foreign key (ProductLine_products) references ProductLine ( ProductLineId);
-alter table ProductLine_products_Product_productLine
-	add column Product_productLine int     , add foreign key (Product_productLine) references Product ( ProductId);
-
-alter table Office
-	add column officeCode int     ;
-alter table Office
-	add column city varchar(1000)     ;
-alter table Office
-	add column phone varchar(1000)     ;
-alter table Office
-	add column addressLine1 varchar(1000)     ;
-alter table Office
-	add column addressLine2 varchar(1000)     ;
-alter table Office
-	add column state varchar(1000)     ;
-alter table Office
-	add column country varchar(1000)     ;
-alter table Office
-	add column postalCode varchar(1000)     ;
-alter table Office
-	add column territory varchar(1000)     ;
-
-alter table Employee
-	add column employeeNumber int     ;
-alter table Employee
-	add column lastName varchar(1000)     ;
-alter table Employee
-	add column firstName varchar(1000)     ;
-alter table Employee
-	add column extension varchar(1000)     ;
-alter table Employee
-	add column email varchar(1000)     ;
-alter table Employee
-	add column jobTitle varchar(1000)     ;
-
-alter table Payment
-	add column checkNumber varchar(1000)     ;
-alter table Payment
-	add column paymentDate varchar(1000)     ;
-alter table Payment
-	add column amount varchar(1000)     ;
-
 alter table Customer
 	add column customerNumber int     ;
 alter table Customer
@@ -148,113 +140,52 @@ alter table Customer
 	add column country varchar(1000)     ;
 alter table Customer
 	add column creditLimit varchar(1000)     ;
-
-alter table PurchaseOrder
-	add column orderNumber int     ;
-alter table PurchaseOrder
-	add column orderDate varchar(1000)     ;
-alter table PurchaseOrder
-	add column requiredDate varchar(1000)     ;
-alter table PurchaseOrder
-	add column shippedDate varchar(1000)     ;
-alter table PurchaseOrder
-	add column status varchar(1000)     ;
-alter table PurchaseOrder
-	add column comments varchar(1000)     ;
-
-alter table PurchaseOrderDetails
-	add column quantityOrdered int     ;
-alter table PurchaseOrderDetails
-	add column priceEach varchar(1000)     ;
-alter table PurchaseOrderDetails
-	add column orderLineNumber int     ;
-
-alter table Product
-	add column productName varchar(1000)     ;
-alter table Product
-	add column productCode varchar(1000)     ;
-alter table Product
-	add column productScale varchar(1000)     ;
-alter table Product
-	add column productVendor varchar(1000)     ;
-alter table Product
-	add column productDescription varchar(1000)     ;
-alter table Product
-	add column quantityInStock int     ;
-alter table Product
-	add column buyPrice varchar(1000)     ;
-alter table Product
-	add column MSRP varchar(1000)     ;
-
-alter table ProductLine
-	add column productLine varchar(1000)     ;
-alter table ProductLine
-	add column textDescription varchar(1000)     ;
-alter table ProductLine
-	add column htmlDescription varchar(1000)     ;
-alter table ProductLine
-	add column image varchar(1000)     ;
-
-alter table _Meta_Method_Params
-	add column class varchar(500)     ;
-alter table _Meta_Method_Params
-	add column methodName varchar(500)     ;
-alter table _Meta_Method_Params
-	add column paramName varchar(500)     ;
-alter table _Meta_Method_Params
-	add column paramType varchar(500)     ;
-alter table _Meta_Method_Params
-	add column paramMultiplicity varchar(500)     ;
-alter table _Meta_Method_Params
-	add column paramInOut varchar(10)     ;
-alter table _Meta_Method_Params
-	add column paramClassName varchar(500)     ;
-alter table _Meta_Method_Params
-	add column paramSetName varchar(500)     ;
-
-alter table _Meta_Methods
-	add column class varchar(500)     ;
-alter table _Meta_Methods
-	add column methodName varchar(500)     ;
-alter table _Meta_Methods
-	add column isObjectMethod bit     ;
-
-alter table _Meta_Attributes
-	add column class varchar(500)     ;
-alter table _Meta_Attributes
-	add column attName varchar(500)     ;
-alter table _Meta_Attributes
-	add column primType varchar(500)     ;
-alter table _Meta_Attributes
-	add column typeMultiplicity varchar(500)     ;
-alter table _Meta_Attributes
-	add column className varchar(500)     ;
-alter table _Meta_Attributes
-	add column setName varchar(500)     ;
-alter table _Meta_Attributes
-	add column direction varchar(500)     ;
-alter table _Meta_Attributes
-	add column tableName varchar(500)     ;
-alter table _Meta_Attributes
-	add column oppAttName varchar(500)     ;
-alter table _Meta_Attributes
-	add column isId bit     ;
-
-alter table _Meta_Sets
-	add column setName varchar(500)     ;
-alter table _Meta_Sets
-	add column tableName varchar(500)     ;
-alter table _Meta_Sets
-	add column columnName varchar(500)     ;
-
-alter table _Meta_Classes
-	add column className varchar(500)     ;
-alter table _Meta_Classes
-	add column tableName varchar(500)     ;
+drop table if exists Payment;
+create table Payment (PaymentId int   auto_increment primary key );
+alter table Payment
+	add column checkNumber varchar(1000)     ;
+alter table Payment
+	add column paymentDate varchar(1000)     ;
+alter table Payment
+	add column amount varchar(1000)     ;
+drop table if exists Employee;
+create table Employee (EmployeeId int   auto_increment primary key );
+alter table Employee
+	add column employeeNumber int     ;
+alter table Employee
+	add column lastName varchar(1000)     ;
+alter table Employee
+	add column firstName varchar(1000)     ;
+alter table Employee
+	add column extension varchar(1000)     ;
+alter table Employee
+	add column email varchar(1000)     ;
+alter table Employee
+	add column jobTitle varchar(1000)     ;
+drop table if exists Office;
+create table Office (OfficeId int   auto_increment primary key );
+alter table Office
+	add column officeCode int     ;
+alter table Office
+	add column city varchar(1000)     ;
+alter table Office
+	add column phone varchar(1000)     ;
+alter table Office
+	add column addressLine1 varchar(1000)     ;
+alter table Office
+	add column addressLine2 varchar(1000)     ;
+alter table Office
+	add column state varchar(1000)     ;
+alter table Office
+	add column country varchar(1000)     ;
+alter table Office
+	add column postalCode varchar(1000)     ;
+alter table Office
+	add column territory varchar(1000)     ;
 
 drop procedure if exists ProductLine_updateText;
 delimiter //
-create procedure ProductLine_updateText ( in t_in varchar(1000))
+create procedure ProductLine_updateText ( in t_in varchar(1000),in this int)
 	begin
 	declare exit handler for sqlwarning, sqlexception, not found 
 	begin
@@ -267,556 +198,3421 @@ create procedure ProductLine_updateText ( in t_in varchar(1000))
        set textDescription = t_in
        where this = ProductLineId
        
-        ;
-       
+       ;
   
-  end if ;
-  
+  end if;
   commit;
 	end //
 delimiter ;
-
-
 insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('ProductLine','ProductLine')
- ;
-insert  
+('ProductLine', 'ProductLine')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('ProductLine','productLine','String','Mandatory',null,'','','Uni','ProductLine',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('ProductLine','textDescription','String','Mandatory',null,'','','Uni','ProductLine',0)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('ProductLine','htmlDescription','String','Mandatory',null,'','','Uni','ProductLine',0)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('ProductLine','image','String','Mandatory',null,'','','Uni','ProductLine',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('ProductLine','products','ClassRef','Set','productLine','Product','','Bi','ProductLine_products_Product_productLine',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
 into
 _Meta_Methods
 (class, methodName, isObjectMethod)
 values
-('ProductLine','updateText',false)
- ;
-insert  
+('ProductLine', 'updateText', true)
+;insert  
 into
 _Meta_Method_Params
 (class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
 values
-('ProductLine','updateText','t','String','Mandatory','input','','')
- ;
-insert  
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('Product','Product')
- ;
-insert  
+('Product', 'Product')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','productName','String','Mandatory',null,'','','Uni','Product',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','productCode','String','Mandatory',null,'','','Uni','Product',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','productLine','ClassRef','Mandatory','products','ProductLine','','Bi','ProductLine_products_Product_productLine',0)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','productScale','String','Mandatory',null,'','','Uni','Product',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','productVendor','String','Mandatory',null,'','','Uni','Product',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','productDescription','String','Mandatory',null,'','','Uni','Product',0)
- ;
-insert  
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','quantityInStock','Integer','Mandatory',null,'','','Uni','Product',0)
- ;
-insert  
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','buyPrice','String','Mandatory',null,'','','Uni','Product',0)
- ;
-insert  
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','MSRP','String','Mandatory',null,'','','Uni','Product',0)
- ;
-insert  
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Product','forPurchaseOrders','ClassRef','Set','product','PurchaseOrderDetails','','Bi','Product_forPurchaseOrders_PurchaseOrderDetails_product',0)
- ;
-insert  
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('PurchaseOrderDetails','PurchaseOrderDetails')
- ;
-insert  
+('PurchaseOrderDetails', 'PurchaseOrderDetails')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrderDetails','purchaseOrder','ClassRef','Mandatory','details','PurchaseOrder','','Bi','PurchaseOrderDetails_purchaseOrder_PurchaseOrder_details',0)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrderDetails','product','ClassRef','Mandatory','forPurchaseOrders','Product','','Bi','Product_forPurchaseOrders_PurchaseOrderDetails_product',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrderDetails','quantityOrdered','Integer','Mandatory',null,'','','Uni','PurchaseOrderDetails',1)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrderDetails','priceEach','String','Mandatory',null,'','','Uni','PurchaseOrderDetails',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrderDetails','orderLineNumber','Integer','Mandatory',null,'','','Uni','PurchaseOrderDetails',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('PurchaseOrder','PurchaseOrder')
- ;
-insert  
+('PurchaseOrder', 'PurchaseOrder')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','orderNumber','Integer','Mandatory',null,'','','Uni','PurchaseOrder',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','orderDate','String','Mandatory',null,'','','Uni','PurchaseOrder',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','requiredDate','String','Mandatory',null,'','','Uni','PurchaseOrder',0)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','shippedDate','String','Mandatory',null,'','','Uni','PurchaseOrder',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','status','String','Mandatory',null,'','','Uni','PurchaseOrder',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','comments','String','Mandatory',null,'','','Uni','PurchaseOrder',0)
- ;
-insert  
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','details','ClassRef','Set','purchaseOrder','PurchaseOrderDetails','','Bi','PurchaseOrderDetails_purchaseOrder_PurchaseOrder_details',0)
- ;
-insert  
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('PurchaseOrder','customer','ClassRef','Mandatory','orders','Customer','','Bi','PurchaseOrder_customer_Customer_orders',0)
- ;
-insert  
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('Customer','Customer')
- ;
-insert  
+('Customer', 'Customer')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','customerNumber','Integer','Mandatory',null,'','','Uni','Customer',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','customerName','String','Mandatory',null,'','','Uni','Customer',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','contactLastName','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','contactFirstName','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','phone','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','addressLine1','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','addressLine2','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','city','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','state','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','postalCode','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','country','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','salesRepEmployee','ClassRef','Mandatory','salesRepFor','Employee','','Bi','Customer_salesRepEmployee_Employee_salesRepFor',0)
- ;
-insert  
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','creditLimit','String','Mandatory',null,'','','Uni','Customer',0)
- ;
-insert  
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','orders','ClassRef','Set','customer','PurchaseOrder','','Bi','PurchaseOrder_customer_Customer_orders',0)
- ;
-insert  
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Customer','payments','ClassRef','Set','customer','Payment','','Bi','Customer_payments_Payment_customer',0)
- ;
-insert  
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('Payment','Payment')
- ;
-insert  
+('Payment', 'Payment')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Payment','customer','ClassRef','Mandatory','payments','Customer','','Bi','Customer_payments_Payment_customer',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Payment','checkNumber','String','Mandatory',null,'','','Uni','Payment',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Payment','paymentDate','String','Mandatory',null,'','','Uni','Payment',0)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Payment','amount','String','Mandatory',null,'','','Uni','Payment',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('Employee','Employee')
- ;
-insert  
+('Employee', 'Employee')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','employeeNumber','Integer','Mandatory',null,'','','Uni','Employee',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','lastName','String','Mandatory',null,'','','Uni','Employee',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','firstName','String','Mandatory',null,'','','Uni','Employee',1)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','extension','String','Mandatory',null,'','','Uni','Employee',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','email','String','Mandatory',null,'','','Uni','Employee',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','office','ClassRef','Mandatory','employees','Office','','Bi','Employee_office_Office_employees',0)
- ;
-insert  
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','reportsTo','ClassRef','Optional','inChargeOf','Employee','','Bi','Employee_reportsTo_Employee_inChargeOf',0)
- ;
-insert  
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','jobTitle','String','Mandatory',null,'','','Uni','Employee',0)
- ;
-insert  
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','inChargeOf','ClassRef','Set','reportsTo','Employee','','Bi','Employee_reportsTo_Employee_inChargeOf',0)
- ;
-insert  
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Employee','salesRepFor','ClassRef','Set','salesRepEmployee','Customer','','Bi','Customer_salesRepEmployee_Employee_salesRepFor',0)
- ;
-insert  
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;insert  
 into
 _Meta_Classes
 (className, tablename)
 values
-('Office','Office')
- ;
-insert  
+('Office', 'Office')
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','officeCode','Integer','Mandatory',null,'','','Uni','Office',1)
- ;
-insert  
+('ProductLine', 'products', 'ClassRef', 'Set', 'productLine', 'Product', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','city','String','Mandatory',null,'','','Uni','Office',1)
- ;
-insert  
+('Product', 'productLine', 'ClassRef', 'Mandatory', 'products', 'ProductLine', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','phone','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('Product', 'forPurchaseOrders', 'ClassRef', 'Set', 'product', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','addressLine1','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('PurchaseOrderDetails', 'purchaseOrder', 'ClassRef', 'Mandatory', 'details', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','addressLine2','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('PurchaseOrderDetails', 'product', 'ClassRef', 'Mandatory', 'forPurchaseOrders', 'Product', '', 'Bi', '', 1)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','state','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('PurchaseOrder', 'details', 'ClassRef', 'Set', 'purchaseOrder', 'PurchaseOrderDetails', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','country','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('PurchaseOrder', 'customer', 'ClassRef', 'Mandatory', 'orders', 'Customer', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','postalCode','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('Customer', 'salesRepEmployee', 'ClassRef', 'Mandatory', 'salesRepFor', 'Employee', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','territory','String','Mandatory',null,'','','Uni','Office',0)
- ;
-insert  
+('Customer', 'orders', 'ClassRef', 'Set', 'customer', 'PurchaseOrder', '', 'Bi', '', 0)
+;insert  
 into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
-('Office','employees','ClassRef','Set','office','Employee','','Bi','Employee_office_Office_employees',0)
- ;
-
+('Customer', 'payments', 'ClassRef', 'Set', 'customer', 'Payment', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'customer', 'ClassRef', 'Mandatory', 'payments', 'Customer', '', 'Bi', '', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'reportsTo', 'ClassRef', 'Optional', 'inChargeOf', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'inChargeOf', 'ClassRef', 'Set', 'reportsTo', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'employees', 'ClassRef', 'Set', 'office', 'Employee', '', 'Bi', '', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'productLine', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'textDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'htmlDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('ProductLine', 'image', 'String', 'Mandatory', null, '', '', 'Uni', 'ProductLine', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productName', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productScale', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productVendor', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'productDescription', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'quantityInStock', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'buyPrice', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Product', 'MSRP', 'String', 'Mandatory', null, '', '', 'Uni', 'Product', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'quantityOrdered', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'priceEach', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrderDetails', 'orderLineNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrderDetails', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'orderDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'requiredDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'shippedDate', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'status', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('PurchaseOrder', 'comments', 'String', 'Mandatory', null, '', '', 'Uni', 'PurchaseOrder', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'customerName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactLastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'contactFirstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Customer', 'creditLimit', 'String', 'Mandatory', null, '', '', 'Uni', 'Customer', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'checkNumber', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'paymentDate', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Payment', 'amount', 'String', 'Mandatory', null, '', '', 'Uni', 'Payment', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'employeeNumber', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'lastName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'firstName', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'extension', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'email', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Employee', 'jobTitle', 'String', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'officeCode', 'Integer', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'city', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 1)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'phone', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine1', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'addressLine2', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'state', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'country', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'postalCode', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
+('Office', 'territory', 'String', 'Mandatory', null, '', '', 'Uni', 'Office', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateText', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+;
 SET @@GLOBAL.max_sp_recursion_depth = 255;
 SET @@session.max_sp_recursion_depth = 255; 
 
