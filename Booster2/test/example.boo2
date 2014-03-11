@@ -1,5 +1,18 @@
 system S
 
+class A {
+	attributes
+	  b : SET(B.a)[*]
+	
+}
+
+class B {
+	attributes
+	  a : SET(A.b)[*]
+	
+}
+
+/*
 set DayOfWeek { Monday, Tuesday, Wednesday }
 
 class A {
@@ -9,7 +22,7 @@ class A {
 		m1 { a' = 3 }		
 	
 }
-
+*/
 /*
 class B {
 	attributes

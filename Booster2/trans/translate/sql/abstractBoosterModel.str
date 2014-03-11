@@ -19,6 +19,7 @@ imports
 			[metatables*] := <booster-to-metatables> x; 
 			[tables*] := <map(booster-to-relational-class)> <LookupTable> "Class" ;
 			[tables'*] := <filter(get-assoc-table)> <LookupTable> "Attribute" ;
+			log(|Error(), "Assoc tables", [tables'*]);
 			[settables*] := <map(get-set-table)> <LookupTable> "SetDef" ;
 			[procedures*] := <map(booster-to-relational-procedure)> <LookupTable> "Method" ;
 			[metaStatements*] := <booster-to-metadata> x;
@@ -258,12 +259,14 @@ imports
 				
 			
 	get-assoc-table:
-		((cname, attname), ds, t, (oname, oaname), min, max, tname)
+		((cname, attname), (ds, t, (oname, oaname), min, max, tn))
 			-> Table(tablename, [Column(tableid, "", False(), Int(), AutoIncrement(), Primary(), None()), 
 								 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
 								 Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))])
 		where
-			<? Reference(oname)> t <+ <? Optional(Reference(oname))> t <+ <? Set(Reference(oname))> t;
+			log(|Error(), "get-assoc-table", (cname, attname));
+			<(?Reference(oname) <+ ?Optional(Reference(oname)) <+ ?Set(Reference(oname)))> t;
+			log(|Error(), "get-assoc-table 1", (cname, attname));
 			tablename := <concat-strings> [cname, "_", attname];
 			firstcolname := <concat-strings> [cname, "_", attname];			
 			secondcolname := <concat-strings> [oname, "_", oaname];
@@ -271,7 +274,7 @@ imports
 			<updateAttributeTableName> (cname, attname, tablename)
 
 	get-assoc-table:
-		((cname, attname), ds, Set(BasicType(t)), opp, min, max, tname)
+		((cname, attname), (ds, Set(BasicType(t)), opp, min, max, tn))
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
@@ -280,12 +283,12 @@ imports
 			tablename := <concat-strings> [cname, "_", attname];
 			firstcolname := <concat-strings> [cname, "Id"];			
 			tableid := <concat-strings> [tablename, "Id"];
-			<updateAttributeTableName> (cname, attname, tablename);
-			t' := <get-type-booster-to-sql> t
+			t' := <get-type-booster-to-sql> t;
+			<updateAttributeTableName> (cname, attname, tablename)
 			
 
 	get-assoc-table:
-		((cname, attname), ds, Set(Reference(tname)), opp, min, max, tname)
+		((cname, attname), (ds, Set(Reference(tname)), opp, min, max, tn))
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
@@ -298,7 +301,7 @@ imports
 			<updateAttributeTableName> (cname, attname, tablename)
 			
 	get-assoc-table:
-		((cname, attname), ds, Set(Reference(tname)), opp, min, max, tname)
+		((cname, attname), (ds, Set(Reference(tname)), opp, min, max, tn))
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
@@ -310,7 +313,11 @@ imports
 			tableid := <concat-strings> [tablename, "Id"];
 			<updateAttributeTableName> (cname, attname, tablename)
 
-
+/*    get-assoc-table:
+    	something -> Table("",[]) 
+    		where 
+    		log(|Error(), "cannot find assoc table", something)
+*/
 			
 	get-set-table:
 		(name, [values*])

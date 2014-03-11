@@ -123,10 +123,10 @@ rules
 		Given a classname, returns a list of (classname, attributename) pairs 	
 */
 	lookup-class-attributes:
-		cname -> <filter(\ ((cname, aname), attdetails) -> ((cname, aname), attdetails)\)><LookupTable> "Attribute"
+		cname -> <filter(\ ((cname', aname), attdetails) -> ((cname', aname), attdetails) where <equal>(cname, cname')\)><LookupTable> "Attribute"
 
 	lookup-class-methods:
-		cname -> <filter(\ ((cname, mname), mdetails) -> ((cname, mname), mdetails)\)><LookupTable> "Method"
+		cname -> <filter(\ ((cname', mname), mdetails) -> ((cname', mname), mdetails) where <equal>(cname, cname')\)><LookupTable> "Method"
 
 
 /* 	lookup-attribute-type:
