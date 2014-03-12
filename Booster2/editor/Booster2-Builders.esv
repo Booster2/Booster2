@@ -31,7 +31,8 @@ builders
   builder                   : "Generate SQL" = translateToSQL (openeditor) (realtime) (source)
   
   // workflow begin
-  builder                   : "Calculate Workflow Preconditions" = precondToLookupTable (openeditor) (realtime) (source)
+  builder                   : "Calculate Workflow Preconditions (Booster)"     = precondToBooster (openeditor) (realtime) (source)
+  builder                   : "Calculate Workflow Preconditions (LookupTable)" = precondToLookupTable (openeditor) (realtime) (source)
   // workflow end
 
   builder                   : "Test some stuff" = builder-test (openeditor) (realtime) (source)

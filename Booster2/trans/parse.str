@@ -141,7 +141,8 @@ rules
     getWfs = <concat> <filter(\ Workflows(wfs) -> wfs \)>
 
     getSeqWfs = <filter(\ SeqWf(n,expr) -> SeqWf(n,expr) \)> <getWfs>
-    getParWfs = <filter(\ ParWf(n,expr) -> ParWf(n,expr) \)> <getWfs>
+    // if the user already provides a precondition, we just ignore it
+    getParWfs = <filter(\ ParWf(n,expr) -> ParWf(n,expr) \ <+ \ ParWf2(cond,n,expr) -> ParWf(n,expr) \)> <getWfs>
 		 
 // workflow end
 

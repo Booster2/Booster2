@@ -360,6 +360,8 @@ ParWf -> WorkflowComponent
     
 'seq' ID ':' SeqWfExpression 		-> SeqWf {cons("SeqWf")}
 'par' ID ':' ParWfExpression		-> ParWf {cons("ParWf")}
+
+'par' Constraint '&' ID ':' ParWfExpression		-> ParWf {cons("ParWf2")}
   
 %% A sequential workflow expression is either the keyword \verb|skip|, or
 %% the choice between two guarded actions, or a wait expression:   

@@ -104,8 +104,16 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	seqWfNotation : t -> "???"
 	where log(|Error(),"notation not known: ",t)
 	
+	// precondition not available
 	parwf : ((classname, sname), expr) -> $[["\t\t\t"]par [sname] : [<parWfNotation> expr]]
+	where
+		not (<lookup> ((classname,sname),<LookupTable> "PrecondParWorkflows"))
 	
+	// precondition available
+	parwf : ((classname, sname), expr) -> $[["\t\t\t"]par [<constraint> cond] & [sname] : [<parWfNotation> expr]]
+	where
+		cond := <lookup> ((classname,sname),<LookupTable> "PrecondParWorkflows")
+		
 	parWfNotation: [] -> ""
 	parWfNotation: [wfr] -> wfr
 	parWfNotation: [wfr|list] -> $[[wfr] ||| [<parWfNotation> list]]

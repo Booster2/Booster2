@@ -17,6 +17,8 @@ class C1 {
     seq w1: true & m0() -> true & m1(in? = a) -> SKIP
     // we would like to be able to call methods on other objects
     seq w2: true & m0() -> true & c2.m0(in_c2? = a) -> SKIP
+    // test
+    seq w3: true & m0() -> SKIP
   workflows
     par p: w0
 }

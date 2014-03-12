@@ -4,7 +4,7 @@ imports
   include/Booster2
   trans/calculateWFPrecond/misc
   trans/calculateWFPrecond/workflow
-  simplify
+  trans/simplify
   
   // TODO: Currently, we don't support prioritisation of guarded actions
   
@@ -174,7 +174,8 @@ rules
 		(constraint6, program2) := <calculate-wp>(program, post-constraint, class_name, method_name);
 		log(|Error(),"check_constraint6",constraint6);
 		log(|Error(),"check_program2",program2);
-		constraint7 := <make-pre-state> constraint6
+		constraint7 := ( <make-pre-state> constraint6 );
+		log(|Error(),"simplified",<innermost(simplify)> constraint7)
 		
 		// for testing
 		;constraint7' := ("wp(",method_name,",",post,")")
