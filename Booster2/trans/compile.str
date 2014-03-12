@@ -3,7 +3,6 @@ module compile
 imports
   include/Booster2
   
-  // Thomas: I had to lower-case the name "LookupTable"
   library/lookupTable
   
   library/constraint
@@ -14,7 +13,6 @@ imports
   library/expression
   library/valueExpression
 
-	translate/booster/booster
 	
 rules
 

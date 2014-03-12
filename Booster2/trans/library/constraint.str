@@ -4,18 +4,14 @@ imports
   include/Booster2
   
   library/relation
-  library/expression
-  library/valueExpression
   library/environment
  
   library/strategy
-  library/constraint
-  
+
   
   compile
   elaborate
 
-  translate/booster/booster
   
  rules
  	
@@ -119,7 +115,7 @@ imports
 		 	constraint4 := <aliasing-substitute>	(classname, methodname, constraint2, path, expression, env)
 
 	aliasing-substitute:
-		 (classname, methodname, Exists(name, expr1, constraint1), Path(ps, pc), expression, env)
+		 (classname, methodname, Exists(name, expr1 { Set(type1) }, constraint1), Path(ps { type1 }, pc), expression, env)
 		 	-> And(
 		 		Exists(name, expr1, 
 		 			Implies(
@@ -137,9 +133,6 @@ imports
 		 					constraint1)))
 		 where
 		 	//log(|Error(), "Aliasing Substitute", (Forall(name, expr1, constraint1), Path(ps, pc), expression));
-		 	Set(type1) := <get-expression-type>(expr1, classname, methodname, env);
-		 	type2 := <get-expression-type>(ps, classname, methodname, env);
-		 	<equal>(type1, type2);
 			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
 		 	constraint2 := <literal-substitute>	(constraint1, [PathStart(name, Some(Primed())), ps]);
 			//log(|Error(), "Constraint3", (constraint2, [Path(ps, pc)], expression));
@@ -155,7 +148,7 @@ imports
 		 	constraint2 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env')
 
 	aliasing-substitute:
-		 (classname, methodname, Forall(name, expr1, constraint1), Path(ps, pc), expression, env)
+		 (classname, methodname, Forall(name, expr1 {Set(type1)}, constraint1), Path(ps { type1 }, pc), expression, env)
 		 	-> And(
 		 		Forall(name, expr1, 
 		 			Implies(
@@ -173,9 +166,6 @@ imports
 		 					constraint1)))
 		 where
 		 	//log(|Error(), "Aliasing Substitute", (Forall(name, expr1, constraint1), Path(ps, pc), expression));
-		 	Set(type1) := <get-expression-type>(expr1, classname, methodname, env);
-		 	type2 := <get-expression-type>(ps, classname, methodname, env);
-		 	<equal>(type1, type2);
 			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
 		 	constraint2 := <literal-substitute>	(constraint1, [PathStart(name, Some(Primed())), ps]);
 			//log(|Error(), "Constraint3", (constraint2, [Path(ps, pc)], expression));
@@ -206,7 +196,7 @@ imports
 		 	//log(|Error(), "Aliasing Subst - paths", paths);
 		 	pathstart {type}:= <(\Path(ps, pc) -> ps\) <+ (\ PathStart(ps, maybeprimed) {type} -> PathStart(ps, maybeprimed) {type} \)> path;
 		 	//log(|Error(), "Aliasing Subst - type", type);
-		 	filtered-paths := <curryfilter(is-correct-type)> ((type, classname, methodname, env), paths);
+		 	filtered-paths := <filter((\p -> (type, p) \) ; is-correct-type)> paths;
 		 	//log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
 		 	subsets := <subsets> filtered-paths;
 		 	//log(|Error(), "Aliasing Subst - subset",subsets);

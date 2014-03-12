@@ -4,7 +4,6 @@ imports
 
   include/Booster2
   
-  library/expression
   compile
  
  rules
@@ -21,8 +20,7 @@ imports
  		(varname, env)
  			-> vartype
  			where
- 				(classname, maybename, expression) := <lookup>(varname, env);
- 				Set(vartype) := <get-expression-type> (expression, classname, maybename, env)
+ 				(classname, maybename, expression {Set(vartype) }) := <lookup>(varname, env)
  				
 /* 	lookup-environment-type:
  		something -> BasicType(Int())

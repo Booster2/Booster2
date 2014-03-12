@@ -2,12 +2,8 @@ module library/abstractBoosterModel
 
 imports
   include/Booster2
-  library/constraint
-  library/valueExpression
-  library/strategy
   library/basicTypes
  
-  library/environment
   
  rules
  	
@@ -25,10 +21,6 @@ imports
 		where
 			type := <lookup>(inputname,<lookup>((classname, methname), <LookupTable> "Inputs"))
 			
-	lookup-input-type:
-			e -> String()
-		where
-			log(|Error(), "lookup-input-type fail", e)
 			
 			
 /* 	lookup-input-type:
@@ -94,48 +86,6 @@ imports
 	
 
 		
-
-
-/*	lookup-invariants:
-		(l, abm)
-			-> []
-		where
-			debug */ 
-			
-
-	lookup-system-name:
-		x -> <LookupTable> "Name"
-
-	lookup-classes:
-		x -> <LookupTable> "Classes"
-
-
-
-
-	add-class-id:
-		(classname, attname) ->
-			[]
-		where
-			ids := (<LookupTable> "IDs");
-			ids' := <union>(ids, [(classname, attname)]);
-			rules(
-				LookupTable :+ "IDs" -> ids'
-			)
-
-	add-class-id:
-		(classname, attname) ->
-			[]
-		where
-			rules(
-				LookupTable :+ "IDs" -> [(classname, attname)]
-			)
-
-	get-class-ids:
-		x
-			-> elems
-		where
-			elems := <LookupTable> "Ids"
-			
 
 /***** TODO *****/
 /*

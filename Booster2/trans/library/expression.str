@@ -14,58 +14,6 @@ rules
 	
 
 			
-/* get-expression-type
-*/
-
-	get-expression-type:
-		(UnOp(Head(), expr1), classname, methodname, env)
-			-> String()
-		where
-			String() := <get-expression-type> (expr1, classname, methodname, env)
-			
-	get-expression-type:
-		(UnOp(Head(),expr1), classname, methodname, env)
-			-> type1
-		where
-			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
-				
-	get-expression-type:
-		(UnOp(Tail(),expr1), classname, methodname, env)
-			-> String()
-		where
-			String() := <get-expression-type> (expr1, classname, methodname, env)
-			
-	get-expression-type:
-		(UnOp(Tail(),expr1), classname, methodname, env)
-			-> type1
-		where
-			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
-
-	get-expression-type:
-		(UnOp(Negative(),expr1), classname, methodname, env)
-			-> Int()
-		where
-			Int() := <get-expression-type> (expr1, classname, methodname, env)
-
-	get-expression-type:
-		(UnOp(Cardinality(),expr1), classname, methodname, env)
-			-> Int()
-		where
-			String() := <get-expression-type> (expr1, classname, methodname, env)
-
-	get-expression-type:
-		(UnOp(Cardinality(),expr1), classname, methodname, env)
-			-> Int()
-		where
-			Set(type1) := <get-expression-type> (expr1, classname, methodname, env)
-
-/*	get-expression-type:
-		(BinOp(expr1, op, expr2), classname, methodname, env)
-			-> t3
-		where
-			t1 := <get-expression-type> (expr1, classname, methodname, env);
-			t2 := <get-expression-type> (expr1, classname, methodname, env);
-			t3 := <binop-type-matching> (t1, op, t2) */
 
 
 			

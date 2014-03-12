@@ -5,9 +5,6 @@ imports
   
   library/lookupTable
   library/abstractBoosterModel
-  library/constraint
-  library/relation
-  library/expression
   library/basicTypes
   library/environment
   
@@ -81,104 +78,6 @@ imports
 			-> (cname2, aname)
 
 			
-/* 	get-expression-type
-*/
-
-	get-expression-type:
-		(BasicValue(t), classname, methodname, env)
-			-> <get-corresponding-booster-type> t
-
-
-	get-expression-type:
-		(TypeExtent(t), classname, methodname, env)
-			-> Set(t)
-
-
-	get-expression-type:
-		(Null(), classname, methodname, env)
-			-> Null()
-
-	get-expression-type:
-		(This(), classname, methodname, env)
-			-> Reference(classname)
-
-
-	get-expression-type:
-		(ThisPrimed(), classname, methodname, env)
-			-> Reference(classname)
-
-
-	get-expression-type:
-		(Input(inputname), classname, methodname, env)
-			-> <lookup-input-type>((classname, methodname), inputname)
-
-	get-expression-type:
-		(Output(outputname), classname, methodname, env)
-			-> <lookup-output-type>((classname, methodname), outputname)
-
-	get-expression-type:
-		(SetExtent([]), classname, methodname, env)
-			-> Null()
-
-	get-expression-type:
-		(SetExtent([x, xs*]), classname, methodname, env)
-			-> Set(t)
-		where
-			t := <get-expression-type> (x, classname, methodname, env);
-			Set(t) := <get-expression-type>(SetExtent([xs*]), classname, methodname, env)
-
-	get-expression-type:
-		(SetExtent([x, xs*]), classname, methodname, env)
-			-> Set(t)
-		where
-			t := <get-expression-type> (x, classname, methodname, env);
-			Null() := <get-expression-type>(SetExtent([xs*]), classname, methodname, env)
-
-	get-expression-type:
-		(PathStart(attname, maybeprimed), classname, methodname, env)
-			-> type
-		where
-			type := <lookup-attribute-type> ((classname, attname))
-
-	get-expression-type:
-		(PathStart(name, maybePrimed), classname, methodname, env)
-			-> Set(Reference(name))
-			where
-				<is-class-name> name
-
-	get-expression-type:
-		(PathStart(svalue, maybePrimed), classname, methodname, env)
-			-> Reference(sname)
-			where
-				sname := <lookup-set-value> svalue
-
-	get-expression-type:
-		(PathStart(name, maybePrimed), classname, methodname, env)
-			-> Set(Reference(name))
-			where
-				<is-set-name> name
-
-	get-expression-type:
-		(Path(ps, PathComponent(attname, maybeprimed)), classname, methodname, env)
-			-> t
-		where
-			Reference(otherclassname) := <get-expression-type> (ps, classname, methodname, env);
-			t := <lookup-attribute-type> ((otherclassname, attname))
-			
-	get-expression-type:
-		(Path(ps, PathComponent(attname, maybeprimed)), classname, methodname, env)
-			-> t
-		where
-			Optional(Reference(otherclassname)) := <get-expression-type> (ps, classname, methodname, env);
-			t := <lookup-attribute-type> ((otherclassname, attname))
-
-
-
-
-	get-expression-type:
-		something -> BasicValue(Int())
-			where
-				log(|Error(), "Get Expression Type", something)
 
 			
 			

@@ -1,9 +1,0 @@
-module library/typeDecl
-
-imports
-  include/Booster2
-  
- 
- rules
- 	
- 

@@ -5,8 +5,6 @@ imports
   library/valueExpression
   
   library/lookupTable
-  library/abstractBoosterModel
-  library/strategy
 
   library/basicTypes
   library/environment

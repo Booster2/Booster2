@@ -4,13 +4,6 @@ imports
   include/Booster2
    
   library/expression
-  library/valueExpression
-  
-  library/strategy
-  library/constraint
-  
-  compile
-  elaborate
   
  rules
  	 
@@ -24,29 +17,17 @@ imports
 					
 
 	is-correct-type:
-		((type, classname, methodname, env), path)
+		(type, path {type})
 			-> path
-		where 
-			type' := <resolve-path-type> (classname, path, (classname, methodname), env);
-			<equal>(type', type)
 
 	is-correct-type:
-		((type, classname, methodname, env), path)
+		(type, path { Optional(type) })
 			-> path
-		where 
-			type' := <resolve-path-type> (classname, path, (classname, methodname), env);
-			<equal>(type', Optional(type))
 
 	is-correct-type:
-		((type, classname, methodname, env), path)
+		(Optional(type), path { type })
 			-> path
-		where 
-			type' := <resolve-path-type> (classname, path, (classname, methodname), env);
-			<equal>(Optional(type'), type)
-			
-	is-correct-type:
-		((type, classname, methodname, env), path)
-			-> None()
+
 		
 		 	
 			 
