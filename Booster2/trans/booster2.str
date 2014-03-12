@@ -28,6 +28,7 @@ imports
   library/environment
   library/abstractBoosterModel
   library/valueExpression
+  library/lookupTable
   
 rules  
   

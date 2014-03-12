@@ -30,8 +30,8 @@
 	<h4 style="float: right; " ></h4> -->
 		
 		<ul class="methods" data-bind="foreach: objectMethods">
-			<li>
-				<a class="method-button" data-bind="text: methodName().unCamelCase(), attr: { href: '#objectmethod/' + $parent.showingClassName() + '/' + $parent.showingObjectID() + '/' + methodName() }"></a>
+			<li style="list-style: none;">
+				<button type="button" class="btn" data-bind="text: methodName().unCamelCase(), disable: methodAvailability() == 0, click : function() { window.location.href = '#objectmethod/' + $parent.showingClassName() + '/' + $parent.showingObjectID() + '/' + methodName(); }"></a>
 			</li>
 		</ul>
 		<table id="classListTable" class="table table-striped table-bordered">

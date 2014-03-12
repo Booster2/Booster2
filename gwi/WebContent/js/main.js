@@ -34,6 +34,7 @@ function Method(objectItem) {
     self.methodName = ko.observable(objectItem.methodName);
     self.methodThisOid = ko.observable(objectItem.methodThisOid);
     self.methodParams = ko.observableArray(objectItem.parameters);
+    self.methodAvailability = ko.observable(objectItem.methodAvailability);
     self.objectItem = objectItem;
     
 }

@@ -5,6 +5,7 @@ imports
   include/Booster2
   
   library/expression
+  compile
  
  rules
  	
