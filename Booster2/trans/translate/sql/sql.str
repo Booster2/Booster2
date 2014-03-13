@@ -152,6 +152,14 @@ rules
 				 end if;["\r\r"]]
 
 	proc-stmt:
+		IfThen(expr, StatementList(stmts), elseifs, StatementList(stmts')) 
+			-> $[if [<expression> expr]
+				 then [<map(proc-stmt)> stmts]
+				 [<foldout(elseif)> (elseifs, "\n")]
+				 else [<map(proc-stmt)> stmts']
+				 end if;["\r\r"]]
+
+	proc-stmt:
 		Update(uo,tr,us,wp,obp,lp) 
 			-> $[update [<foldout(update-option)> (uo, " ")] [<table-reference> tr]
 				set [<foldout(update)> (us, ",")]
