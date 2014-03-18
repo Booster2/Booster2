@@ -130,15 +130,18 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
     where
 
 		model := <elaborate> <parse> ast;
-    	if !node => UniDirectional(COMPLETION(prefix)) then
-        	proposals := <union>(<union>(["String","Int","DateTime", "Boolean"],<LookupTable> "Classes"), <LookupTable> "Sets")
+		//log(|Error(), "model", model);
+		//log(|Error(), "ast", ast);
+		if !node => UniDirectional(COMPLETION(prefix)) then
+        	proposals := <union>(<union>(["String","Int","DateTime", "Boolean"],<map(\(cname, cdef) -> cname\)> <LookupTable> "Class"), <map(\(sname, sdef) -> sname\)> <LookupTable> "SetDef")
       	end;
     	if !node => Extension(COMPLETION(prefix)) then
-        	log(|Error(), "Completion", <parent-at-position(|position)> ast);
-        	proposals := <LookupTable> "Classes"
+    		//classname := <collect-one(get-completion-class)> ast;
+        	//proposals := <filter(\(cname, cdef) -> cname where <not(equal)>(cname, classname)\)><LookupTable> "Class"
+        	proposals := <map(\(cname, cdef) -> cname\)><LookupTable> "Class"
       	end;
     	if !node => BiDirectional(classname,COMPLETION("")) then
-        	proposals := <lookup>(classname, <LookupTable> "Attributes" )
+        	proposals := <\ (ds, as, atts, ms, cs, wfs) -> atts\> <lookup>(classname, <LookupTable> "Class")
       	end;
       	if !node => PathComponent(COMPLETION(""), None()) then
         	classname := <collect-one(get-completion-class)> ast;
@@ -147,39 +150,36 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
       	end;
       	if !node => PathStart(COMPLETION(""),None()) then
         	classname := <collect-one(get-completion-class)> ast;
-        	methodname := <collect-one(get-completion-method)> ast;
-        	proposals := <union>(["this"], <lookup-class-attributes> classname)
+        	proposals := <union>(["this"], <\ (ds, as, atts, ms, cs, wfs) -> atts\> <lookup>(classname, <LookupTable> "Class"))
       	end
       	
     get-completion-method:
     	Method (name, something) -> 
     		name
     		where
-    		<collect-one(get-completion)> something 
+    		<collect-one(?COMPLETION(x))> something 
 
     get-completion-class:
     	Class (name, extends, something) -> 
     		name
     		where
-    		<collect-one(get-completion)> something 
+    		<collect-one(?COMPLETION(x))> (name, extends, something) 
 
-	get-completion:
-		 COMPLETION("") -> COMPLETION("")
 		 
     get-potential-attributes:
-    	(cname, mname, Path (pathStart, something)) -> 
+    	(cname, mname, Path (pathStart {Reference(c)}, something)) -> 
 			attnames
 			where
-				Reference(c) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
-		      	attnames := <lookup-class-attributes> c
+				attnames := <\(ds, as, atts, ms, cs, wfs) -> atts\> <lookup>(cname, <LookupTable> "Class")
 
     get-potential-attributes:
-    	(cname, mname, Path (pathStart, something)) -> 
+    	(cname, mname, Path (pathStart {Optional(Reference(c))}, something)) -> 
 			attnames
 			where
-				Optional(Reference(c)) := <resolve-path-type>(cname, pathStart, (cname, mname), <new-environment> []);
-		      	attnames := <lookup-class-attributes> c
-		      	
+				attnames := <\(ds, as, atts, ms, cs, wfs) -> atts\> <lookup>(cname, <LookupTable> "Class")
+
+    get-potential-attributes:
+		somethingelse -> []
 		      	
       /* <debug(!"Complete: ")> (<get-classes-from-system> ast) */
       /*;
