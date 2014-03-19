@@ -1,0 +1,5 @@
+system methodTest 
+ 
+
+
+	class class1  { 		attributes			att1  : INT		invariants 			att1 < 10		methods 			m1 { this.att1 := this.att1 + 5 }	}

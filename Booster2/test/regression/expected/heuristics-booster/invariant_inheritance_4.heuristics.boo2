@@ -1,0 +1,5 @@
+system Test 
+ 
+
+
+	class A  { 		attributes			a  : INT		invariants 			a > 0	}	class B extends A { 		attributes			a  : INT		invariants 			a < 10			a > 0	}	class C extends A { 		attributes			a  : INT		invariants 			a < 20			a > 0	}	class D extends B, C { 		attributes			a  : INT		invariants 			a > 0			a < 10			a < 20	}

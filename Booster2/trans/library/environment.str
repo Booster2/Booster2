@@ -4,7 +4,7 @@ imports
 
   include/Booster2
   
-  compile
+  wp
  
  rules
  	

@@ -1,0 +1,5 @@
+system attributeInheritance 
+ 
+
+
+	class a  { 		attributes			a  : INT	}	class b extends a { 		attributes			a  : INT	}

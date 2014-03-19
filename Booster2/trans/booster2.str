@@ -12,7 +12,10 @@ imports
   
   elaborate
  
-  compile
+  heuristics
+  wp
+  
+  
   // Workflow Stuff Begin
   calculateWFPrecond/main
   // Workflow Stuff End
@@ -39,8 +42,12 @@ rules
   elaborateToBooster = (\ x -> <builder-elaborate(output-to-booster)> ("elaborated.boo2", x) \)
   elaborateToLookupTable = (\ x -> <builder-elaborate(output-lookup-table)> ("elaborated.table", x) \)
 
-  compileToBooster = (\ x -> <builder-compile(output-to-booster)> ("compiled.boo2", x) \)
-  compileToLookupTable = (\ x -> <builder-compile(output-lookup-table)> ("compiled.table", x) \)
+  heuristicsToBooster = (\ x -> <builder-heuristics(output-to-booster)> ("heuristics.boo2", x) \)
+  heuristicsToLookupTable = (\ x -> <builder-heuristics(output-lookup-table)> ("heuristics.table", x) \)
+
+  WPToBooster = (\ x -> <builder-wp(output-to-booster)> ("wp.boo2", x) \)
+  WPToLookupTable = (\ x -> <builder-wp(output-lookup-table)> ("wp.table", x) \)
+
 
   simplifyToBooster = (\ x -> <builder-simplify(output-to-booster)> ("simplified.boo2", x) \)
   simplifyToLookupTable = (\ x -> <builder-simplify(output-lookup-table)> ("simplified.table", x) \)
@@ -52,6 +59,12 @@ rules
 
   java-elaborate-booster = main(elaborateToBooster)
   java-elaborate-lut = main(elaborateToLookupTable)
+
+  java-heuristics-booster = main(heuristicsToBooster)
+  java-heuristics-lut = main(heuristicsToLookupTable)
+
+  java-wp-booster = main(WPToBooster)
+  java-wp-lut = main(WPToLookupTable)
   
   // workflow begin
   precondToBooster = (\ x -> <builder-precond(output-to-booster)> ("precond.boo2", x) \)
@@ -208,15 +221,26 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    				          <parse> 
    				            selected   
    
-   builder-compile(output): 
+   builder-heuristics(output): 
    		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
    	 where
    		filename := <guarantee-extension(|extension)> path;
    		result :=   <output>
-   						<compile>
+   						<heuristics>
 	   						<elaborate>
 	   				          <parse> 
 	   				            selected   
+
+   builder-wp(output): 
+   		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
+   	 where
+   		filename := <guarantee-extension(|extension)> path;
+   		result :=   <output>
+   						<wp>
+   							<heuristics>
+	   							<elaborate>
+	   				          		<parse> 
+	   				            		selected   
 
    builder-simplify(output): 
    		(extension, (selected, position, ast, path, project-path)) -> (filename, result)
@@ -224,10 +248,11 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
    		filename := <guarantee-extension(|extension)> path;
    		result :=   <output>
    						<simplify-main>
-	   						<compile>
-		   						<elaborate>
-		   				          <parse> 
-		   				            selected   
+	   						<wp>
+	   							<heuristics>
+			   						<elaborate>
+			   				          <parse> 
+			   				            selected   
    
 
    builder-translate-sql:
@@ -237,10 +262,11 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 		result := <pp-install>
    				  	<booster-to-relational>
    				  		<simplify-main>
-	  						<compile> 
-	  						  <elaborate>
-	          					<parse> 
-	            					selected;
+	   						<wp>
+	   							<heuristics>
+		  						  <elaborate>
+		          					<parse> 
+		            					selected;
    		stdtxtfile := <concat-strings>[project-path, "/sql-build/standardStuff.sql"];		            
    		standard-text := <read-text-file> stdtxtfile;
    		result' := <concat-strings>[result, standard-text]   
@@ -302,10 +328,11 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 	 	result :=
 	 		<output>
 	  			<precond-main>
-	  				<compile>
-	 	    			<elaborate> 
-	 	      				<parse> 
-	 	        				selected
+					<wp>
+						<heuristics>
+		 	    			<elaborate> 
+		 	      				<parse> 
+		 	        				selected
 /* *************************
 *** Workflow Stuff End *****
 ************************* */				   
