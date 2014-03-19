@@ -1,0 +1,498 @@
+module heuristics
+
+imports
+  include/Booster2
+  
+  library/lookupTable
+  
+  library/constraint
+  // Get rid of these if we can...
+
+  library/abstractBoosterModel
+  library/environment
+  library/expression
+  library/valueExpression
+
+rules
+
+
+heuristics:
+	system -> system
+where
+	<map(\ ((cname, mname), (constraint, gc, exts, done, inputs, outputs)) -> <heuristics-each> (cname, mname, constraint) \) >(<LookupTable> "Method")
+						
+		
+
+/* 	compile-each:
+		Generates a program for each constraint, calculates the invariants and performs the WP. 
+*/
+			
+	heuristics-each:
+			(classname, methname, constraint)
+				-> (classname, methname, constraint) 
+				
+			with
+				program := <program> (classname, methname, constraint);
+				<updateMethodProgram> (classname, methname, program)
+
+rules
+
+/* 	program:
+		takes a constraint, in the context of a class, and a method name,
+		and a model, and returns a candidate program to achieve 
+		the constraint as a goal			
+*/
+
+
+	program:
+		(classname, methodname, True())
+			-> Skip()
+
+	program:
+		(classname, methodname, False())
+			-> Guard(False(), Skip())
+
+	program:
+		(classname, methodname, And(constraint1, constraint2))
+			-> Parallel(program1, program2)
+		with
+			program1 := <program> (classname, methodname, constraint1);
+			program2 := <program> (classname, methodname, constraint2)
+
+	program:
+		(classname, methodname, Or(constraint1, constraint2))
+			-> Choice(program1, program2)
+		with
+			program1 := <program> (classname, methodname, constraint1);
+			program2 := <program> (classname, methodname, constraint2)
+
+	program:
+		(classname, methodname, Then(constraint1, constraint2))
+			-> Sequence(program1, program2)
+		with
+			program1 := <program> (classname, methodname, constraint1);
+			program2 := <program> (classname, methodname, constraint2)
+
+	program:
+		(classname, methodname, Implies(constraint1, constraint2))
+			-> Choice(Guard(constraint1,program1), Guard(Not(constraint1),Skip()))
+		with
+			program1 := <program> (classname, methodname, constraint1)
+
+	program:
+		(classname, methodname, Not(constraint1))
+			-> Guard(Not(constraint1),Skip())
+
+
+
+/*	TODO:
+		These are incomplete
+*/
+	program:
+		(classname, methodname, Exists(name, expr, constraint))
+			-> Any(name, expr, program)
+		with
+			program := <program> (classname, methodname, constraint)
+		
+	program:
+		(classname, methodname, Forall(name, expr, constraint))
+			-> All(name, expr, program)
+		with
+			program := <program> (classname, methodname, constraint)
+		
+	program:
+		(classname, methodname, BinRel(Path(a,b) {type}, Equal(), expression))
+			-> Assign(path1 {type}, expression)
+		where
+			<not(is-pre-state)> Path(a,b) ;
+			path1 := <make-pre-state> Path(a,b);
+			<?BasicType(t) <+ ?Optional(BasicType(t)) <+ Set(BasicType(t))> type 
+
+	program:
+		(classname, methodname, BinRel(expression, In(), Path(a,b) {type} ))
+			-> Assign(path1 {type}, BinOp(path1, Union(), SetExtent([expression])))
+		where
+			<not(is-pre-state)> Path(a,b) ;
+			path1 := <make-pre-state> Path(a,b);
+			<?Set(BasicType(t))> type 
+
+
+	program:
+		(classname, methodname, BinRel(Path(a,b) {Reference(name)} , Equal(), expression))
+			-> Assign(path1 {Reference(name)} , expression)
+		where
+			<not(is-pre-state)> Path(a,b) ;
+			path1 := <make-pre-state> Path(a,b);
+			<is-set-name> name
+
+	program:
+		(classname, methodname, BinRel(Path(a,b) { Optional(Reference(name)) }, Equal(), expression))
+			-> Assign(path1 { Optional(Reference(name)) }, expression)
+		where
+			<not(is-pre-state)> Path(a,b) ;
+			path1 := <make-pre-state> Path(a,b);
+			<is-set-name> name
+			
+			
+	program:
+		(classname, methodname, BinRel(Output(o), In(), PathStart(cl,Some(Primed())) { Set(Reference(cl)) }))
+			-> New(Output(o), cl) 
+		where
+			/*log(|Warning(), "Matching new"); */
+			<not(is-pre-state)> PathStart(cl,Some(Primed()));
+			path1 := <make-pre-state> PathStart(cl,Some(Primed()))  
+
+
+			
+
+ 
+ /* Optional-to-Mandatory */
+	program:			
+		(classname, methodname, BinRel(Path(a {Reference(name4) },b) { Optional(Reference(name2)) }, Equal(), Null()))
+			-> Parallel(Assign(path3 { Optional(Reference(name2)) }, Null()),
+						Guard(BinRel(path3 { Optional(Reference(name2)) } , NotEqual(), Null() ),
+							  Assign(PathStart(name2, None()) {Set(Reference(name2))},
+							  		 BinOp(PathStart(name2, None()) {Set(Reference(name2))}, Minus(),
+							  		 	   SetExtent([path3 { Optional(Reference(name2)) }]) { Set(Reference(name2))}))))
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> Path(a,b);
+			(name2, name6) := <lookup-opposite> (name4, name3);
+			Reference(name4) := <lookup-attribute-type> (name2, name6);
+			path3 := <make-pre-state> (Path(a,b))
+
+
+
+ /* Optional-to-Optional */
+	program:			
+		(classname, methodname, BinRel(Path(a { Reference(name4) },b) { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }))
+			-> Parallel(Assign(path3 { Optional(Reference(name2)) }, Null(){ Optional(Reference(name2)) }),
+						Choice(Guard(BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null(){ Optional(Reference(name2)) }),
+							  Assign(Path(path3 { Optional(Reference(name2)) }, PathComponent(name6, None())) { Optional(Reference(name4)) },
+							  		 Null())),
+							  Guard(BinRel(path3 { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }),Skip())))
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+	
+ /* Optional-to-Set-valued */
+	program:			
+		(classname, methodname, BinRel(Path(a { Reference(name4) },b) {Optional(Reference(name2))}, Equal(), Null()))
+			-> Parallel(Assign(path3 {Optional(Reference(name2))}, Null()),
+						Guard(BinRel(path3 {Optional(Reference(name2))}, NotEqual(), Null()),
+							  Assign(Path(path3{Optional(Reference(name2))}, 
+							  		 			PathComponent(name6, None())){Set(Reference(name4))},
+							  		 BinOp(Path(path3 {Optional(Reference(name2))}, 
+							  		 			PathComponent(name6, None())) {Set(Reference(name4))}, Minus(),  
+							  		 	   SetExtent([a { Reference(name4) }]){Set(Reference(name4))}))))
+		where
+			<not(is-pre-state)> (Path(a,b));		
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+ /* Set-valued-to-Mandatory */
+	program:			
+		(classname, methodname, BinRel(expression { Reference(name2)}, NotIn(), Path(a { Reference(name4) },b) { Set(Reference(name2))}))
+			-> Parallel(Assign(path3 { Set(Reference(name2))}, BinOp(path3 { Set(Reference(name2))}, Minus(), SetExtent([expression{Reference(name2)}]){ Set(Reference(name2))})),
+					    Assign(PathStart(name2, None()){ Set(Reference(name2))},
+					    	   BinOp(PathStart(name2, None()){ Set(Reference(name2))}, Minus(), 
+					    	   		 SetExtent([expression{ Reference(name2)}]){ Set(Reference(name2))})))
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Reference(name4) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+			
+ /* Set-valued-to-Optional */
+	program:			
+		(classname, methodname, BinRel(expression { Reference(name2) }, NotIn(), Path(a { Reference(name4) },b) { Set(Reference(name2)) }))
+			-> Parallel(Assign(path3,
+							   BinOp(path3, Minus(), SetExtent([expression{ Reference(name2) }]){ Set(Reference(name2)) })),
+						Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())),
+							   Null()))
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+			
+
+ /* Set-valued-to-Set-valued */
+	program:			
+		(classname, methodname, BinRel(expression { Reference(name2) }, NotIn(), Path(a{Reference(name4)},b) { Set(Reference(name2)) }))
+			-> Parallel(Assign(path3,
+							   BinOp(path3{ Set(Reference(name2)) }, Minus(), SetExtent([expression{ Reference(name2) }]){ Set(Reference(name2)) })),
+						Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())),
+							   BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())), Minus(),  
+							   		 SetExtent([a {Reference(name4)}]{Set(Reference(name4))}))))
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+/* Mandatory-to-Mandatory */
+	program:
+		(classname, methodname, BinRel(Path(a { Reference(name4) },b){ Reference(name2) }, Equal(), expression {Reference(name2)}))
+			-> Guard(BinRel(expression{Reference(name2)}, NotIn(), PathStart(name2, None()){Set(Reference(name2))}), 
+				Parallel(Assign(path3{ Reference(name2) }, expression{Reference(name2)}), 
+						 Assign(Path(expression{Reference(name2)},PathComponent(name6, None())){Reference(name4)},a {Reference(name4)})))
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Reference(name4) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+
+/** Up to here! **/
+			
+/* Mandatory-to-Optional */
+	program:
+		(classname, methodname, BinRel(Path(a { Reference(name4)},b) { Reference(name2) }, Equal(), expression { Reference(name2) }))
+			-> Parallel(Parallel(Assign(path3{ Reference(name2) }, expression{ Reference(name2) }),
+								 Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())){ Reference(name4)}, a { Reference(name4)})),
+						Assign(Path(path3{ Reference(name2) }, PathComponent(name6, None())){ Reference(name4)}, Null()) )
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+			
+/* Mandatory-to-Set-valued */
+	program:			
+		(classname, methodname, BinRel(Path(a{ Reference(name4) },b) { Reference(name2) }, Equal(), expression { Reference(name2) }))
+			-> Parallel(Parallel(Assign(path3 { Reference(name2) }, expression { Reference(name2) }),
+								 Assign(Path(Path(a { Reference(name4) }, PathComponent(name3, None())){ Reference(name2) }, 
+								 			 PathComponent(name6, None())){ Set(Reference(name4)) },
+								 		BinOp(Path(Path(a { Reference(name4) }, PathComponent(name3, None())){ Reference(name2) },  
+								 	    	  	PathComponent(name6, None())){ Set(Reference(name4)) }, Minus(), 
+								 	    	  SetExtent([a { Reference(name4) }]) { Set(Reference(name4)) }))),
+						Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Set(Reference(name4)) }, 
+							   BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Set(Reference(name4)) }, Union(),
+							   		 SetExtent([a { Reference(name4) }]) { Set(Reference(name4)) })))
+								 
+		where
+			<not(is-pre-state)> (Path(a,b));
+			<is-class-name> name2;
+			name3 := <get-path-attribute-name>(Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+/* Optional-to-mandatory */
+	program:			
+		(classname, methodname, BinRel(Path(a { Reference(name4)},b) { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) }))
+			-> Guard(BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), PathStart(name2, None()){ Optional(Reference(name2)) }),
+					 Parallel(Parallel(Assign(path3{ Optional(Reference(name2)) }, expression { Optional(Reference(name2)) } ),
+					 		  		   Choice(Guard(And(BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), Null()),
+					 		  			                BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })),
+					 		  				        Assign(PathStart(name2, None()){ Set(Reference(name2)) }, BinOp(PathStart(name2, None()) { Set(Reference(name2)) }, Minus(), 
+					 		  							  		        SetExtent([Path(a { Reference(name4)}, 
+					 		  											                PathComponent(name3, None())){ Optional(Reference(name2)) }]){ Set(Reference(name2)) }))),
+					 		  			      Guard(Or(BinRel(path3{ Optional(Reference(name2)) }, Equal(), Null()),
+					 		  			      		   BinRel(path3{ Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) })),
+					 		  			      		Skip()))),
+					 		  Assign(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Reference(name4)},
+					 		  	     a { Reference(name4)})))
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b));
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Reference(name4) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state>(Path(a,b))
+			
+/* Optional-to-optional */
+	program:			
+		(classname, methodname, BinRel(Path(a {Reference(name4)},b) { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) }))
+			-> Parallel(Parallel(Assign(path3 { Optional(Reference(name2)) }, expression { Optional(Reference(name2)) }),
+								 Choice(Guard(And(BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
+								 				  BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })),
+								 			  Assign(Path(Path(a {Reference(name4)}, PathComponent(name3, None())){ Optional(Reference(name2)) },
+								 			  			  PathComponent(name6, None())){ Optional(Reference(name4)) },
+								 			  		 Null())),
+								 		Guard(Or(BinRel(path3 { Optional(Reference(name2)) }, Equal(), Null()),
+								 				 BinRel(path3 { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) })),
+								 			  Skip()))),
+						Parallel(Choice(Guard(And(BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), Null()),
+												  BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), a {Reference(name4)})),
+											  Assign(Path(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+											  			  PathComponent(name3, None())){ Optional(Reference(name2)) },
+											  		 Null())),
+										Guard(Or(BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+													   Equal(), Null()),
+												 BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+													   Equal(), a {Reference(name4)})),
+											  Skip())),
+								 Assign(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+								 		a {Reference(name4)})))
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b)); 	
+			name3 := <get-path-attribute-name>(Path(a,b));
+			(name2, name6) := <lookup-opposite>((name4, name3));
+			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+	
+/* Optional-to-Set-valued */
+	program:			
+		(classname, methodname, BinRel(Path(a {Reference(name4)},b) {Optional(Reference(name2))}, Equal(), expression{Optional(Reference(name2))}))
+			-> 	Parallel(
+			  		Parallel(
+			  			Assign(path3{Optional(Reference(name2))}, expression{Optional(Reference(name2))}),
+						Choice(
+							Guard(
+								And(
+									BinRel(path3{Optional(Reference(name2))}, NotEqual(), Null()),
+								 	BinRel(path3{Optional(Reference(name2))}, NotEqual(), expression{Optional(Reference(name2))})),
+								Assign(
+									Path(
+										Path(a {Reference(name4)}, PathComponent(name3,None())){Optional(Reference(name2))}, 
+								 		PathComponent(name6, None())){Set(Reference(name4))},
+								 	BinOp(
+								 		Path(
+								 			Path(a {Reference(name4)}, PathComponent(name3,None())), 
+								 			PathComponent(name6, None())){Set(Reference(name4))}, Minus(), 
+								 	SetExtent([a {Reference(name4)}]){Set(Reference(name4))}))),
+							Guard(
+								Or(
+									BinRel(path3{Optional(Reference(name2))}, Equal(), Null()),
+								 	BinRel(path3{Optional(Reference(name2))}, Equal(), expression{Optional(Reference(name2))})),
+					  		    Skip()))),
+					Assign(
+						Path(expression {Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))},
+						BinOp(
+							Path(expression{Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))}, Union(), 
+							SetExtent([a {Reference(name4)}]){Set(Reference(name4))})))
+			
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b));
+			name3 := <get-path-attribute-name>(Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+		
+/* Set-valued-to-Mandatory */
+	program:			
+		(classname, methodname, BinRel(expression {Reference(name2)}, In(), Path(a {Reference(name4)},b) {Set(Reference(name2))}))
+			-> (Guard(
+					BinRel(expression {Reference(name2)}, NotIn(), path3 {Set(Reference(name2))}), 
+					Parallel(
+							Parallel(
+									Assign(
+										path3{Set(Reference(name2))},
+							  			BinOp(path3{Set(Reference(name2))}, Union(), SetExtent([expression {Reference(name2)}]))), 
+									Assign(
+										Path(expression {Reference(name2)}, PathComponent(name6, None())),
+							   			a {Reference(name4)})),
+							Assign(Path(Path(expression {Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
+								 	   			   PathComponent(name3, None())){Set(Reference(name2))},
+								 	   		  BinOp(Path(Path(expression {Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
+								 	   			   	     PathComponent(name3, None())){Set(Reference(name2))}, Minus(), 
+								 	   			   	SetExtent([expression {Reference(name2)}]){Set(Reference(name2))})))))
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b));
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Reference(name4) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+/* Set-valued-to-Optional */
+	program:			
+		(classname, methodname, BinRel(expression{Reference(name2)}, In(), Path(a {Reference(name4)},b){Set(Reference(name2))}))
+			-> Parallel(Parallel(Assign(path3{Set(Reference(name2))},
+										BinOp(path3{Set(Reference(name2))}, Union(), SetExtent([expression{Reference(name2)}]){Set(Reference(name2))})),
+								 Guard(BinRel(Path(expression{Reference(name2)}, 
+								 					 PathComponent(name6, None())){Reference(name4)},
+								 				NotEqual(), Null()),
+								 	   Assign(Path(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
+								 	   			   PathComponent(name3, None())){Set(Reference(name4))},
+								 	   		  BinOp(Path(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
+								 	   			   	     PathComponent(name3, None())){Set(Reference(name2))},
+								 	   			   	Minus(), 
+								 	   			   	SetExtent([Path(expression{Reference(name2)}, PathComponent(name6, None()))]){Set(Reference(name2))})))),
+						Assign(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
+							   a {Reference(name4)}))
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b));
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+		
+/* Set-valued-to-Set-valued */
+	program:			
+		(classname, methodname, BinRel(expression{Reference(name2)}, In(), Path(a { Reference(name4) },b){Set(Reference(name2))}))
+			-> Parallel(Assign(path3 {Set(Reference(name2))},
+							   BinOp(path3{Set(Reference(name2))}, Union(), 
+							   		 SetExtent([expression{Reference(name2)}]){Set(Reference(name2))})),
+						Assign(Path(expression{Reference(name2)}, PathComponent(name6, None())){ Set(Reference(name4)) },
+							   BinOp(Path(expression{Reference(name2)}, PathComponent(name6, None())){ Set(Reference(name4)) }, Union(), 
+							   		 SetExtent([a { Reference(name4) }]){ Set(Reference(name4)) })))
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b));
+			name3 := <get-path-attribute-name> (Path(a,b));
+			(name2, name6) := <lookup-opposite> ((name4, name3));
+			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+					
+/* Default */
+
+	program:
+		(classname, methodname, relation)
+			-> Skip()
+		where
+			log(|Warning(), "cannot determine program", relation)
+
+			
+			
+
+
+/* 	make-pre-state:
+		takes a constraint, and returns its representation in the 
+		pre-state of a method 			
+*/
+
+	make-pre-state:
+		constraint ->
+			<bottomup(try( (\ PathComponent(name, Some(Primed())) -> PathComponent(name, None()) \) <+
+						   (\ PathStart(name, Some(Primed())) -> PathStart(name, None()) \) <+
+						   (\ ThisPrimed() -> This() \)  
+						   		))> constraint 	
+
+
+/*	is-pre-state
+		takes a constraint, and returns if can be entirely evaluated in the pre-state.  Ie. there are no primes 
+*/
+	is-pre-state:
+		constraint ->
+			<equal>([], <collect(?PathComponent(name, Some(Primed())) <+ 
+								?PathStart(name, Some(Primed())) <+
+								?ThisPrimed() <+
+								?Output(s))> constraint)
