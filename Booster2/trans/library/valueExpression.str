@@ -81,93 +81,6 @@ imports
 
 			
 			
-/* 	resolve-path-type:
-		Takes a path, the class where it is found, the model, 
-		and optionally a method where it is found, and returns its type 	
-*/
-
-	resolvePathType:
-		(classname, path {type}, method, env)
-		 	-> type
-
-
-	resolve-path-type:
-		(classname, This(), method, env) 
-			-> Reference(classname)
-
-	resolve-path-type:
-		(classname, ThisPrimed(), method, env) 
-			-> Reference(classname)
-			
-	resolve-path-type:
-		(classname, Input(attname), (classname, methname), env)
-			-> type
-		where
-			type := <lookup-input-type>((classname, methname), attname)
-			
-	resolve-path-type:
-		(classname, Output(attname), (classname, methname), env)
-			-> type
-		where
-			type := <lookup-output-type>(((classname, methname), attname))
-
-
-	
-	resolve-path-type:
-		(classname, PathStart(name, None()), method, env)
-			-> (Reference(name))
-		where
-			<is-set-name> name
-
-	resolve-path-type:
-		(classname, PathStart(svalue, None()), method, env)
-			-> Reference(sname)
-		where
-			sname := <lookup-set-value> (svalue)
-
-	resolve-path-type:
-		(classname, PathStart(attname, maybeprimed), method, env)
-			-> Set(Reference(attname))
-		where
-			<is-class-name> attname
-						
-	resolve-path-type:
-		(classname, PathStart(attname, maybeprimed), method, env)
-			-> type
-		where
-			type := <lookup-attribute-type>(classname, attname)
-
-	resolve-path-type:
-		(classname, PathStart(varname, maybeprimed), method, env)
-			-> type
-		where
-			type := <lookup-environment-type>(varname, env)
-
-
-	resolve-path-type:
-		(classname, Path(path, PathComponent(attname, maybeprimed)), method, env)
-			->  type
-		where
-			Optional(Reference(classname2)) := <resolve-path-type> (classname, path, method, env);
-			type := <lookup-attribute-type>((classname2, attname))
-
-	resolve-path-type:
-		(classname, Path(path, PathComponent(attname, maybeprimed)), method, env)
-			-> type
-		where
-			Reference(classname2) := <resolve-path-type> (classname, path, method, env);
-			type := <lookup-attribute-type>((classname2, attname))
-		
-		
-	/* resolve-path-type:
-			e -> String()
-		where
-			log(|Error(), "resolve-path-type fail", e)	*/
-		
-/*	resolve-path-type:
-		(arg1, arg2, arg3)
-			-> <resolve-path-type> (arg1, arg2, arg3, [])
-*/
 					
 
 		
@@ -204,10 +117,9 @@ imports
 		 	-> True()
 
 	is-defined:
-		 (classname, method, Path(a,b), env)
+		 (classname, method, Path(a {Optional(type)},b), env)
 		 	-> And(constraint, BinRel(a, NotEqual(), Null()))
 		 where
-		 	Optional(type) := <resolve-path-type>(classname, a, method, env);
 		 	constraint := <is-defined> (classname, method, a, env) 
 
 	is-defined:

@@ -7,37 +7,7 @@ imports
   
  rules
  	
-			
-			
-/* 	lookup-input-type:
-		Takes a class name, and a method name, and an input name,
-		and a model, 
-		and returns the type of that input in the model 	
-*/
 
-	lookup-input-type:
-		((classname, methname), inputname)
-			-> type
-		where
-			type := <lookup>(inputname,<lookup>((classname, methname), <LookupTable> "Inputs"))
-			
-			
-			
-/* 	lookup-input-type:
-		Takes a class name, and a method name, and an input name,
-		and a model, 
-		and returns the type of that input in the model 	
-*/
-
-	lookup-output-type:
-		(((classname, methname), outputname))
-			-> type
-		where
-			type := <lookup>(outputname,<lookup>((classname, methname), <LookupTable> "Outputs"))
-			
-			
-			
-			
 		
 			
 		
