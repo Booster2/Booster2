@@ -10,36 +10,6 @@ imports
   
  rules
  	
-	
-
-			
-	
-			
-
-/* 	get-path-initial-path:
-		takes a path, and returns the path of the owner object			
-*/
-
-	get-path-initial-path:
-		(This()) -> This()
-		
-	get-path-initial-path:
-		(ThisPrimed()) -> This()
-		
-	get-path-initial-path:
-		(PathStart(name, maybePrimed)) -> This()		
-
-	get-path-initial-path:
-		(Path(ps, pc)) -> ps		
-
-	get-path-initial-path:
-		(Input(name)) -> Input(name)
-		
-	get-path-initial-path:
-		(Output(name)) -> Output(name)
-		
-		 
-		
 		
 
 /* 	get-path-attribute-name:

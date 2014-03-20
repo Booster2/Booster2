@@ -11,24 +11,6 @@ strategies
   currymap(rule) : (value, [v,vs*]) -> [<rule> (value, v), rs* ]
   	where
   		[rs*] := <currymap(rule)> (value, [vs*])  
-
-
-// CurryFilter: applies a filter to a list, where the filter function takes an additional parameter 
-
-
-  curryfilter(rule) : (value, []) -> []
-  	
-  curryfilter(rule) : (value, [v,vs*]) -> 
-		[v, rs* ]
-  	where
-  		<equal>(v,  <rule> (value, v));
-		[rs*] := <curryfilter(rule)> (value, [vs*])
-		  
-  curryfilter(rule) : (value, [v,vs*]) -> 
-		[ rs* ]
-  	where
-  		<equal>(None(),  <rule> (value, v));
-		[rs*] := <curryfilter(rule)> (value, [vs*])
 		
 		
 // Subsets: gets all subsets of a list

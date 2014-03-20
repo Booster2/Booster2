@@ -3,42 +3,38 @@ module lookupTable
 imports
   include/Booster2  
   
- 
+rules
+	// removes the first element of a list for which s applies 
+	remove-first(s) = split-fetch(s) ; conc
+	
+	replaceInLookupTable(s): (lookuptable, key) -> newLookupTable
+			where
+				currentlyKnownValues := <LookupTable> lookuptable;
+				oldValue := <lookup>(key, currentlyKnownValues);
+				newEntry := <s>(key, oldValue);
+				newLookupTable := <conc>(<remove-first(?(key, newValue))> currentlyKnownValues, [newEntry])
+				
+				
+	
 
 rules
 			
-	replaceClass(s):
-		(oldClassName)
-			-> (oldClassName)
-		where
-			currentlyKnownClasses := <LookupTable> "Class";
-			oldClass := <lookup>(oldClassName, currentlyKnownClasses);
-			newClasses := <union>(<diff>(currentlyKnownClasses, [(oldClassName, oldClass)]), [<s>(oldClassName, oldClass)]);
-			rules(
-				LookupTable :+ "Class" -> newClasses
-			)
+	replaceClass(s): classname -> classname 
+		where 
+			newLookupTable := <replaceInLookupTable(s)>  ("Class", classname) ; 
+			rules( LookupTable:+ "Class" -> newLookupTable)
 			
 	replaceMethod(s):
-		(cname, mname)
-			-> (cname, mname)
+		(cname, mname) -> (cname, mname)
 		where
-			currentlyKnownMethods := <LookupTable> "Method";
-			oldMethod := <lookup>((cname, mname), currentlyKnownMethods);
-			newMethods := <union>(<diff>(currentlyKnownMethods, [((cname, mname), oldMethod)]), [<s>((cname, mname), oldMethod)]);
-			rules(
-				LookupTable :+ "Method" -> newMethods
-			)
+			newLookupTable := <replaceInLookupTable(s)>  ("Method", (cname, mname)) ; 
+			rules( LookupTable:+ "Method" -> newLookupTable)
 
 	replaceAttribute(s):
-		(cname, aname)
-			-> (cname, aname)
+		(cname, aname) -> (cname, aname)
 		where
-			currentlyKnownAttributes := <LookupTable> "Attribute";
-			oldAttribute := <lookup>((cname, aname), currentlyKnownAttributes);
-			newAttributes := <union>(<diff>(currentlyKnownAttributes, [((cname, aname), oldAttribute)]), [<s>((cname, aname), oldAttribute)]);
-			rules(
-				LookupTable :+ "Attribute" -> newAttributes
-			)
+			newLookupTable := <replaceInLookupTable(s)>  ("Attribute", (cname, aname)) ; 
+			rules( LookupTable:+ "Attribute" -> newLookupTable)
 			
 	addInput:
 		(cname, mname, input, type)

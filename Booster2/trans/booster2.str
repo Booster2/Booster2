@@ -102,9 +102,9 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
   // each a list of (term, message) tuples or simply (message) terms.
   editor-analyze: 
     (ast, path, project-path) -> (errors, warnings, notes)
-    with
+    where
       editor-init;
-      analyze;
+      <elaborate> <parse> ast;
       errors   := <collect-all(constraint-error, conc)> ast;
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast

@@ -2,162 +2,26 @@ module check
 
 imports
   include/Booster2
-  library/strategy
 
 
 rules
-  // Analysis: does a topdown traversal of the tree,
-  // and tries to apply the record-entity rule.
-  analyze:
-    t -> t
-    with
-      <build-lookup-table> t
-      /*;
-      <topdown(try(record-class))> t;
-      <topdown(try(record-setdef))> t;
-      <topdown(try(record-setvalue))> t */
 
-  build-lookup-table:
-  	(System(name, [cs*]),filename, dir) -> (System(name, [cs*]),filename, dir)
-  		with
-  			<map(build-lookup-table)> [cs*]
-  
-  build-lookup-table:
-  	SetDef(name, [vs*]) -> SetDef(name, [vs*])
-  		with
-  		rules(
-  			SetDefs :+ name -> name
-  		);
-  		<currymap(build-lookup-table-setvalue)> (name, [vs*])    
-
-  build-lookup-table:
-  	Class(name, extends, [cs*]) -> Class(name, extends, [cs*])
-  		with
-  		rules(
-  			Classes :+ name -> name
-  		);
-  		<currymap(build-lookup-table-class-component)> (name, [cs*])    
-
-  build-lookup-table:
-  	Class(name, extends, [cs*]) -> Class(name, extends, [cs*])
-  		with
-  		rules(
-  			Classes :+ name -> name
-  		);
-  		<currymap(build-lookup-table-class-component)> (name, [cs*])    
-  	
-  /*build-lookup-table:
-  	x -> x
-  		with
-  		log(|Error(), "build-lookup-table", x ) */
-
-	build-lookup-table-setvalue:
-		(name, value) -> (name, value)
-		with
-			rules(
-				SetDefValues :+ (name, value) -> (name, value)
-			);
-			rules(
-				SetValues :+ value -> value
-			)
-			
-	build-lookup-table-class-component:
-		(name, Attributes([as*])) -> 
-			<currymap(build-lookup-table-class-component)> (name, [as*])
-
-	build-lookup-table-class-component:
-		(name, Methods([ms*])) -> 
-			<currymap(build-lookup-table-class-component)> (name, [ms*])
-
-	build-lookup-table-class-component:
-		(name, Invariant([is*])) -> 
-			<currymap(build-lookup-table-class-component)> (name, [is*])
-
-    // Workflow Stuff Begin
-    build-lookup-table-class-component:
-    	(name, Workflows([ws*])) -> 
-    	    <currymap(build-lookup-table-class-component)> (name,[ws*])
-    	    
-    build-lookup-table-class-component:
-    	(cname, SeqWf(name,exp)) -> (cname, SeqWf(name,exp))
-    	with
-    		rules(
-    			SeqWfs :+ (cname,name) -> (cname,name)
-    		)
-    build-lookup-table-class-component:
-    	(cname, ParWf(name,exp)) -> (cname, ParWf(name,exp))
-    	with
-    		rules(
-    			ParWfs :+ (cname,name) -> (cname,name)
-    		)		
-    // Workflow Stuff End
-
-	build-lookup-table-class-component:
-		(cname, Attribute(aname, decorations, type)) -> (cname, Attribute(aname, decorations, type)) 
-		with
-			rules(
-				Attributes :+ (cname, aname) -> (cname, aname)
-			)
-
-	build-lookup-table-class-component:
-		(cname, Method(mname, const)) -> (cname, Method(mname, const)) 
-		with
-			rules(
-				Methods :+ (cname, mname) -> (cname, mname)
-			)
-
-	build-lookup-table-class-component:
-		(cname, constraint) -> (cname, constraint) 
-
-
-      
-/*  // Records the definition of an entity in a dynamic rule GetEntity.
-  record-entity: 
-    Entity(x, body) -> Entity(x, body)
-    with
-      // For a name 'x', GetEntity will return the original 'x' tree node
-      rules(
-        GetEntity :+ x -> x
-      )
-
-  // Records the definition of an entity in a dynamic rule GetEntity.
-  record-class: 
-    Class(x, body) -> Class(x, body)
-    with
-      // For a name 'x', GetEntity will return the original 'x' tree node
-      rules(
-        GetClass :+ x -> x
-      )
-
-  record-setdef: 
-    SetDef(x, body) -> SetDef(x, body)
-    with
-      // For a name 'x', GetEntity will return the original 'x' tree node
-      rules(
-        GetSetDef :+ x -> x
-      )
-
-  record-setvalue: 
-    SetDef(name, []) -> SetDef(name, [])
-    
-  record-setvalue: 
-    SetDef(name, [v, vs*]) -> <record-setvalue> SetDef(name, [vs*])
-    with
-      // For a name 'x', GetEntity will return the original 'x' tree node
-      rules(
-        GetSetValue :+ v -> v
-      )
-      
-  
-*/
-rules
 
 	constraint-error:
-		SetDef(name, [vs*]) -> (name, $[Duplicate set name: [name]])
+		Class(name, _, _) -> (name, $[Duplicate class name: [name]])
 	where
-		not(<bagof-SetDefs> name => [_])
+		not(<filter(\ (cn, cdef) -> cn where <equal>(cn, name) \)> <LookupTable> "Class" => [_])
 		
+
+	constraint-error:
+		SetDef(name, vs) -> (name, $[Duplicate set name: [name]])
+	where
+		not(<filter(\ (sn, sdef) -> sn where <equal>(sn, name) \)> <LookupTable> "SetDef" => [_])
+
+
+
 		
+/*		
 	constraint-error:
 		SetDef(name, [vs*]) -> [es*]
 	where
@@ -180,11 +44,11 @@ rules
 
 	constraint-error-components:
 		(name, Invariant([is*])) -> []
-
+*/
     /* *****************************************************************
    ********** Workflow Stuff - BEGIN *******************************
    *****************************************************************  */	    
-
+/*
   constraint-error-components:
 		(name, Workflows([wfs*])) -> [nwfs*]
 	where
@@ -202,11 +66,11 @@ rules
 
   check(cname,name): WorkflowReference(ref) -> $[Sequential workflow name [ref] not defined.]
   where not(<SeqWfs> (<cname>,ref))
-
+*/
   //check(cname,name): MethodReference(path,args) -> $[Method name not defined]
   //where
   //	<equal>(<name>,"hallo")
-  
+/*  
   constraint-error-workflow:
 		(cname, ParWf(name, definition)) -> (name, $[Duplicate (parallel) workflow: [name]])
 	where
@@ -214,9 +78,9 @@ rules
 	
   constraint-error-workflow:
   	    (cname,ParWf(pname,definition)) -> <constraint-error-parwf> (cname,definition)	
-
+*/
   // I don't know why this is necessary.
-  constraint-error-workflow: t -> []
+/*  constraint-error-workflow: t -> []
     
                               
   constraint-error-parwf:
@@ -234,11 +98,11 @@ rules
   	 
   // I don't know why this is necessary.	    
   constraint-error-parwf: t -> []
-                                                    
+*/                                                    
 /* *****************************************************************
    ********** Workflow Stuff - END *********************************
    *****************************************************************  */
-
+/*
 	constraint-error-attribute:
 		(cname, Attribute(aname, decorations, type)) -> (aname, $[Duplicate attribute name "[aname]" in class [cname]])
 	where
@@ -258,14 +122,7 @@ rules
 		(cname, mname) -> []
 
 
-	constraint-error-setvalue:
-		(name, value) -> (value, $[Duplicate set element: [value]])
-	where
-		not(<bagof-SetValues> value => [_])
-
-	constraint-error-setvalue:
-		(name, value) -> []
-		
+*/		
 /*  
 
   
