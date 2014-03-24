@@ -8,7 +8,6 @@ imports
   library/constraint
   // Get rid of these if we can...
 
-  library/abstractBoosterModel
   library/environment
   library/expression
   library/valueExpression
@@ -105,6 +104,7 @@ rules
 			-> Assign(path1 {type}, expression)
 		where
 			<not(is-pre-state)> Path(a,b) ;
+			<is-pre-state> expression;
 			path1 := <make-pre-state> Path(a,b);
 			<?BasicType(t) <+ ?Optional(BasicType(t)) <+ Set(BasicType(t))> type 
 
@@ -113,6 +113,7 @@ rules
 			-> Assign(path1 {type}, BinOp(path1, Union(), SetExtent([expression])))
 		where
 			<not(is-pre-state)> Path(a,b) ;
+			<is-pre-state> expression;
 			path1 := <make-pre-state> Path(a,b);
 			<?Set(BasicType(t))> type 
 
@@ -122,6 +123,7 @@ rules
 			-> Assign(path1 {Reference(name)} , expression)
 		where
 			<not(is-pre-state)> Path(a,b) ;
+			<is-pre-state> expression;
 			path1 := <make-pre-state> Path(a,b);
 			<is-set-name> name
 
@@ -131,6 +133,7 @@ rules
 		where
 			<not(is-pre-state)> Path(a,b) ;
 			path1 := <make-pre-state> Path(a,b);
+			<is-pre-state> expression;
 			<is-set-name> name
 			
 			

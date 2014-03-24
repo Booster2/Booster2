@@ -347,6 +347,9 @@ rules
 			<lt>(v,0)	
 
 
+	simplify:
+		BinRel(BinOp(expr, Plus(), expr'), Equal(), BinOp(expr, Plus(), expr''))
+			-> BinRel(expr', Equal(), expr'')
 
 
 /*	simplify:
@@ -355,7 +358,7 @@ rules
 */			
 	simplify:
 		UnOp(Cardinality(),SetExtent([a, as*]))
-			-> BasicValue(Integer(k))
+			-> BasicValue(Integer(k)){BasicType(Int())}
 		where
 			BasicValue(Integer(i)) := <simplify> UnOp(Cardinality(),SetExtent([as*]));
 			k := <add>(i,1)

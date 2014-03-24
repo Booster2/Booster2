@@ -2,8 +2,7 @@ module translate/lookupTable
 
 imports
   include/Booster2
-
-  library/abstractBoosterModel
+ 
   library/basicTypes
  
 

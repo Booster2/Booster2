@@ -19,7 +19,7 @@ imports
 /* Integer */
 
 	get-type-extent:
-		Int() -> TypeExtent(Int())
+		Int() -> TypeExtent(Int()){ Set(BasicType(Int())) }
 		
 	get-type-booster-notation:
 		Int() -> $[INT]
@@ -34,7 +34,7 @@ imports
 /* String */
 
 	get-type-extent:
-		String() -> TypeExtent(String())
+		String() -> TypeExtent(String()){ Set(BasicType(String())) }
 		
 	get-type-booster-notation:
 		String() -> $[STRING]
@@ -48,7 +48,7 @@ imports
 /* DateTime */
 
 	get-type-extent:
-		DateTime() -> TypeExtent(DateTime())
+		DateTime() -> TypeExtent(DateTime()){ Set(BasicType(DateTime())) }
 		
 	get-type-booster-notation:
 		DateTime() -> $[DATETIME]
@@ -62,7 +62,7 @@ imports
 /* Boolean */
 
 	get-type-extent:
-		Boolean() -> TypeExtent(Boolean())
+		Boolean() -> TypeExtent(Boolean()){ Set(BasicType(Boolean())) }
 		
 	get-type-booster-notation:
 		Boolean() -> $[BOOLEAN]
@@ -131,3 +131,38 @@ is-more-general-than:
 // then there's the less-than or equal function, which we might find useful.
 is-eq-more-general-than = (\ (t1,t2) -> True() where <equal>(t1,t2) <+ <is-more-general-than>(t1,t2) \) 
 
+
+get-type-constraint:
+	path { BasicType(t) } 
+		-> BinRel(path { BasicType(t) }, In(), <get-type-extent> t)
+
+get-type-constraint:
+	path { Optional(BasicType(t)) } 
+		-> Or(BinRel(path { Optional(BasicType(t)) }, In(), <get-type-extent> t), BinRel(path { Optional(BasicType(t)) }, Equal(), Null()))
+		
+
+get-type-constraint:
+	path { Set(BasicType(t)) }
+		-> BinRel(path { Set(BasicType(t)) }, SubsetEquals(), <get-type-extent> t)
+
+
+get-type-constraint:
+	path { Reference(name1) }
+		-> BinRel(path { Reference(name1) }, In(), PathStart(name1, None()){ Set(Reference(name1)) })
+
+
+get-type-constraint:
+	path { Optional(Reference(name1)) } 
+		-> Or(BinRel(path, In(), PathStart(name1, None()){ Set(Reference(name1)) }), BinRel(path, Equal(), Null()))
+		
+
+get-type-constraint:
+	path { Set(Reference(name1)) }
+		-> BinRel(path, SubsetEquals(), PathStart(name1, None()){ Set(Reference(name1)) })
+						
+get-type-constraint:
+	something -> True()
+		where log(|Error(), "get-type-constraint problem", something)									
+			
+			
+	

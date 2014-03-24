@@ -16,17 +16,6 @@ imports
 	
 					
 
-	is-correct-type:
-		(type, path {type})
-			-> path
-
-	is-correct-type:
-		(type, path { Optional(type) })
-			-> path
-
-	is-correct-type:
-		(Optional(type), path { type })
-			-> path
 
 		
 		 	

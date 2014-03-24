@@ -174,3 +174,28 @@ rules
 				LookupTable :+ "TableNames" -> [((classname, attname), tablename)]
 			)
 */
+
+
+	lookup-invariant:
+		(classname, attname)
+			->  inv
+		where
+			inv := <get-attribute-constraint> (classname, attname)
+			
+	
+
+		
+
+/***** TODO *****/
+/*
+	get-attribute-constraint:
+		(classname, attname) -> constraint
+			where		
+				constraint := <lookup>((classname, attname), <LookupTable> "ClassBasedInvariants")
+
+	get-attribute-constraint:
+		(classname, attname) -> True()
+				
+*/				
+	get-attribute-constraint:
+		(classname, attname) -> True()

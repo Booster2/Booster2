@@ -4,7 +4,6 @@ imports
   include/Booster2
   
   library/lookupTable
-  library/abstractBoosterModel
   library/basicTypes
   library/environment
   

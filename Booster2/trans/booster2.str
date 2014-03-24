@@ -108,6 +108,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
       errors   := <collect-all(constraint-error, conc)> ast;
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast
+      
 
   
   // Prints the abstract syntax ATerm of a selection.
