@@ -410,5 +410,12 @@ rules
 	simplify:
 		Parallel(Skip(), prog) -> prog
 		
-		
-		
+	simplify:
+		UnOp(Cardinality(), SetExtent([_]))
+			-> BasicValue(Integer(1)) {BasicType(Int())}	
+	
+	simplify:
+		BinRel(BinOp(exp, Plus(), BasicValue(Integer(i))), GreaterThanEquals(), BasicValue(Integer(0)))
+			-> True()
+		where
+			<gt>(i,0)	

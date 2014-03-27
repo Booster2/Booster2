@@ -419,3 +419,9 @@ context-free priorities
   	 > Constraint 'or' Constraint 	-> Constraint
  	 > Constraint '=>' Constraint 	-> Constraint 
  	 > Constraint ';' Constraint 	-> Constraint 
+ 	 	  
+context-free priorities
+
+  ValueExpression 				-> Expression
+> UnOp Expression 				-> Expression
+> Expression BinOp Expression 	-> Expression
