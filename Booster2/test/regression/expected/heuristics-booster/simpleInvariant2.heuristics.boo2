@@ -2,4 +2,4 @@ system methodTest
  
 
 
-	class class1  { 		attributes			name  : STRING		invariants 			name /= "James"		methods 			m1 { this.name := n? }	}
+	class class1  { 		attributes			name  : STRING		invariants 			this.name /= "James"		methods 			m1 { this.name := n? }	}

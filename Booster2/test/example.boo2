@@ -1,76 +1,39 @@
 system S
 
+/*
 class A {
 	attributes
-	  b : SET(B.a)[*]
+		a : INT
+		b : [A . b]
+	invariants
+		a > 3
+	methods
+		m1 { a' = a + 1 or a' = a + 2 }
 	
+}*/
+
+
+class A {
+  attributes
+    x : INT
+    b : [B . a]  
+  methods
+    m1 { x' = x + 1}
 }
 
 class B {
-	attributes
-	  a : SET(A.b)[*]
-	
-}
-
-/*
-set DayOfWeek { Monday, Tuesday, Wednesday }
-
-class A {
-	attributes
-		a (id) : INT
-	methods
-		m1 { a' = 3 }		
-	
-}
-*/
-/*
-class B {
-	attributes
-		b : SET(INT)[0..15]
-	methods
-		m2 { 5 : b'}
-	
+  attributes
+    a : [A . b]
+  invariants
+    a.x < 3
 }
 
 class C {
 	attributes
-		c1 : DayOfWeek
-		c2 : [DayOfWeek]
-	methods
-		m3 { c1' = d? }
-		m4 { c2' = d? }
-	
-}
-
-class D {
-	attributes
 		a : INT
+		b : INT
+	invariants
+		a /= b
 	methods
-		m5 { o! : D' }
+		m1 { a' = in? }
 }
-
-class E {
-	attributes
-		f : [F . e]
-	methods
-		m6 {f' = null}
-}
-
-class F {
-	attributes
-		e : E . f
-}
-
-
-class G {
-	attributes
-		h : [H . g]
-	methods
-		m7 {h' = null}
-}
-
-class H {
-	attributes
-		g : [ G . h ]
-}
-*/

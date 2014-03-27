@@ -70,7 +70,11 @@ rules
 				
 
 	addClassInvariant = (\ (cname, inv) -> (cname, inv) where
-				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, a ,m,<union>(c, [inv]),w))\)> cname \) 
+				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, a ,m,<conc>(c, [inv]),w))\)> cname \) 
+
+	updateClassInvariants = (\ (cname, invs) -> (cname, invs) where
+				<replaceClass(\ (cn, (is,as,a,m,c,w)) -> (cn, (is,as, a ,m,invs,w))\)> cname \) 
+
 
 	updateMethodConstraint = (\ (cname, mname, newConstraint) -> (cname, mname, newConstraint) where
 				<replaceMethod(\ ((c,m),(co,gc,e,d,is,os)) -> ((c,m),(newConstraint,gc,e,d,is,os)) \)> (cname, mname) \)
@@ -79,7 +83,10 @@ rules
 				<replaceMethod(\ ((c,m),(co,gc,e,d,is,os)) -> ((c,m),(co,newProgram,e,d,is,os)) \)> (cname, mname) \)
 
 	updateAttributeTableName = (\ (cname, aname, newtname) -> (cname, aname, newtname) where
-				<replaceAttribute(\ ((c,a),(ds, t, opp, min, max, tname)) -> ((c,a),(ds, t, opp, min, max, newtname)) \)> (cname, aname) \)
+				<replaceAttribute(\ ((c,a),(ds, t, opp, min, max, tname, invs)) -> ((c,a),(ds, t, opp, min, max, newtname, invs)) \)> (cname, aname) \)
+
+	updateAttributeInvariant = (\ (cname, aname, newInv) -> (cname, aname, newInv) where
+				<replaceAttribute(\ ((c,a),(ds, t, opp, min, max, tname, invs)) -> ((c,a),(ds, t, opp, min, max, tname, <conc>(invs, [newInv]))) \)> (cname, aname) \)
 				
 
 	getInputType:
@@ -130,17 +137,17 @@ rules
 */
 	lookup-attribute-type:
 		(cname, aname)
-			-> <\ (ds, t, opp, min, max, tname) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname, invs) -> t \><lookup>((cname, aname), <LookupTable> "Attribute")
 
 
 
 	lookup-max-mult:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max, tname) -> max \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname, invs) -> max \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 	lookup-min-mult:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max, tname) -> min \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname, invs) -> min \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 /* 	lookup-opposite:
 		Takes a class name, and an attribute name
@@ -148,11 +155,11 @@ rules
 */
 	lookup-opposite:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max, tname) -> opp \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname, invs) -> opp \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 	lookup-attribute-table-name:
 		(classname, attname)
-			-> <\ (ds, t, opp, min, max, tname) -> tname \> <lookup>((classname, attname), <LookupTable> "Attribute")
+			-> <\ (ds, t, opp, min, max, tname, invs) -> tname \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
 
 /*
@@ -183,7 +190,9 @@ rules
 			inv := <get-attribute-constraint> (classname, attname)
 			
 	
-
+	get-class-invariants:
+		classname -> invs
+			where (is,as,a,m,invs,w) := <lookup>(classname, <LookupTable> "Class")
 		
 
 /***** TODO *****/

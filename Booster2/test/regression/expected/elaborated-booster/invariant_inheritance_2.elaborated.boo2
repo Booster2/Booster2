@@ -2,4 +2,4 @@ system S
  
 
 
-	class a  { 		attributes			a  : INT		invariants 			a > 0	}	class b extends a { 		attributes			a  : INT		invariants 			a < 10			a > 0	}
+	class a  { 		attributes			a  : INT		invariants 			this.a > 0	}	class b extends a { 		attributes			a  : INT		invariants 			this.a < 10			this.a > 0	}

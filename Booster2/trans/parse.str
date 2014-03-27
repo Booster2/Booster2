@@ -99,13 +99,14 @@ rules
 	
  	organise-attribute:
  		(cname, Attribute(attName, decorators, type))
- 			-> ((cname, attName), (decorators, type', opposite, minmult, maxmult, tname))
+ 			-> ((cname, attName), (decorators, type', opposite, minmult, maxmult, tname, invs))
  		where
  			type' := <get-minimal-type> type;
  			opposite := <get-opposite> type;
  			minmult := <get-min-mult> type;
  			maxmult := <get-max-mult> type;
- 			tname := ""
+ 			tname := "";
+ 			invs := []
  			
  	organise-attribute:
  		something -> something

@@ -88,7 +88,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		name -> $[[name]]
 					
 	attribute:
-		((classname, attname), (decs, type, opposite, minmult, maxmult, tname)) 
+		((classname, attname), (decs, type, opposite, minmult, maxmult, tname, invs)) 
 			-> $[["\t\t\t"][attname] [<foldout(decorator)>(decs, ", ")] : [<type>(type, opposite, minmult, maxmult)] ]
 			//[<output-to-booster-attribute-type>(classname, attname)]]
 	
@@ -231,14 +231,14 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		Implies(constraint1, constraint2) -> $[([<constraint> constraint1] => [<constraint> constraint2])]
 
 	constraint: 
-		Exists(name, expr, constraint) -> $[(exists [name] : [<expression> expr] @ ([constraint]))]
+		Exists(name, expr, constraint) -> $[(exists [name] : [<expression> expr] @ ([<constraint> constraint]))]
 
 	constraint: 
-		Forall(name, expr, constraint) -> $[(forall [name] : [<expression> expr] @ ([constraint]))] 										
+		Forall(name, expr, constraint) -> $[(forall [name] : [<expression> expr] @ ([<constraint> constraint]))] 										
 										
 	constraint:
 		BinRel(expr1, rel, expr2) -> $[[ <expression> expr1] [<get-binrel-booster-notation> rel] [<expression> expr2]]
-
+		
 	constraint:
 		MethodReference(path, substs) -> $[[<expression> path] ( [<substs> substs]) ]
 

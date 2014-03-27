@@ -218,14 +218,26 @@ rules
 		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), LessThanEquals(), BasicValue(Integer(j)))
 			-> BinRel(a, LessThanEquals(), BasicValue(Integer(k)))
 		where
-			k := <subt>(j,i)
+			k := <subt>(<string-to-int>j,<string-to-int>i)
+
+	simplify:
+		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), LessThan(), BasicValue(Integer(j)))
+			-> BinRel(a, LessThan(), BasicValue(Integer(k)))
+		where
+			k := <subt>(<string-to-int>j,<string-to-int>i) 
 
 
 	simplify:
 		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), GreaterThanEquals(), BasicValue(Integer(j)))
 			-> BinRel(a, GreaterThanEquals(), BasicValue(Integer(k)))
 		where
-			k := <subt>(j,i)
+			k := <subt>(<string-to-int>j,<string-to-int>i)
+
+	simplify:
+		BinRel(BinOp(a, Plus(), BasicValue(Integer(i))), GreaterThan(), BasicValue(Integer(j)))
+			-> BinRel(a, GreaterThan(), BasicValue(Integer(k)))
+		where
+			k := <subt>(<string-to-int>j,<string-to-int>i)
 
 
 	simplify:
@@ -271,26 +283,26 @@ rules
 		(BinOp(BasicValue(Integer(i)), Times(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
-			k := <mulS>(i, j)
+			k := <mulS>(<string-to-int>i, <string-to-int>j)
 
 			
 	simplify:
 		(BinOp(BasicValue(Integer(i)), Plus(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
-			k := <addS>(i, j)
+			k := <addS>(<string-to-int>i, <string-to-int>j)
 
 	simplify:
 		(BinOp(BasicValue(Integer(i)), Minus(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
-			k := <subtS>(i, j)
+			k := <subtS>(<string-to-int>i, <string-to-int>j)
 
 	simplify:
 		(BinOp(BasicValue(Integer(i)), Divide(), BasicValue(Integer(j))))
 			-> BasicValue(Integer( k ))
 		where
-			k := <divS>(i, j)
+			k := <divS>(<string-to-int>i,<string-to-int>j)
 
 			
 	simplify:
@@ -326,25 +338,25 @@ rules
 		BinRel(UnOp(Cardinality(),something), GreaterThanEquals(), BasicValue(Integer(v)))
 			-> True()
 		where
-			<lt>(v,0)	
+			<lt>(<string-to-int>v,0)	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), GreaterThan(), BasicValue(Integer(v)))
 			-> True()
 		where
-			<lt>(v,0)	
+			<lt>(<string-to-int>v,0)	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), LessThanEquals(), BasicValue(Integer(v)))
 			-> False()
 		where
-			<lt>(v,0)	
+			<lt>(<string-to-int>v,0)	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), LessThan(), BasicValue(Integer(v)))
 			-> False()
 		where
-			<lt>(v,0)	
+			<lt>(<string-to-int>v,0)	
 
 
 	simplify:
@@ -361,7 +373,7 @@ rules
 			-> BasicValue(Integer(k)){BasicType(Int())}
 		where
 			BasicValue(Integer(i)) := <simplify> UnOp(Cardinality(),SetExtent([as*]));
-			k := <add>(i,1)
+			k := <add>(<string-to-int>i,1)
 			
 
 			
@@ -373,4 +385,26 @@ rules
 		Guard(True(), p)
 			-> p
 			
-
+	simplify:
+		Path(Path(ps {Reference(cname)}, PathComponent(aname1, maybePrimed)){Reference(cname')},PathComponent(aname2, maybePrimed)){Reference(cname)}
+			-> ps {Reference(cname)}
+			where
+				(cname', aname2) := <lookup-opposite>(cname, aname1)
+				
+	simplify:
+		Path(Path(ps {Reference(cname)}, PathComponent(aname1, maybePrimed)){Optional(Reference(cname'))},PathComponent(aname2, maybePrimed)){Optional(Reference(cname))}
+			-> ps {Reference(cname)}
+			where
+				(cname', aname2) := <lookup-opposite>(cname, aname1)
+				
+	simplify:
+		Path(Path(ps {Reference(cname)}, PathComponent(aname1, maybePrimed)){Reference(cname')},PathComponent(aname2, maybePrimed)){Optional(Reference(cname))}
+			-> ps {Reference(cname)}
+			where
+				(cname', aname2) := <lookup-opposite>(cname, aname1)
+				
+	simplify:
+		Path(Path(ps {Reference(cname)}, PathComponent(aname1, maybePrimed)){Optional(Reference(cname'))},PathComponent(aname2, maybePrimed)){Reference(cname)}
+			-> ps {Reference(cname)}
+			where
+				(cname', aname2) := <lookup-opposite>(cname, aname1)

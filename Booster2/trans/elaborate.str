@@ -10,6 +10,8 @@ library/binOp
 library/unOp
 library/basicTypes
 
+translate/booster/booster
+
 rules
 	
 	
@@ -18,7 +20,10 @@ rules
 		where
 			<unrollSubclasses> system;
 			<filter(mark-method-as-done)><LookupTable>"Method";
-			<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ insert-this <+ type-inference  <+  method-expansion ))> system;
+			//<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ insert-this <+ type-inference  <+  method-expansion ))> system;
+			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants)> system;
+			<repeat( insert-this <+ type-inference  <+  method-expansion )> system;
+			<map(propagateInvariants)><LookupTable>"Class";
 			<expandSeqWfs> system;
 			<type-inference-wf> system
 			
@@ -139,17 +144,28 @@ rules
 			<map(\cname' -> <addClassInvariant> (cname', inv) \)> cnames		
 
 
-	type-inference:
+	type-inference = type-inference-methods <+ type-inference-invariants
+
+	type-inference-methods:
 		system -> system
 			where
 		oldMethods := <LookupTable> "Method";
 		methodConstraints := <map(\((cname, mname),(constraint,gc,e,True(), is,os)) -> (cname, mname, constraint) \)> oldMethods;
-		<map(do-type-inference)> methodConstraints;
+		<map(do-type-inference-method)> methodConstraints;
 		newMethods := <LookupTable> "Method";
 		<not(equal)> (oldMethods, newMethods)
+
+	type-inference-invariants:
+		system -> system
+			where
+		oldClasses := <LookupTable> "Class";
+		classInvariants := <map(\(cname,(dscs,ascs,atts,ms, invs, wfs)) -> (cname, invs) \)> oldClasses;
+		<map(do-type-inference-invariants)> classInvariants;
+		newClasses := <LookupTable> "Class";
+		<not(equal)> (oldClasses, newClasses)
 			
 			
-	do-type-inference:
+	do-type-inference-method:
 		(cname, mname,c) -> (cname, mname, c')
 			where
 				c' := <topdown(try(
@@ -158,7 +174,16 @@ rules
 										<+ induce-types
 										<+ record-parameter) ))> c  ;
 				(<equal>(c, c') <+ <updateMethodConstraint> (cname, mname, c'))
+
+	do-type-inference-invariants:
+		(cname,invs) -> (cname, invs')
+			where
+				invs' := <map(topdown(try(
+								try(\ term -> (cname, term) \); infer-types )))> invs  ;
+				(<equal>(invs, invs') <+ <updateClassInvariants> (cname, invs'))
 										
+		
+	class-from-context = (\ (cname, mname) -> cname\) <+ id	
 			
 	infer-types:
 		(context, BasicValue(Integer(i)) {} ) -> BasicValue(Integer(i)) { Optional(BasicType(Int())) }
@@ -191,27 +216,27 @@ rules
 		type := <getOutputType>(cname, mname, s)
 
 	infer-types:
-		((cname, mname), This() {} )
-			-> This() {Reference(cname)}
+		(context, This() {} )
+			-> This() {Reference(<class-from-context>context)}
 
 	infer-types:
-		((cname, mname), ThisPrimed() {})
-			-> ThisPrimed() {Reference(cname)}
+		(context, ThisPrimed() {})
+			-> ThisPrimed() {Reference(<class-from-context>context)}
 
 	infer-types:
-		((cname, mname), PathStart(att, maybePrimed) )
+		(context, PathStart(att, maybePrimed) )
 			-> PathStart(att, maybePrimed) {type}
 		where
-			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((cname, att), <LookupTable>"Attribute")
+			type := <\ (ds,t,o,min,max,tname, invs) -> t\><lookup>((<class-from-context>context, att), <LookupTable>"Attribute")
 
 	infer-types:
-		((cname, mname), PathStart(cname', maybePrimed) )
+		(context, PathStart(cname', maybePrimed) )
 			-> PathStart(cname', maybePrimed) {Set(Reference(cname'))}
 		where
-			<lookup>(cname, <LookupTable>"Class")
+			<lookup>(<class-from-context>context, <LookupTable>"Class")
 
 	infer-types:
-		((cname, mname), PathStart(sname, maybePrimed) )
+		(context, PathStart(sname, maybePrimed) )
 			-> PathStart(sname, maybePrimed) {Set(Reference(sname))}
 		where
 			<lookup>(sname, <LookupTable>"Set")
@@ -221,7 +246,13 @@ rules
 		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
-			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
+			type := <\ (ds,t,o,min,max,tname, invs) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
+
+	infer-types:
+		(context, Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed) ))
+			-> Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed)) { type}
+		where
+			type := <\ (ds,t,o,min,max,tname, invs) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 
 
@@ -345,24 +376,102 @@ rules
 			substs' := <map(\ (t, e) -> (t {} , e)\)> substs;
 			constraint' := <bottomup(try(\ trm -> <lookup>(trm {} , substs')\))> constraint
 
-	insert-this:
+	insert-this = insert-this-methods <+ insert-this-invariants
+
+	insert-this-methods:
 		system -> system
 			where
 		oldMethods := <LookupTable> "Method";
 		methodConstraints := <map(\((cname, mname),(constraint,gc,e,True(), is,os)) -> (cname, mname, constraint) \)> oldMethods;
-		newMethodConstraints := <map(do-insert-this)> methodConstraints;
+		newMethodConstraints := <map(do-insert-this-method)> methodConstraints;
 		<not(equal)>(methodConstraints, newMethodConstraints)
 
+	insert-this-invariants:
+		system -> system
+			where
+		oldClasses := <LookupTable> "Class";
+		classInvariants := <map(\(cname, (ascs,dscs, atts, meths, invs, wfs)) -> (cname, invs) \)> oldClasses;
+		newClassInvariants := <map(do-insert-this-invariants)> classInvariants;
+		<not(equal)>(classInvariants, newClassInvariants)
 
 
-	do-insert-this:
+
+	do-insert-this-method:
 		(cname, mname,c) -> (cname, mname, c')
 			where
 				c' := <topdown(try(\ PathStart(aname, maybePrimed) -> Path(This(), PathComponent(aname, maybePrimed)) 
 							where <lookup>((cname, aname), <LookupTable> "Attribute") <+ <lookup>((cname, aname), <LookupTable> "Method") \))> c ;
 				<updateMethodConstraint> (cname, mname, c')
+
+	do-insert-this-invariants:
+		(cname, invs) -> (cname, invs')
+			where
+				invs' := <map(topdown(try(\ PathStart(aname, maybePrimed) -> Path(This(), PathComponent(aname, maybePrimed)) 
+							where <lookup>((cname, aname), <LookupTable> "Attribute") \)))> invs ;
+				<updateClassInvariants> (cname, invs')
 	
+	
+	// For each invariant, 
+	propagateInvariants:
+		(cname, (dscs, ascs, as, ms, is, wfs)) -> (cname, (dscs, ascs, as, ms, is, wfs))
+			where
+				<map(\p -> p where <propagateInvariant>(cname, p) \)> is
+				
+				
+	propagateInvariant:
+		(cname, p) 
+			-> (cname, p)
+			where
+				atts := <filter(\((cn, an), (ds, t, o, min, max, tname, invs) ) -> (cn, an, t) 
+									where <?Reference(cname) <+ ?Optional(Reference(cname)) <+ ?Set(Reference(cname))> t\)> <LookupTable> "Attribute";
+				//log(|Error(), (cname, p), atts)	;
+				<map(\(cn, an, type) -> p' 
+							where p' := <context-invariant> (cn, an, type, p) ;
+							// This is where I add the invariant to the class
+							<addClassInvariant>(cn, p')    \)> atts
+				
+	context-invariant:
+		(cn, an, Reference(cname), p) -> <literal-substitute>(p, [(This(){Reference(cn)}, Path(This(){Reference(cn)}, PathComponent(an, None())){Reference(cname)})])
+
+	context-invariant:
+		(cn, an, Optional(Reference(cname)), p) -> Implies(BinRel(Path(This(){Reference(cn)}, PathComponent(an, None())){Optional(Reference(cname))}, NotEqual(), Null()), 
+		 	<literal-substitute>(p, [(This(){Reference(cn)}, Path(This(){Reference(cn)}, PathComponent(an, None())){Optional(Reference(cname))})]))
+
+	context-invariant:
+		(cn, an, Set(Reference(cname)), p) -> Forall("s", Path(This(), PathComponent(an, None())), 
+		 	<literal-substitute>(p, [(This(), PathStart("s", None()))]))
 			
+	/* 	get-mentioned-attributes:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/		
+
+	get-mentioned-attributes:
+		(cname, expr, env)
+			-> <collect((\ term -> (cname, term, env)\) ; _get-mentioned-attributes)>
+
+	
+	_get-mentioned-attributes:
+		(cname, PathStart(attname, maybeprimed), env)
+			-> (cname, attname)
+		where
+			type := <lookup-attribute-type> ((cname, attname))
+		// i.e. the attribute does exist
+		
+
+	_get-mentioned-attributes:
+		(cname, Path(path{ Reference(otherclassname)}, PathComponent(attname, maybeprimed)), env)
+			-> (otherclassname, attname)
+		where
+			type := <lookup-attribute-type> ((otherclassname, attname))
+
+	_get-mentioned-attributes:
+		(cname, Path(path { Optional(Reference(otherclassname)) }, PathComponent(attname, maybeprimed)), env)
+			-> (otherclassname, attname)
+		where
+			type := <lookup-attribute-type> ((otherclassname, attname))
+
   
   // Workflow Begin
     // try to apply strategy s as many times as possible to subterms
