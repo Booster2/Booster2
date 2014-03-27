@@ -34,12 +34,6 @@ rules
 			<not(eq)>(This(), expr)
 */
 
-	simplify:
-		Forall(name, PathStart(classname, None()), Implies(constraint1, constraint2))
-			-> True()		
-		where
-			<elem>((classname, Forall(name, PathStart(classname, None()), constraint2)), <LookupTable> "QualifiedInvariants")  
-
 
 	simplify:
 		And(True(), constraint)
@@ -408,3 +402,13 @@ rules
 			-> ps {Reference(cname)}
 			where
 				(cname', aname2) := <lookup-opposite>(cname, aname1)
+				
+	simplify:
+		Parallel(prog, Skip()) -> prog
+		
+		
+	simplify:
+		Parallel(Skip(), prog) -> prog
+		
+		
+		

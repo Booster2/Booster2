@@ -82,6 +82,11 @@
 			<param name="folderName" value="heuristics-booster"/>
 			<param name="suffix" value=".heuristics.boo2"/>
 		</antcall>
+		<antcall target="_runTest">
+			<param name="transformName" value="java-simplify-booster"/>
+			<param name="folderName" value="simplified-booster"/>
+			<param name="suffix" value=".simplified.boo2"/>
+		</antcall>
 	</target>
 	
 	<target name="_runTest">

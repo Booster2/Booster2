@@ -55,8 +55,8 @@ imports
 		
 
 	is-defined:
-		 (classname, method, BasicValue(t), env)
-		 	-> BinRel(BasicValue(t), In(), typeExtent)
+		 (classname, method, BasicValue(t){type}, env)
+		 	-> BinRel(BasicValue(t) {type}, In(), typeExtent)
 		 where
 		 	t' := <get-corresponding-booster-type> t;
 		 	typeExtent := <get-type-extent> t'

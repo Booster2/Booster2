@@ -4,6 +4,6 @@ class A {
 	attributes
 		a : INT
 	methods
-		m1 { true }
+		m1 { false }
 	
 }

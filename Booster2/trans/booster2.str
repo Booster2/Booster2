@@ -65,6 +65,9 @@ rules
 
   java-wp-booster = main(WPToBooster)
   java-wp-lut = main(WPToLookupTable)
+
+  java-simplify-booster = main(simplifyToBooster)
+  java-simplify-lut = main(simplifyToLookupTable)
   
   // workflow begin
   precondToBooster = (\ x -> <builder-precond(output-to-booster)> ("precond.boo2", x) \)

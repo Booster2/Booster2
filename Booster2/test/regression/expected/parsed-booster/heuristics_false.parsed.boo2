@@ -2,4 +2,4 @@ system testSystem
  
 
 
-	class A  { 		attributes			a  : INT		methods 			m1 { true }	}
+	class A  { 		attributes			a  : INT		methods 			m1 { false }	}
