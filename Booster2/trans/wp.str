@@ -73,7 +73,7 @@ where
 				multiplicityConstraint :=  <make-post-state><conjoin-constraints><filter(get-multiplicity-constraint)> paths;
 				//log(|Error(), "multiplicity constraint", <constraint> multiplicityConstraint);
 				
-				classInvariant := <make-post-state><conjoin-constraints> <filter( id )> <get-class-invariants> classname;
+				classInvariant := <make-post-state><conjoin-constraints> <filter(\i -> i where <not(equal)>([], <isect>((<get-modified-attributes>program), (<get-mentioned-attributes> (classname, i, []))))\)> <get-class-invariants> classname;
 				//log(|Error(), "classInvariant", classInvariant);
 				invariant := <conjoin-constraints>[classInvariant, typeConstraint, multiplicityConstraint];
 				(constraint6, program2) := <calculate-wp>(program, And(invariant, constraint), classname, methname);
@@ -85,6 +85,38 @@ where
 				<updateMethodProgram> (classname, methname, Guard(constraint7, program2))
 			
 
+	/* 	get-mentioned-attributes:
+		takes an expression, in the context of a class, maybe a method name,
+		and a model, and returns the list of attributes that it
+		constrains.			
+*/		
+
+	get-mentioned-attributes:
+		(cname, expr, env)
+			-> <collect((\ term -> (cname, term, env)\) ; _get-mentioned-attributes)>
+
+	
+	_get-mentioned-attributes:
+		(cname, PathStart(attname, maybeprimed), env)
+			-> (cname, attname)
+		where
+			type := <lookup-attribute-type> ((cname, attname))
+		// i.e. the attribute does exist
+		
+
+	_get-mentioned-attributes:
+		(cname, Path(path{ Reference(otherclassname)}, PathComponent(attname, maybeprimed)), env)
+			-> (otherclassname, attname)
+		where
+			type := <lookup-attribute-type> ((otherclassname, attname))
+
+	_get-mentioned-attributes:
+		(cname, Path(path { Optional(Reference(otherclassname)) }, PathComponent(attname, maybeprimed)), env)
+			-> (otherclassname, attname)
+		where
+			type := <lookup-attribute-type> ((otherclassname, attname))
+
+  
 
 	calculate-wp:
 		(Skip(), constraint, classname, methodname)

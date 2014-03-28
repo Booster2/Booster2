@@ -88,7 +88,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		name -> $[[name]]
 					
 	attribute:
-		((classname, attname), (decs, type, opposite, minmult, maxmult, tname, invs)) 
+		((classname, attname), (decs, type, opposite, minmult, maxmult, tname)) 
 			-> $[["\t\t\t"][attname] [<foldout(decorator)>(decs, ", ")] : [<type>(type, opposite, minmult, maxmult)] ]
 			//[<output-to-booster-attribute-type>(classname, attname)]]
 	

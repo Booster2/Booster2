@@ -246,13 +246,13 @@ rules
 		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
 		where
-			type := <\ (ds,t,o,min,max,tname, invs) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
+			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 	infer-types:
 		(context, Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed)) { type}
 		where
-			type := <\ (ds,t,o,min,max,tname, invs) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
+			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 
 
@@ -422,7 +422,7 @@ rules
 		(cname, p) 
 			-> (cname, p)
 			where
-				atts := <filter(\((cn, an), (ds, t, o, min, max, tname, invs) ) -> (cn, an, t) 
+				atts := <filter(\((cn, an), (ds, t, o, min, max, tname) ) -> (cn, an, t) 
 									where <?Reference(cname) <+ ?Optional(Reference(cname)) <+ ?Set(Reference(cname))> t\)> <LookupTable> "Attribute";
 				//log(|Error(), (cname, p), atts)	;
 				<map(\(cn, an, type) -> p' 
@@ -441,37 +441,7 @@ rules
 		(cn, an, Set(Reference(cname)), p) -> Forall("s", Path(This(), PathComponent(an, None())), 
 		 	<literal-substitute>(p, [(This(), PathStart("s", None()))]))
 			
-	/* 	get-mentioned-attributes:
-		takes an expression, in the context of a class, maybe a method name,
-		and a model, and returns the list of attributes that it
-		constrains.			
-*/		
-
-	get-mentioned-attributes:
-		(cname, expr, env)
-			-> <collect((\ term -> (cname, term, env)\) ; _get-mentioned-attributes)>
-
-	
-	_get-mentioned-attributes:
-		(cname, PathStart(attname, maybeprimed), env)
-			-> (cname, attname)
-		where
-			type := <lookup-attribute-type> ((cname, attname))
-		// i.e. the attribute does exist
-		
-
-	_get-mentioned-attributes:
-		(cname, Path(path{ Reference(otherclassname)}, PathComponent(attname, maybeprimed)), env)
-			-> (otherclassname, attname)
-		where
-			type := <lookup-attribute-type> ((otherclassname, attname))
-
-	_get-mentioned-attributes:
-		(cname, Path(path { Optional(Reference(otherclassname)) }, PathComponent(attname, maybeprimed)), env)
-			-> (otherclassname, attname)
-		where
-			type := <lookup-attribute-type> ((otherclassname, attname))
-
+  
   
   // Workflow Begin
     // try to apply strategy s as many times as possible to subterms
