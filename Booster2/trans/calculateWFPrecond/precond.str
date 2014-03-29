@@ -6,8 +6,12 @@ imports
   trans/calculateWFPrecond/workflow
   trans/simplify
   
-  // TODO: Currently, we don't support prioritisation of guarded actions
+  trans/library/basicTypes
+  trans/library/lookupTable
+  trans/wp
   
+  
+  // TODO: Currently, we don't support prioritisation of guarded actions
 rules
 	
 	// The following three methods are used to work with the Map of calculated preconditions
@@ -103,7 +107,7 @@ rules
 		   par1 := <reduceWaits> (<listUpdate> ([wfs*], i, wi1));
 		   <pre> (cname,pname,par1);
 		   
-		   loc_cond := And(<get> gi1,<wp> ((cname,ai1) , <lookupMap> par1));
+		   loc_cond := And(<get> gi1,<precond_wp> ((cname,ai1) , <lookupMap> par1));
 		   formset_rest := <preIter> ((cname,pname,[wfs*],True()),<addi>(i,1),t);
 		   formset := <conc> ([loc_cond], formset_rest)
 		   
@@ -125,13 +129,13 @@ rules
            if not(<guard_false> gi2) then <pre> (cname,pname,par2) end;
            
            if <guard_false> gi1 ; <guard_false> gi2 then loc_cond := False() else 
-           if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<wp> ((cname,ai2) , <lookupMap> par2))) else 
-           if <guard_false> gi2 then loc_cond := And ((<get> gi1) ,(<wp> ((cname,ai1) , <lookupMap> par1))) else
+           if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<precond_wp> ((cname,ai2) , <lookupMap> par2))) else 
+           if <guard_false> gi2 then loc_cond := And ((<get> gi1) ,(<precond_wp> ((cname,ai1) , <lookupMap> par1))) else
            	    loc_cond :=
            	    And (And(
-           	      Implies(<get> gi1 , <wp> ((cname,ai1), <lookupMap> par1))
+           	      Implies(<get> gi1 , <precond_wp> ((cname,ai1), <lookupMap> par1))
            	      ,	
-           	      Implies(<get> gi2 , <wp> ((cname,ai2), <lookupMap> par2))
+           	      Implies(<get> gi2 , <precond_wp> ((cname,ai2), <lookupMap> par2))
            	    )
            	    , Or( <get> gi1, <get> gi2)	 	
            	    )   
@@ -141,15 +145,9 @@ rules
            formset := <conc> ([loc_cond], formset_rest)
            
         
-	wp: ((cname,MethodReference(path,[substs*])),post) -> constraint7
+	precond_wp: ((cname,MethodReference(path,[substs*])),post) -> constraint7
 	where
-		// TODO: in order to cope with proper methd reference, it is necessary to
-		// redo the elaborate phase for method references in workflows
-		
-		// TODO: another issue is that the type information needs to be present 
-		// in guards within guarded actions
-		
-		log(|Error(),"post",post);
+		log(|Error(),"check");
 		
 		class_name := cname;					// should be replaced by the class to which the method reference refers
 		method_name := <getMethodName> path;	// the method name should be calculated properly
@@ -158,29 +156,21 @@ rules
 		
 		program := prog;
 		paths := <get-modified-paths> program;
-		constraint2a :=  <conjoin-constraints><map(get-type-constraint)> paths;
-		constraint2b :=  <conjoin-constraints><filter(get-multiplicity-constraint)> paths;
-		constraint3 := <make-post-state> And(constraint2a, constraint2b) ;
-				
-		mod-atts := <get-modified-attributes> program;
-		invs := <conjoin-constraints><map(lookup-invariant)> mod-atts;
-		constraint4 := <conjoin-constraints ; make-post-state> invs ;
-				
-		constraint5 := And(constraint4, constraint3);
 		
+		typeConstraint :=  <make-post-state><conjoin-constraints><map(get-type-constraint)> paths;
+		multiplicityConstraint :=  <make-post-state><conjoin-constraints><filter(get-multiplicity-constraint)> paths;
+		classInvariant := <make-post-state><conjoin-constraints> <filter( id )> <get-class-invariants> class_name;
 		post-new := <make-post-state> post;
-		post-constraint := And(constraint5,post-new);
-				
-		(constraint6, program2) := <calculate-wp>(program, post-constraint, class_name, method_name);
-		log(|Error(),"check_constraint6",constraint6);
-		log(|Error(),"check_program2",program2);
-		constraint7 := ( <make-pre-state> constraint6 );
-		log(|Error(),"simplified",<innermost(simplify)> constraint7)
+		invariant := <conjoin-constraints>[classInvariant, typeConstraint, multiplicityConstraint, post];
+		
+		(constraint6, program2) := <calculate-wp>(program, And(invariant,constraint), class_name, method_name);
+		constraint7 := <make-pre-state> constraint6
 		
 		// for testing
 		;constraint7' := ("wp(",method_name,",",post,")")
 		
-     
+       
+       
 	// get the method name from a path
 	// PathComponent(name,[decorators*])
 	getMethodName: Path(path,path_component) -> <getMethodName> path_component
@@ -246,20 +236,5 @@ rules
 				
 				*/
 		
-		// never used!! Just declared to prevent undefinedness error
-		cheat : t -> t
-		with rules (LookupTable :+ "" -> ""
-		             calculate-wp :+ "" -> ""
-		             run-program :+ "" -> ""
-		             program :+ "" -> ""
-		             get-modified-paths :+ "" -> ""
-		             get-type-constraint :+ "" -> ""
-		             new-environment :+ "" -> ""
-		             get-multiplicity-constraint :+ "" -> ""
-		             make-post-state :+ "" -> ""
-		             get-modified-attributes :+ "" -> ""
-		             lookup-invariant :+ "" -> ""
-		             conjoin-constraints :+ "" -> ""
-		             make-pre-state :+ "" -> "")
 		 
 	
