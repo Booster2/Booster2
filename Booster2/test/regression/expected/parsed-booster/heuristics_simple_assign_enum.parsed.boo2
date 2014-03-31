@@ -1,0 +1,5 @@
+system testSystem 
+ 
+	set DayOfWeek { Monday, Tuesday, Wednesday }
+
+	class A  { 		attributes			a  : DayOfWeek 		methods 			m1 { a' = Monday }	}

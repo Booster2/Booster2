@@ -1,0 +1,5 @@
+system testSystem 
+ 
+
+
+	class A  { 		attributes			a  : DATETIME		methods 			m1 { this.a := d? }	}

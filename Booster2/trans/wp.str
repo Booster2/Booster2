@@ -47,7 +47,8 @@ rules
 									?This() <+ 
 									?ThisPrimed() <+
 									?Input(i) <+
-									?Output(o))
+									?Output(o) <+
+									?PathStart(p, pc) {Set(Reference(c))})
 
 
 wp:
@@ -135,13 +136,14 @@ where
 			
 
 	calculate-wp:
-		(New(o, cl), constraint1, classname, methname)
-			-> (And(constraint4, And(constraint3, constraint2)), New(o, cl))
+		(New(Output(o){ Reference(c)}, cl { Set(Reference(c))}), constraint1, classname, methname)
+			-> (And(constraint4, And(constraint3, constraint2)), New(Output(o){ Reference(c)}, cl{ Set(Reference(c))}))
 		where 
-			
-			constraint2 := <aliasing-substitute> (classname, methname, constraint1, PathStart(cl, None()), BinOp(PathStart(cl, None()),Union(), Output(o)), <new-environment>[]);
-			constraint3 := <is-defined> (classname, methname, BinOp(PathStart(cl, None()),Union(),Output(o)), <new-environment>[]);
-			constraint4 := <is-defined> (classname, methname, PathStart(cl, None()), <new-environment>[])
+			log(|Error(), "calculate-wp", (cl, constraint1));
+			cl' := <make-post-state> cl;
+			constraint2 := <aliasing-substitute> (classname, methname, constraint1, cl' { Set(Reference(c))}, BinOp(cl{ Set(Reference(c))},Union(), SetExtent([Output(o){ Reference(c)}]){ Set(Reference(c))}), <new-environment>[]);
+			constraint3 := <is-defined> (classname, methname, BinOp(cl{ Set(Reference(c))},Union(),Output(o){ Reference(c)}), <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, cl{ Set(Reference(c))}, <new-environment>[])
 
 
 	// Thomas: Why is the guard "constraint1" never used subsequently?
@@ -366,24 +368,24 @@ where
 		 (classname, methodname, BinRel(expression1, binrel, expression2), path, expression, env)
 		 	-> constraint
 		 where
-		 	//log(|Error(), "Aliasing Subst - classname, methodname:", (classname, methodname));
-		 	//log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
-		 	//log(|Error(), "Aliasing Subst - path", path);
-		 	//log(|Error(), "Aliasing Subst - expression", expression);
+		 	log(|Error(), "Aliasing Subst - classname, methodname:", (classname, methodname));
+		 	log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
+		 	log(|Error(), "Aliasing Subst - path", path);
+		 	log(|Error(), "Aliasing Subst - expression", expression);
 		 	paths1 := <get-mentioned-paths> expression1;
-		 	//log(|Error(), "Aliasing Subst - paths1", paths1);
+		 	log(|Error(), "Aliasing Subst - paths1", paths1);
 		 	paths2 := <get-mentioned-paths> expression2;
-		 	//log(|Error(), "Aliasing Subst - paths2", paths2);
+		 	log(|Error(), "Aliasing Subst - paths2", paths2);
 		 	paths := <union>(paths1, paths2);
-		 	//log(|Error(), "Aliasing Subst - paths", paths);
+		 	log(|Error(), "Aliasing Subst - paths", paths);
 		 	pathstart {type}:= <(\Path(ps, pc) -> ps\) <+ (\ PathStart(ps, maybeprimed) {type} -> PathStart(ps, maybeprimed) {type} \)> path;
-		 	//log(|Error(), "Aliasing Subst - type", type);
+		 	log(|Error(), "Aliasing Subst - type", type);
 		 	filtered-paths := <filter((\p -> (type, p) \) ; is-correct-type)> paths;
-		 	//log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
+		 	log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
 		 	subsets := <subsets> filtered-paths;
-		 	//log(|Error(), "Aliasing Subst - subset",subsets);
-		 	constraint := <conjoin-constraints><currymap(generate-aliasing-constraint)> ((classname, methodname, BinRel(expression1, binrel, expression2), path, expression, env, filtered-paths), subsets)/*; 
-			log(|Error(), "Aliasing Subst - constraint", constraint) */
+		 	log(|Error(), "Aliasing Subst - subset",subsets);
+		 	constraint := <conjoin-constraints><currymap(generate-aliasing-constraint)> ((classname, methodname, BinRel(expression1, binrel, expression2), path, expression, env, filtered-paths), subsets); 
+			log(|Error(), "Aliasing Subst - constraint", constraint)
 	
 /*	aliasing-substitute:
 		something -> True()
@@ -394,18 +396,31 @@ where
 			-> Implies(And(ant1,ant2), con2)
 		where
 			pathstart {type}:= <(\Path(ps, pc) -> ps\) <+ (\ PathStart(ps, maybeprimed) {type} -> PathStart(ps, maybeprimed) {type} \)> path;
+			log(|Error(), "generate-aliasing-constraint 1", pathstart {type});
 			ant1 := <conjoin-constraints><currymap(\ (p1, p2) -> BinRel(p1, Equal(), p2)\)>(pathstart {type}, paths);
+			log(|Error(), "generate-aliasing-constraint 2", ant1);
 			paths2 := <diff>(all-paths, paths); 
+			log(|Error(), "generate-aliasing-constraint 3", paths2);
 			ant2 := <conjoin-constraints><currymap(\ (p1, p2) -> BinRel(p1, NotEqual(), p2)\)>(pathstart {type}, paths2);
+			log(|Error(), "generate-aliasing-constraint 4", ant2);
+			
 			//log(|Error(), "Something", (paths, ps));
 			substs := <map(\p -> (p, pathstart {type})\)> paths;
-	
+			log(|Error(), "generate-aliasing-constraint 5", substs);
+			
 			con := <literal-substitute> (BinRel(expression1, binrel, expression2), substs);
+			log(|Error(), "generate-aliasing-constraint 6", con);
+			
 			/* log(|Error(), "con", <constraint> con); */
-			con2 := <literal-substitute> (con, [(path, expression)]) /*;
+			con2 := <literal-substitute> (con, [(path, expression)]) ;
+			log(|Error(), "generate-aliasing-constraint 7", con2) /*;
+			
 			log(|Error(), "con2", con2)  */
 
 
+	is-correct-type:
+		(type, PathStart(pstart, maybeprimed){type})
+			-> PathStart(pstart, maybeprimed)
 
 	is-correct-type:
 		(type, Path(pstart {type}, pc))

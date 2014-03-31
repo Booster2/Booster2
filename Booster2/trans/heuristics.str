@@ -250,10 +250,11 @@ rules
 
 /* Mandatory-to-Mandatory */
 	program:
-		(classname, methodname, BinRel(Path(a { Reference(name4) },b){ Reference(name2) }, Equal(), expression {Reference(name2)}))
-			-> Guard(BinRel(expression{Reference(name2)}, NotIn(), PathStart(name2, None()){Set(Reference(name2))}), 
-				Parallel(Assign(path3{ Reference(name2) }, expression{Reference(name2)}), 
-						 Assign(Path(expression{Reference(name2)},PathComponent(name6, None())){Reference(name4)},a {Reference(name4)})))
+		(classname, methodname, BinRel(Path(a { Reference(name4) },b){ Reference(name2) }, Equal(), Output(o) {Reference(name2)}))
+			-> Guard(BinRel(Output(o){Reference(name2)}, NotIn(), PathStart(name2, None()){Set(Reference(name2))}), 
+				Sequence(New(Output(o){Reference(name2)}, PathStart(name2, None()){Set(Reference(name2))})
+					,Parallel(Assign(path3{ Reference(name2) }, Output(o){Reference(name2)}), 
+						 Assign(Path(Output(o){Reference(name2)},PathComponent(name6, None())){Reference(name4)},a {Reference(name4)}))))
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;

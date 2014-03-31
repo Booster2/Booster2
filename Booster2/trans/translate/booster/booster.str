@@ -189,7 +189,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		Skip() -> $[skip]
 
 	guardedCommand:
-		New(Output(o), cl) -> $[new [o]! : [cl]]
+		New(Output(o), cl) -> $[new [o]! : [<expression> cl]]
 			
 	guardedCommand:
 		Assign(path, expression) -> $[[<expression> path] := [<expression> expression]]								
@@ -282,21 +282,12 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	expression:
 		PathComponent(name, Some(Primed())) -> $[[name]']
 
-
 	expression:
 		PathStart(st, None()) -> $[[st]]
-
 			
 	expression:
 		PathStart(st, Some(Primed())) -> $[[st]']
 
-// I'm not sure these rules are necessary any more! 
-/*	expression:
-		PathStart(st, None()) -> $[[<expression> st]]
-			
-	expression:
-		PathStart(st, Some(Primed())) -> $[[<expression> st]']
-*/
 	expression:
 		SetExtent(exprs) -> $[{[<foldout(expression)>(exprs, ", ")]}]
 		

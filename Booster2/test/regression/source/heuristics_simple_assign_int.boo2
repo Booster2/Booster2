@@ -2,8 +2,8 @@ system testSystem
 
 class A {
 	attributes
-		a : STRING
+		a : INT
 	methods
-		m1 { a' = "Hello, World" }
+		m1 { a' = 3 }
 	
 }

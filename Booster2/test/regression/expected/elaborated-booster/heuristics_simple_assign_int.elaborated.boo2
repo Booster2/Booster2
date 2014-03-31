@@ -2,4 +2,4 @@ system testSystem
  
 
 
-	class A  { 		attributes			a  : STRING		methods 			m1 { this.a' = "Hello, World" }	}
+	class A  { 		attributes			a  : INT		methods 			m1 { this.a' = 3 }	}
