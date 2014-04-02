@@ -425,23 +425,26 @@ rules
 				atts := <filter(\((cn, an), (ds, t, o, min, max, tname) ) -> (cn, an, t) 
 									where <?Reference(cname) <+ ?Optional(Reference(cname)) <+ ?Set(Reference(cname))> t\)> <LookupTable> "Attribute";
 				//log(|Error(), (cname, p), atts)	;
-				<map(\(cn, an, type) -> p' 
-							where p' := <context-invariant> (cn, an, type, p) ;
+				<map(\ (cn', an', type') -> True() 
+							where  
 							// This is where I add the invariant to the class
-							<addClassInvariant>(cn, p')    \)> atts
+							<addClassInvariant>(cn', <context-invariant> (cn', an', type', p))
+							//log(|Error(), "Added class invariant")
+							\)> atts
 				
 	context-invariant:
 		(cn, an, Reference(cname), p) -> <literal-substitute>(p, [(This(){Reference(cn)}, Path(This(){Reference(cn)}, PathComponent(an, None())){Reference(cname)})])
+			
 
 	context-invariant:
 		(cn, an, Optional(Reference(cname)), p) -> Implies(BinRel(Path(This(){Reference(cn)}, PathComponent(an, None())){Optional(Reference(cname))}, NotEqual(), Null()), 
 		 	<literal-substitute>(p, [(This(){Reference(cn)}, Path(This(){Reference(cn)}, PathComponent(an, None())){Optional(Reference(cname))})]))
+			
 
 	context-invariant:
-		(cn, an, Set(Reference(cname)), p) -> Forall("s", Path(This(), PathComponent(an, None())), 
-		 	<literal-substitute>(p, [(This(), PathStart("s", None()))]))
-			
-  
+		(cn, an, Set(Reference(cname)), p) -> Forall("s", Path(This(){Reference(cn)}, PathComponent(an, None())){Set(Reference(cn))}, 
+		 	<literal-substitute>(p, [(This(){Reference(cn)}, PathStart("s", None()){Reference(cn)})]))
+	
   
   // Workflow Begin
     // try to apply strategy s as many times as possible to subterms

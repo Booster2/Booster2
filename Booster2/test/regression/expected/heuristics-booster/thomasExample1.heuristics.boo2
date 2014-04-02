@@ -1,0 +1,5 @@
+system S 
+ 
+
+
+	class C  { 		attributes			c_a  : A . a_c			c_b  : B . b_c		invariants 			1 > 0	}	class A  { 		attributes			a_c  : set ( C. c_a )  [0 .. *]		invariants 			(forall s : this.a_c @ (1 > 0))	}	class B  { 		attributes			b_c  : C . c_b		invariants 			1 > 0	}

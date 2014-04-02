@@ -50,6 +50,10 @@ rules
 	simplify:
 		And(constraint, False())
 			-> False()
+
+	simplify:
+		And(constraint, constraint)
+			-> constraint
 			
 	simplify:
 		Or(constraint, True())
@@ -58,6 +62,10 @@ rules
 	simplify:
 		Or(True(), constraint)
 			-> True()
+
+	simplify:
+		Or(constraint, constraint)
+			-> constraint
 			
 	simplify:
 		Implies(True(), constraint)
@@ -79,6 +87,9 @@ rules
 		Implies(p, Implies(p, constraint))
 			-> Implies(p, constraint)
 
+	simplify:
+		Implies(constraint, constraint)
+			-> True()
 
 
 	simplify:
@@ -98,6 +109,10 @@ rules
 		)) -> Implies(False(), constraint)
 	
 	simplify:
+		Or(p, And(Not(p), q))
+			-> Or(p,q)
+	
+	simplify:
 		Guard(True(), program)
 			-> program
 			
@@ -114,11 +129,11 @@ rules
 			-> And(constraint1, constraint)
 			
 	simplify:
-		(Or(constraint, False()))
+		Or(constraint, False())
 			-> constraint
 
 	simplify:
-		(Or(False(), constraint))
+		Or(False(), constraint)
 			-> constraint
 		
 
@@ -319,6 +334,9 @@ rules
 	
 	simplify:
 		BinRel(exp1, SubsetEquals(), exp1) -> True()
+
+	simplify:
+		BinRel(exp1, SupersetEquals(), exp1) -> True()
 		
 	
 	
@@ -418,4 +436,37 @@ rules
 		BinRel(BinOp(exp, Plus(), BasicValue(Integer(i))), GreaterThanEquals(), BasicValue(Integer(0)))
 			-> True()
 		where
-			<gt>(i,0)	
+			<gt>(i,0)
+			
+	simplify:
+		BinRel(expr1, In(), SetExtent(exprs))
+			-> True()
+			where
+				<elem>(expr1, exprs)
+
+	simplify:
+		BinRel(expr1, NotIn(), SetExtent(exprs))
+			-> False()
+			where
+				<elem>(expr1, exprs)
+	
+	simplify:
+		Or(BinRel(expr1, In(), expr2),BinRel(expr1, NotIn(), expr2))
+			-> True()
+			
+	simplify:
+		Or(BinRel(expr1, In(), expr2),And(BinRel(expr1, NotIn(), expr2), constraint))
+			-> Or(BinRel(expr1, In(), expr2), constraint)
+			
+	simplify:
+		Or(BinRel(expr1, In(), SetExtent(exprs)), BinRel(expr1, Equal(), expr2))
+			-> BinRel(expr1, In(), SetExtent(exprs))
+		where
+			<elem>(expr2, exprs)
+			
+	simplify:
+		Or(And(expr1, expr2), And(epx2, expr3))
+			-> And(Or(expr1, expr3), expr2)
+			
+				
+						

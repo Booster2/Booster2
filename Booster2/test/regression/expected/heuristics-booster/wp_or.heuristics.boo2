@@ -1,0 +1,5 @@
+system S 
+ 
+
+
+	class A  { 		attributes			x  : INT		methods 			m1 { (this.x := 5) [] (this.x := 4) }	}
