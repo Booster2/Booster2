@@ -289,7 +289,15 @@ create procedure ProductLine_updateText ( in t_in varchar(1000),in this int)
 	end; 
 	start transaction;
   
-  if true
+  if true and (select  productLine from ProductLine
+                             where this = ProductLineId
+                             
+                             
+                             
+                             
+                             
+                             
+                             ) != 'Classic Cars' and t_in != 'Hello, World!'
   then update  ProductLine
        set textDescription = t_in
        where this = ProductLineId
@@ -298,6 +306,26 @@ create procedure ProductLine_updateText ( in t_in varchar(1000),in this int)
   
   end if;
   commit;
+	end //
+delimiter ;drop function if exists ProductLine_updateText_available;
+delimiter //
+create function ProductLine_updateText_available ( this int)
+	returns bit
+	begin
+  
+  if true and (select  productLine from ProductLine
+                             where this = ProductLineId
+                             
+                             
+                             
+                             
+                             
+                             
+                             ) != 'Classic Cars' and true
+  then return 1;
+  
+  else return 0;
+  end if;
 	end //
 delimiter ;
 insert  
@@ -347,7 +375,7 @@ into
 _Meta_Method_Params
 (class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
 values
-('ProductLine', 'updateText', 't', 'String', 'Mandatory', 'input', '', '')
+('ProductLine', 'updateText', 't', 'String', 'Optional', 'input', '', '')
 ;insert  
 into
 _Meta_Method_Params
@@ -1093,11 +1121,42 @@ SELECT * FROM ATTRIBUTES;
 				$$
 
 			
-CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(500))
+drop procedure if exists `GET_OBJECT_METHOD_NAMES`;
+DELIMITER $$
+CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(500), OID_in INT)
 	BEGIN
-    SELECT * FROM _Meta_Methods WHERE class = className_in AND isObjectMethod = true;
+DROP TABLE IF EXISTS OBJECT_METHODS;
+CREATE TEMPORARY TABLE OBJECT_METHODS 
+  (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+	methodName VARCHAR(500),
+	methodAvailable BIT
+  ) ENGINE = MEMORY; 
+	BEGIN
+	DECLARE MNAME CHAR(255);
+	DECLARE done INT DEFAULT 0;
+
+	DECLARE method_names CURSOR for
+		SELECT methodName FROM _Meta_Methods WHERE class = className_in AND isObjectMethod = true;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET DONE = 1;
+	OPEN method_names;
+
+	WHILE done = 0 DO
+		FETCH NEXT FROM method_names INTO MNAME;
+		IF done = 0 THEN
+			SET @SQL_TEXT = CONCAT("INSERT INTO OBJECT_METHODS (methodName, methodAvailable) VALUES ('", MNAME,"', ", className_in,"_",MNAME,"_available (", OID_in, "));");
+				PREPARE stmt_name FROM @SQL_TEXT;
+				EXECUTE stmt_name;
+				DEALLOCATE PREPARE stmt_name; 
+		END IF;
+	END WHILE;
+
+CLOSE method_names;
+	SELECT * from OBJECT_METHODS;
+	END;
   END;
 $$
+
 
 CREATE PROCEDURE `GET_CLASS_METHOD_NAMES` ( className_in VARCHAR(500))
 	BEGIN

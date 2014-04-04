@@ -1,0 +1,14 @@
+system testSystem
+
+class A {
+	attributes
+		b : SET(B . a)[*]
+	methods
+		m1 { b! : b' }
+	
+}
+
+class B {
+	attributes
+		a : SET(A . b)[*]
+}

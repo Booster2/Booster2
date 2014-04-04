@@ -107,10 +107,10 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
     (ast, path, project-path) -> (errors, warnings, notes)
     where
       editor-init;
-      <elaborate> <parse> ast;
-      errors   := <collect-all(constraint-error, conc)> ast;
-      warnings := <collect-all(constraint-warning, conc)> ast;
-      notes    := <collect-all(constraint-note, conc)> ast
+      <try(elaborate)> <parse> ast;
+      errors   := <concat><collect-all(constraint-error, conc)> ast;
+      warnings := <concat><collect-all(constraint-warning, conc)> ast;
+      notes    := <concat><collect-all(constraint-note, conc)> ast
       
 
   

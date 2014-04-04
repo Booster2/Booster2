@@ -17,7 +17,6 @@ imports
 			[metatables*] := <booster-to-metatables> x; 
 			[tables*] := <map(booster-to-relational-class)> <LookupTable> "Class" ;
 			[tables'*] := <filter(get-assoc-table)> <LookupTable> "Attribute" ;
-			log(|Error(), "Assoc tables", [tables'*]);
 			[settables*] := <map(get-set-table)> <LookupTable> "SetDef" ;
 			[procedures*] := <map(booster-to-relational-procedure)> <LookupTable> "Method" ;
 			[procedures'*] := <map(availability-procedure)> <LookupTable> "Method" ;
@@ -187,7 +186,7 @@ imports
 			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*])
 		where 
 			[columns*] := <filter(get-attribute-column)><filter(\((cname',aname), adef) -> ((cname',aname), adef) where <equal>(cname', cname) \)> <LookupTable> "Attribute";
-			log(|Error(), "columns", [columns*]);
+			//log(|Error(), "columns", [columns*]);
 			/* log(|Error(), "columns", <filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute"); */ 
 			identity := <concat-strings> [cname, "Id"]
 
@@ -263,9 +262,9 @@ imports
 								 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
 								 Column(secondcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(oname, [<concat-strings>[oname, "Id"]])))])
 		where
-			log(|Error(), "get-assoc-table", (cname, attname));
+			//log(|Error(), "get-assoc-table", (cname, attname));
 			<(?Reference(oname) <+ ?Optional(Reference(oname)) <+ ?Set(Reference(oname)))> t;
-			log(|Error(), "get-assoc-table 1", (cname, attname));
+			//log(|Error(), "get-assoc-table 1", (cname, attname));
 			tablename := <concat-strings> [cname, "_", attname];
 			firstcolname := <concat-strings> [cname, "_", attname];			
 			secondcolname := <concat-strings> [oname, "_", oaname];
@@ -325,6 +324,12 @@ imports
 			
 	convert-input:
 		(name, BasicType(t))
+			-> Input(name, t')
+		where
+			t' := <get-type-booster-to-sql> t
+
+	convert-input:
+		(name, Optional(BasicType(t)))
 			-> Input(name, t')
 		where
 			t' := <get-type-booster-to-sql> t
@@ -694,28 +699,21 @@ imports
 		(classname, progname, ThisPrimed())
 			-> True()
 	
+	remove-inputs:
+		constraint ->
+			<topdown(try(\ BinRel(exp1, relop, exp2) -> True() where 
+				<not(equal)>(<collect-all(?Input(i) <+ ?Output(o))>, []) \))> constraint
 	
 	availability-procedure:
 		((cname, mname), (c,gc,exts,d,is,os))
-			-> Procedure(name, params, DeclareList([]), StatementList(statements))
+			-> Function(name, params, Bit(), DeclareList([]), StatementList(statements))
 		where
 			name := <concat-strings> [cname, "_", mname, "_available"];
-			params := [Input("ObjectID", Int()), Input("InputsIncluded", Bit())];
-			guard-without-inputs := <(\ Guard(c, p) -> c\) <+ !True() >  gc;
-			guard-with-inputs := <(\ Guard(c, p) -> c\) <+ !True() >  gc;
+			params := [Input("this", Int())];
+			guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> c\) <+ !True() >  gc;
 			statements := [
-				IfThen(Equal(SystemVariable("InputsIncluded_in"),Int(1)), 
-					StatementList([	
-						IfThen(<booster-to-relational-constraint> (cname, mname, guard-with-inputs), 
-						StatementList([Select([], [Int(1)], None(), None(), None(), None(), None(), None(), None(), None(), None())]), 
-						[], 
-						StatementList([Select([], [Int(0)], None(), None(), None(), None(), None(), None(), None(), None(), None())]))
-					]), 
+				IfThen(<booster-to-relational-constraint> (cname, mname, guard-without-inputs), 
+					StatementList([Return(Int(1))]), 
 					[], 
-					StatementList([						
-						IfThen(<booster-to-relational-constraint> (cname, mname, guard-without-inputs), 
-						StatementList([Select([], [Int(1)], None(), None(), None(), None(), None(), None(), None(), None(), None())]), 
-						[], 
-						StatementList([Select([], [Int(0)], None(), None(), None(), None(), None(), None(), None(), None(), None())]))
-					]))
+					StatementList([Return(Int(0))]))
 				]

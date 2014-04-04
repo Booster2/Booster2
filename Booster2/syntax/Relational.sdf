@@ -43,6 +43,8 @@ exports
 	"(" {Statement ";" }*  ")" -> StatementList {cons("StatementList")}
 	
 	'procedure' ID "(" {Parameter "," }*  ")" DeclareList StatementList -> Procedure {cons("Procedure")}
+
+	'function' ID "(" {Parameter "," }*  ")" "returns" SQLType DeclareList StatementList -> Procedure {cons("Function")}
 	
 	'in' ID SQLType -> Parameter {cons("Input")}
 	'out' ID SQLType -> Parameter {cons("Output")}
@@ -54,12 +56,12 @@ exports
 	'end if'   -> Statement {cons("IfThen")}
 
 	'begin' DeclareList StatementList 'end'   -> Statement {cons("BeginEnd")}
-
+	
 	Update -> Statement
 	Query -> Statement 
 	Insert -> Statement {cons("Insert")}
 	'delete' -> Statement {cons("Delete")}
-
+	Return -> Statement 
 	'*' -> SQLExpression {cons("Star")}
 	
 	'true' -> SQLExpression {cons("True")}
@@ -376,3 +378,4 @@ exports
 	
 	'default' SQLExpression -> DefaultDeclare {cons("DefaultDeclare")}
 	
+	'return' SQLExpression -> Return {cons("Return")}

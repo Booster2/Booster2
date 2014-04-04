@@ -64,6 +64,18 @@ rules
 	 			    commit;
 	 			  	end //
 	 			  delimiter ;]
+
+	 pp-install-procedure:
+	 	Function(name, inputs, retType, DeclareList(declares), StatementList(statements))
+	 		-> $[ drop function if exists [name];
+	 			  delimiter //
+	 			  create function [name] ( [<foldout(proc-param-without-inout)> (inputs, ",")])
+	 			  	returns [<column-type> retType]
+	 				begin
+	 			    [<foldout(declare-statement)> (declares, "; ")]
+	 			    [<map(proc-stmt)> statements]
+	 			  	end //
+	 			  delimiter ;]
 	 			
 	 column-type:
 	 	Varchar(n)
@@ -120,7 +132,14 @@ rules
 	column-key:
 		NoKey() -> $[]	
 		
+	proc-param-without-inout:
+		Input("this", type)
+			-> $[this [<column-type> type]]
 
+	proc-param-without-inout:
+		Input(name, type)
+			-> $[[name]_in [<column-type> type]]
+		
 	proc-param:
 		Input("this", type)
 			-> $[in this [<column-type> type]]
@@ -181,6 +200,9 @@ rules
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
 			-> $[[<expression> Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)];["\r\r"]]
 
+	proc-stmt:
+		Return(expr)
+			-> $[return [<expression> expr];]
 
 	insert-priority:
 		Some(LowPriority()) -> $[low_priority]
@@ -461,7 +483,8 @@ rules
 	
 	expression:
 		String(str)
-			-> $['[str]']
+			-> $['[<<un-double-quote> str <+ !str>]']
+			
 	
 	expression:
 		Int(i)

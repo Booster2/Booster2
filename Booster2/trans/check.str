@@ -2,19 +2,25 @@ module check
 
 imports
   include/Booster2
-
+  parse
 
 rules
 
 
 	constraint-error:
-		Class(name, _, _) -> (name, $[Duplicate class name: [name]])
+		Class(name, _, _) -> [(name, $[Duplicate class name: [name]])]
 	where
 		not(<filter(\ (cn, cdef) -> cn where <equal>(cn, name) \)> <LookupTable> "Class" => [_])
-		
 
 	constraint-error:
-		SetDef(name, vs) -> (name, $[Duplicate set name: [name]])
+		Class(cname,exts, comps) -> errs
+	where
+		atts := <getAttributes> comps;
+		errs := <filter(\ Attribute(attName, decorators, type) -> (attName, $[Duplicate attribute name: [attName]]) 
+								where not(<filter(\ ((cn, an), adef) -> (cn, an) where <equal>((cn, an), (cname, attName)) \)> <LookupTable> "Attribute" => [_]) \)> atts 
+
+	constraint-error:
+		SetDef(name, vs) -> [(name, $[Duplicate set name: [name]])]
 	where
 		not(<filter(\ (sn, sdef) -> sn where <equal>(sn, name) \)> <LookupTable> "SetDef" => [_])
 
@@ -183,15 +189,15 @@ rules
   
   
    constraint-note:
-    Class("Test", extends, _) -> ("Test", $[This is just an example program in the "entities" language
-                                      (this note is defined in trans/check.str) ])
+    Class("Test", extends, _) -> [("Test", $[This is just an example program in the "entities" language
+                                      (this note is defined in trans/check.str) ])]
                                       
    constraint-warning:
-  	Class(name, extends, []) -> (name, $[Empty class [name]])
+  	Class(name, extends, []) -> [(name, $[Empty class [name]])]
  	
                                          
   constraint-error:
-  	x -> (x, $[True is equal to False])
+  	x -> [(x, $[True is equal to False])]
   		where
   		<equal>(True(), False()) 
 

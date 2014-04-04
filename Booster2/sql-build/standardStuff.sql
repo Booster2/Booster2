@@ -322,11 +322,42 @@ SELECT * FROM ATTRIBUTES;
 				$$
 
 			
-CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(500))
+drop procedure if exists `GET_OBJECT_METHOD_NAMES`;
+DELIMITER $$
+CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(500), OID_in INT)
 	BEGIN
-    SELECT * FROM _Meta_Methods WHERE class = className_in AND isObjectMethod = true;
+DROP TABLE IF EXISTS OBJECT_METHODS;
+CREATE TEMPORARY TABLE OBJECT_METHODS 
+  (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+	methodName VARCHAR(500),
+	methodAvailable BIT
+  ) ENGINE = MEMORY; 
+	BEGIN
+	DECLARE MNAME CHAR(255);
+	DECLARE done INT DEFAULT 0;
+
+	DECLARE method_names CURSOR for
+		SELECT methodName FROM _Meta_Methods WHERE class = className_in AND isObjectMethod = true;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET DONE = 1;
+	OPEN method_names;
+
+	WHILE done = 0 DO
+		FETCH NEXT FROM method_names INTO MNAME;
+		IF done = 0 THEN
+			SET @SQL_TEXT = CONCAT("INSERT INTO OBJECT_METHODS (methodName, methodAvailable) VALUES ('", MNAME,"', ", className_in,"_",MNAME,"_available (", OID_in, "));");
+				PREPARE stmt_name FROM @SQL_TEXT;
+				EXECUTE stmt_name;
+				DEALLOCATE PREPARE stmt_name; 
+		END IF;
+	END WHILE;
+
+CLOSE method_names;
+	SELECT * from OBJECT_METHODS;
+	END;
   END;
 $$
+
 
 CREATE PROCEDURE `GET_CLASS_METHOD_NAMES` ( className_in VARCHAR(500))
 	BEGIN

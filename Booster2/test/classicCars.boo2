@@ -7,7 +7,7 @@ System ClassicCars
 			image : String
 			products : SET ( Product . productLine )[*]
 		methods
-			updateText{textDescription' = t?}
+			updateText{productLine /= "Classic Cars" & t? /= "Hello, World!" & textDescription' = t?}
 	} 
 	
 	class Product {

@@ -127,10 +127,10 @@ where
 		(Assign(path, expression), constraint1, classname, methname)
 			-> (And( constraint2, And(constraint3, constraint4)), Assign(path, expression))
 		where 
-			log(|Error(), "wp constraint", <constraint> constraint1);
+			//log(|Error(), "wp constraint", <constraint> constraint1);
 			path1 := <make-post-state> path;
 			constraint2 := <aliasing-substitute> (classname, methname, constraint1, path1, expression, <new-environment>[]);
-			log(|Error(), "wp aliasing substitute result", <constraint> constraint2);
+			//log(|Error(), "wp aliasing substitute result", <constraint> constraint2);
 			constraint3 := <is-defined> (classname, methname, expression, <new-environment>[]);
 			constraint4 := <is-defined> (classname, methname, path, <new-environment>[])
 			
@@ -174,12 +174,9 @@ where
 				Choice(Guard(<make-pre-state> constraint2, program3), 
 					   Guard(<make-pre-state> constraint3, program4)))
 				where
-			log(|Error(), "WP-choice 1", (<guardedCommand> Choice(program1, program2), <constraint> constraint1)); 
 			(constraint2, program3) := <calculate-wp> (program1, constraint1, classname, methname);
-			log(|Error(), "WP-choice 2", (<constraint>constraint2, <guardedCommand>program3));
-			(constraint3, program4) := <calculate-wp> (program2, constraint1, classname, methname);
-			log(|Error(), "WP-choice 3", (<constraint>constraint3, <guardedCommand>program4))
-
+			(constraint3, program4) := <calculate-wp> (program2, constraint1, classname, methname)
+			
 	calculate-wp:
 		(Parallel(program1, program2), constraint1, classname, methname)
 			-> (constraint3, Parallel(program3, program4))

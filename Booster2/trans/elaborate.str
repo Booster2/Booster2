@@ -50,7 +50,7 @@ rules
 		((cname, aname), adef) 
 			-> ((cname, aname), (cnames, adef))
 		where
-			cnames := <concat><filter(\ (n, (is,as,a,m,c,w)) -> [n] where <elem>(cname, as); <not(elem)>(aname, a)\)> <LookupTable> "Class";
+			cnames := <filter(\ (n, (is,as,a,m,c,w)) -> n where <elem>(cname, as); <not(elem)>(((n, aname), adef), <LookupTable> "Attribute") \)> <LookupTable> "Class";
 			<not(equal)> (cnames, [])
 
 	
