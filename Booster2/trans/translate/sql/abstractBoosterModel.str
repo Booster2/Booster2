@@ -418,7 +418,7 @@ imports
 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, New(Output(obj), cls))
+		(classname, progname, New(Output(obj), PathStart(cls, None())))
 			-> [Insert(None(), None(), Into(), cls, [], [], None()),
 				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([Output(obj)])), None())]
 		

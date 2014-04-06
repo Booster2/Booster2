@@ -174,16 +174,15 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		(constraint)
 			-> $[["\t\t\t"][<constraint> constraint]]
 
+
+	method:
+		((classname, methodname), (constraint, (), exts, done, inputs, outputs))
+			-> $[["\t\t\t"][methodname] { [<constraint> constraint] }]
 	
 	method:
 		((classname, methodname), (constraint, guardedCommand, exts, done, inputs, outputs))
 			-> $[["\t\t\t"][methodname] { [<guardedCommand> guardedCommand] }]
-		where
-			<not(equal)>(guardedCommand, ())
 
-	method:
-		((classname, methodname), (constraint, guardedCommand, exts, done, inputs, outputs))
-			-> $[["\t\t\t"][methodname] { [<constraint> constraint] }]
 
 	guardedCommand:
 		Skip() -> $[skip]

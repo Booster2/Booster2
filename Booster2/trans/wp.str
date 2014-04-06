@@ -139,7 +139,7 @@ where
 		(New(Output(o){ Reference(c)}, cl { Set(Reference(c))}), constraint1, classname, methname)
 			-> (And(constraint4, And(constraint3, constraint2)), New(Output(o){ Reference(c)}, cl{ Set(Reference(c))}))
 		where 
-			//log(|Error(), "calculate-wp", (cl, constraint1));
+			log(|Error(), "calculate-wp, New", (cl, constraint1));
 			cl' := <make-post-state> cl;
 			constraint2 := <aliasing-substitute> (classname, methname, constraint1, cl' { Set(Reference(c))}, BinOp(cl{ Set(Reference(c))},Union(), SetExtent([Output(o){ Reference(c)}]){ Set(Reference(c))}), <new-environment>[]);
 			constraint3 := <is-defined> (classname, methname, BinOp(cl{ Set(Reference(c))},Union(),Output(o){ Reference(c)}), <new-environment>[]);

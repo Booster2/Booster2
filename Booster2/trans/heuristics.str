@@ -139,11 +139,8 @@ rules
 			
 	program:
 		(classname, methodname, BinRel(Output(o), In(), PathStart(cl,Some(Primed())) { Set(Reference(cl)) }))
-			-> New(Output(o), cl) 
-		where
-			/*log(|Warning(), "Matching new"); */
-			<not(is-pre-state)> PathStart(cl,Some(Primed()));
-			path1 := <make-pre-state> PathStart(cl,Some(Primed()))  
+			-> New(Output(o){ Reference(cl)}, PathStart(cl,None()){ Set(Reference(cl)) }) 
+  
 
 
 			

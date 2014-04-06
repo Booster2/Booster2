@@ -76,7 +76,8 @@ rules
 	 			    [<map(proc-stmt)> statements]
 	 			  	end //
 	 			  delimiter ;]
-	 			
+ 	 
+			
 	 column-type:
 	 	Varchar(n)
 	 		-> $[varchar([n])]
@@ -148,11 +149,11 @@ rules
 		Input(name, type)
 			-> $[in [name]_in [<column-type> type]]
 		
-	proc-params:
+	proc-param:
 		Output(name, type)
 			-> $[out [name]_out [<column-type> type]]
-		
-	proc-params:
+			
+	proc-param:
 		InOut(name, type)
 			-> $[inout [name]_inout [<column-type> type]]
 		
@@ -203,7 +204,7 @@ rules
 	proc-stmt:
 		Return(expr)
 			-> $[return [<expression> expr];]
-
+			
 	insert-priority:
 		Some(LowPriority()) -> $[low_priority]
 		
@@ -910,7 +911,7 @@ rules
 
     into-part:
     	Some(Into(vars))
-    		-> $[into [<foldout(column-name)> (vars, ", ")]] 
+    		-> $[into [<foldout(column-name <+ expression)> (vars, ", ")]] 
 
 
 	charset:

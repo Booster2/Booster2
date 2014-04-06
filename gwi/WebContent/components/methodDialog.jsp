@@ -9,7 +9,7 @@
 		<form id="methodCallForm" name="methodCallForm" action="" class="form-horizontal">
 
 <!-- ko foreach: methodParams() -->
-	<!-- ko if: paramName() != 'this' && (paramType() == 'Int' || paramType() == 'String') -->
+	<!-- ko if: paramName() != 'this' && (paramType() == 'Integer' || paramType() == 'String') -->
 	<div class="control-group">
 		<label class="control-label" data-bind="attr: {for: paramName}, text: paramName().unCamelCase() + ':'"></label>
 		<div class="controls">
