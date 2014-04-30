@@ -185,7 +185,7 @@ rules
 				set [<foldout(update)> (us, ",")]
 				[<maybe-output(where-part)> wp]
 				[<maybe-output(order-by-part)> obp]
-				[<limit-part> lp];["\r\r"]]
+				[<maybe-output(limit-part)> lp];["\r\r"]]
 
 	proc-stmt:
 		Insert( ip , ig, into ,tn,cns, es, od) 
@@ -196,6 +196,15 @@ rules
 				values
 				([<foldout(expression)> (es, ", ")])
 				[<maybe-output(on-duplicate)> od];["\r\r"]]
+
+	proc-stmt:
+		Delete( dp , q, ig ,tn,wp,obp, lp) 
+			-> $[delete [<maybe-output(delete-priority)> dp] [<maybe-output(quick)> q]
+				[<maybe-output(ignore)> ig]
+				from [tn]
+				[<maybe-output(where-part)> wp]
+				[<maybe-output(order-by-part)> obp]
+				[<maybe-output(limit-part)> lp];["\r\r"]]
 
 	proc-stmt:
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
@@ -213,6 +222,12 @@ rules
 		
 	insert-priority:
 		Some(HighPriority()) -> $[high_priority]
+	
+	delete-priority:
+		Some(LowPriority()) -> $[low_priority]
+
+	quick:
+		Some(Quick()) -> $[quick]
 				
 	ignore:
 		Some(Ignore()) -> $[ignore]
@@ -275,19 +290,19 @@ rules
 			
 	expression:
 		Or(exp1, exp2)
-			-> $[ [<expression> exp1] or [<expression> exp2]]
+			-> $[ ([<expression> exp1] or [<expression> exp2])]
 
 	expression:
 		Xor(exp1, exp2)
-			-> $[ [<expression> exp1] xor [<expression> exp2]]
+			-> $[([<expression> exp1] xor [<expression> exp2])]
 
 	expression:
 		And(exp1, exp2)
-			-> $[ [<expression> exp1] and [<expression> exp2]]
+			-> $[([<expression> exp1] and [<expression> exp2])]
 
 	expression:
 		Not(exp)
-			-> $[ not [<expression> exp]]
+			-> $[ not ([<expression> exp])]
 			
 	expression:
 		Is(bp,Not(),tfu)
@@ -311,7 +326,7 @@ rules
 	
 	expression:
 		Equal(exp1,exp2)
-			-> $[[<expression> exp1] = [<expression> exp2]]		
+			-> $[[<expression> exp1] <=> [<expression> exp2]]		
 
 	expression:
 		GreaterThanEqual(exp1,exp2)
@@ -331,7 +346,7 @@ rules
 
 	expression:
 		NotEqual(exp1,exp2)
-			-> $[[<expression> exp1] != [<expression> exp2]]		
+			-> $[not([<expression> exp1] <=> [<expression> exp2])]		
 
 	expression:
 		Equal(exp1, allany, query)

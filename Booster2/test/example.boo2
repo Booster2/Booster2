@@ -1,39 +1,10 @@
-system S
+system s
 
-/*
 class A {
 	attributes
 		a : INT
-		b : [A . b]
-	invariants
-		a > 3
 	methods
-		m1 { a' = a + 1 or a' = a + 2 }
-	
-}*/
-
-
-class A {
-  attributes
-    x : INT
-    b : [B . a]  
-  methods
-    m1 { x' = x + 1}
+		create { a! : A' ; a!.a' = a?}
+		update { a < 5 & a? < 6 & a' = a? }
 }
 
-class B {
-  attributes
-    a : [A . b]
-  invariants
-    a.x < 3
-}
-
-class C {
-	attributes
-		a : INT
-		b : INT
-	invariants
-		a /= b
-	methods
-		m1 { a' = in? }
-}

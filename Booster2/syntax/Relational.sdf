@@ -60,7 +60,7 @@ exports
 	Update -> Statement
 	Query -> Statement 
 	Insert -> Statement {cons("Insert")}
-	'delete' -> Statement {cons("Delete")}
+	Delete -> Statement {cons("Delete")}
 	Return -> Statement 
 	'*' -> SQLExpression {cons("Star")}
 	
@@ -357,6 +357,7 @@ exports
     '(' {SQLExpression ","}* ')'
     OnDuplicate? -> Insert {cons("Insert")}
     
+    
     'LOW_PRIORITY' -> InsertPriority {cons("LowPriority")}
     'DELAYED' -> InsertPriority {cons("DelayedPriority")}
     'HIGH_PRIORITY' -> InsertPriority {cons("HighPriority")}
@@ -369,6 +370,22 @@ exports
     'Value' -> Values {cons("Values")}
     
     'ON' 'DUPLICATE' 'KEY' 'UPDATE' {UpdatePart ","}* -> OnDuplicate {cons("OnDuplicate")}
+
+	'DELETE' 
+    DeletePriority?
+    Quick?
+    Ignore?
+    'FROM' 
+    ID
+	WherePart?
+    OrderByPart?
+    LimitPart? -> Delete {cons("Delete")}
+
+    
+    'LOW_PRIORITY' -> DeletePriority {cons("DeletePriority")}
+    
+    'QUICK' -> Quick {cons("Quick")}
+
 
 	ID '=' SQLExpression -> UpdatePart {cons("UpdatePart")}
 	

@@ -7,7 +7,9 @@ System ClassicCars
 			image : String
 			products : SET ( Product . productLine )[*]
 		methods
-			updateText{productLine /= "Classic Cars" & t? /= "Hello, World!" & textDescription' = t?}
+			updateTextDescription{productLine /= "Classic Cars" & textDescription? /= "Hello, World!" & textDescription' = textDescription?}
+			create{p! : ProductLine'}
+			create2{pl! : ProductLine'}
 	} 
 	
 	class Product {
@@ -85,6 +87,9 @@ System ClassicCars
 			jobTitle : String
 			inChargeOf : SET(Employee . reportsTo)[*]
 			salesRepFor : SET(Customer . salesRepEmployee)[*]
+		methods
+			changeOffice {office' = newOffice?}
+			moveOffice {newOffice? /= office & office' = newOffice?}
 	}
 	
 	class Office {
