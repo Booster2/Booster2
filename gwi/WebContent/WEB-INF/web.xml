@@ -51,6 +51,16 @@
   </servlet-mapping>
   <servlet>
     <description></description>
+    <display-name>methodPrecondition</display-name>
+    <servlet-name>methodPrecondition</servlet-name>
+    <servlet-class>ox.softeng.booster.methodPrecondition</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>methodPrecondition</servlet-name>
+    <url-pattern>/methodPrecondition</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
     <display-name>ClassCardinality</display-name>
     <servlet-name>ClassCardinality</servlet-name>
     <servlet-class>ox.softeng.booster.ClassCardinality</servlet-class>

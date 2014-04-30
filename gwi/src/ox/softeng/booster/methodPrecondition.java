@@ -24,7 +24,7 @@ import org.json.simple.JSONObject;
 /**
  * Servlet implementation class callMethod
  */
-public class callMethod extends HttpServlet {
+public class methodPrecondition extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
 	@Override
@@ -63,7 +63,7 @@ public class callMethod extends HttpServlet {
 			LinkedHashMap<String, Object> methodOutputParameterValues = new LinkedHashMap <String,Object>();
 			LinkedHashMap<String, String> paramTypes = new LinkedHashMap <String,String>();
 			LinkedHashMap<String, String> paramInOuts = new LinkedHashMap <String,String>();
-			String callStatement = "call `" + className + "_" + methodName + "`(";
+			String callStatement = "select `" + className + "_" + methodName + "_available_inputs` (";
 
 			while(rs.next())
 			{
@@ -98,7 +98,7 @@ public class callMethod extends HttpServlet {
 				
 			}
 			callStatement += ")";
-
+			System.out.println("callStatement: " + callStatement);
 			cs = client.prepareCall(callStatement);
 			System.out.println("methodInputParameterValues.size()" + methodInputParameterValues.size());
 		    Iterator<Entry<String, Object>>  it = methodInputParameterValues.entrySet().iterator();
@@ -138,53 +138,20 @@ public class callMethod extends HttpServlet {
 
 			
 			cs.execute();
-			result.put("_success", true);
-			JSONArray outputParameterValues = new JSONArray();
+			rs = cs.getResultSet();
 			rs.beforeFirst();
 			while(rs.next())
 			{
-				String paramName = rs.getString("paramName");
-				String paramType = rs.getString("paramType");
-				String inOut = rs.getString("paramInOut");
-				String paramClassName= rs.getString("paramClassName");
-				String paramSetName = rs.getString("paramSetName");
-				paramTypes.put(paramName, paramType);
-				paramInOuts.put(paramName, inOut);
-				if(inOut.equalsIgnoreCase("output"))
-				{
-		        	JSONObject obj = new JSONObject();
-					
-					//obj.put("paramMutiplicity", paramMultiplicity);
-					if(paramType.equalsIgnoreCase("String"))
-			        {
-			        	String strOutput = cs.getString(paramNo);
-			        	obj.put("value", strOutput);
-			        	System.out.println("Retrieving: " + paramName + "," + result);
-			        }
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
-					{
-			        	Integer intOutput = cs.getInt(paramNo);
-			        	obj.put("value", intOutput);
-			        	System.out.println("Retrieving: " + paramName + "," + result);
-					}
-					obj.put("paramName", paramName);
-					obj.put("paramType", paramType);
-					obj.put("paramClassName", paramClassName);
-					obj.put("paramSetName", paramSetName);
-					outputParameterValues.add(obj);
-
-				}
-				//String paramMultiplicity = rs.getString("paramMultiplicity");
-							
+				System.out.println("precondition: "+ rs.getInt(1));
+				result.put("_precondition", rs.getBoolean(1));
 			}
-			result.put("outputParameterValues", outputParameterValues);
 			
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 			result.put("_success", false);
-			result.put("outputParameterValues", null);
+			result.put("_precondition", false);
 		}
 		
 		response.getOutputStream().println(result.toJSONString());
@@ -197,7 +164,7 @@ public class callMethod extends HttpServlet {
 	/**
      * @see HttpServlet#HttpServlet()
      */
-    public callMethod() {
+    public methodPrecondition() {
         super();
         // TODO Auto-generated constructor stub
     }

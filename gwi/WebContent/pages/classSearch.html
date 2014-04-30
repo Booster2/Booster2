@@ -1,0 +1,60 @@
+<!-- Class Search View -->
+<h2>{{className}} Search:</h2>
+
+<div class="row">
+  <div class="col-xs-6">
+    <div class="btn-group btn-group-sm">
+	    <button type="button" ng-class="{'active':tableParams.count() == 10}" ng-click="tableParams.count(10)" class="btn btn-default">10</button>
+	    <button type="button" ng-class="{'active':tableParams.count() == 25}" ng-click="tableParams.count(25)" class="btn btn-default">25</button>
+	    <button type="button" ng-class="{'active':tableParams.count() == 50}" ng-click="tableParams.count(50)" class="btn btn-default">50</button>
+	</div>
+   items displayed per page
+    </div>
+  <div class="col-xs-6">
+	<div class="form-group pull-right">
+		<div class="right-inner-addon">
+        	<i class="fa fa-search"></i>
+        	<input class="form-control" id="filter" placeholder="Filter" type="search" ng-model="filter.$"/>
+    	</div>
+	
+	<!-- <span class="glyphicon glyphicon-search search-icon"></span> -->
+		
+  	</div>
+  </div>
+ </div>
+    
+<table ng-table="tableParams" class="table table-striped table-bordered table-hover">
+<thead>
+		<tr>
+			<th ng-repeat="column in data.columns"
+                class="sortable" ng-class="{
+                    'sort-asc': tableParams.isSortBy(column, 'asc'),
+                    'sort-desc': tableParams.isSortBy(column, 'desc')
+                  }"
+                ng-click="tableParams.sorting(column, tableParams.isSortBy(column, 'asc') ? 'desc' : 'asc')">
+                <div>{{column.unCamelCase()}}</div>
+            </th> 
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="row in data.rows" ng-click="gotoEntry(className, row[0])" class="clickable">
+			<td ng-repeat="colName in data.columns">
+				{{row[$index + 1]}}
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<div class="row">
+<div class="col-xs-6">
+
+  <p>Showing items <strong>{{(page - 1) * tableParams.count() + 1}}</strong>
+    	 to <strong>{{tableParams.total() < page * tableParams.count()? data.total: page * tableParams.count()}}</strong> 
+    	 of <strong>{{tableParams.total()}}</strong></p>
+</div>    	 
+
+
+<div class="col-xs-6">
+    <pagination total-items="tableParams.total()" items-per-page="tableParams.count()" page="page" max-size="5" class="pagination-sm pull-right clickable" boundary-links="true" on-select-page="pageChanged(page)"></pagination>
+</div>
+</div>

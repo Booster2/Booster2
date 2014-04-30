@@ -91,3 +91,26 @@ filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
 transform: rotate(-90deg);
 filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
+
+
+
+.clickable:hover {
+	cursor:pointer;
+}
+
+tfoot {
+	display: none;
+}
+
+.right-inner-addon {
+    position: relative;
+}
+.right-inner-addon input {
+    padding-right: 30px;    
+}
+.right-inner-addon i {
+    position: absolute;
+    right: 0px;
+    padding: 10px 12px;
+    pointer-events: none;
+}

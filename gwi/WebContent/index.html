@@ -1,0 +1,150 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <html ng-app="boosterApp">
+    <meta charset="utf-8">
+    <title>Booster</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <!--  css  -->
+    <link rel="stylesheet"
+	href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+	<link rel="stylesheet"
+	href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
+    
+    
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,300' rel='stylesheet' type='text/css'>
+
+	<link href="css/main.css" rel="stylesheet">
+	<link href="css/ng-table.css" rel="stylesheet">
+	
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="../assets/ico/favicon.png">
+
+
+  </head>
+
+<body>
+<nav class="navbar navbar-inverse" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+        <a class="navbar-brand" href="#">
+          	<img src="images/rocket.png" style="height: 1em; margin-right: 0.5em;"/>Booster</a>
+
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" ng-controller="headerController">
+      <ul class="nav navbar-nav">
+        <li ng-class="{ active : isActive('/')}"><a href="#">Class List</a></li>
+        <li ng-class="{ active : isActive('/queries')}"><a href="#queries">Queries</a></li>
+        <li ng-class="{ active : isActive('/utilities')}"><a href="#utilities">Utilities</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user fa-fw"></i> James Welch <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#profile">Profile</a></li>
+            <li class="divider"></li>
+            <li><a href="#logout">Log out</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+	<div class="container">
+	
+		<div class="alert alert-info" ng-if="loading">
+			<i class="fa fa-spinner fa-spin fa-2x"></i>&nbsp;&nbsp;&nbsp;Loading page... please wait
+		</div>
+		
+		<div id="main">
+			<!-- angular templating -->
+			<!-- this is where content will be injected -->
+			<div ng-view ng-show="!loading"></div>
+		</div>
+      
+    </div><!--/.fluid-container-->
+ 
+ 
+
+    <script type="text/ng-template" id="myModalContent.html" >
+    <div ng-controller="methodDialogController">
+		<div class="modal-header">
+            <h3>{{classname.unCamelCase()}} : {{methodname.unCamelCase()}}</h3>
+        </div>
+        <div class="modal-body">
+           		<form id="methodCallForm" name="methodCallForm" class="form-horizontal" role="form">
+					<div class="form-group" ng-repeat="param in methodObject.parameters" ng-hide="param.paramName === 'this'">
+						<label class="col-sm-2 control-label">{{param.paramName.unCamelCase()}} :</label>
+						<div class="col-sm-10">
+							<input  ng-model="param.paramValue" 
+									ng-change="changeinputs(classname, methodname);"
+									class="form-control" 
+									ng-if="param.paramType === 'Integer' || param.paramType === 'String'" 
+									type="text" 
+									name="{{param.paramName}}" 
+									placeholder="{{param.paramName.unCamelCase()}}" />
+							<select ng-repeat="value in  param.values" ng-if="param.paramType === 'SetValue'">
+								<option ng-if="value != 'unassigned'" value="value">{{value.unCamelCase()}}</option>
+							</select>
+							<select ng-if="param.paramType === 'ClassRef' && param.paramName !== 'this'"
+									ng-model="param.paramValue"
+									name="{{param.paramName}}" 
+									ng-change="changeinputs(classname, methodname);"
+									>
+								<option ng-repeat="value in  param.values"  ng-if="value != 'unassigned'" ng-value="value.id">{{value.desc.unCamelCase()}}</option>
+							</select>
+							<input class="form-control" ng-if="param.paramType === 'ClassRef' && param.paramName === 'this'" type="text" name="{{param.paramName}}" placeholder="{{param.paramName.unCamelCase()}}" value="{{oid}}"/>
+								
+						</div>
+					</div>
+				</form>	
+				{{precondition}}
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-disabled="!precondition" ng-click="ok()">OK</button>
+            <button class="btn btn" ng-click="cancel()">Cancel</button>
+        </div>
+	</div>
+    </script>
+
+
+
+ 
+ 
+<!-- load angular via CDN -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.10/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.10/angular-route.js"></script>
+<script src="js/script.js"></script>
+<script src="js/ng-table.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<script src="js/ui-bootstrap-tpls-0.10.0.min.js"></script>
+
+
+  </body>
+</html>
+
+

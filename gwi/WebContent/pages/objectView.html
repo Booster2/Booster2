@@ -1,0 +1,83 @@
+    <div class="navbar navbar-default" >
+    	<div class="navbar-inner">
+   			<table style="width: 100%;">
+   				<tr>
+   					<td style="width: 12em; text-align: left;">
+   						<a class="btn btn-default" ng-disabled="object.first == 0 || object.first == object.objectID"
+   							ng-href="#object/{{object.className}}/{{object.first}}"><i class="fa fa-fast-backward"></i></a>
+						&nbsp;
+						<a class="btn btn-default" ng-disabled="object.prev == 0 || object.prev == object.objectID"
+							ng-href="#object/{{object.className}}/{{object.prev}}"><i class="fa fa-play fa-flip-horizontal"></i></a>
+   					</td>
+   					<td style="text-align: center;">
+   						<h5>Browse : <span>{{object.className.unCamelCase()}}</span></h5>
+						<h4>{{object.description}}</h4>
+   					</td>
+   					<td style="width: 12em; text-align: right;">
+   						<a class="btn btn-default" ng-disabled="object.next == 0 || object.next == object.objectID"
+   							ng-href="#object/{{object.className}}/{{object.next}}"><i class="fa fa-play"></i></a>
+						&nbsp;
+						<a class="btn btn-default" ng-disabled="object.last == 0 || object.last == object.objectID"
+							ng-href="#object/{{object.className}}/{{object.last}}"><i class="fa fa-fast-forward"></i></a>
+   					</td>
+ 				</tr>
+   			</table>
+     	</div>
+    </div>
+
+<!-- 	<h4 style="float: left; "></h4>
+	<h4 style="float: right; " ></h4> -->
+		
+		<div class="btn-toolbar" role="toolbar">
+			<div class="btn-group" ng-repeat="method in object.methods">
+				<button type="button" class="btn btn-primary" ng-disabled="method.methodAvailability == 0"
+						ng-click="open(object.className, method.methodName, object.objectID);">
+					{{method.methodName.unCamelCase()}}			
+				</button>
+			</div>
+		</div>
+		<br/>
+		<table class="table table-striped table-bordered">
+		<tbody>
+			<tr ng-repeat="attribute in object.attributes"  >
+				<td class="attribute-name-td">
+					<span class="attribute-name">{{attribute.attName.unCamelCase()}}</span>
+				</td>
+				<td>
+					<span ng-if="attribute.attPrimType == 'String'" >
+						<span ng-repeat="value in attribute.stringValues">{{value}}<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set' " class="noValues">
+							(No. of values: {{attribute.stringValues.length}})
+						</span>
+					</span>
+					<span ng-if="attribute.attPrimType == 'Integer'">
+						<span ng-repeat="value in attribute.intValues">{{value}}<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.intValues.length}})
+						</span>
+					</span>
+					<span ng-if="attribute.attPrimType == 'DateTime'">
+						<span ng-repeat="value in attribute.dateTimeValues">{{value}}<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.dateTimeValues.length}})
+						</span>
+					</span>
+					<span ng-if="attribute.attPrimType == 'SetValue'">
+						<span ng-repeat="value in attribute.setValues">{{value}}<br/></span>
+						<span ng-if="attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.setValues.length}})
+						</span>
+					</span>
+					<span ng-if="attribute.attPrimType == 'ClassRef'">
+						<span ng-repeat="value in attribute.oidValues">
+							<a ng-href="#object/{{attribute.attClassName}}/{{value}}">{{attribute.objDescs[$index]}}
+							</a><br/>
+					    </span>
+					<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+						(No. of values: {{attribute.oidValues.length}})
+					</span>
+				</span>
+			</td>
+		</tr>
+	</tbody>
+</table>
