@@ -88,52 +88,6 @@
     </div><!--/.fluid-container-->
  
  
-
-    <script type="text/ng-template" id="myModalContent.html" >
-    <div ng-controller="methodDialogController">
-		<div class="modal-header">
-            <h3>{{classname.unCamelCase()}} : {{methodname.unCamelCase()}}</h3>
-        </div>
-        <div class="modal-body">
-           		<form id="methodCallForm" name="methodCallForm" class="form-horizontal" role="form">
-					<div class="form-group" ng-repeat="param in methodObject.parameters" ng-hide="param.paramName === 'this'">
-						<label class="col-sm-2 control-label">{{param.paramName.unCamelCase()}} :</label>
-						<div class="col-sm-10">
-							<input  ng-model="param.paramValue" 
-									ng-change="changeinputs(classname, methodname);"
-									class="form-control" 
-									ng-if="param.paramType === 'Integer' || param.paramType === 'String'" 
-									type="text" 
-									name="{{param.paramName}}" 
-									placeholder="{{param.paramName.unCamelCase()}}" />
-							<select ng-repeat="value in  param.values" ng-if="param.paramType === 'SetValue'">
-								<option ng-if="value != 'unassigned'" value="value">{{value.unCamelCase()}}</option>
-							</select>
-							<select ng-if="param.paramType === 'ClassRef' && param.paramName !== 'this'"
-									ng-model="param.paramValue"
-									name="{{param.paramName}}" 
-									ng-change="changeinputs(classname, methodname);"
-									>
-								<option ng-repeat="value in  param.values"  ng-if="value != 'unassigned'" ng-value="value.id">{{value.desc.unCamelCase()}}</option>
-							</select>
-							<input class="form-control" ng-if="param.paramType === 'ClassRef' && param.paramName === 'this'" type="text" name="{{param.paramName}}" placeholder="{{param.paramName.unCamelCase()}}" value="{{oid}}"/>
-								
-						</div>
-					</div>
-				</form>	
-				{{precondition}}
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" ng-disabled="!precondition" ng-click="ok()">OK</button>
-            <button class="btn btn" ng-click="cancel()">Cancel</button>
-        </div>
-	</div>
-    </script>
-
-
-
- 
- 
 <!-- load angular via CDN -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.10/angular.min.js"></script>

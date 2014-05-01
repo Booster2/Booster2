@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -87,6 +90,12 @@ public class methodPrecondition extends HttpServlet {
 					{
 						methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
 					}
+					else if(paramType.equalsIgnoreCase("DateTime"))
+					{
+				        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
+						methodInputParameterValues.put(paramName, new Timestamp(date.getTime()));
+					}
 					paramInOuts.put(paramName + "_in", inOut);
 				}
 				else{
@@ -118,6 +127,11 @@ public class methodPrecondition extends HttpServlet {
 						cs.setInt(paramNo,(Integer)pairs.getValue());
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
+					else if(paramType.equalsIgnoreCase("DateTime"))
+					{
+						cs.setTimestamp(paramNo,(Timestamp)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
 		        }
 		        else if(paramInOuts.get(pairs.getKey() + "_out").equalsIgnoreCase("output"))
 		        {
@@ -131,6 +145,12 @@ public class methodPrecondition extends HttpServlet {
 						cs.registerOutParameter(paramNo, java.sql.Types.INTEGER);
 						System.out.println("Registering: " + pairs.getKey() + "," + pairs.getValue());
 					}
+					else if(paramType.equalsIgnoreCase("DateTime"))
+					{
+						cs.registerOutParameter(paramNo, java.sql.Types.TIMESTAMP);
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+
 		        }
 		        it.remove(); // avoids a ConcurrentModificationException
 		        paramNo++;
@@ -149,7 +169,7 @@ public class methodPrecondition extends HttpServlet {
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 			result.put("_success", false);
 			result.put("_precondition", false);
 		}

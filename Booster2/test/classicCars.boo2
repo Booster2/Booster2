@@ -87,9 +87,11 @@ System ClassicCars
 			jobTitle : String
 			inChargeOf : SET(Employee . reportsTo)[*]
 			salesRepFor : SET(Customer . salesRepEmployee)[*]
+			dateOfBirth : DATETIME
 		methods
 			changeOffice {office' = newOffice?}
 			moveOffice {newOffice? /= office & office' = newOffice?}
+			update { employeeNumber' = employeeNumber? & lastName' = lastName? & firstName' = firstName? & dateOfBirth' = dateOfBirth?}
 	}
 	
 	class Office {
