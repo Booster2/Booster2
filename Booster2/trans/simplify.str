@@ -467,6 +467,11 @@ rules
 	simplify:
 		Or(And(expr1, expr2), And(epx2, expr3))
 			-> And(Or(expr1, expr3), expr2)
-			
+	
+	simplify:
+		(Then(True(), x)) -> x		
+
+	simplify:
+		(Then(x, True())) -> x		
 				
 						
