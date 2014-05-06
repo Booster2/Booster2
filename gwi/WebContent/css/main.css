@@ -2,7 +2,19 @@ body{
 	font-family: 'Open Sans', sans-serif;
 	/* background-image: url("../images/bg.png"); */
 }
+.modal-dialog{
+	width: 800px;
+}
 
+.ng-valid-time {
+	margin-top: -24px;
+}
+
+.ng-valid-time tr.text-center td a {
+    height: 1.4em;
+    margin: 0;
+    padding: 0;
+}
 .attribute-name {
 	font-weight: 700;
 }

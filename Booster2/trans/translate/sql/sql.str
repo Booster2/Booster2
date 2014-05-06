@@ -89,10 +89,22 @@ rules
 	 column-type:
 	 	Int()
 	 		-> $[int]
+
+	 column-type:
+	 	Decimal()
+	 		-> $[decimal(65,30)]
 	 				
 	 column-type:
 	 	Datetime()
 	 		-> $[datetime]
+
+	 column-type:
+	 	Date()
+	 		-> $[date]
+
+	 column-type:
+	 	Time()
+	 		-> $[time]
 
 
 	 column-type:
@@ -505,6 +517,10 @@ rules
 	expression:
 		Int(i)
 			-> $[[i]]
+
+	expression:
+		Decimal(d)
+			-> $[[d]]
 
 	expression:
 		True() 

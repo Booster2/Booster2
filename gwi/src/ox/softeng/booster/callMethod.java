@@ -1,15 +1,18 @@
 package ox.softeng.booster;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -90,11 +93,29 @@ public class callMethod extends HttpServlet {
 					{
 						methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
 					}
+					else if(paramType.equalsIgnoreCase("Decimal"))
+					{
+					    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+				        Number parsed = nf.parse(requestParameters.get(paramName)[0]);
+				        BigDecimal bd1 = new BigDecimal(parsed.toString());
+						methodInputParameterValues.put(paramName, bd1);
+					}
+					else if(paramType.equalsIgnoreCase("Date"))
+					{
+				        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
+						methodInputParameterValues.put(paramName, new java.sql.Date(date.getTime()));
+					}
+					else if(paramType.equalsIgnoreCase("Time"))
+					{
+				        java.sql.Time time = java.sql.Time.valueOf(requestParameters.get(paramName)[0]);
+						methodInputParameterValues.put(paramName, time);
+					}
 					else if(paramType.equalsIgnoreCase("DateTime"))
 					{
-				        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+						SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
-						methodInputParameterValues.put(paramName, new Timestamp(date.getTime()));
+						methodInputParameterValues.put(paramName, new java.sql.Timestamp(date.getTime()));
 					}
 
 					paramInOuts.put(paramName + "_in", inOut);
@@ -126,6 +147,21 @@ public class callMethod extends HttpServlet {
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
 						cs.setInt(paramNo,(Integer)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+					else if(paramType.equalsIgnoreCase("Decimal"))
+					{
+						cs.setBigDecimal(paramNo,(BigDecimal)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+					else if(paramType.equalsIgnoreCase("Time"))
+					{
+						cs.setTime(paramNo,(java.sql.Time)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+					else if(paramType.equalsIgnoreCase("Date"))
+					{
+						cs.setDate(paramNo,(java.sql.Date)pairs.getValue());
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("DateTime"))

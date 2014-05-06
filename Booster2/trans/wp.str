@@ -79,7 +79,7 @@ where
 				attpaths := <zip>(paths, <get-modified-attributes> program);
 				newClassInvariant := <make-post-state><conjoin-constraints><concat><map(\(Path(p, pc), a) -> <nub><filter(\i -> <literal-substitute> (i, [(This(), p)]) where <elem>(a, <get-mentioned-attributes> (classname, i, []))\)> <get-class-invariants> classname \)>attpaths;
 				//log(|Error(), "new invariant", newClassInvariant); 
-				classInvariant := <make-post-state><conjoin-constraints> <nub><filter(\i -> i where <not(equal)>([], <isect>((<get-modified-attributes> program), (<get-mentioned-attributes> (classname, i, []))))\)> <get-class-invariants> classname;
+				//classInvariant := <make-post-state><conjoin-constraints> <nub><filter(\i -> i where <not(equal)>([], <isect>((<get-modified-attributes> program), (<get-mentioned-attributes> (classname, i, []))))\)> <get-class-invariants> classname;
 				//log(|Error(), "classInvariant", classInvariant);
 				invariant := <conjoin-constraints>[newClassInvariant, typeConstraint, multiplicityConstraint];
 				(constraint6, program2) := <calculate-wp>(program, And(invariant, constraint), classname, methname);

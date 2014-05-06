@@ -31,6 +31,7 @@ imports
   library/environment
   library/valueExpression
   library/lookupTable
+  library/basicTypes
   
 rules  
   
@@ -150,7 +151,7 @@ rules // Main editor interface (defined by editor/Booster-Builders and -Referenc
 		//log(|Error(), "model", model);
 		//log(|Error(), "ast", ast);
 		if !node => UniDirectional(COMPLETION(prefix)) then
-        	proposals := <union>(<union>(["String","Int","DateTime", "Boolean"],<map(\(cname, cdef) -> cname\)> <LookupTable> "Class"), <map(\(sname, sdef) -> sname\)> <LookupTable> "SetDef")
+        	proposals := <union>(<union>(<get-primitive-types> True(),<map(\(cname, cdef) -> cname\)> <LookupTable> "Class"), <map(\(sname, sdef) -> sname\)> <LookupTable> "SetDef")
       	end;
     	if !node => Extension(COMPLETION(prefix)) then
     		//classname := <collect-one(get-completion-class)> ast;

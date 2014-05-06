@@ -125,6 +125,9 @@ PrimTypeDecl -> BoosterTerm
  
 'STRING' -> BasicTypeDecl {cons("String")}
 'INT' -> BasicTypeDecl {cons("Int")}
+'DECIMAL' -> BasicTypeDecl {cons("Decimal")}
+'DATE' -> BasicTypeDecl {cons("Date")}
+'TIME' -> BasicTypeDecl {cons("Time")}
 'DATETIME' -> BasicTypeDecl {cons("DateTime")}
 'BOOLEAN' -> BasicTypeDecl {cons("Boolean")}
  
@@ -251,12 +254,19 @@ ValueExpression -> BoosterTerm
 
 INT 		-> BasicValue {cons("Integer")}
 STRING		-> BasicValue {cons("String")}
+DECIMAL		-> BasicValue {cons("Decimal")}
 
+'currentdatetime' -> BasicValue {cons("CurrentDateTime")}
+'currentdate' -> BasicValue {cons("CurrentDate")}
+'currenttime' -> BasicValue {cons("CurrentTime")}
 
 %% A type extent is simply the name of one of the basic types:
     
 'string'	-> TypeExtent {cons("String"), prefer}
 'int'		-> TypeExtent {cons("Int"), prefer}
+'decimal'	-> TypeExtent {cons("Decimal"), prefer}
+'date'		-> TypeExtent {cons("Date"), prefer}
+'time'		-> TypeExtent {cons("Time"), prefer}
 'datetime'	-> TypeExtent {cons("DateTime"), prefer}
 'boolean'	-> TypeExtent {cons("Boolean"), prefer}
     

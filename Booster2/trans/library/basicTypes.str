@@ -6,6 +6,8 @@ imports
   library/lookupTable   
  
  rules
+ 	
+ 	get-primitive-types: True() -> ["String","Int","Decimal","Date","Time","DateTime", "Boolean"]
 
 /* Basic Values */
 
@@ -15,6 +17,9 @@ imports
 	get-corresponding-booster-type:
 		String(s) -> String()
 
+	get-corresponding-booster-type:
+		Decimal(d) -> Decimal()
+
 
 /* Integer */
 
@@ -23,12 +28,32 @@ imports
 		
 	get-type-booster-notation:
 		Int() -> $[INT]
+
+	get-type-booster-notation:
+		Integer(i) -> $[[i]]
 		
 	get-type-booster-to-sql:
 		Int() -> Int()	
 		
 	get-type-name-for-metadata:
 		Int() -> "Integer"	
+
+/* Decimal */
+
+	get-type-extent:
+		Decimal() -> TypeExtent(Decimal()){ Set(BasicType(Decimal())) }
+		
+	get-type-booster-notation:
+		Decimal() -> $[DECIMAL]
+		
+	get-type-booster-notation:
+		Decimal(d) -> $[[d]]
+		
+	get-type-booster-to-sql:
+		Decimal() -> Decimal()	
+		
+	get-type-name-for-metadata:
+		Decimal() -> "Decimal"	
 
 
 /* String */
@@ -38,6 +63,9 @@ imports
 		
 	get-type-booster-notation:
 		String() -> $[STRING]
+		
+	get-type-booster-notation:
+		String(s) -> $[[s]]
 
 	get-type-booster-to-sql:
 		String() -> Varchar(1000)
@@ -58,6 +86,34 @@ imports
 		
 	get-type-name-for-metadata:
 		DateTime() -> "DateTime"
+
+/* Date */
+
+	get-type-extent:
+		Date() -> TypeExtent(Date()){ Set(BasicType(Date())) }
+		
+	get-type-booster-notation:
+		Date() -> $[DATE]
+
+	get-type-booster-to-sql:
+		Date() -> Date()
+		
+	get-type-name-for-metadata:
+		Date() -> "Date"
+
+/* Time */
+
+	get-type-extent:
+		Time() -> TypeExtent(Time()){ Set(BasicType(Time())) }
+		
+	get-type-booster-notation:
+		Time() -> $[TIME]
+
+	get-type-booster-to-sql:
+		Time() -> Time()
+		
+	get-type-name-for-metadata:
+		Time() -> "Time"
 
 /* Boolean */
 
@@ -89,6 +145,7 @@ is-more-general-than:
 	(Optional(BasicType(String())), Optional(BasicType(Int())))
 		-> True()
 
+
 is-more-general-than:
 	(BasicType(String()), BasicType(Int()))
 		-> True()
@@ -100,6 +157,20 @@ is-more-general-than:
 is-more-general-than:
 	(Set(BasicType(String())), Set(BasicType(Int())))
 		-> True()
+
+is-more-general-than:
+	(BasicType(Decimal()), BasicType(Int()))
+		-> True()
+
+is-more-general-than:
+	(Optional(BasicType(Decimal())), BasicType(Int()))
+		-> True()
+
+is-more-general-than:
+	(Set(BasicType(Decimal())), Set(BasicType(Int())))
+		-> True()
+
+
 
 
 is-more-general-than:

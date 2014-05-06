@@ -629,6 +629,24 @@ imports
 			-> Int(i)
 
 	booster-to-relational-expression:
+		(classname, progname, BasicValue(Decimal(d)))
+			-> Decimal(d)
+
+	booster-to-relational-expression:
+		(classname, progname, BasicValue(CurrentDateTime()))
+			-> FunctionCall("NOW", [])
+
+	booster-to-relational-expression:
+		(classname, progname, BasicValue(CurrentDate()))
+			-> FunctionCall("CURDATE", [])
+
+	booster-to-relational-expression:
+		(classname, progname, BasicValue(CurrentTime()))
+			-> FunctionCall("CURTIME", [])
+
+
+
+	booster-to-relational-expression:
 		(classname, progname, TypeExtent(t))
 			-> Null()
 

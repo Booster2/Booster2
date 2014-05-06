@@ -10,28 +10,73 @@
 							<input  ng-model="param.paramValue" 
 									ng-change="changeinputs(classname, methodname);"
 									class="form-control" 
-									ng-if="param.paramType === 'Integer' || param.paramType === 'String'" 
+									ng-if="param.paramType === 'Integer' || param.paramType === 'String'  || param.paramType === 'Decimal'" 
 									type="text" 
 									name="{{param.paramName}}" 
 									placeholder="{{param.paramName.unCamelCase()}}" />
-							<p class="input-group" ng-if="param.paramType === 'DateTime'" ng-controller="DatepickerDemoCtrl">
+							<p class="input-group" ng-if="param.paramType === 'Date'" ng-controller="DatepickerDemoCtrl">
               					<input 	type="text" 
-              							class="form-control"
-              							name="{{param.paramName}}" 
-              							ng-change="changeinputs(classname, methodname);"
-              							datepicker-popup="{{format}}" 
-              							ng-model="param.paramValue" 
-              							is-open="opened" 
-              							min="minDate" 
-              							max="'2015-06-22'" 
-              							datepicker-options="dateOptions" 
-              							date-disabled="disabled(date, mode)" 
-              							ng-required="true" 
-              							close-text="Close" />
+             							ng-controller="DatepickerDemoCtrl"
+             							class="form-control"
+             							name="{{param.paramName}}_time" 
+             							ng-change="changeinputs(classname, methodname);"
+             							datepicker-popup="{{format}}" 
+             							ng-model="param.paramDateValue" 
+             							is-open="opened" 
+             							min="minDate" 
+             							max="'2015-06-22'" 
+             							datepicker-options="dateOptions" 
+             							date-disabled="disabled(date, mode)" 
+             							ng-required="true" 
+             							close-text="Close" />
               					<span class="input-group-btn">
                 					<button class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
               					</span>
+
             				</p>
+							<div class="form-group" ng-if="param.paramType === 'DateTime'">
+	              				<div class="col-sm-9">
+		              				<p class="input-group">
+		              					<input 	type="text" 
+		              							ng-controller="DatepickerDemoCtrl"
+		              							class="form-control"
+		              							name="{{param.paramName}}_time" 
+		              							ng-change="changeinputs(classname, methodname);"
+		              							datepicker-popup="{{format}}" 
+		              							ng-model="param.paramDateValue" 
+		              							is-open="opened" 
+		              							min="minDate" 
+		              							max="'2015-06-22'" 
+		              							datepicker-options="dateOptions" 
+		              							date-disabled="disabled(date, mode)" 
+		              							ng-required="true" 
+		              							close-text="Close" />
+			              					<span class="input-group-btn">
+			                					<button class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+			              					</span>
+	              					</p>
+	              				</div>
+           						<div class="col-sm-3">
+           							<timepicker 
+           								name="{{param.paramName}}_time" 
+           								ng-controller="TimepickerDemoCtrl" 
+           								ng-model="param.paramTimeValue" 
+           								ng-change="changeinputs(classname, methodname);" 
+           								hour-step="hstep" 
+           								minute-step="mstep" 
+           								show-meridian="ismeridian"></timepicker>
+              					</div>
+            				</div>
+							<div class="form-group" ng-if="param.paramType === 'Time'">
+       							<timepicker 
+       								name="{{param.paramName}}_time" 
+       								ng-controller="TimepickerDemoCtrl" 
+       								ng-model="param.paramTimeValue" 
+       								ng-change="changeinputs(classname, methodname);" 
+       								hour-step="hstep" 
+       								minute-step="mstep" 
+       								show-meridian="ismeridian"></timepicker>
+            				</div>
 							
 							<!--  <input  
 									

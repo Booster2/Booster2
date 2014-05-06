@@ -13,6 +13,9 @@ exports
     'true' -> ID {reject}
     'string' -> ID {reject}
     'int' -> ID {reject}
+    'decimal' -> ID {reject}
+    'date' -> ID {reject}
+    'time' -> ID {reject}
     'datetime' -> ID {reject}
     'boolean' -> ID {reject}
     'attributes' -> ID {reject}
@@ -22,7 +25,12 @@ exports
     'methods' -> ID {reject}
     'skip' -> ID {reject}
     
-    [0-9]+            -> INT
+    'currentdatetime' -> ID {reject}
+    'currentdate' -> ID {reject}
+    'currenttime' -> ID {reject}
+    
+    [0-9]+				-> INT
+    [0-9]+'.'[0-9]+     -> DECIMAL
     
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar

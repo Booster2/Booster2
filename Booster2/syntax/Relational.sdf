@@ -26,6 +26,8 @@ exports
 	'bit' -> SQLType {cons("Bit")}
 	
 	'datetime'  -> SQLType {cons("Datetime")}
+	'date'  -> SQLType {cons("Date")}
+	'time'  -> SQLType {cons("Time")}
 	
 	'true' -> BOOL {cons("True")}
 	'false' -> BOOL {cons("False")}
@@ -161,6 +163,7 @@ exports
     
     SQLSTRING -> Literal {cons("String")}
     INT -> Literal {cons("Int")}
+    DECIMAL -> Literal {cons("Decimal")}
     'true' -> Literal {cons("True")}
     'false' -> Literal {cons("False")}
     'null' -> Literal {cons("Null")}

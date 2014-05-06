@@ -7,6 +7,9 @@ To add a new type to Booster:
 \item Add it to the Booster2.sdf file, and add a corresponding 'Extent' 
 \item Make sure the syntax is disallowed by the tokenizer (common.sdf)
 \item Add the rules for the type in library/basicTypes.str
+\item Ensure the correct type inferences can be made in
+  \verb|infer-types| for any instances of the types, and the
+  corresponding extents. (Currently in \verb|elaborate.str|)
 \item Ensure there is a corresponding type in the Relational.sdf
   syntax, and that the output methods are appropriate.
 \end{itemize}

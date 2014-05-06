@@ -119,6 +119,21 @@ public class ObjectView extends HttpServlet {
 						JSONArray intValues = (JSONArray) jsono.get("intValues");
 						intValues.add(rs.getInt("INT_VALUE"));
 					}
+					else if("Decimal".equalsIgnoreCase(attPrimType))
+					{
+						JSONArray decimalValues = (JSONArray) jsono.get("decimalValues");
+						decimalValues.add(rs.getInt("DECIMAL_VALUE"));
+					}
+					else if("Time".equalsIgnoreCase(attPrimType))
+					{
+						JSONArray timeValues = (JSONArray) jsono.get("timeValues");
+						timeValues.add(rs.getTime("TIME_VALUE"));
+					}
+					else if("Date".equalsIgnoreCase(attPrimType))
+					{
+						JSONArray dateValues = (JSONArray) jsono.get("dateValues");
+						dateValues.add(rs.getTimestamp("DATE_VALUE"));
+					}
 					else if("DateTime".equalsIgnoreCase(attPrimType))
 					{
 						JSONArray dateTimeValues = (JSONArray) jsono.get("dateTimeValues");
@@ -141,7 +156,10 @@ public class ObjectView extends HttpServlet {
 				{
 					obj = new JSONObject();
 					JSONArray intValues = new JSONArray();
+					JSONArray decimalValues = new JSONArray();
 					JSONArray stringValues = new JSONArray();
+					JSONArray timeValues = new JSONArray();
+					JSONArray dateValues = new JSONArray();
 					JSONArray dateTimeValues = new JSONArray();
 					JSONArray setValues = new JSONArray();
 					JSONArray oidValues = new JSONArray();
@@ -155,9 +173,21 @@ public class ObjectView extends HttpServlet {
 					{
 						intValues.add(rs.getInt("INT_VALUE"));
 					}
+					if("Decimal".equalsIgnoreCase(attPrimType))
+					{
+						decimalValues.add(rs.getBigDecimal("DECIMAL_VALUE").stripTrailingZeros());
+					}
 					else if("String".equalsIgnoreCase(attPrimType))
 					{
 						stringValues.add(rs.getString("STRING_VALUE"));
+					}
+					else if("Time".equalsIgnoreCase(attPrimType))
+					{
+						timeValues.add(rs.getString("TIME_VALUE"));
+					}
+					else if("Date".equalsIgnoreCase(attPrimType))
+					{
+						dateValues.add(rs.getString("DATE_VALUE"));
 					}
 					else if("DateTime".equalsIgnoreCase(attPrimType))
 					{
@@ -174,8 +204,11 @@ public class ObjectView extends HttpServlet {
 					}					
 					
 					obj.put("intValues", intValues);
+					obj.put("decimalValues", decimalValues);
 					obj.put("stringValues", stringValues);
 					obj.put("dateTimeValues", dateTimeValues);
+					obj.put("dateValues", dateValues);
+					obj.put("timeValues", timeValues);
 					obj.put("setValues", setValues);
 					obj.put("oidValues", oidValues);
 					obj.put("objDescs", objDescs);

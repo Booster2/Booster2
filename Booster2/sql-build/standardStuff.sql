@@ -58,6 +58,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC
     ATT_PRIM_TYPE VARCHAR(500),
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
+    DECIMAL_VALUE DECIMAL(65,30),
     STRING_VALUE VARCHAR(500),
     DATETIME_VALUE TIMESTAMP NULL,
     SET_VALUE VARCHAR(500),
@@ -108,10 +109,22 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
                                     (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Decimal' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, TRIM(`",ANAME,"`)+0 AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
-                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
-                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Date' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Time' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
@@ -200,8 +213,11 @@ CREATE TEMPORARY TABLE ATTRIBUTES
     ATT_PRIM_TYPE VARCHAR(500),
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
+    DECIMAL_VALUE DECIMAL(65,30),
     STRING_VALUE VARCHAR(500),
     DATETIME_VALUE TIMESTAMP NULL,
+    DATE_VALUE DATE NULL,
+    TIME_VALUE TIME NULL,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100),
@@ -229,10 +245,22 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Decimal' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DECIMAL_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DECIMAL_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Date' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATE_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Time' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS TIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
@@ -254,10 +282,22 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Decimal' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DECIMAL_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
     ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Date' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATE_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Time' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS TIME_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
 
     ELSEIF @primType = 'SetValue' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
@@ -423,6 +463,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC
     ATT_PRIM_TYPE VARCHAR(500),
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
+    DECIMAL_VALUE DECIMAL(65,30),
     STRING_VALUE VARCHAR(500),
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
@@ -504,6 +545,8 @@ WHILE done = 0 DO
 				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` VARCHAR(1000);');
 			ELSEIF(APT = 'Integer') THEN
 				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` INT;');
+			ELSEIF(APT = 'Decimal') THEN
+				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` DECIMAL(65,30);');
 			END IF;
 			/* SELECT @SQL_TEXT1; */
 			

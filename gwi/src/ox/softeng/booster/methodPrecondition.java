@@ -1,15 +1,18 @@
 package ox.softeng.booster;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -63,18 +66,12 @@ public class methodPrecondition extends HttpServlet {
 			int noParams = 0;
 			
 			LinkedHashMap<String, Object> methodInputParameterValues = new LinkedHashMap <String,Object>();
-			LinkedHashMap<String, Object> methodOutputParameterValues = new LinkedHashMap <String,Object>();
 			LinkedHashMap<String, String> paramTypes = new LinkedHashMap <String,String>();
 			LinkedHashMap<String, String> paramInOuts = new LinkedHashMap <String,String>();
 			String callStatement = "select `" + className + "_" + methodName + "_available_inputs` (";
 
 			while(rs.next())
 			{
-				if(noParams!=0)
-				{
-					callStatement += ",";
-				}
-				callStatement += "?";
 				
 				String paramName = rs.getString("paramName");
 				String paramType = rs.getString("paramType");
@@ -82,6 +79,11 @@ public class methodPrecondition extends HttpServlet {
 				paramTypes.put(paramName, paramType);
 				if(inOut.equalsIgnoreCase("input"))
 				{
+					if(noParams!=0)
+					{
+						callStatement += ",";
+					}
+					callStatement += "?";
 					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
 					{
 						methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
@@ -90,12 +92,32 @@ public class methodPrecondition extends HttpServlet {
 					{
 						methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
 					}
+					else if(paramType.equalsIgnoreCase("Decimal"))
+					{
+					    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+				        Number parsed = nf.parse(requestParameters.get(paramName)[0]);
+				        BigDecimal bd1 = new BigDecimal(parsed.toString());
+						methodInputParameterValues.put(paramName, bd1);
+					}
+					else if(paramType.equalsIgnoreCase("Date"))
+					{
+				        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
+						methodInputParameterValues.put(paramName, new java.sql.Date(date.getTime()));
+					}
+					else if(paramType.equalsIgnoreCase("Time"))
+					{
+				        java.sql.Time time = java.sql.Time.valueOf(requestParameters.get(paramName)[0]);
+						methodInputParameterValues.put(paramName, time);
+					}
 					else if(paramType.equalsIgnoreCase("DateTime"))
 					{
-				        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+						SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
-						methodInputParameterValues.put(paramName, new Timestamp(date.getTime()));
+				        System.out.println("Date: " + date);
+						methodInputParameterValues.put(paramName, new java.sql.Timestamp(date.getTime()));
 					}
+
 					paramInOuts.put(paramName + "_in", inOut);
 				}
 				else{
@@ -127,30 +149,26 @@ public class methodPrecondition extends HttpServlet {
 						cs.setInt(paramNo,(Integer)pairs.getValue());
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
+					else if(paramType.equalsIgnoreCase("Decimal"))
+					{
+						cs.setBigDecimal(paramNo,(BigDecimal)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+					else if(paramType.equalsIgnoreCase("Time"))
+					{
+						cs.setTime(paramNo,(java.sql.Time)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+					else if(paramType.equalsIgnoreCase("Date"))
+					{
+						cs.setDate(paramNo,(java.sql.Date)pairs.getValue());
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
 					else if(paramType.equalsIgnoreCase("DateTime"))
 					{
 						cs.setTimestamp(paramNo,(Timestamp)pairs.getValue());
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
-		        }
-		        else if(paramInOuts.get(pairs.getKey() + "_out").equalsIgnoreCase("output"))
-		        {
-			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
-			        {
-			        	cs.registerOutParameter(paramNo, java.sql.Types.VARCHAR);
-			        	System.out.println("Registering: " + pairs.getKey() + "," + pairs.getValue());
-			        }
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
-					{
-						cs.registerOutParameter(paramNo, java.sql.Types.INTEGER);
-						System.out.println("Registering: " + pairs.getKey() + "," + pairs.getValue());
-					}
-					else if(paramType.equalsIgnoreCase("DateTime"))
-					{
-						cs.registerOutParameter(paramNo, java.sql.Types.TIMESTAMP);
-						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
-					}
-
 		        }
 		        it.remove(); // avoids a ConcurrentModificationException
 		        paramNo++;
@@ -169,7 +187,7 @@ public class methodPrecondition extends HttpServlet {
 		}
 		catch(Exception e)
 		{
-			//e.printStackTrace();
+			e.printStackTrace();
 			result.put("_success", false);
 			result.put("_precondition", false);
 		}

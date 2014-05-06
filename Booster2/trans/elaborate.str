@@ -192,6 +192,15 @@ rules
 		(context, BasicValue(String(s)) {} ) -> BasicValue(String(s)) { Optional(BasicType(String())) }
 
 	infer-types:
+		(context, CurrentDateTime() {} ) -> CurrentDateTime() { Optional(BasicType(DateTime())) }
+
+	infer-types:
+		(context, CurrentDate() {} ) -> CurrentDate() { Optional(BasicType(Date())) }
+
+	infer-types:
+		(context, CurrentTime() {} ) -> CurrentTime() { Optional(BasicType(Time())) }
+
+	infer-types:
 		(context, TypeExtent(Boolean()) {} ) -> TypeExtent(Boolean()) { Set(BasicType(Boolean())) }
 
 	infer-types:
@@ -202,6 +211,13 @@ rules
 
 	infer-types:
 		(context, TypeExtent(DateTime()) {} ) -> TypeExtent(DateTime()) { Set(BasicType(DateTime())) }
+
+	infer-types:
+		(context, TypeExtent(Date()) {} ) -> TypeExtent(Date()) { Set(BasicType(Date())) }
+
+	infer-types:
+		(context, TypeExtent(Time()) {} ) -> TypeExtent(Time()) { Set(BasicType(Time())) }
+
 
 	infer-types:
 		((cname, mname), Input(s) {})

@@ -56,10 +56,28 @@
 							(No. of values: {{attribute.intValues.length}})
 						</span>
 					</span>
+					<span ng-if="attribute.attPrimType == 'Decimal'">
+						<span ng-repeat="value in attribute.decimalValues">{{value}}<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.decimalValues.length}})
+						</span>
+					</span>
 					<span ng-if="attribute.attPrimType == 'DateTime'">
 						<span ng-repeat="value in attribute.dateTimeValues">{{value}}<br/></span>
 						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
 							(No. of values: {{attribute.dateTimeValues.length}})
+						</span>
+					</span>
+					<span ng-if="attribute.attPrimType == 'Date'">
+						<span ng-repeat="value in attribute.dateValues">{{value}}<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.dateValues.length}})
+						</span>
+					</span>
+					<span ng-if="attribute.attPrimType == 'Time'">
+						<span ng-repeat="value in attribute.timeValues">{{value}}<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.timeValues.length}})
 						</span>
 					</span>
 					<span ng-if="attribute.attPrimType == 'SetValue'">

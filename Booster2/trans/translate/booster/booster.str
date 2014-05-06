@@ -249,10 +249,8 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 		BinOp(expr1, op, expr2) -> $[[<expression> expr1] [<get-binop-booster-notation> op] [<expression> expr2]]
 
 	expression:
-		BasicValue(Integer(i)) -> $[[i]]
+		BasicValue(t) -> <get-type-booster-notation> t
 
-	expression:
-		BasicValue(String(s)) -> $[[s]]
 			
 	expression:
 		TypeExtent(t) -> <get-type-booster-notation> t 

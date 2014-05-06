@@ -164,11 +164,26 @@ boosterApp.controller('methodDialogController', ['$log','$scope','methodPrecondi
 	$scope.changeinputs = function(classname, methodname, oid) {
 		$log.info('Hoorah!');
 		var data = {};
-    	$.each($('#methodCallForm').serializeArray(), function(i, field) {
-    	    data[field.name] = field.value;
+		console.log($scope);
+    	$.each($scope.methodObject.parameters,function(index, param){
+    	    	
+    	    if(param.paramType === 'Date' && param.paramDateValue){
+    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY"); 
+    	    }
+    	    else if(param.paramType === 'Time' && param.paramTimeValue){
+    	    	data[param.paramName] = moment(param.paramTimeValue).format("HH:mm:00"); 
+    	    }
+    	    else if(param.paramType === 'DateTime' && param.paramDateValue && param.paramTimeValue){
+    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY ") + moment(param.paramTimeValue).format("HH:mm:00"); 
+    	    }
+    	    else{
+    	    	data[param.paramName] = param.paramValue;
+    	    }
+    	    
     	});
     	data["_methodName"] = methodname;
     	data["_className"] = classname;
+    	console.log(data);
     	methodPreconditionService.getPrecondition(data).then(function(result){
     		console.log(result);
     		$scope.precondition = result._precondition;
@@ -228,7 +243,7 @@ boosterApp.factory('methodViewService', function($http) {
 	};
 });
 
-boosterApp.factory('methodSubmitService', function($http, $route) {
+boosterApp.factory('methodSubmitService', function($http, $route, $location) {
 	return {
 		submitMethod: function(params) {
 			//return the promise directly.
@@ -237,11 +252,13 @@ boosterApp.factory('methodSubmitService', function($http, $route) {
 						.then(function(result) {
 							//resolve the promise as the data
 							if(result.data._success){
-								if(result.data.outputParameterValues.length == 0 && params["this"])
+								if(result.data.outputParameterValues.length == 1){
+									object = result.data.outputParameterValues[0];
+									$location.path('/object/' + object.paramClassName + '/' + object.value);
+								}
+								else
 								{
 									$route.reload();
-									//objectViewService.getObjectView(params._className, params["this"]);
-									//$location.path('/object/' + params._className + '/' + params["this"]);
 								}
 							}
 							return result.data;
@@ -303,7 +320,7 @@ boosterApp.factory('classSearchService', function($http) {
 
 
 
-var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, classname, methodname, oid) {
+var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, classname, methodname, oid, methodSubmitService) {
 
 	
 	methodViewService.getMethodView(classname, methodname).then(function(object) {
@@ -314,7 +331,29 @@ var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, cla
 	});
 
 	$scope.ok = function () {
+		console.log("I'm here, I'm here!");
+		var data = {};
+    	$.each($scope.methodObject.parameters,function(index, param){
+	    	
+    	    if(param.paramType === 'Date' && param.paramDateValue){
+    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY"); 
+    	    }
+    	    else if(param.paramType === 'Time' && param.paramTimeValue){
+    	    	data[param.paramName] = moment(param.paramTimeValue).format("HH:mm:00"); 
+    	    }
+    	    else if(param.paramType === 'DateTime' && param.paramDateValue && param.paramTimeValue){
+    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY ") + moment(param.paramTimeValue).format("HH:mm:00"); 
+    	    }
+    	    else{
+    	    	data[param.paramName] = param.paramValue;
+    	    }
+    	    
+    	});
+    	data["_methodName"] = methodname;
+    	data["_className"] = classname;
+		methodSubmitService.submitMethod(data);
 		$modalInstance.close($scope.classname);
+		
 	};
 
 	$scope.cancel = function () {
@@ -323,7 +362,7 @@ var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, cla
 };
 
 
-boosterApp.factory('methodDialogService', function($log, $http, $modal, methodViewService, methodSubmitService) {
+boosterApp.factory('methodDialogService',function($log, $http, $modal, methodViewService, methodSubmitService) {
 	return {
 		open : function (classname, methodname, oid) {
 			var modalInstance = $modal.open({
@@ -337,14 +376,8 @@ boosterApp.factory('methodDialogService', function($log, $http, $modal, methodVi
 				}
 			});
 
-			modalInstance.result.then(function () {
-				var data = {};
-	        	$.each($('#methodCallForm').serializeArray(), function(i, field) {
-	        	    data[field.name] = field.value;
-	        	});
-	        	data["_methodName"] = methodname;
-	        	data["_className"] = classname;
-				methodSubmitService.submitMethod(data);
+			modalInstance.result.then(function ($scope) {
+				
 				//$scope.selected = selectedItem;
 			}, function () {
 				//$log.info('Modal dismissed at: ' + new Date());
@@ -369,9 +402,9 @@ var DatepickerDemoCtrl = function ($scope) {
 	  };
 
 	  // Disable weekend selection
-	  $scope.disabled = function(date, mode) {
+	  /* $scope.disabled = function(date, mode) {
 	    return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
-	  };
+	  }; */
 
 	  $scope.toggleMin = function() {
 	    $scope.minDate = ( $scope.minDate ) ? null : new Date();
@@ -394,6 +427,14 @@ var DatepickerDemoCtrl = function ($scope) {
 	  $scope.format = $scope.formats[0];
 	};
 
+	var TimepickerDemoCtrl = function ($scope) {
+		  
+		  $scope.hstep = 1;
+		  $scope.mstep = 1;
+		  $scope.ismeridian = false;
+
+		};	
+	
 String.prototype.unCamelCase = function(){
 	return this
 	// insert a space between lower & upper
