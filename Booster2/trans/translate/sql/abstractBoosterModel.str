@@ -178,9 +178,6 @@ imports
 		where 
 			<is-set-name> name
 
-
-
-
 	booster-to-relational-class:
 		(cname, (dscs, ascs, as, ms, cs, wfs)) 
 			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*])
@@ -218,7 +215,7 @@ imports
 
 	get-attribute-column:
 		((cname, attname), (ds, Reference(tname), opp, 1, 1, tablename))
-			-> Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
+			-> Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(tname, [tname])))
 		where
 			<is-set-name> tname;
 			<updateAttributeTableName> (cname, attname,cname)

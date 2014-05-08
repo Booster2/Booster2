@@ -1,0 +1,5 @@
+system Test 
+ 
+
+
+	class A  { 		attributes			n  : INT			m  : INT		invariants 			n > m		methods 			update { (m' = m? & n' = n?) }	}

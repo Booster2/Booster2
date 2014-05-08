@@ -1,0 +1,5 @@
+system s 
+ 
+
+
+	class A  { 		attributes			a  : DECIMAL		methods 			create { new newA! : A }	}

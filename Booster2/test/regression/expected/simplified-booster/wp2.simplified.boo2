@@ -1,0 +1,5 @@
+system Test 
+ 
+
+
+	class A  { 		attributes			n  : INT			m  : INT		invariants 			this.n > this.m		methods 			update { (n? > m? & (m? : INT & n? : INT)) --> ( (this.n := n?) || (this.m := m?) ) }	}

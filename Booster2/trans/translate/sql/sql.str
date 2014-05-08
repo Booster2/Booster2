@@ -13,9 +13,9 @@ rules
 
 	pp-install:
 	 	Schema(name, tables, procedures, StatementList(statements))
-	 		-> $[drop database if exists [name];
-				 create database [name];
-	 		     use [[name]];
+	 		-> $[drop database if exists `[name]`;
+				 create database `[name]`;
+	 		     use `[name]`;
 	 		     SET autocommit=0;
 	 		[<map(pp-install-table)> tables]
 	 		[<map(pp-install-procedure)> procedures]
@@ -25,15 +25,15 @@ rules
 	 pp-install-table:
 	 	Table(name, [column, columns*])
 	 	
-	 		-> $[drop table if exists [name];
-	 			 create table [name] ([<pp-install-column> column]);
+	 		-> $[drop table if exists `[name]`;
+	 			 create table `[name]` ([<pp-install-column> column]);
 	 			[<map((\ c -> (name, c) \) ; pp-install-columns)> [columns*]]]
 	 			
 
 
 	 pp-install-columns:
 	 	(name, coldef)
-	 		-> $[ alter table [name]
+	 		-> $[ alter table `[name]`
 	 				add column [<pp-install-column> coldef];
 	 			]
 	 
@@ -46,13 +46,13 @@ rules
 
 	reference:
 		(columnname, Some(Reference(name, names)))
-			-> $[, add foreign key ([columnname]) references [name] ( [<foldout(column-name)> (names, ", ")])] 
+			-> $[, add foreign key (`[columnname]`) references `[name]` ( [<foldout(column-name)> (names, ", ")])] 
 	 		
 	 pp-install-procedure:
 	 	Procedure(name, inputs, DeclareList(declares), StatementList(statements))
 	 		-> $[ drop procedure if exists [name];
 	 			  delimiter //
-	 			  create procedure [name] ( [<foldout(proc-param)> (inputs, ",")])
+	 			  create procedure `[name]` ( [<foldout(proc-param)> (inputs, ",")])
 	 				begin
 	 				declare exit handler for sqlwarning, sqlexception, not found 
 	 				begin
@@ -249,10 +249,10 @@ rules
 		
 
 	column-name:
-		Output(o) -> $[[o]_out]
+		Output(o) -> $[`[o]_out`]
 		
 	column-name:
-		cn -> $[[cn]]
+		cn -> $[`[cn]`]
 		
 			
 	on-duplicate:

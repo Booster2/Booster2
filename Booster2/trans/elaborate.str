@@ -458,7 +458,7 @@ rules
 			
 
 	context-invariant:
-		(cn, an, Set(Reference(cname)), p) -> Forall("s", Path(This(){Reference(cn)}, PathComponent(an, None())){Set(Reference(cn))}, 
+		(cn, an, Set(Reference(cname)), p) -> Forall("s", Path(This(){Reference(cn)}, PathComponent(an, None())){Set(Reference(cname))}, 
 		 	<literal-substitute>(p, [(This(){Reference(cn)}, PathStart("s", None()){Reference(cn)})]))
 	
   

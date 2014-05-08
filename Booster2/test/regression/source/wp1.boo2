@@ -1,0 +1,13 @@
+system Test
+
+class A { 
+	attributes
+		n : Int
+		m : Int
+	invariants
+		n > 10
+		m > 10
+	methods
+		update { m' = m? & n' = n?}
+}
+

@@ -20,6 +20,8 @@ imports
   // remove for production version!
   translate/booster/booster
   translate/helpers
+  simplify
+ 
 
 rules
 
@@ -67,22 +69,31 @@ where
 				-> (classname, methname, constraint, Guard(constraint7, program2)) 
 				
 			with
+				log(|Error(), "wp constraint", <constraint> constraint);
+				log(|Error(), "program", program);
 				paths := <get-modified-paths> program;
-				//log(|Error(), "modified paths", <foldout(expression)> (paths, ","));
+				log(|Error(), "modified paths", <foldout(expression)> (paths, ","));
 				typeConstraint :=  <make-post-state><conjoin-constraints><map(get-type-constraint)> paths;
-				//log(|Error(), "type constraint", <constraint> typeConstraint);
+				log(|Error(), "type constraint", <constraint> typeConstraint);
 				multiplicityConstraint :=  <make-post-state><conjoin-constraints><filter(get-multiplicity-constraint)> paths;
-				//log(|Error(), "multiplicity constraint", <constraint> multiplicityConstraint);
+				log(|Error(), "multiplicity constraint", <constraint> multiplicityConstraint);
 				// For each path modified by the program:
 				//   For each invariant which mentions it 
 				//   	take the object of the path, and replace it for 'this'
-				attpaths := <zip>(paths, <get-modified-attributes> program);
-				newClassInvariant := <make-post-state><conjoin-constraints><concat><map(\(Path(p, pc), a) -> <nub><filter(\i -> <literal-substitute> (i, [(This(), p)]) where <elem>(a, <get-mentioned-attributes> (classname, i, []))\)> <get-class-invariants> classname \)>attpaths;
-				//log(|Error(), "new invariant", newClassInvariant); 
+				//attpaths := <zip>(paths, <get-modified-attributes> program);
+				attpaths := <zip>(paths, <map(get-path-attribute)> paths);
+				log(|Error(), "attpaths", attpaths);
+				classInvariants := <get-class-invariants> classname;
+				newClassInvariant := <make-post-state><conjoin-constraints><concat><filter(\(Path(p, pc), a) -> 
+															<nub><filter(\i -> <literal-substitute> (i, [(<lookup>(a, <get-mentioned-attributes> (classname, i, [])), Path(p, pc))]) 
+																	 \)> classInvariants \)>
+																			attpaths;
+																		
+				log(|Error(), "new invariant", /* <constraint> <innermost(simplify)> */ newClassInvariant);
 				//classInvariant := <make-post-state><conjoin-constraints> <nub><filter(\i -> i where <not(equal)>([], <isect>((<get-modified-attributes> program), (<get-mentioned-attributes> (classname, i, []))))\)> <get-class-invariants> classname;
 				//log(|Error(), "classInvariant", classInvariant);
-				invariant := <conjoin-constraints>[newClassInvariant, typeConstraint, multiplicityConstraint];
-				(constraint6, program2) := <calculate-wp>(program, And(invariant, constraint), classname, methname);
+				invariant := <conjoin-constraints>[ newClassInvariant, typeConstraint, multiplicityConstraint];
+				(constraint6, program2) := <calculate-wp>(program, And(invariant, constraint ), classname, methname);
 				//log(|Error(), "weakest precondition", <constraint> constraint6);
 				//log(|Error(), "program 2", <guardedCommand> program2);
 				
@@ -104,7 +115,7 @@ where
 	
 	_get-mentioned-attributes:
 		(cname, PathStart(attname, maybeprimed), env)
-			-> (cname, attname)
+			-> ((cname, attname), PathStart(attname, maybeprimed))
 		where
 			type := <lookup-attribute-type> ((cname, attname))
 		// i.e. the attribute does exist
@@ -112,13 +123,13 @@ where
 
 	_get-mentioned-attributes:
 		(cname, Path(path{ Reference(otherclassname)}, PathComponent(attname, maybeprimed)), env)
-			-> (otherclassname, attname)
+			-> ((otherclassname, attname), Path(path{ Reference(otherclassname)}, PathComponent(attname, maybeprimed)))
 		where
 			type := <lookup-attribute-type> ((otherclassname, attname))
 
 	_get-mentioned-attributes:
 		(cname, Path(path { Optional(Reference(otherclassname)) }, PathComponent(attname, maybeprimed)), env)
-			-> (otherclassname, attname)
+			-> ((otherclassname, attname), Path(path { Optional(Reference(otherclassname)) }, PathComponent(attname, maybeprimed)))
 		where
 			type := <lookup-attribute-type> ((otherclassname, attname))
 
@@ -127,6 +138,18 @@ where
 	calculate-wp:
 		(Skip(), constraint, classname, methodname)
 			-> ( constraint, Skip())
+
+/*	calculate-wp:
+		(Assign(path, expression), constraint1, classname, methname)
+			-> (constraint2, Assign(path, expression))
+		where 
+			//log(|Error(), "wp constraint", <constraint> constraint1);
+			path1 := <make-post-state> path;
+			constraint2 := <literal-substitute> (constraint1, [(path1, expression)]);
+			//log(|Error(), "wp aliasing substitute result", <constraint> constraint2);
+			constraint3 := <is-defined> (classname, methname, expression, <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, path, <new-environment>[])
+*/		
 
 	calculate-wp:
 		(Assign(path, expression), constraint1, classname, methname)
@@ -141,13 +164,16 @@ where
 			
 
 	calculate-wp:
-		(New(Output(o){ Reference(c)}, cl { Set(Reference(c))}), constraint1, classname, methname)
-			-> (And(constraint4, constraint2), New(Output(o){ Reference(c)}, cl{ Set(Reference(c))}))
+		(New(Output(o){ Reference(c)}, PathStart(c, None()) { Set(Reference(c))}), constraint1, classname, methname)
+			-> (And(constraint4, constraint2), New(Output(o){ Reference(c)}, PathStart(c, None()){ Set(Reference(c))}))
 		where 
-			log(|Error(), "calculate-wp, New", (cl, constraint1));
-			cl' := <make-post-state> cl;
-			constraint2 := <aliasing-substitute> (classname, methname, constraint1, cl' { Set(Reference(c))}, BinOp(cl{ Set(Reference(c))},Union(), SetExtent([Output(o){ Reference(c)}]){ Set(Reference(c))}), <new-environment>[]);
-			constraint4 := <is-defined> (classname, methname, cl{ Set(Reference(c))}, <new-environment>[])
+			//log(|Error(), "calculate-wp, New");
+			constraint2 := <literal-substitute>(constraint1, [(PathStart(c, Some(Primed())) { Set(Reference(c))}, BinOp(PathStart(c, None()){ Set(Reference(c))},Union(), SetExtent([Output(o){ Reference(c)}]){ Set(Reference(c))}))]); 
+			//constraint2 := <aliasing-substitute> (classname, methname, constraint1, PathStart(c, Some(Primed())) { Set(Reference(c))}, BinOp(PathStart(c, None()){ Set(Reference(c))},Union(), SetExtent([Output(o){ Reference(c)}]){ Set(Reference(c))}), <new-environment>[]);
+			constraint4 := <is-defined> (classname, methname, PathStart(c, None()){ Set(Reference(c))}, <new-environment>[])
+			//log(|Error(), "constraint2", <constraint> constraint2);
+			//log(|Error(), "constraint4", <constraint> constraint4)
+
 
 
 	// Thomas: Why is the guard "constraint1" never used subsequently?
@@ -170,7 +196,9 @@ where
 			-> (constraint3, Sequence(program4, program3))
 		where
 			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
+			//log(|Error(), "wp-sequence first part", (<constraint> constraint2, <guardedCommand> program3));
 			(constraint3, program4) := <calculate-wp> (program1, <make-post-state> constraint2, classname, methname)
+			//log(|Error(), "wp-sequence second part", (<constraint> constraint3, <guardedCommand> program4))
 
 	calculate-wp:
 		(Choice(program1, program2), constraint1, classname, methname)
@@ -185,10 +213,11 @@ where
 		(Parallel(program1, program2), constraint1, classname, methname)
 			-> (constraint3, Parallel(program3, program4))
 		where
+			<debug> ("parallel wp", <constraint> <innermost(simplify)>constraint1);
 			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
-			//<debug> ("constraint2", constraint2);
-			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname)
-			//<debug> ("constraint3", constraint3)
+			<debug> ("constraint2", <constraint> <innermost(simplify)>constraint2);
+			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname);
+			<debug> ("constraint3", <constraint> <innermost(simplify)>constraint3)
 			
 
 			
@@ -322,7 +351,7 @@ where
 		 where
 		 	//log(|Error(), "Aliasing Substitute", (Forall(name, expr1, constraint1), Path(ps, pc), expression));
 			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
-		 	constraint2 := <literal-substitute>	(constraint1, [PathStart(name, Some(Primed())), ps]);
+		 	constraint2 := <literal-substitute>	(constraint1, [(PathStart(name, Some(Primed())), ps)]);
 			//log(|Error(), "Constraint3", (constraint2, [Path(ps, pc)], expression));
 			constraint3 := <aliasing-substitute>	(classname, methodname, constraint2, Path(ps, pc), expression, env')
 		 	
@@ -331,7 +360,7 @@ where
 		 (classname, methodname, Exists(name, expr1, constraint1), path, expression, env)
 		 	-> Exists(name, expr2, constraint2)
 		 where
-		 	expr2 := <literal-substitute>	(expr1, [path, expression]);
+		 	expr2 := <literal-substitute>	(expr1, [(path, expression)]);
 		 	env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
 		 	constraint2 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env')
 
@@ -353,18 +382,21 @@ where
 		 					ps),
 		 					constraint1)))
 		 where
-		 	//log(|Error(), "Aliasing Substitute", (Forall(name, expr1, constraint1), Path(ps, pc), expression));
-			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
-		 	constraint2 := <literal-substitute>	(constraint1, [PathStart(name, Some(Primed())), ps]);
+		 	//log(|Error(), "Aliasing Substitute: constraint", <constraint>(Forall(name, expr1 {Set(type1)}, constraint1)));
+			//log(|Error(), "Aliasing Substitute: path", <expression>Path(ps { type1 }, pc));
+			//log(|Error(), "Aliasing Substitute: expression", <expression> expression);
+			//env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
+		 	constraint2 := <literal-substitute>	(constraint1, [(PathStart(name, Some(Primed())), ps)]);
+			//log(|Error(), "constraint2", constraint2);
 			//log(|Error(), "Constraint3", (constraint2, [Path(ps, pc)], expression));
-			constraint3 := <aliasing-substitute>	(classname, methodname, constraint2, Path(ps, pc), expression, env')
+			constraint3 := <aliasing-substitute>	(classname, methodname, constraint2, Path(ps, pc), expression, env)
 		 	
 
 	aliasing-substitute:
 		 (classname, methodname, Forall(name, expr1, constraint1), path, expression, env)
 		 	-> Forall(name, expr2, constraint2)
 		 where
-		 	expr2 := <literal-substitute>	(expr1, [path, expression]);
+		 	expr2 := <literal-substitute>	(expr1, [(path, expression)]);
 			env' := <add-var-to-environment> (name, (classname, methodname, expr1), env);
 		 	constraint2 := <aliasing-substitute>	(classname, methodname, constraint1, path, expression, env')
 				
@@ -373,23 +405,23 @@ where
 		 	-> constraint
 		 where
 		 	//log(|Error(), "Aliasing Subst - classname, methodname:", (classname, methodname));
-		 	//log(|Error(), "Aliasing Subst - binrel", (BinRel(expression1, binrel, expression2)));
-		 	//log(|Error(), "Aliasing Subst - path", path);
-		 	//log(|Error(), "Aliasing Subst - expression", expression);
+		 	//log(|Error(), "Aliasing Subst - binrel", <constraint>(BinRel(expression1, binrel, expression2)));
+		 	//log(|Error(), "Aliasing Subst - path", <expression>path);
+		 	//log(|Error(), "Aliasing Subst - expression", <expression> expression);
 		 	paths1 := <get-mentioned-paths> expression1;
-		 	//log(|Error(), "Aliasing Subst - paths1", paths1);
+		 	//log(|Error(), "Aliasing Subst - paths1", <foldout(expression)> (paths1, ","));
 		 	paths2 := <get-mentioned-paths> expression2;
-		 	//log(|Error(), "Aliasing Subst - paths2", paths2);
+		 	//log(|Error(), "Aliasing Subst - paths2", <foldout(expression)> (paths2, ","));
 		 	paths := <union>(paths1, paths2);
-		 	//log(|Error(), "Aliasing Subst - paths", paths);
+		 	//log(|Error(), "Aliasing Subst - paths", <foldout(expression)> (paths, ","));
 		 	pathstart {type}:= <(\Path(ps, pc) -> ps\) <+ (\ PathStart(ps, maybeprimed) {type} -> PathStart(ps, maybeprimed) {type} \)> path;
 		 	//log(|Error(), "Aliasing Subst - type", type);
 		 	filtered-paths := <filter((\p -> (type, p) \) ; is-correct-type)> paths;
-		 	//log(|Error(), "Aliasing Subst - filtered paths", filtered-paths);
+		 	//log(|Error(), "Aliasing Subst - filtered paths", <foldout(expression)> (filtered-paths, ","));
 		 	subsets := <subsets> filtered-paths;
 		 	//log(|Error(), "Aliasing Subst - subset",subsets);
-		 	constraint := <conjoin-constraints><currymap(generate-aliasing-constraint)> ((classname, methodname, BinRel(expression1, binrel, expression2), path, expression, env, filtered-paths), subsets) //; 
-			//log(|Error(), "Aliasing Subst - constraint", constraint)
+		 	constraint := <conjoin-constraints><currymap(generate-aliasing-constraint)> ((classname, methodname, BinRel(expression1, binrel, expression2), path, expression, env, filtered-paths), subsets) // ; 
+			//log(|Error(), "Aliasing Subst - constraint", <constraint> constraint)
 	
 /*	aliasing-substitute:
 		something -> True()

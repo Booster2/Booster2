@@ -341,7 +341,7 @@ rules
 	
 	
 
-	// if n < 0 and 
+	// if n <= 0 and 
 	//     card(something) >= n
 	// then True
 	//
@@ -350,25 +350,25 @@ rules
 		BinRel(UnOp(Cardinality(),something), GreaterThanEquals(), BasicValue(Integer(v)))
 			-> True()
 		where
-			<lt>(<string-to-int>v,0)	
+			<leq>(v,0)	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), GreaterThan(), BasicValue(Integer(v)))
 			-> True()
 		where
-			<lt>(<string-to-int>v,0)	
+			<lt>(v,0)	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), LessThanEquals(), BasicValue(Integer(v)))
 			-> False()
 		where
-			<lt>(<string-to-int>v,0)	
+			<leq>(v,0)	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), LessThan(), BasicValue(Integer(v)))
 			-> False()
 		where
-			<lt>(<string-to-int>v,0)	
+			<lt>(v,0)	
 
 
 	simplify:
@@ -385,7 +385,7 @@ rules
 			-> BasicValue(Integer(k)){BasicType(Int())}
 		where
 			BasicValue(Integer(i)) := <simplify> UnOp(Cardinality(),SetExtent([as*]));
-			k := <add>(<string-to-int>i,1)
+			k := <add>(i,1)
 			
 
 			

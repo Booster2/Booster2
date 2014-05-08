@@ -1,0 +1,5 @@
+system s 
+ 
+
+
+	class A  { 		attributes			a  : DECIMAL		invariants 			this.a < 1.23		methods 			create { (a? < 1.23 & a? : DECIMAL) --> ( (new newA! : A) ; (newA!.a := a?) ) }	}

@@ -1,0 +1,5 @@
+system Test 
+ 
+
+
+	class A  { 		attributes			n  : INT			m  : INT			b  : B . a		invariants 			n > 10			m > 10	}	class B  { 		attributes			a  : A . b		methods 			update { (a.m' = m? & a.n' = n?) }	}

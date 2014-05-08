@@ -216,9 +216,9 @@ rules
  /* Set-valued-to-Optional */
 	program:			
 		(classname, methodname, BinRel(expression { Reference(name2) }, NotIn(), Path(a { Reference(name4) },b) { Set(Reference(name2)) }))
-			-> Parallel(Assign(path3,
+			-> Parallel(Assign(path3 { Set(Reference(name2)) },
 							   BinOp(path3, Minus(), SetExtent([expression{ Reference(name2) }]){ Set(Reference(name2)) })),
-						Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())),
+						Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							   Null()))
 		where
 			<not(is-pre-state)> (Path(a,b));
@@ -261,7 +261,6 @@ rules
 			path3 := <make-pre-state> (Path(a,b))
 
 
-/** Up to here! **/
 			
 /* Mandatory-to-Optional */
 	program:
@@ -280,7 +279,7 @@ rules
 /* Mandatory-to-Set-valued */
 	program:			
 		(classname, methodname, BinRel(Path(a{ Reference(name4) },b) { Reference(name2) }, Equal(), expression { Reference(name2) }))
-			-> Parallel(Parallel(Assign(path3 { Reference(name2) }, expression { Reference(name2) }),
+/*			-> Parallel(Parallel(Assign(path3 { Reference(name2) }, expression { Reference(name2) }),
 								 Assign(Path(Path(a { Reference(name4) }, PathComponent(name3, None())){ Reference(name2) }, 
 								 			 PathComponent(name6, None())){ Set(Reference(name4)) },
 								 		BinOp(Path(Path(a { Reference(name4) }, PathComponent(name3, None())){ Reference(name2) },  
@@ -289,6 +288,21 @@ rules
 						Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Set(Reference(name4)) }, 
 							   BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Set(Reference(name4)) }, Union(),
 							   		 SetExtent([a { Reference(name4) }]) { Set(Reference(name4)) })))
+*/
+		-> Parallel(Parallel(Assign(Path(a{ Reference(name4) },b ){ Reference(name2) }, expression { Reference(name2) } ), 
+							  Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+							 			BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+							 					Union(),
+							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))}))),
+		   Choice(
+			Guard(BinRel(a{ Reference(name4) }, NotIn(), PathStart(name4,None()){Set(Reference(name4))}),
+					Assign(Path(Path(a{ Reference(name4) },b) { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+							 			BinOp(Path(Path(a{ Reference(name4) },b) { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+							 					Minus(),
+							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))}))),
+			Guard(BinRel(a{ Reference(name4) }, In(), PathStart(name4,None()){Set(Reference(name4))}),
+					Skip())
+			))
 								 
 		where
 			<not(is-pre-state)> (Path(a,b));
