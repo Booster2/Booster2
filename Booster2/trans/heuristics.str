@@ -97,9 +97,9 @@ rules
 		(classname, methodname, Forall(name, expr, constraint))
 			-> All(name, expr, program)
 		where
-			log(|Error(), "matched heuristics", constraint);
+			//log(|Error(), "matched heuristics", constraint);
 			<not(is-pre-state)> constraint;
-			log(|Error(), "matched heuristics", constraint);
+			//log(|Error(), "matched heuristics", constraint);
 			program := <program> (classname, methodname, constraint)
 			
 		

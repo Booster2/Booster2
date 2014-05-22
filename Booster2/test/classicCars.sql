@@ -162,6 +162,8 @@ alter table Employee
 	add column email varchar(1000)     ;
 alter table Employee
 	add column jobTitle varchar(1000)     ;
+alter table Employee
+	add column dateOfBirth datetime     ;
 drop table if exists Office;
 create table Office (OfficeId int   auto_increment primary key );
 alter table Office
@@ -279,9 +281,9 @@ alter table Office_employees
 alter table Office_employees
 	add column Employee_office int     , add foreign key (Employee_office) references Employee ( EmployeeId);
 
-drop procedure if exists ProductLine_updateText;
+drop procedure if exists ProductLine_create;
 delimiter //
-create procedure ProductLine_updateText ( in t_in varchar(1000),in this int)
+create procedure ProductLine_create ( out p_out int)
 	begin
 	declare exit handler for sqlwarning, sqlexception, not found 
 	begin
@@ -289,39 +291,235 @@ create procedure ProductLine_updateText ( in t_in varchar(1000),in this int)
 	end; 
 	start transaction;
   
-  if true and (select  productLine from ProductLine
-                             where this = ProductLineId
-                             
-                             
-                             
-                             
-                             
-                             
-                             ) != 'Classic Cars' and t_in != 'Hello, World!'
+  insert  
+  into
+  ProductLine
+  ()
+  values
+  ()
+  ;(select  LAST_INSERT_ID() 
+  
+  
+  
+  
+  
+  
+  into p_out
+  );
+  commit;
+	end //
+delimiter ;drop procedure if exists ProductLine_create2;
+delimiter //
+create procedure ProductLine_create2 ( out pl_out int)
+	begin
+	declare exit handler for sqlwarning, sqlexception, not found 
+	begin
+	rollback;
+	end; 
+	start transaction;
+  
+  insert  
+  into
+  ProductLine
+  ()
+  values
+  ()
+  ;(select  LAST_INSERT_ID() 
+  
+  
+  
+  
+  
+  
+  into pl_out
+  );
+  commit;
+	end //
+delimiter ;drop procedure if exists ProductLine_updateTextDescription;
+delimiter //
+create procedure ProductLine_updateTextDescription ( in textDescription_in varchar(1000),in this int)
+	begin
+	declare exit handler for sqlwarning, sqlexception, not found 
+	begin
+	rollback;
+	end; 
+	start transaction;
+  
+  if (true and (not((select  productLine from ProductLine
+                                   where this <=> ProductLineId
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   ) <=> 'Classic Cars') and not(textDescription_in <=> 'Hello, World!')))
   then update  ProductLine
-       set textDescription = t_in
-       where this = ProductLineId
+       set textDescription = textDescription_in
+       where this <=> ProductLineId
        
        ;
   
   end if;
   commit;
 	end //
-delimiter ;drop function if exists ProductLine_updateText_available;
+delimiter ;drop procedure if exists Employee_update;
 delimiter //
-create function ProductLine_updateText_available ( this int)
+create procedure Employee_update ( in employeeNumber_in int,in lastName_in varchar(1000),in firstName_in varchar(1000),in dateOfBirth_in datetime,in this int)
+	begin
+	declare exit handler for sqlwarning, sqlexception, not found 
+	begin
+	rollback;
+	end; 
+	start transaction;
+  
+  if (true and (true and (true and true)))
+  then begin
+       
+       update  Employee
+       set dateOfBirth = dateOfBirth_in
+       where this <=> EmployeeId
+       
+       ;
+       end;begin
+       
+       begin
+       
+       update  Employee
+       set firstName = firstName_in
+       where this <=> EmployeeId
+       
+       ;
+       end;begin
+       
+       begin
+       
+       update  Employee
+       set lastName = lastName_in
+       where this <=> EmployeeId
+       
+       ;
+       end;begin
+       
+       update  Employee
+       set employeeNumber = employeeNumber_in
+       where this <=> EmployeeId
+       
+       ;
+       end;
+       end;
+       end;
+  
+  end if;
+  commit;
+	end //
+delimiter ;drop function if exists ProductLine_create_available;
+delimiter //
+create function ProductLine_create_available ( this int)
 	returns bit
 	begin
   
-  if true and (select  productLine from ProductLine
-                             where this = ProductLineId
-                             
-                             
-                             
-                             
-                             
-                             
-                             ) != 'Classic Cars' and true
+  if true
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists ProductLine_create_available_inputs;
+delimiter //
+create function ProductLine_create_available_inputs ( )
+	returns bit
+	begin
+  
+  if true
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists ProductLine_create2_available;
+delimiter //
+create function ProductLine_create2_available ( this int)
+	returns bit
+	begin
+  
+  if true
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists ProductLine_create2_available_inputs;
+delimiter //
+create function ProductLine_create2_available_inputs ( )
+	returns bit
+	begin
+  
+  if true
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists ProductLine_updateTextDescription_available;
+delimiter //
+create function ProductLine_updateTextDescription_available ( this int)
+	returns bit
+	begin
+  
+  if (true and (not((select  productLine from ProductLine
+                                   where this <=> ProductLineId
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   ) <=> 'Classic Cars') and true))
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists ProductLine_updateTextDescription_available_inputs;
+delimiter //
+create function ProductLine_updateTextDescription_available_inputs ( textDescription_in varchar(1000),this int)
+	returns bit
+	begin
+  
+  if (true and (not((select  productLine from ProductLine
+                                   where this <=> ProductLineId
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   ) <=> 'Classic Cars') and not(textDescription_in <=> 'Hello, World!')))
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists Employee_update_available;
+delimiter //
+create function Employee_update_available ( this int)
+	returns bit
+	begin
+  
+  if (true and (true and (true and true)))
+  then return 1;
+  
+  else return 0;
+  end if;
+	end //
+delimiter ;drop function if exists Employee_update_available_inputs;
+delimiter //
+create function Employee_update_available_inputs ( employeeNumber_in int,lastName_in varchar(1000),firstName_in varchar(1000),dateOfBirth_in datetime,this int)
+	returns bit
+	begin
+  
+  if (true and (true and (true and true)))
   then return 1;
   
   else return 0;
@@ -369,19 +567,43 @@ into
 _Meta_Methods
 (class, methodName, isObjectMethod)
 values
-('ProductLine', 'updateText', true)
+('ProductLine', 'create', false)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'create2', false)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('ProductLine', 'updateTextDescription', true)
 ;insert  
 into
 _Meta_Method_Params
 (class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
 values
-('ProductLine', 'updateText', 't', 'String', 'Optional', 'input', '', '')
+('ProductLine', 'create', 'p', 'ClassRef', 'Mandatory', 'output', 'ProductLine', '')
 ;insert  
 into
 _Meta_Method_Params
 (class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
 values
-('ProductLine', 'updateText', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
+('ProductLine', 'create2', 'pl', 'ClassRef', 'Mandatory', 'output', 'ProductLine', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateTextDescription', 'textDescription', 'String', 'Optional', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('ProductLine', 'updateTextDescription', 'this', 'ClassRef', 'Mandatory', 'input', 'ProductLine', '')
 ;insert  
 into
 _Meta_Classes
@@ -711,6 +933,12 @@ into
 _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
+('Employee', 'dateOfBirth', 'DateTime', 'Mandatory', null, '', '', 'Uni', 'Employee', 0)
+;insert  
+into
+_Meta_Attributes
+(class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
+values
 ('Employee', 'office', 'ClassRef', 'Mandatory', 'employees', 'Office', '', 'Bi', 'Employee_office', 0)
 ;insert  
 into
@@ -730,6 +958,42 @@ _Meta_Attributes
 (class, attName, primType, typeMultiplicity, oppAttName, className, setName, direction, tableName, isId)
 values
 ('Employee', 'salesRepFor', 'ClassRef', 'Set', 'salesRepEmployee', 'Customer', '', 'Bi', 'Employee_salesRepFor', 0)
+;insert  
+into
+_Meta_Methods
+(class, methodName, isObjectMethod)
+values
+('Employee', 'update', true)
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('Employee', 'update', 'employeeNumber', 'Integer', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('Employee', 'update', 'lastName', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('Employee', 'update', 'firstName', 'String', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('Employee', 'update', 'dateOfBirth', 'DateTime', 'Mandatory', 'input', '', '')
+;insert  
+into
+_Meta_Method_Params
+(class, methodName, paramName, paramType, paramMultiplicity, paramInOut, paramClassName, paramSetName)
+values
+('Employee', 'update', 'this', 'ClassRef', 'Mandatory', 'input', 'Employee', '')
 ;insert  
 into
 _Meta_Classes
@@ -844,7 +1108,7 @@ SELECT * FROM TCOUNTS;
 END
 $$
 
-CREATE PROCEDURE `GET_OBJECT_DESCRIPTION`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(100))
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(500))
 BEGIN
 
 DROP TABLE IF EXISTS ATTRIBUTES_FOR_DESC;
@@ -857,8 +1121,9 @@ CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC
     ATT_PRIM_TYPE VARCHAR(500),
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
+    DECIMAL_VALUE DECIMAL(65,30),
     STRING_VALUE VARCHAR(500),
-    DATETIME_VALUE TIMESTAMP,
+    DATETIME_VALUE TIMESTAMP NULL,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100)
@@ -873,7 +1138,7 @@ $$
 
 DELIMITER $$
 
-CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_RECURSE`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(100))
+CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_RECURSE`( className_in VARCHAR(500), objectID INT, out objectDesc VARCHAR(500))
 BEGIN
 DECLARE done INT DEFAULT 0;
 DECLARE ANAME CHAR(255);
@@ -907,10 +1172,22 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
                                     (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Decimal' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, TRIM(`",ANAME,"`)+0 AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
-                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
-                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Date' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Time' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
+                                    (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE)
@@ -999,8 +1276,11 @@ CREATE TEMPORARY TABLE ATTRIBUTES
     ATT_PRIM_TYPE VARCHAR(500),
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
+    DECIMAL_VALUE DECIMAL(65,30),
     STRING_VALUE VARCHAR(500),
-    DATETIME_VALUE TIMESTAMP,
+    DATETIME_VALUE TIMESTAMP NULL,
+    DATE_VALUE DATE NULL,
+    TIME_VALUE TIME NULL,
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
     CLASS_NAME VARCHAR(100),
@@ -1028,10 +1308,22 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Decimal' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DECIMAL_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DECIMAL_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Date' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATE_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Time' and @typeMult != 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS TIME_VALUE FROM ", @tableName," WHERE ",@tableName,"Id = ", objectID, ")");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
@@ -1053,10 +1345,22 @@ WHILE done = 0 DO
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Decimal' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DECIMAL_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
     ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
                                     (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Date' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATE_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
+    ELSEIF @primType = 'Time' and @typeMult = 'Set' THEN
+        SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
+                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS TIME_VALUE FROM ", @tableName," WHERE ",className_in,"Id = ", objectID, ")");
 
     ELSEIF @primType = 'SetValue' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
@@ -1222,6 +1526,7 @@ CREATE TEMPORARY TABLE ATTRIBUTES_FOR_DESC
     ATT_PRIM_TYPE VARCHAR(500),
     TYPE_MULT VARCHAR(500),
     INT_VALUE INT,
+    DECIMAL_VALUE DECIMAL(65,30),
     STRING_VALUE VARCHAR(500),
     SET_VALUE VARCHAR(500),
     OID_VALUE INT,
@@ -1303,6 +1608,8 @@ WHILE done = 0 DO
 				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` VARCHAR(1000);');
 			ELSEIF(APT = 'Integer') THEN
 				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` INT;');
+			ELSEIF(APT = 'Decimal') THEN
+				SET @SQL_TEXT1 = CONCAT('ALTER TABLE `OBJECT_IDS` ADD COLUMN `',ANAME, '` DECIMAL(65,30);');
 			END IF;
 			/* SELECT @SQL_TEXT1; */
 			

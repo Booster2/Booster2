@@ -1,10 +1,11 @@
-system s
-
+system S
+      
 class A {
 	attributes
-		a : INT
+		x : INT
+		y : INT
+	invariants
+		x < 10
 	methods
-		create { a! : A' ; a!.a' = a?}
-		update { a < 5 & a? < 6 & a' = a? }
+	    m1 { (x' = x + 1 or x' = 0) & y' = 3}
 }
-

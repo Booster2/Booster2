@@ -526,7 +526,7 @@ imports
 				<is-class-name> t;
 				tablename := <concat-strings>[classname', "_", attname];
 				column1 := <concat-strings>[classname', "_", attname];
-				log(|Error(), "guarded-command to relational", tablename);
+				//log(|Error(), "guarded-command to relational", tablename);
 				(cname', aname') := <lookup-opposite> (classname', attname);
 				oppattname := <concat-strings>[cname', "_", aname'];
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
@@ -557,7 +557,7 @@ imports
 				<is-class-name> t;
 				tablename := <concat-strings>[classname', "_", attname];
 				column1 := <concat-strings>[classname', "_", attname];
-				log(|Error(), "guarded-command to relational", tablename);
+				//log(|Error(), "guarded-command to relational", tablename);
 				(cname', aname') := <lookup-opposite> (classname', attname);
 				oppattname := <concat-strings>[cname', "_", aname'];
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
@@ -1072,7 +1072,7 @@ imports
 			name1 := <concat-strings> [cname, "_", mname, "_available"];
 			params1 := [Input("this", Int())];
 			guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> (c, []) \) <+ !True() >  gc;
-			log(|Error(), "guard-without-inputs", <constraint> guard-without-inputs);
+			//log(|Error(), "guard-without-inputs", <constraint> guard-without-inputs);
 			statements1 := [
 				IfThen(<booster-to-relational-constraint> (cname, mname, guard-without-inputs), 
 					StatementList([Return(Int(1))]), 
@@ -1122,10 +1122,10 @@ procedure-to-get-applicable-references:
 		name := <concat-strings> [cname, "_", mname,"_",i,"_choice"];
 		params := [Input("this", Int())];
 		guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> (c,[Input(i){type}])\) <+ !True() >  gc;
-		log(|Error(), "available-references", <constraint> guard-without-inputs);
+		//log(|Error(), "available-references", <constraint> guard-without-inputs);
 		tidname := <concat-strings> [tname, "Id"];
 		expr' := <booster-to-relational-constraint> (cname, mname, guard-without-inputs);
-		log(|Error(), expr');
+		//log(|Error(), expr');
 		expr'' := <literal-substitute> (expr', [(SystemVariable(<concat-strings>[i, "_in"]), ColumnName(tidname))]);
 		statements := [InsertInto(
 							"CLASS_DESCS", 
