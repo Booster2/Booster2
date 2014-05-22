@@ -34,7 +34,7 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	 			 ["\r\r"] 
 	 			 [<foldout(setdef)> (<LookupTable> "SetDef", "\r\r")]
 	 			 ["\r\r"]
-	 			 [<foldout(class)> (<LookupTable> "Class", "\r\r")] ]
+	 			 [<foldout(class)> (<qsort(swap)><LookupTable> "Class", "\r\r")] ]
 
 		
 	setdef:
@@ -251,6 +251,14 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	expression:
 		BasicValue(t) -> <get-type-booster-notation> t
 
+	expression:
+		BasicValue(CurrentDateTime()) -> $[CurrentDateTime]
+
+	expression:
+		BasicValue(CurrentDate()) -> $[CurrentDate]
+
+	expression:
+		BasicValue(CurrentTime()) -> $[CurrentTime]
 			
 	expression:
 		TypeExtent(t) -> <get-type-booster-notation> t 

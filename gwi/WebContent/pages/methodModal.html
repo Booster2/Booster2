@@ -8,7 +8,7 @@
 						<label class="col-sm-4 control-label">{{param.paramName.unCamelCase()}} :</label>
 						<div class="col-sm-8 ">
 							<input  ng-model="param.paramValue" 
-									ng-change="changeinputs(classname, methodname);"
+									ng-change="changeinputs(classname, methodname, oid);"
 									class="form-control" 
 									ng-if="param.paramType === 'Integer' || param.paramType === 'String'  || param.paramType === 'Decimal'" 
 									type="text" 
@@ -19,7 +19,7 @@
              							ng-controller="DatepickerDemoCtrl"
              							class="form-control"
              							name="{{param.paramName}}_time" 
-             							ng-change="changeinputs(classname, methodname);"
+             							ng-change="changeinputs(classname, methodname, oid);"
              							datepicker-popup="{{format}}" 
              							ng-model="param.paramDateValue" 
              							is-open="opened" 
@@ -61,7 +61,7 @@
            								name="{{param.paramName}}_time" 
            								ng-controller="TimepickerDemoCtrl" 
            								ng-model="param.paramTimeValue" 
-           								ng-change="changeinputs(classname, methodname);" 
+           								ng-change="changeinputs(classname, methodname, oid);" 
            								hour-step="hstep" 
            								minute-step="mstep" 
            								show-meridian="ismeridian"></timepicker>
@@ -72,7 +72,7 @@
        								name="{{param.paramName}}_time" 
        								ng-controller="TimepickerDemoCtrl" 
        								ng-model="param.paramTimeValue" 
-       								ng-change="changeinputs(classname, methodname);" 
+       								ng-change="changeinputs(classname, methodname, oid);" 
        								hour-step="hstep" 
        								minute-step="mstep" 
        								show-meridian="ismeridian"></timepicker>
@@ -84,13 +84,19 @@
 									type="text" 
 									 
 									placeholder="{{param.paramName.unCamelCase()}}" />   -->
-							<select ng-repeat="value in  param.values" ng-if="param.paramType === 'SetValue'">
-								<option ng-if="value != 'unassigned'" value="value">{{value.unCamelCase()}}</option>
-							</select>
-							<select ng-if="param.paramType === 'ClassRef' && param.paramName !== 'this'"
+							<select class="form-control"
+									ng-if="param.paramType === 'SetValue'"
 									ng-model="param.paramValue"
 									name="{{param.paramName}}" 
-									ng-change="changeinputs(classname, methodname);"
+									ng-change="changeinputs(classname, methodname, oid);"
+									>
+								<option ng-repeat="value in  param.values"  ng-if="value != 'unassigned'" ng-value="value">{{value.unCamelCase()}}</option>
+							</select>
+							<select class="form-control"
+									ng-if="param.paramType === 'ClassRef' && param.paramName !== 'this'"
+									ng-model="param.paramValue"
+									name="{{param.paramName}}" 
+									ng-change="changeinputs(classname, methodname, oid);"
 									>
 								<option ng-repeat="value in  param.values"  ng-if="value != 'unassigned'" ng-value="value.id">{{value.desc.unCamelCase()}}</option>
 							</select>

@@ -23,7 +23,7 @@ rules
 			//<repeat( (inheritance-attributes <+ inheritance-methods <+ inheritance-invariants <+ insert-this <+ type-inference  <+  method-expansion ))> system;
 			<repeat( inheritance-attributes <+ inheritance-methods <+ inheritance-invariants)> system;
 			<repeat( insert-this <+ type-inference  <+  method-expansion )> system;
-			<map(propagateInvariants)><LookupTable>"Class";
+			// <map(propagateInvariants)><LookupTable>"Class";
 			<expandSeqWfs> system;
 			<type-inference-wf> system
 			
@@ -246,6 +246,13 @@ rules
 			type := <\ (ds,t,o,min,max,tname, invs) -> t\><lookup>((<class-from-context>context, att), <LookupTable>"Attribute")
 
 	infer-types:
+		(context, PathStart(sname, None()) )
+			-> PathStart(sname, None()) {Optional(Reference(setname))}
+		where
+			[setname] := <filter(\ (n, vs) -> n where <elem>(sname, vs) \)> <LookupTable>"SetDef"
+
+
+	infer-types:
 		(context, PathStart(cname', maybePrimed) )
 			-> PathStart(cname', maybePrimed) {Set(Reference(cname'))}
 		where
@@ -256,6 +263,7 @@ rules
 			-> PathStart(sname, maybePrimed) {Set(Reference(sname))}
 		where
 			<lookup>(sname, <LookupTable>"Set")
+
 
 
 	infer-types:
@@ -323,16 +331,22 @@ rules
 			-> UnOp(op, expr {type}) {type}
 		
 	
+	induce-types:
+		(context, Forall(var, expr{Set(t)}, const))
+			-> Forall(var, expr{Set(t)}, const')
+		where
+			const' := <literal-substitute>(const, [(PathStart(var, None()), (PathStart(var, None()){t}))]);
+			(<not(equal)>(const, const'))
 
 
 			
-	record-parameter:
+/*	record-parameter:
 		((cname, mname), Input(s) {type})
 			-> Input(s) {type}
 		where
 			<is-more-general-than> (type, <getInputType>(cname, mname, s));
 			<addInput> (cname, mname, s, type)
-
+*/
 	record-parameter:
 		((cname, mname), This() {type})
 			-> This() {type}

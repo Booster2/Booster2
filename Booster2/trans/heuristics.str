@@ -90,14 +90,18 @@ rules
 	program:
 		(classname, methodname, Exists(name, expr, constraint))
 			-> Any(name, expr, program)
-		with
+		where
 			program := <program> (classname, methodname, constraint)
 		
 	program:
 		(classname, methodname, Forall(name, expr, constraint))
 			-> All(name, expr, program)
-		with
+		where
+			log(|Error(), "matched heuristics", constraint);
+			<not(is-pre-state)> constraint;
+			log(|Error(), "matched heuristics", constraint);
 			program := <program> (classname, methodname, constraint)
+			
 		
 	program:
 		(classname, methodname, BinRel(Path(a,b) {type}, Equal(), expression))
@@ -191,12 +195,12 @@ rules
 							  		 			PathComponent(name6, None())) {Set(Reference(name4))}, Minus(),  
 							  		 	   SetExtent([a { Reference(name4) }]){Set(Reference(name4))}))))
 		where
-			<not(is-pre-state)> (Path(a,b));		
+			<not(is-pre-state)> Path(a { Reference(name4) },b) {Optional(Reference(name2))};		
 			<is-class-name> name2;
-			name3 := <get-path-attribute-name> (Path(a,b));
+			name3 := <get-path-attribute-name> Path(a { Reference(name4) },b) {Optional(Reference(name2))};
 			(name2, name6) := <lookup-opposite> ((name4, name3));
 			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
-			path3 := <make-pre-state> (Path(a,b))
+			path3 := <make-pre-state> Path(a { Reference(name4) },b) {Optional(Reference(name2))}
 
  /* Set-valued-to-Mandatory */
 	program:			
@@ -221,12 +225,12 @@ rules
 						Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							   Null()))
 		where
-			<not(is-pre-state)> (Path(a,b));
+			<not(is-pre-state)> Path(a { Reference(name4) },b) { Set(Reference(name2)) };
 			<is-class-name> name2;
-			name3 := <get-path-attribute-name> (Path(a,b));
+			name3 := <get-path-attribute-name> Path(a { Reference(name4) },b) { Set(Reference(name2)) };
 			(name2, name6) := <lookup-opposite> ((name4, name3));
 			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
-			path3 := <make-pre-state> (Path(a,b))
+			path3 := <make-pre-state> Path(a { Reference(name4) },b) { Set(Reference(name2)) }
 			
 
  /* Set-valued-to-Set-valued */
@@ -289,15 +293,15 @@ rules
 							   BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Set(Reference(name4)) }, Union(),
 							   		 SetExtent([a { Reference(name4) }]) { Set(Reference(name4)) })))
 */
-		-> Parallel(Parallel(Assign(Path(a{ Reference(name4) },b ){ Reference(name2) }, expression { Reference(name2) } ), 
+		-> Parallel(Parallel(Assign(path3{ Reference(name2) }, expression { Reference(name2) } ), 
 							  Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							 			BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							 					Union(),
 							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))}))),
 		   Choice(
 			Guard(BinRel(a{ Reference(name4) }, NotIn(), PathStart(name4,None()){Set(Reference(name4))}),
-					Assign(Path(Path(a{ Reference(name4) },b) { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
-							 			BinOp(Path(Path(a{ Reference(name4) },b) { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+					Assign(Path(path3{ Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+							 			BinOp(Path(path3{ Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							 					Minus(),
 							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))}))),
 			Guard(BinRel(a{ Reference(name4) }, In(), PathStart(name4,None()){Set(Reference(name4))}),
@@ -374,9 +378,8 @@ rules
 		(classname, methodname, BinRel(Path(a {Reference(name4)},b) {Optional(Reference(name2))}, Equal(), expression{Optional(Reference(name2))}))
 			-> 	Parallel(
 			  		Parallel(
-			  			Assign(path3{Optional(Reference(name2))}, expression{Optional(Reference(name2))}),
-						Choice(
-							Guard(
+			  			Choice(
+					 		Guard(
 								And(
 									BinRel(path3{Optional(Reference(name2))}, NotEqual(), Null()),
 								 	BinRel(path3{Optional(Reference(name2))}, NotEqual(), expression{Optional(Reference(name2))})),
@@ -386,14 +389,18 @@ rules
 								 		PathComponent(name6, None())){Set(Reference(name4))},
 								 	BinOp(
 								 		Path(
-								 			Path(a {Reference(name4)}, PathComponent(name3,None())), 
+								 			Path(a {Reference(name4)}, PathComponent(name3,None())){Optional(Reference(name2))}, 
 								 			PathComponent(name6, None())){Set(Reference(name4))}, Minus(), 
 								 	SetExtent([a {Reference(name4)}]){Set(Reference(name4))}))),
 							Guard(
 								Or(
 									BinRel(path3{Optional(Reference(name2))}, Equal(), Null()),
 								 	BinRel(path3{Optional(Reference(name2))}, Equal(), expression{Optional(Reference(name2))})),
-					  		    Skip()))),
+					  		    Skip())
+
+							),
+					  		    Assign(path3{Optional(Reference(name2))}, expression{Optional(Reference(name2))})
+						),
 					Assign(
 						Path(expression {Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))},
 						BinOp(
@@ -402,11 +409,11 @@ rules
 			
 		where
 			<is-class-name> name2;
-			<not(is-pre-state)> (Path(a,b));
+			<not(is-pre-state)> Path(a {Reference(name4)},b) {Optional(Reference(name2))};
 			name3 := <get-path-attribute-name>(Path(a,b));
 			(name2, name6) := <lookup-opposite> ((name4, name3));
 			Set(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
-			path3 := <make-pre-state> (Path(a,b))
+			path3 := <make-pre-state> Path(a {Reference(name4)},b) {Optional(Reference(name2))}
 
 		
 /* Set-valued-to-Mandatory */

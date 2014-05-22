@@ -51,6 +51,12 @@ var boosterApp = angular.module('boosterApp', ['ngRoute', 'ngTable','ui.bootstra
 	  }];
 });
 
+boosterApp.filter('nl2br', function(){
+    return function(text) {
+         return text.replace(/\n/g, '<br/>');
+    };}
+);
+
 // configure our routes
 boosterApp.config(function($routeProvider) {
 	$routeProvider
@@ -160,34 +166,45 @@ boosterApp.controller('utilitiesController', function($scope) {
 });
 
 boosterApp.controller('methodDialogController', ['$log','$scope','methodPreconditionService', function($log, $scope, methodPreconditionService) {
-	$scope.precondition = false;
+	$scope.precondition = true;
 	$scope.changeinputs = function(classname, methodname, oid) {
+		
 		$log.info('Hoorah!');
+		$log.info($scope.classname);
+		$log.info($scope.methodname);
+		$log.info($scope.oid);
 		var data = {};
 		console.log($scope);
-    	$.each($scope.methodObject.parameters,function(index, param){
-    	    	
-    	    if(param.paramType === 'Date' && param.paramDateValue){
-    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY"); 
-    	    }
-    	    else if(param.paramType === 'Time' && param.paramTimeValue){
-    	    	data[param.paramName] = moment(param.paramTimeValue).format("HH:mm:00"); 
-    	    }
-    	    else if(param.paramType === 'DateTime' && param.paramDateValue && param.paramTimeValue){
-    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY ") + moment(param.paramTimeValue).format("HH:mm:00"); 
-    	    }
-    	    else{
-    	    	data[param.paramName] = param.paramValue;
-    	    }
-    	    
-    	});
-    	data["_methodName"] = methodname;
-    	data["_className"] = classname;
+		if($scope.methodObject){
+	    	$.each($scope.methodObject.parameters,function(index, param){
+	    	    	
+	    	    if(param.paramType === 'Date' && param.paramDateValue){
+	    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY"); 
+	    	    }
+	    	    else if(param.paramType === 'Time' && param.paramTimeValue){
+	    	    	data[param.paramName] = moment(param.paramTimeValue).format("HH:mm:00"); 
+	    	    }
+	    	    else if(param.paramType === 'DateTime' && param.paramDateValue && param.paramTimeValue){
+	    	    	data[param.paramName] = moment(param.paramDateValue).format("DD-MM-YYYY ") + moment(param.paramTimeValue).format("HH:mm:00"); 
+	    	    }
+	    	    else{
+	    	    	data[param.paramName] = param.paramValue;
+	    	    }
+	    	    
+	    	});
+		}
+    	data["_methodName"] = $scope.methodname;
+    	data["_className"] = $scope.classname;
+    	if(oid)
+    		data["this"] = $scope.oid;
+
     	console.log(data);
+    	
     	methodPreconditionService.getPrecondition(data).then(function(result){
     		console.log(result);
     		$scope.precondition = result._precondition;
     	});
+    	
 	};
 		
 }]);
@@ -230,13 +247,16 @@ boosterApp.factory('objectViewService', function($http) {
 
 boosterApp.factory('methodViewService', function($http) {
 	return {
-		getMethodView: function(className, methodName) {
+		getMethodView: function(className, methodName, oid) {
 			//return the promise directly.
 			return $http.get('/gwi/MethodView', 
-					{	params: {className : className,
-						methodName: methodName}})
+					{	params: {
+						className : className,
+						methodName: methodName,
+						thisParam : oid}})
 						.then(function(result) {
 							//resolve the promise as the data
+
 							return result.data;
 						});
 		}
@@ -320,14 +340,16 @@ boosterApp.factory('classSearchService', function($http) {
 
 
 
-var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, classname, methodname, oid, methodSubmitService) {
+var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, classname, methodname, oid, methodSubmitService, methodPreconditionService) {
 
-	
-	methodViewService.getMethodView(classname, methodname).then(function(object) {
+
+	methodViewService.getMethodView(classname, methodname, oid).then(function(object) {
 		$scope.methodObject = object;
 		$scope.classname = classname;
 		$scope.methodname = methodname;
 		$scope.oid = oid;
+
+		
 	});
 
 	$scope.ok = function () {
@@ -351,6 +373,8 @@ var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, cla
     	});
     	data["_methodName"] = methodname;
     	data["_className"] = classname;
+    	if(oid)
+    		data["this"] = oid;
 		methodSubmitService.submitMethod(data);
 		$modalInstance.close($scope.classname);
 		
@@ -374,8 +398,9 @@ boosterApp.factory('methodDialogService',function($log, $http, $modal, methodVie
 					methodname : function() { return methodname; },
 					oid: function() { return oid; }
 				}
+			
 			});
-
+	
 			modalInstance.result.then(function ($scope) {
 				
 				//$scope.selected = selectedItem;

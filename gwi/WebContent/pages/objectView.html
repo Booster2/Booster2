@@ -45,7 +45,7 @@
 				</td>
 				<td>
 					<span ng-if="attribute.attPrimType == 'String'" >
-						<span ng-repeat="value in attribute.stringValues">{{value}}<br/></span>
+						<span style="white-space: pre-line; "ng-repeat="value in attribute.stringValues">{{value }}<br/></span>
 						<span ng-if="attribute.attTypeMult=='Set' " class="noValues">
 							(No. of values: {{attribute.stringValues.length}})
 						</span>

@@ -9,16 +9,44 @@ rules
 
 	simplify-main:
 		system -> system
-		with
+		where
 			simp-programs := <map(\((cname, mname), (constraint, gc, exts, done, ins, outs)) -> <simp> (cname, mname, gc)\)> <LookupTable> "Method"
 			
 	simp:
 		(cname, mname, prog) 
 			-> (cname, mname, prog) 
 		where 
-			prog' := <innermost(simplify)> prog;
+			prog' := <innermost(simplify <+ simplify-assume-inv)> prog;
 			<updateMethodProgram>(cname, mname, prog')
 			
+	
+	
+	simplify-assume-inv:
+		BinRel(Path(ps {Reference(classname)}, PathComponent(attname, None())){Set(Reference(classname'))},
+				SubsetEquals(),
+				PathStart(classname', None()){Set(Reference(classname'))})
+			-> True()
+		where
+			(ds, Set(Reference(classname')), opp, min, max, s) := <lookup>((classname, attname), <LookupTable>"Attribute")
+
+	simplify-assume-inv:
+		BinRel(Path(ps {Optional(Reference(classname))}, PathComponent(attname, None())){Set(Reference(classname'))},
+				SubsetEquals(),
+				PathStart(classname', None()){Set(Reference(classname'))})
+			-> True()
+		where
+			(ds, Set(Reference(classname')), opp, min, max, s) := <lookup>((classname, attname), <LookupTable>"Attribute")
+
+	simplify-assume-inv:
+		BinRel(Path(ps {Optional(Reference(classname))}, PathComponent(attname, None())){Reference(classname')},
+				In(),
+				PathStart(classname', None()){Set(Reference(classname'))})
+			-> True()
+		where
+			log(|Error(), "simplify-assume-inv matches");
+			(ds, Reference(classname'), opp, min, max, s) := <lookup>((classname, attname), <LookupTable>"Attribute");
+			log(|Error(), "simplify-assume-inv matched")
+
 			
 			// Some normalisation rules?
 /*	simplify:
@@ -144,7 +172,7 @@ rules
 	simplify:
 		And(And(constraint1, constraint), constraint  )
 			-> And(constraint1, constraint)
-			
+/*			
 	simplify:
 		And(BinRel(expression1, Equal(), expression2), BinRel(expression1, NotEqual(), expression2))
 			-> False()
@@ -179,7 +207,7 @@ rules
 				BinRel(expression1, Equal(), expression3),
 				BinRel(expression1, Equal(), expression2)))
 		-> True()
-		
+*/		
 	simplify:
 		Forall(name, expr, True())
 			-> True()
@@ -352,11 +380,11 @@ rules
 		where
 			<leq>(v,0)	
 
-	simplify:
+/*	simplify:
 		BinRel(UnOp(Cardinality(),something), GreaterThan(), BasicValue(Integer(v)))
 			-> True()
 		where
-			<lt>(v,0)	
+			<lt>(v,0) */	
 
 	simplify:
 		BinRel(UnOp(Cardinality(),something), LessThanEquals(), BasicValue(Integer(v)))

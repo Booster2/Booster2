@@ -62,6 +62,7 @@ exports
 	Update -> Statement
 	Query -> Statement 
 	Insert -> Statement {cons("Insert")}
+	InsertInto -> Statement {cons("InsertInto")}
 	Delete -> Statement {cons("Delete")}
 	Return -> Statement 
 	'*' -> SQLExpression {cons("Star")}
@@ -359,6 +360,10 @@ exports
     'values'
     '(' {SQLExpression ","}* ')'
     OnDuplicate? -> Insert {cons("Insert")}
+
+    'INSERT INTO'
+    ID '(' {ID ","}* ')'
+    Query -> InsertInto {cons("InsertInto")}
     
     
     'LOW_PRIORITY' -> InsertPriority {cons("LowPriority")}

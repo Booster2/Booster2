@@ -10,3 +10,5 @@ foldout(s): ([x|xs*], sep) -> $[[<s> x][sep][<foldout(s)>([xs*], sep)]]
 //foldout(s): something -> $[] where log(|Error(), "foldoutError", something)
  
 maybe-output(s) = (\None() -> $[]\) <+ s
+
+swap: ((name, value), (name', value')) -> <string-lt>(name, name')

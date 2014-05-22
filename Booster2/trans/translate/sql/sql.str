@@ -67,9 +67,9 @@ rules
 
 	 pp-install-procedure:
 	 	Function(name, inputs, retType, DeclareList(declares), StatementList(statements))
-	 		-> $[ drop function if exists [name];
+	 		-> $[ drop function if exists `[name]`;
 	 			  delimiter //
-	 			  create function [name] ( [<foldout(proc-param-without-inout)> (inputs, ",")])
+	 			  create function `[name]` ( [<foldout(proc-param-without-inout)> (inputs, ",")])
 	 			  	returns [<column-type> retType]
 	 				begin
 	 			    [<foldout(declare-statement)> (declares, "; ")]
@@ -178,23 +178,25 @@ rules
 				 end;["\r\r"]]
 	proc-stmt:
 		IfThen(expr, StatementList(stmts), elseifs, None()) 
-			-> $[if [<expression> expr]
+			-> $[if [<sql-expression> expr]
 				 then [<map(proc-stmt)> stmts]
 				 [<foldout(elseif)> (elseifs, "\n")]
 				 end if;["\r\r"]]
 
 	proc-stmt:
 		IfThen(expr, StatementList(stmts), elseifs, StatementList(stmts')) 
-			-> $[if [<expression> expr]
+			-> $[if [<sql-expression> expr]
 				 then [<map(proc-stmt)> stmts]
 				 [<foldout(elseif)> (elseifs, "\n")]
 				 else [<map(proc-stmt)> stmts']
 				 end if;["\r\r"]]
 
 	proc-stmt:
-		Update(uo,tr,us,wp,obp,lp) 
-			-> $[update [<foldout(update-option)> (uo, " ")] [<table-reference> tr]
-				set [<foldout(update)> (us, ",")]
+		Update(uo,tr,[(name, expr)],wp,obp,lp) 
+			-> $[ set @updateValue = [<sql-expression> expr];
+				
+				update [<foldout(update-option)> (uo, " ")] [<table-reference> tr]
+				set [name] = @updateValue
 				[<maybe-output(where-part)> wp]
 				[<maybe-output(order-by-part)> obp]
 				[<maybe-output(limit-part)> lp];["\r\r"]]
@@ -203,11 +205,18 @@ rules
 		Insert( ip , ig, into ,tn,cns, es, od) 
 			-> $[insert [<maybe-output(insert-priority)> ip] [<maybe-output(ignore)> ig]
 				[<maybe-output(into)> into]
-				[tn]
+				`[tn]`
 				([<foldout(column-name)> (cns, ", ")])
 				values
-				([<foldout(expression)> (es, ", ")])
+				([<foldout(sql-expression)> (es, ", ")])
 				[<maybe-output(on-duplicate)> od];["\r\r"]]
+
+	proc-stmt:
+		InsertInto(tn,cns, q) 
+			-> $[insert into
+				`[tn]`
+				([<foldout(column-name)> (cns, ", ")])
+				[<sql-expression> q];["\r\r"]]
 
 	proc-stmt:
 		Delete( dp , q, ig ,tn,wp,obp, lp) 
@@ -220,11 +229,14 @@ rules
 
 	proc-stmt:
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
-			-> $[[<expression> Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)];["\r\r"]]
+			-> $[[<sql-expression> Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)];["\r\r"]]
 
 	proc-stmt:
 		Return(expr)
-			-> $[return [<expression> expr];]
+			-> $[return [<sql-expression> expr];]
+			
+	proc-stmt:
+		something -> $[] where log(|Error(), "proc-stmt not working", something)		
 			
 	insert-priority:
 		Some(LowPriority()) -> $[low_priority]
@@ -261,14 +273,14 @@ rules
 			
 	update-part:
 		UpdatePart(cn, expr)
-			-> $[[cn] = [<expression> expr]]
+			-> $[[cn] = [<sql-expression> expr]]
 
 
 			
 			
 	elseif:
 		ElseIf(expr, StatementList(stmts))	
-			-> $[else if [<expression> expr]
+			-> $[else if [<sql-expression> expr]
 				 then [<map(proc-stmt)> stmts]
 				 ]
 				 
@@ -282,16 +294,16 @@ rules
 			
 	table-reference:
 		 TableName(name)
-		 	-> $[[name]]	
+		 	-> $[`[name]`]	
 		 	
 	update:
 		(name, expr)
-			-> $[[name] = [<expression> expr]]
+			-> $[`[name]` = [<sql-expression> expr]]
 
 			
 	where-part:
 		Where(exp)
-			-> $[where [<expression> exp]]
+			-> $[where [<sql-expression> exp]]
 
 			
 
@@ -300,304 +312,304 @@ rules
 			-> $[]
 			
 			
-	expression:
+	sql-expression:
 		Or(exp1, exp2)
-			-> $[ ([<expression> exp1] or [<expression> exp2])]
+			-> $[ ([<sql-expression> exp1] or [<sql-expression> exp2])]
 
-	expression:
+	sql-expression:
 		Xor(exp1, exp2)
-			-> $[([<expression> exp1] xor [<expression> exp2])]
+			-> $[([<sql-expression> exp1] xor [<sql-expression> exp2])]
 
-	expression:
+	sql-expression:
 		And(exp1, exp2)
-			-> $[([<expression> exp1] and [<expression> exp2])]
+			-> $[([<sql-expression> exp1] and [<sql-expression> exp2])]
 
-	expression:
+	sql-expression:
 		Not(exp)
-			-> $[ not ([<expression> exp])]
+			-> $[ not ([<sql-expression> exp])]
 			
-	expression:
+	sql-expression:
 		Is(bp,Not(),tfu)
-			-> $[[<expression> bp] is not [<expression> tfu]]
+			-> $[[<sql-expression> bp] is not [<sql-expression> tfu]]
 
-	expression:
+	sql-expression:
 		Is(bp,None(),tfu)
-			-> $[[<expression> bp] is [<expression> tfu]]
+			-> $[[<sql-expression> bp] is [<sql-expression> tfu]]
 			
-	expression:
+	sql-expression:
 		IsNull(bp,Not())
-			-> $[[<expression> bp] is not null]
+			-> $[[<sql-expression> bp] is not null]
 
-	expression:
+	sql-expression:
 		IsNull(bp,None())
-			-> $[[<expression> bp] is null]
+			-> $[[<sql-expression> bp] is null]
 		
-	expression:
+	sql-expression:
 		Iff(exp1,exp2)
-			-> $[[<expression> exp1] <=> [<expression> exp2]]		
+			-> $[[<sql-expression> exp1] <=> [<sql-expression> exp2]]		
 	
-	expression:
+	sql-expression:
 		Equal(exp1,exp2)
-			-> $[[<expression> exp1] <=> [<expression> exp2]]		
+			-> $[[<sql-expression> exp1] <=> [<sql-expression> exp2]]		
 
-	expression:
+	sql-expression:
 		GreaterThanEqual(exp1,exp2)
-			-> $[[<expression> exp1] >= [<expression> exp2]]		
+			-> $[[<sql-expression> exp1] >= [<sql-expression> exp2]]		
 
-	expression:
+	sql-expression:
 		GreaterThan(exp1,exp2)
-			-> $[[<expression> exp1] > [<expression> exp2]]		
+			-> $[[<sql-expression> exp1] > [<sql-expression> exp2]]		
 
-	expression:
+	sql-expression:
 		LessThanEqual(exp1,exp2)
-			-> $[[<expression> exp1] <= [<expression> exp2]]		
+			-> $[[<sql-expression> exp1] <= [<sql-expression> exp2]]		
 
-	expression:
+	sql-expression:
 		LessThan(exp1,exp2)
-			-> $[[<expression> exp1] < [<expression> exp2]]		
+			-> $[[<sql-expression> exp1] < [<sql-expression> exp2]]		
 
-	expression:
+	sql-expression:
 		NotEqual(exp1,exp2)
-			-> $[not([<expression> exp1] <=> [<expression> exp2])]		
+			-> $[not([<sql-expression> exp1] <=> [<sql-expression> exp2])]		
 
-	expression:
+	sql-expression:
 		Equal(exp1, allany, query)
-			-> $[[<expression> exp1] = [<all-any> allany] [<query> query]]		
+			-> $[[<sql-expression> exp1] = [<all-any> allany] [<query> query]]		
 
-	expression:
+	sql-expression:
 		GreaterThanEqual(exp1,allany, query)
-			-> $[[<expression> exp1] >= [<all-any> allany] [<query> query]]		
+			-> $[[<sql-expression> exp1] >= [<all-any> allany] [<query> query]]		
 
-	expression:
+	sql-expression:
 		GreaterThan(exp1,allany, query)
-			-> $[[<expression> exp1] > [<all-any> allany] [<query> query]]		
+			-> $[[<sql-expression> exp1] > [<all-any> allany] [<query> query]]		
 
-	expression:
+	sql-expression:
 		LessThanEqual(exp1,allany, query)
-			-> $[[<expression> exp1] <= [<all-any> allany] [<query> query]]		
+			-> $[[<sql-expression> exp1] <= [<all-any> allany] [<query> query]]		
 
-	expression:
+	sql-expression:
 		LessThan(exp1,allany, query)
-			-> $[[<expression> exp1] < [<all-any> allany] [<query> query]]		
+			-> $[[<sql-expression> exp1] < [<all-any> allany] [<query> query]]		
 
-	expression:
+	sql-expression:
 		NotEqual(exp1,allany, query)
-			-> $[[<expression> exp1] != [<all-any> allany] [<query> query]]		
+			-> $[[<sql-expression> exp1] != [<all-any> allany] [<query> query]]		
 
 
-	expression:
+	sql-expression:
 		InQuery(expr, maybenot, query)
-			-> $[[<expression> expr] [<maybe-output(maybenot)> maybenot] in [<query> query]]
+			-> $[[<sql-expression> expr] [<maybe-output(maybenot)> maybenot] in [<query> query]]
 
-	expression:
+	sql-expression:
 		InSet(expr, maybenot, exprs)
-			-> $[[<expression> expr] [<maybe-output(maybenot)> maybenot] in [<foldout(expression)> (exprs, ",")]]
+			-> $[[<sql-expression> expr] [<maybe-output(maybenot)> maybenot] in [<foldout(sql-expression)> (exprs, ",")]]
 	
-	expression:
+	sql-expression:
 		Between(expr1, maybenot, expr2, expr3)
-			-> $[[<expression> expr1] [<maybe-output(maybenot)> maybenot] between [<expression> expr2] and [<expression> expr3]]
+			-> $[[<sql-expression> expr1] [<maybe-output(maybenot)> maybenot] between [<sql-expression> expr2] and [<sql-expression> expr3]]
 
-	expression:
+	sql-expression:
 		SoundsLike(expr1, expr2)
-			-> $[[<expression> expr1] sounds like [<expression> expr2]]
+			-> $[[<sql-expression> expr1] sounds like [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Like(expr1, maybenot, expr2, escape)
-			-> $[[<expression> expr1] [<maybe-output(maybenot)> maybenot] like [<expression> expr2] [<maybe-output(maybeescape)> escape]]
+			-> $[[<sql-expression> expr1] [<maybe-output(maybenot)> maybenot] like [<sql-expression> expr2] [<maybe-output(maybeescape)> escape]]
 
-	expression:
+	sql-expression:
 		Regexp(expr1, maybenot, expr2)
-			-> $[[<expression> expr1] [<maybe-output(maybenot)> maybenot] regexp [<expression> expr2]]
+			-> $[[<sql-expression> expr1] [<maybe-output(maybenot)> maybenot] regexp [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		BitOr(expr1, expr2)
-			-> $[[<expression> expr1] | [<expression> expr2]]
+			-> $[[<sql-expression> expr1] | [<sql-expression> expr2]]
 	
-	expression:
+	sql-expression:
 		BitAnd(expr1, expr2)
-			-> $[[<expression> expr1] & [<expression> expr2]]
+			-> $[[<sql-expression> expr1] & [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		BitShiftLeft(expr1, expr2)
-			-> $[[<expression> expr1] << [<expression> expr2]]
+			-> $[[<sql-expression> expr1] << [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		BitShiftRight(expr1, expr2)
-			-> $[[<expression> expr1] >> [<expression> expr2]]
+			-> $[[<sql-expression> expr1] >> [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Plus(expr1, expr2)
-			-> $[[<expression> expr1] + [<expression> expr2]]
+			-> $[[<sql-expression> expr1] + [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Minus(expr1, expr2)
-			-> $[[<expression> expr1] - [<expression> expr2]]
+			-> $[[<sql-expression> expr1] - [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Multiply(expr1, expr2)
-			-> $[[<expression> expr1] * [<expression> expr2]]
+			-> $[[<sql-expression> expr1] * [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Divide(expr1, expr2)
-			-> $[[<expression> expr1] / [<expression> expr2]]
+			-> $[[<sql-expression> expr1] / [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Div(expr1, expr2)
-			-> $[[<expression> expr1] div [<expression> expr2]]
+			-> $[[<sql-expression> expr1] div [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Mod(expr1, expr2)
-			-> $[[<expression> expr1] mod [<expression> expr2]]
+			-> $[[<sql-expression> expr1] mod [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Percent(expr1, expr2)
-			-> $[[<expression> expr1] % [<expression> expr2]]
+			-> $[[<sql-expression> expr1] % [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		Power(expr1, expr2)
-			-> $[[<expression> expr1] ^ [<expression> expr2]]
+			-> $[[<sql-expression> expr1] ^ [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		PlusInt(expr1, interval)
-			-> $[[<expression> expr1] + [<interval> interval]]
+			-> $[[<sql-expression> expr1] + [<interval> interval]]
 
-	expression:
+	sql-expression:
 		MinusInt(expr1, interval)
-			-> $[[<expression> expr1] - [<interval> interval]]
+			-> $[[<sql-expression> expr1] - [<interval> interval]]
 
-	expression:
+	sql-expression:
 		Collate(expr, collname)
-			-> $[[<expression> expr] collate [collname]]
+			-> $[[<sql-expression> expr] collate [collname]]
 			
-	expression:
+	sql-expression:
 		Or(expr1, expr2)
-			-> $[[<expression> expr1] || [<expression> expr2]]
+			-> $[[<sql-expression> expr1] || [<sql-expression> expr2]]
 
-	expression:
+	sql-expression:
 		UnaryPlus(expr)
-			-> $[+[<expression> expr]]
+			-> $[+[<sql-expression> expr]]
 
-	expression:
+	sql-expression:
 		UnaryMinus(expr)
-			-> $[-[<expression> expr]]
+			-> $[-[<sql-expression> expr]]
 
-	expression:
+	sql-expression:
 		Reverse(expr)
-			-> $[~[<expression> expr]]
+			-> $[~[<sql-expression> expr]]
 
-	expression:
+	sql-expression:
 		Not(expr)
-			-> $[![<expression> expr]]
+			-> $[![<sql-expression> expr]]
 
-	expression:
+	sql-expression:
 		Binary(expr)
-			-> $[binary [<expression> expr]]
+			-> $[binary [<sql-expression> expr]]
 
-	expression:
+	sql-expression:
 		SetExpression(exprs)
-			-> $[([<foldout(expression)> (exprs, ", ")])]
+			-> $[([<foldout(sql-expression)> (exprs, ", ")])]
 
-	expression:
+	sql-expression:
 		Row(expr, exprs)
-			-> $[row [<expression> expr], [<foldout(expression)> (exprs, ", ")]]
+			-> $[row [<sql-expression> expr], [<foldout(sql-expression)> (exprs, ", ")]]
 			
-	expression:
+	sql-expression:
 		Exists(query)
 			-> $[exists [<query> query]]
 			
-	expression:
+	sql-expression:
 		EscapeSyntax(name, expr)
-			-> $[{ [name] [<expression> expr]}]
+			-> $[{ [name] [<sql-expression> expr]}]
 	
-	expression:
+	sql-expression:
 		String(str)
 			-> $['[<<un-double-quote> str <+ !str>]']
 			
 	
-	expression:
+	sql-expression:
 		Int(i)
 			-> $[[i]]
 
-	expression:
+	sql-expression:
 		Decimal(d)
 			-> $[[d]]
 
-	expression:
+	sql-expression:
 		True() 
 			-> $[true]
 
-	expression:
+	sql-expression:
 		False() 
 			-> $[false]
 
-	expression:
+	sql-expression:
 		Unknown() 
 			-> $[unknown]
 
-	expression:
+	sql-expression:
 		Null()
 			-> $[null]
 			
-	expression:
+	sql-expression:
 		ColumnName(name)
 			-> $[[name]]
 
-	expression:
+	sql-expression:
 		TableColumnName(tname, cname)
 			-> $[[tname].[cname]]
 
-	expression:
+	sql-expression:
 		ExpressionAs(expr, i)
-			-> $[([<expression> expr] as [i])]
+			-> $[([<sql-expression> expr] as [i])]
 
-	expression:
+	sql-expression:
 		ColumnNameAs(name, i)
 			-> $[([name] as [i])]
 
 
-	expression:
+	sql-expression:
 		TableColumnNameAs(tname, cname, i)
 			-> $[([tname].[cname] as i)]
 
-	expression:
+	sql-expression:
 		Star()
 			-> "*"
 
-	expression:
+	sql-expression:
 		DBTableColumnName(dname,tname,cname)
 			-> $[[dname].[tname].[cname]]
 
-	expression:
+	sql-expression:
 		LocalVariable(name)
 			-> $[@[name]]
 
-	expression:
+	sql-expression:
 		SystemVariable(name)
 			-> $[[name]]
 	
-	expression:
+	sql-expression:
 		Marker()
 			-> $[?]
 			
-	expression:
+	sql-expression:
 		MatchExpression(ids, expr, modifier)
-			->$[match ([<foldout(output-id)> (ids, ", ")]) against ([<expression>expr] [<maybe-output(search-modifier)> modifier])]
+			->$[match ([<foldout(output-id)> (ids, ", ")]) against ([<sql-expression>expr] [<maybe-output(search-modifier)> modifier])]
 
-	expression:
+	sql-expression:
 		CaseExpression(expr, cws, ce)
 			->
-				$[case [<expression> expr]
+				$[case [<sql-expression> expr]
 				    [<foldout(case-when)> (cws, "\n")]
 				    [<maybe-output(case-else)> ce]
 				  end]
 			
-	expression:
+	sql-expression:
 		FunctionCall(name, params)
-			-> $[[name]([<foldout(expression)> (params, ", ")])]
+			-> $[[name]([<foldout(sql-expression)> (params, ", ")])]
 				
-	expression:
+	sql-expression:
 		Select(sts,ses,fp, wp, gbp,hp,obp,lp,pp,ip,mp)
-			-> $[(select [<select-type> sts] [<foldout(expression)> (ses, " ")] [<maybe-output(from-part)> fp]
+			-> $[(select [<select-type> sts] [<foldout(sql-expression)> (ses, " ")] [<maybe-output(from-part)> fp]
 			   [<maybe-output(where-part)> wp]
 			   [<maybe-output(group-by-part)> gbp]
 			   [<maybe-output(having-part)> hp]
@@ -608,20 +620,20 @@ rules
 			   [<maybe-output(mode-part)> mp])]
 	
 
-/*				
-	expression:
+				
+	sql-expression:
 		expr -> 
 			$[expr]
 		where
-			log(|Error(), "cannot pretty-print expression:", expr)
-*/		  
+			log(|Error(), "cannot pretty-print sql-expression:", expr)
+		  
 	case-when:
 		[CaseWhen(expr1, expr2)]
-			-> $[when [<expression> expr1] then [<expression> expr2]]
+			-> $[when [<sql-expression> expr1] then [<sql-expression> expr2]]
 			
 	case-else:
 		CaseElse(expr) 
-			-> $[else [<expression> expr]]
+			-> $[else [<sql-expression> expr]]
 			
 		 
 	
@@ -646,11 +658,11 @@ rules
 			
 	maybeescape:
 		Escape(expr)
-			-> $[escape [<expression> expr]]
+			-> $[escape [<sql-expression> expr]]
 
 	interval:
 		IntervalExpression(expr, unit)
-			-> $[interval [<expression> expr] [<unit> unit]]
+			-> $[interval [<sql-expression> expr] [<unit> unit]]
 			
 	unit:
 		MicroSecondUnit()
@@ -817,7 +829,7 @@ rules
 
 	table-reference:
 		OJ(tr, tr', expr)
-			-> $[oj [<table-reference> tr] left outer join [<table-reference> tr'] on [<expression> expr]]
+			-> $[oj [<table-reference> tr] left outer join [<table-reference> tr'] on [<sql-expression> expr]]
 
 	table-reference:
 		InnerJoin(tr, tr', jc)
@@ -903,7 +915,7 @@ rules
 			
 	join-condition:
 		On(expr)
-			-> $[on [<expression> expr]]
+			-> $[on [<sql-expression> expr]]
 			
 	join-condition:
 		Using(ns)
@@ -911,7 +923,7 @@ rules
 		
 	group-by-part:
 		Some(GroupByPart(expr, o, r))
-			-> $[group by [<expression> expr] [<maybe-output(order)> o] [<maybe-output(rollup)> r]]
+			-> $[group by [<sql-expression> expr] [<maybe-output(order)> o] [<maybe-output(rollup)> r]]
  
  	order:
  		Some(Ascending()) -> "asc"
@@ -925,16 +937,16 @@ rules
 
 	having-part:
 		Some(HavingPart(expr))
-			-> $[having [<expression> expr]]
+			-> $[having [<sql-expression> expr]]
 	
 	order-by-part:
 		Some(OrderByPart(expr, o))
-			-> $[order by [<expression> expr] [<maybe-output(order)> o]]
+			-> $[order by [<sql-expression> expr] [<maybe-output(order)> o]]
 	
 			
 	procedure-part:
 		Some(ProcedurePart(n, ps))
-			-> $[procedure [n] ([<foldout(expression)> (ps, ", ")])]
+			-> $[procedure [n] ([<foldout(sql-expression)> (ps, ", ")])]
      
     into-part:
     	Some(IntoOutFile(s,cs,eo))
@@ -942,7 +954,7 @@ rules
 
     into-part:
     	Some(Into(vars))
-    		-> $[into [<foldout(column-name <+ expression)> (vars, ", ")]] 
+    		-> $[into [<foldout(column-name <+ sql-expression)> (vars, ", ")]] 
 
 
 	charset:
@@ -969,7 +981,7 @@ rules
 		
 	declare-default:
 		DefaultDeclare(expr)
-			-> $[default [<expression> expr]]	
+			-> $[default [<sql-expression> expr]]	
 	
 
 

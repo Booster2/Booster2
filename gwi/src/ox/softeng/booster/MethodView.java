@@ -40,6 +40,11 @@ public class MethodView extends HttpServlet {
 
 		String className = request.getParameter("className");
 		String methodName = request.getParameter("methodName");
+		String thisParamStr = request.getParameter("thisParam");
+		Integer thisParam = null;
+		if(thisParamStr != null){
+			thisParam = Integer.parseInt(thisParamStr);
+		}
 		
 		JSONObject result = new JSONObject();
 		
@@ -91,10 +96,19 @@ public class MethodView extends HttpServlet {
 					}
 					if("ClassRef".equalsIgnoreCase(paramType) && 
 							!"".equalsIgnoreCase(paramClassName) &&
-							!result.containsKey(paramClassName))
+							!result.containsKey(paramClassName) &&
+							!"this".equalsIgnoreCase(paramName))
 					{
-						PreparedStatement setvalueps = client.prepareStatement("call `GET_CLASS_VALUES`(?)");
+						PreparedStatement setvalueps = client.prepareStatement("call `GET_CLASS_VALUES`(?,?,?)");
 						setvalueps.setString(1, paramClassName);
+						setvalueps.setString(2,  className + "_" + methodName + "_" + paramName + "_choice");
+						if(thisParam != null)
+						{
+							setvalueps.setInt(3, thisParam);
+						}
+						else{
+							setvalueps.setNull(3, java.sql.Types.INTEGER);	
+						}
 						ResultSet setValuesRS = setvalueps.executeQuery();
 						JSONArray valuesArray = new JSONArray();
 						while(setValuesRS.next())

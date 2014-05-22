@@ -90,6 +90,7 @@ public class methodPrecondition extends HttpServlet {
 					}
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
+						System.out.println("paramName : " + paramName);
 						methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
 					}
 					else if(paramType.equalsIgnoreCase("Decimal"))
