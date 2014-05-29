@@ -29,6 +29,8 @@ exports
 	'date'  -> SQLType {cons("Date")}
 	'time'  -> SQLType {cons("Time")}
 	
+	'text' -> SQLType {cons("Text")}
+	
 	'true' -> BOOL {cons("True")}
 	'false' -> BOOL {cons("False")}
 	
@@ -65,6 +67,7 @@ exports
 	InsertInto -> Statement {cons("InsertInto")}
 	Delete -> Statement {cons("Delete")}
 	Return -> Statement 
+	VariableAssign -> Statement
 	'*' -> SQLExpression {cons("Star")}
 	
 	'true' -> SQLExpression {cons("True")}
@@ -404,3 +407,5 @@ exports
 	'default' SQLExpression -> DefaultDeclare {cons("DefaultDeclare")}
 	
 	'return' SQLExpression -> Return {cons("Return")}
+	
+	'set' ID '=' SQLExpression -> VariableAssign {cons("VariableAssign")}

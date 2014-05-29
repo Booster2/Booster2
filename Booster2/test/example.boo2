@@ -1,11 +1,16 @@
-system S
-      
-class A {
+system testSystem
+
+class A{
 	attributes
-		x : INT
-		y : INT
-	invariants
-		x < 10
+		b1 : B . a1
+		b2 : B . a2
 	methods
-	    m1 { (x' = x + 1 or x' = 0) & y' = 3}
+		update { b1.i' = 3 & b2.i' = 4 }
+}
+
+class B{
+	attributes
+		i : int
+		a1 : SET(A.b1)[*]
+		a2 : SET(A.b2)[*]
 }

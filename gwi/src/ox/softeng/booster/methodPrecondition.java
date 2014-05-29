@@ -84,41 +84,46 @@ public class methodPrecondition extends HttpServlet {
 						callStatement += ",";
 					}
 					callStatement += "?";
-					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+					if(requestParameters.get(paramName) == null)
 					{
-						methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
+						methodInputParameterValues.put(paramName, null);
 					}
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
-					{
-						System.out.println("paramName : " + paramName);
-						methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
+					else{
+		
+						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+						{
+							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
+						}
+						else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+						{
+							methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
+						}
+						else if(paramType.equalsIgnoreCase("Decimal"))
+						{
+						    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+					        Number parsed = nf.parse(requestParameters.get(paramName)[0]);
+					        BigDecimal bd1 = new BigDecimal(parsed.toString());
+							methodInputParameterValues.put(paramName, bd1);
+						}
+						else if(paramType.equalsIgnoreCase("Date"))
+						{
+					        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+					        Date date = formatter.parse(requestParameters.get(paramName)[0]);
+							methodInputParameterValues.put(paramName, new java.sql.Date(date.getTime()));
+						}
+						else if(paramType.equalsIgnoreCase("Time"))
+						{
+					        java.sql.Time time = java.sql.Time.valueOf(requestParameters.get(paramName)[0]);
+							methodInputParameterValues.put(paramName, time);
+						}
+						else if(paramType.equalsIgnoreCase("DateTime"))
+						{
+							SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+					        Date date = formatter.parse(requestParameters.get(paramName)[0]);
+					        System.out.println("Date: " + date);
+							methodInputParameterValues.put(paramName, new java.sql.Timestamp(date.getTime()));
+						}
 					}
-					else if(paramType.equalsIgnoreCase("Decimal"))
-					{
-					    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
-				        Number parsed = nf.parse(requestParameters.get(paramName)[0]);
-				        BigDecimal bd1 = new BigDecimal(parsed.toString());
-						methodInputParameterValues.put(paramName, bd1);
-					}
-					else if(paramType.equalsIgnoreCase("Date"))
-					{
-				        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
-						methodInputParameterValues.put(paramName, new java.sql.Date(date.getTime()));
-					}
-					else if(paramType.equalsIgnoreCase("Time"))
-					{
-				        java.sql.Time time = java.sql.Time.valueOf(requestParameters.get(paramName)[0]);
-						methodInputParameterValues.put(paramName, time);
-					}
-					else if(paramType.equalsIgnoreCase("DateTime"))
-					{
-						SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-				        Date date = formatter.parse(requestParameters.get(paramName)[0]);
-				        System.out.println("Date: " + date);
-						methodInputParameterValues.put(paramName, new java.sql.Timestamp(date.getTime()));
-					}
-
 					paramInOuts.put(paramName + "_in", inOut);
 				}
 				else{
@@ -142,32 +147,69 @@ public class methodPrecondition extends HttpServlet {
 		        {
 			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
 			        {
-			        	cs.setString(paramNo,(String)pairs.getValue());
-			        	System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.VARCHAR);
+						}
+						else{
+							cs.setString(paramNo,(String)pairs.getValue());
+						}
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 			        }
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
-						cs.setInt(paramNo,(Integer)pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.INTEGER);
+						}
+						else{
+							cs.setInt(paramNo,(Integer)pairs.getValue());
+						}
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("Decimal"))
 					{
-						cs.setBigDecimal(paramNo,(BigDecimal)pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.DECIMAL);
+						}
+						else{
+							cs.setBigDecimal(paramNo,(BigDecimal)pairs.getValue());
+						}
+
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("Time"))
 					{
-						cs.setTime(paramNo,(java.sql.Time)pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.TIME);
+						}
+						else{
+							cs.setTime(paramNo,(java.sql.Time)pairs.getValue());
+						}
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("Date"))
 					{
-						cs.setDate(paramNo,(java.sql.Date)pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.DATE);
+						}
+						else{
+							cs.setDate(paramNo,(java.sql.Date)pairs.getValue());
+						}
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("DateTime"))
 					{
-						cs.setTimestamp(paramNo,(Timestamp)pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.TIMESTAMP);
+						}
+						else{
+							cs.setTimestamp(paramNo,(Timestamp)pairs.getValue());
+						}
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 		        }

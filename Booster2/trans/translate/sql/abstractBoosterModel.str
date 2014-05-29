@@ -11,6 +11,7 @@ imports
   
   translate/booster/booster
   elaborate
+  simplify
 	
   translate/helpers
 
@@ -41,7 +42,7 @@ imports
 			setColumn := Column("setName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
 			tableColumn := Column("tableName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
 			columnColumn := Column("columnName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			htmlColumn := Column("html" , "", False(), Varchar(50000), NoExtra(), NoKey(), None());
+			htmlColumn := Column("html" , "", False(), Text(), NoExtra(), NoKey(), None());
 
 			classColumn := Column("class" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
 			attNameColumn := Column("attName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
@@ -76,7 +77,7 @@ imports
 
 	booster-to-metadata-classes:
 		(classname, cdef) ->
-			[ Insert(None(), None(), Into(), "_Meta_Classes", ["className","tablename","html"], [String(classname),String(classname), String(<class>(classname, <lookup>(classname, <LookupTable> "Class")))], None()),
+			[ Insert(None(), None(), Into(), "_Meta_Classes", ["className","tablename","html"], [String(classname),String(classname), String(<class><innermost(simplify)>(classname, <lookup>(classname, <LookupTable> "Class")))], None()),
 				attStmts*, methStmts*, paramStmts*] 
 		where
 			classAtts := <lookup-class-attributes> classname;
@@ -371,7 +372,7 @@ imports
 			 	
 	booster-to-relational-guarded-command:
 		(classname, progname, Skip())
-			-> []
+			-> [ VariableAssign("dummySkip", Int(1)) ]
 			
 			
 
@@ -615,6 +616,15 @@ imports
 			expr2 := <booster-to-relational-constraint> (classname, progname, constraint2);
 			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
 			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Choice(gc1,gc2))
+			-> [IfThen(True(), StatementList(stmts1),[],StatementList(stmts2))]
+		where
+			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
+			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+
+
 
 	booster-to-relational-guarded-command:
 		(classname, progname, gc)

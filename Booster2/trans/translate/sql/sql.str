@@ -106,6 +106,9 @@ rules
 	 	Time()
 	 		-> $[time]
 
+	 column-type:
+	 	Text()
+	 		-> $[text]
 
 	 column-type:
 	 	other
@@ -169,6 +172,9 @@ rules
 		InOut(name, type)
 			-> $[inout [name]_inout [<column-type> type]]
 		
+	proc-stmt:
+		VariableAssign(name, expr)
+			-> $[set @[name] = [<sql-expression> expr];]
 
 	proc-stmt:
 		BeginEnd(DeclareList(declares), StatementList(stmts)) 
@@ -280,7 +286,7 @@ rules
 			
 	elseif:
 		ElseIf(expr, StatementList(stmts))	
-			-> $[else if [<sql-expression> expr]
+			-> $[elseif [<sql-expression> expr]
 				 then [<map(proc-stmt)> stmts]
 				 ]
 				 

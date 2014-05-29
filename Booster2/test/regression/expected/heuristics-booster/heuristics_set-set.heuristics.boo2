@@ -2,4 +2,4 @@ system testSystem
  
 
 
-	class A  { 		attributes			b  : set ( B. a )  [0 .. *]		methods 			m1 { (this.b := this.b \/ {b!}) || (b!.a := b!.a \/ {this}) }	}	class B  { 		attributes			a  : set ( A. b )  [0 .. *]	}
+	class A  { 		attributes			b  : set ( B. a )  [0 .. *]		methods 			m1 { (this.b := this.b \/ {b?}) || (b?.a := b?.a \/ {this}) }	}	class B  { 		attributes			a  : set ( A. b )  [0 .. *]	}

@@ -1,16 +1,6 @@
 module library/strategy
 
 strategies
-
-
-
-// CurryMap: applies the map function to a list, where the mapping function takes an additional parameter
-
-  currymap(rule) : (value, []) -> []
-  	
-  currymap(rule) : (value, [v,vs*]) -> [<rule> (value, v), rs* ]
-  	where
-  		[rs*] := <currymap(rule)> (value, [vs*])  
 		
 		
 // Subsets: gets all subsets of a list
@@ -19,26 +9,6 @@ strategies
 		[] -> [[]]
 		
 	subsets:
-		[xs*] -> <subsets-int>([xs*], <length>[xs*])
-		
-		
-		
-	subsets-int:
-		(x, 0) -> [[]]
-		
-	subsets-int:
-		([], n) -> []
-		
-	subsets-int:
-		([w, ws*], n) -> 
-			<union> (yss, zss)
-	where
-		xss := <subsets-int> ([ws*], (<subt>(n, 1)));
-		yss := <currymap(subset-append)>(w, xss); 	
-		zss := <subsets-int> ([ws*], (<subt>(n, 1)))		
-		
-			
-	subset-append:
-		(w, xs) -> <union>([w], xs)
+		[x, xs*] -> <union> (<subsets> [xs*], <map(\ p -> <union>([x], p)\)> <subsets> [xs*] )
 	
 		

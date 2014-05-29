@@ -49,6 +49,11 @@ rules
 
 			
 			// Some normalisation rules?
+			
+	/*simplify:
+		And(And(p,q), r)
+			-> And(p, And(q,r)) */
+			
 /*	simplify:
 		BinRel(expr, Equal(), This())
 			-> BinRel(This(), Equal(), expr)
@@ -62,6 +67,19 @@ rules
 			<not(eq)>(This(), expr)
 */
 
+
+	simplify:
+		Choice(Guard(And(c1,c2),p1),
+		       Guard(And(c1,c3),p2))
+		->
+			Guard(c1, Choice(Guard(c2,p1),
+		       				 Guard(c3,p2)))
+
+	simplify:
+		Choice(Guard(c1,p1),
+		       Guard(c1,p2))
+		->
+			Guard(c1, Choice(p1,p2))
 
 	simplify:
 		And(True(), constraint)
@@ -94,7 +112,16 @@ rules
 	simplify:
 		Or(constraint, constraint)
 			-> constraint
-			
+	
+	simplify:
+		And(Implies(p,q),q)
+			-> q
+	
+	simplify:
+		And(And(r, Implies(p,q)),q)
+			-> And(r,q)
+	
+		
 	simplify:
 		Implies(True(), constraint)
 			-> constraint
@@ -358,6 +385,8 @@ rules
 	simplify:
 		BinRel(BinOp(exp1, Minus(), exp2), Subset(), exp1) -> True()
 	
+	simplify:
+		BinRel(BinOp(exp1, Minus(), exp2), Subset(), exp3) -> BinRel(exp1, Subset(), exp3)
 	
 	
 	simplify:
@@ -416,7 +445,12 @@ rules
 			k := <add>(i,1)
 			
 
-			
+	simplify:
+		BinRel(BasicValue(Integer(x)),Equal(), BasicValue(Integer(y)))
+			-> False()
+		where
+			<not(equal)>(x,y)
+				
 	simplify:
 		Guard(e1, Guard(e2, p))
 			-> Guard(And(e1,e2),p)

@@ -4,7 +4,7 @@ class A {
 	attributes
 		b : SET(B . a)[*]
 	methods
-		m1 { b! : b' }
+		m1 { b? : b' }
 	
 }
 

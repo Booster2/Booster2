@@ -2,4 +2,4 @@ system testSystem
  
 
 
-	class A  { 		attributes			b  : B . a		methods 			m1 { (this : A & b! /: B) --> ( (new b! : B) ; ((b!.a := this) || (this.b := b!)) ) }	}	class B  { 		attributes			a  : A . b	}
+	class A  { 		attributes			b  : B . a		methods 			m1 { this : A --> ( (new b! : B) ; ((b!.a := this) || (this.b := b!)) ) }	}	class B  { 		attributes			a  : A . b	}
