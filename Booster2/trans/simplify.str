@@ -3,7 +3,9 @@ module simplify
 imports
   include/Booster2
 
+
 library/lookupTable
+translate/booster/booster  
   
 rules
 
@@ -20,6 +22,11 @@ rules
 			<updateMethodProgram>(cname, mname, prog')
 			
 	
+	simplify-assume-inv:
+		BinRel(Path(ps, PathComponent(attname, None())){BasicType(t)}, 
+				In(), 
+				TypeExtent(ext){ Set(BasicType(t))})
+			-> True() 
 	
 	simplify-assume-inv:
 		BinRel(Path(ps {Reference(classname)}, PathComponent(attname, None())){Set(Reference(classname'))},
@@ -43,16 +50,64 @@ rules
 				PathStart(classname', None()){Set(Reference(classname'))})
 			-> True()
 		where
-			log(|Error(), "simplify-assume-inv matches");
-			(ds, Reference(classname'), opp, min, max, s) := <lookup>((classname, attname), <LookupTable>"Attribute");
-			log(|Error(), "simplify-assume-inv matched")
+			(ds, Reference(classname'), opp, min, max, s) := <lookup>((classname, attname), <LookupTable>"Attribute")
 
 			
-			// Some normalisation rules?
+	// Some normalisation rules?
 			
-	/*simplify:
-		And(And(p,q), r)
-			-> And(p, And(q,r)) */
+	 simplify:
+		And(p, And(q,r))
+			-> And(And(p,q), r)
+	
+	simplify:
+		Parallel(p, Parallel(q,r))
+			-> Parallel(Parallel(p,q),r)
+	
+	simplify:
+		BinRel(a, Equal(), b)
+			-> BinRel(b, Equal(), a)
+		where
+			<string-lt>(<expression>b, <expression>a);
+			<not(equal)>(Null(), b)
+
+	simplify:
+		BinRel(a, NotEqual(), b)
+			-> BinRel(b, NotEqual(), a)
+		where
+			<string-lt>(<expression>b, <expression>a);
+			<not(equal)>(Null(), b)
+
+	simplify:
+		And(a, b)
+			-> And(b, a)
+		where
+			<string-lt>(<constraint>b, <constraint>a)
+
+	simplify:
+		And(And(a, b), c)
+			-> And(And(a, c), b)
+		where
+			<string-lt>(<constraint>b, <constraint>c)
+
+
+	simplify:
+		Or(a, b)
+			-> Or(b, a)
+		where
+			<string-lt>(<constraint>b, <constraint>a)
+
+	simplify:
+		Parallel(a, b)
+			-> Parallel(b, a)
+		where
+			<string-lt>(<guardedCommand>b, <guardedCommand>a)
+			
+	simplify:
+		Parallel(p, Guard(c, q))
+			-> Guard(c, Parallel(p,q))
+			
+	simplify:
+		Implies(a, b) -> Or(b, Not(a))
 			
 /*	simplify:
 		BinRel(expr, Equal(), This())
@@ -66,8 +121,12 @@ rules
 		where
 			<not(eq)>(This(), expr)
 */
+	simplify:
+		Not(True()) -> False()
 
-
+	simplify:
+		Not(False()) -> True()
+		
 	simplify:
 		Choice(Guard(And(c1,c2),p1),
 		       Guard(And(c1,c3),p2))
@@ -77,9 +136,40 @@ rules
 
 	simplify:
 		Choice(Guard(c1,p1),
+		       Guard(And(c1,c3),p2))
+		->
+			Guard(c1, Choice(Guard(True(),p1),
+		       				 Guard(c3,p2)))
+
+	simplify:
+		Choice(Guard(c1,p1),
 		       Guard(c1,p2))
 		->
 			Guard(c1, Choice(p1,p2))
+
+	simplify:
+		Choice(Parallel(a,b),
+			   Parallel(a,c))
+		->
+			Parallel(a, Choice(b,c))
+
+	simplify:
+		Choice(Parallel(b,a),
+			   Parallel(c,a))
+		->
+			Parallel(a, Choice(b,c))
+
+	simplify:
+		Choice(Parallel(a, b),
+			   Parallel(c,a))
+		->
+			Parallel(a, Choice(b,c))
+
+	simplify:
+		Choice(Parallel(b,a),
+			   Parallel(a, c))
+		->
+			Parallel(a, Choice(b,c))
 
 	simplify:
 		And(True(), constraint)
@@ -245,14 +335,15 @@ rules
 			-> constraint
 					
 			
-	simplify:
+/*	simplify:
 		Not(And(a, b))
 			-> Or(Not(a), Not(b))
-
+*/
 	simplify:
 		Not(Or(a, b))
 			-> And(Not(a), Not(b))
 			
+	
 	simplify:
 		Not(Implies(a,b))
 			-> And(a, Not(b))		
@@ -268,6 +359,9 @@ rules
 			-> Or(Not(p), q)
 */
 
+	simplify:
+		And(Or(a,b), c)
+			-> Or(And(a,c), And(b,c))
 
 
 	simplify:
@@ -450,7 +544,19 @@ rules
 			-> False()
 		where
 			<not(equal)>(x,y)
-				
+			
+	simplify:
+		Implies(BinRel(a, Equal(), b), Implies(BinRel(b, Equal(), a), q))
+			-> Implies(BinRel(a, Equal(), b), Implies(BinRel(a, Equal(), b), q))
+
+	simplify:
+		Implies(BinRel(a, NotEqual(), b), Implies(BinRel(b, NotEqual(), a), q))
+			-> Implies(BinRel(a, NotEqual(), b), Implies(BinRel(a, NotEqual(), b), q))
+	
+/*	simplify:
+		And(Implies(BinRel(a, Equal(), b), c), Implies(BinRel(b, Equal(), a), c))
+			-> Implies(BinRel(a, Equal(), b), c)
+*/				
 	simplify:
 		Guard(e1, Guard(e2, p))
 			-> Guard(And(e1,e2),p)
@@ -482,6 +588,10 @@ rules
 			-> ps {Reference(cname)}
 			where
 				(cname', aname2) := <lookup-opposite>(cname, aname1)
+	
+	simplify:
+		Parallel(Guard(c, g), g')
+			-> Guard(c,Parallel(g,g'))
 				
 	simplify:
 		Parallel(prog, Skip()) -> prog
@@ -513,6 +623,15 @@ rules
 				<elem>(expr1, exprs)
 	
 	simplify:
+		Or(BinRel(expr1, Equal(), expr2),BinRel(expr1, NotEqual(), expr2))
+			-> True()
+
+	simplify:
+		Or(BinRel(expr1, NotEqual(), expr2),BinRel(expr1, Equal(), expr2))
+			-> True()
+
+
+	simplify:
 		Or(BinRel(expr1, In(), expr2),BinRel(expr1, NotIn(), expr2))
 			-> True()
 			
@@ -526,10 +645,10 @@ rules
 		where
 			<elem>(expr2, exprs)
 			
-	simplify:
+/*	simplify:
 		Or(And(expr1, expr2), And(epx2, expr3))
 			-> And(Or(expr1, expr3), expr2)
-	
+*/	
 	simplify:
 		(Then(True(), x)) -> x		
 

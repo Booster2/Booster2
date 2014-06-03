@@ -2,4 +2,4 @@ system S
  
 
 
-	class A  { 		attributes			x  : INT		methods 			m1 { (5 : INT or 4 : INT) --> ( (5 : INT --> ( this.x := 5 )) [] (4 : INT --> ( this.x := 4 )) ) }	}
+	class A  { 		attributes			x  : INT		methods 			m1 { (4 : INT or 5 : INT) --> ( (5 : INT --> ( this.x := 5 )) [] (4 : INT --> ( this.x := 4 )) ) }	}

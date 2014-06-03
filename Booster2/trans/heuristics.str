@@ -445,9 +445,7 @@ rules
 /* Set-valued-to-Optional */
 	program:			
 		(classname, methodname, BinRel(expression{Reference(name2)}, In(), Path(a {Reference(name4)},b){Set(Reference(name2))}))
-			-> Parallel(Parallel(Assign(path3{Set(Reference(name2))},
-										BinOp(path3, Union(), SetExtent([expression{Reference(name2)}]){Set(Reference(name2))})),
-								 Guard(BinRel(Path(expression{Reference(name2)}, 
+			-> Parallel(Parallel(Choice(Guard(BinRel(Path(expression{Reference(name2)}, 
 								 					 PathComponent(name6, None())){Reference(name4)},
 								 				NotEqual(), Null()),
 								 	   Assign(Path(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
@@ -455,7 +453,11 @@ rules
 								 	   		  BinOp(Path(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
 								 	   			   	     PathComponent(name3, None())){Set(Reference(name2))},
 								 	   			   	Minus(), 
-								 	   			   	SetExtent([Path(expression{Reference(name2)}, PathComponent(name6, None()))]){Set(Reference(name2))})))),
+								 	   			   	SetExtent([Path(expression{Reference(name2)}, PathComponent(name6, None())){Optional(Reference(name4))}]){Set(Reference(name4))}))),
+								 Guard(Not(BinRel(Path(expression{Reference(name2)}, 
+								 					 PathComponent(name6, None())){Reference(name4)},
+								 				NotEqual(), Null())), Skip())),Assign(path3{Set(Reference(name2))},
+										BinOp(path3, Union(), SetExtent([expression{Reference(name2)}]){Set(Reference(name2))}))),
 						Assign(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
 							   a {Reference(name4)}))
 		where

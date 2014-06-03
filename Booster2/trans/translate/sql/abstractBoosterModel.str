@@ -378,20 +378,21 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps {Optional(Reference(tablename))}, pc){t}, expr))
-			-> [Update([],
-				TableName(tablename),[(attname, expr')],Where(expr''),None(),None())]
+			-> [VariableAssign(pn', expr'), Update([],
+				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
+				pn' := <path-to-variable-name> Path(ps {Optional(Reference(tablename))}, pc){t};
 				attname := <get-path-attribute-name> Path(ps, pc);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps {Optional(Reference(tablename))}, pc){t})
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Union(), SetExtent([expr]))))
-			-> [IfThen(	Equal( Select(	[],
+			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), IfThen(	Equal( Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
-											Where(And(	Equal(ColumnName(column1), expr1),
-													  	Equal(ColumnName(column2), expr2))), 
+											Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+													  	Equal(ColumnName(column2), LocalVariable(pn2)))), 
 											None(), 
 											None(), 
 											None(), 
@@ -400,11 +401,14 @@ imports
 											None(), 
 											None()), 
 								  Int(0)), 
-						StatementList([Insert(None(), None(), Into(), tablename, [column1, column2], [expr1, expr2], None())]),
+						StatementList([Insert(None(), None(), Into(), tablename, [column1, column2], [LocalVariable(pn1), LocalVariable(pn2)], None())]),
 						[],
 						None()
 					)]				
 			where 
+				pn' := <path-to-variable-name> path;
+				pn1 := <concat-strings>[pn', "_1"];
+				pn2 := <concat-strings>[pn', "_2"];
 				attname := <get-path-attribute-name> path;
 				tablename := <lookup-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
@@ -415,11 +419,11 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Union(), SetExtent([expr]))))
-			-> [IfThen(	Equal( Select(	[],
+			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), IfThen(	Equal( Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
-											Where(And(	Equal(ColumnName(column1), expr1),
-													  	Equal(ColumnName(column2), expr2))), 
+											Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+													  	Equal(ColumnName(column2), LocalVariable(pn2)))), 
 											None(), 
 											None(), 
 											None(), 
@@ -428,11 +432,14 @@ imports
 											None(), 
 											None()), 
 								  Int(0)), 
-						StatementList([Insert(None(), None(), Into(), tablename, [column1, column2], [expr1, expr2], None())]),
+						StatementList([Insert(None(), None(), Into(), tablename, [column1, column2], [LocalVariable(pn1), LocalVariable(pn2)], None())]),
 						[],
 						None()
 					)]				
 			where 
+				pn' := <path-to-variable-name> path;
+				pn1 := <concat-strings>[pn', "_1"];
+				pn2 := <concat-strings>[pn', "_2"];
 				attname := <get-path-attribute-name> path;
 				tablename := <lookup-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
@@ -443,12 +450,15 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Minus(), SetExtent([expr]))))
-			-> [Delete(	None(), None(), None(), 
+			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), Delete(	None(), None(), None(), 
 						tablename, 
-						Where(And(	Equal(ColumnName(column1), expr1),
-									Equal(ColumnName(column2), expr2))), 
+						Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+									Equal(ColumnName(column2), LocalVariable(pn2)))), 
 						None(), None())]
 			where 
+				pn' := <path-to-variable-name> path;
+				pn1 := <concat-strings>[pn', "_1"];
+				pn2 := <concat-strings>[pn', "_2"];
 				attname := <get-path-attribute-name> path;
 				tablename := <lookup-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
@@ -459,12 +469,15 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Minus(), SetExtent([expr]))))
-			-> [Delete(	None(), None(), None(), 
+			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), Delete(	None(), None(), None(), 
 						tablename, 
-						Where(And(	Equal(ColumnName(column1), expr1),
-									Equal(ColumnName(column2), expr2))), 
+						Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+									Equal(ColumnName(column2), LocalVariable(pn2)))), 
 						None(), None())]
 			where 
+				pn' := <path-to-variable-name> path;
+				pn1 := <concat-strings>[pn', "_1"];
+				pn2 := <concat-strings>[pn', "_2"];
 				attname := <get-path-attribute-name> path;
 				tablename := <lookup-attribute-table-name>(classname', attname);
 				column1 := <concat-strings>[classname', "_", attname];
@@ -475,37 +488,38 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){BasicType(t)}, expr))
-			-> [Update([],
-				TableName(tablename),[(attname, expr')],Where(expr''),None(),None())]
+			-> [VariableAssign(pn', expr'), Update([],
+				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
-				
+				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){BasicType(t)};
 				attname := <get-path-attribute-name> Path(ps, pc);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){BasicType(t)})
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){Optional(BasicType(t))}, expr))
-			-> [Update([],
-				TableName(tablename),[(attname, expr')],Where(expr''),None(),None())]
+			-> [VariableAssign(pn', expr'), Update([],
+				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
-				
+				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){Optional(BasicType(t))};
 				attname := <get-path-attribute-name> Path(ps, pc);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){BasicType(t)})
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){Reference(t)}, expr))
-			-> [Update([],
-				TableName(tablename),[(attname, expr')],Where(expr''),None(),None())]
+			-> [VariableAssign(pn', expr'), Update([],
+				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
 				<is-set-name> t;
+				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){Reference(t)};
 				attname := <get-path-attribute-name> Path(ps, pc);
 				expr' := <booster-to-relational-expression> (classname, progname, expr);
 				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){Reference(t)})
 				
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)}, expr))
-			-> [IfThen(NotEqual( Select(	[],
+			-> [VariableAssign(png, Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
 											Where(Equal(ColumnName(column1), expr'')), 
@@ -515,16 +529,19 @@ imports
 											None(), 
 											None(), 
 											None(), 
-											None()), 
-								  Int(0)), 
-						StatementList([	Update([], TableName(tablename),[(oppattname, expr')],Where(expr'''),None(),None())]),
+											None())), 
+				VariableAssign(pn', expr'), 
+				IfThen(NotEqual( LocalVariable(png), Int(0)), 
+						StatementList([	Update([], TableName(tablename),[(oppattname, LocalVariable(pn'))],Where(expr'''),None(),None())]),
 						[],
-						StatementList([Insert(None(), None(), Into(), tablename, [column1, oppattname], [expr'', expr'], None())])
+						StatementList([Insert(None(), None(), Into(), tablename, [column1, oppattname], [expr'', LocalVariable(pn')], None())])
 						)]
 				
 				
 			where 
 				<is-class-name> t;
+				pn' := <path-to-variable-name> Path(ps { Reference(classname') }, PathComponent(attname, None())){Optional(Reference(t))};
+				png := <concat-strings>[pn', "_guard"];
 				tablename := <concat-strings>[classname', "_", attname];
 				column1 := <concat-strings>[classname', "_", attname];
 				//log(|Error(), "guarded-command to relational", tablename);
@@ -536,7 +553,7 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps { Reference(classname') }, PathComponent(attname, None())){Optional(Reference(t))}, expr))
-			-> [IfThen(NotEqual( Select(	[],
+			-> [VariableAssign(png, Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
 											Where(Equal(ColumnName(column1), expr'')), 
@@ -546,16 +563,19 @@ imports
 											None(), 
 											None(), 
 											None(), 
-											None()), 
-								  Int(0)), 
-						StatementList([	Update([], TableName(tablename),[(oppattname, expr')],Where(expr'''),None(),None())]),
+											None())),
+				VariableAssign(pn', expr'), 
+				IfThen(NotEqual( LocalVariable(png), Int(0)), 
+						StatementList([	Update([], TableName(tablename),[(oppattname, LocalVariable(pn'))],Where(expr'''),None(),None())]),
 						[],
-						StatementList([Insert(None(), None(), Into(), tablename, [column1, oppattname], [expr'', expr'], None())])
+						StatementList([Insert(None(), None(), Into(), tablename, [column1, oppattname], [expr'', LocalVariable(pn')], None())])
 						)]
 				
 				
 			where 
 				<is-class-name> t;
+				pn' := <path-to-variable-name> Path(ps { Reference(classname') }, PathComponent(attname, None())){Optional(Reference(t))};
+				png := <concat-strings>[pn', "_guard"];
 				tablename := <concat-strings>[classname', "_", attname];
 				column1 := <concat-strings>[classname', "_", attname];
 				//log(|Error(), "guarded-command to relational", tablename);
@@ -588,10 +608,11 @@ imports
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Parallel(gc1,gc2))
-			-> [BeginEnd(DeclareList([]), StatementList(stmts1)),BeginEnd(DeclareList([]), StatementList(stmts2))]
+			-> [BeginEnd(DeclareList([]), StatementList([decs*, stmts*]))]
 		where
-			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
-			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+			[stmts1*] := <booster-to-relational-guarded-command> (classname, progname, gc1);
+			[stmts2*] := <booster-to-relational-guarded-command> (classname, progname, gc2);
+			([decs*], [stmts*]) := <partition(?VariableAssign(_, _))> [stmts1*, stmts2*] 		
 
 	booster-to-relational-guarded-command:
 		(classname, progname, Sequence(gc1,gc2))
@@ -676,12 +697,25 @@ imports
 			const1' := <booster-to-relational-constraint> (classname, progname, const1);
 			const2' := <booster-to-relational-constraint> (classname, progname, const2)
 
+
+	booster-to-relational-constraint:
+		(classname, progname, BinRel(expr1, Equal(), Null()))
+			-> IsNull(expr1',None())
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1)
+
 	booster-to-relational-constraint:
 		(classname, progname, BinRel(expr1, Equal(), expr2))
 			-> Equal(expr1', expr2')
 		where
 			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
 			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+
+	booster-to-relational-constraint:
+		(classname, progname, BinRel(expr1, NotEqual(), Null()))
+			-> IsNull(expr1', Not())
+		where
+			expr1' := <booster-to-relational-expression> (classname, progname, expr1)
 
 	booster-to-relational-constraint:
 		(classname, progname, BinRel(expr1, NotEqual(), expr2))
@@ -1151,4 +1185,93 @@ procedure-to-get-applicable-references:
 											None(), 
 											None(), 
 											None()))]
+
+
+/*
+get-declare-lists:
+	(classname, progname, Skip()) -> []
+	
+get-declare-lists:
+	(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Minus(), SetExtent([expr]))))
+		-> [VariableAssign(pn,e')]
+	where
+		e' := <booster-to-relational-expression> (classname, progname, expr);
+		pn := <path-to-variable-name> path
+
+get-declare-lists:
+	(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Minus(), SetExtent([expr]))))
+		-> [VariableAssign(pn,e')]
+	where
+		e' := <booster-to-relational-expression> (classname, progname, expr);
+		pn := <path-to-variable-name> path
+
+get-declare-lists:
+	(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Union(), SetExtent([expr]))))
+		-> [VariableAssign(pn,e')]
+	where
+		e' := <booster-to-relational-expression> (classname, progname, expr);
+		pn := <path-to-variable-name> path
+
+get-declare-lists:
+	(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Union(), SetExtent([expr]))))
+		-> [VariableAssign(pn,e')]
+	where
+		e' := <booster-to-relational-expression> (classname, progname, expr);
+		pn := <path-to-variable-name> path
+
+
+
+get-declare-lists:
+	(classname, progname, Assign(Path(ps {Optional(Reference(tablename))}, pc){t}, expr)) -> [VariableAssign(pn,e')]
+	where
+		e' := <booster-to-relational-expression> (classname, progname, expr);
+		pn := <path-to-variable-name> Path(ps {Optional(Reference(tablename))}, pc){t}
+
+get-declare-lists:
+	(classname, progname, Assign(Path(ps {Reference(tablename)}, pc){t}, expr)) -> [VariableAssign(pn,e')]
+	where
+		e' := <booster-to-relational-expression> (classname, progname, expr);
+		pn := <path-to-variable-name> Path(ps {Reference(tablename)}, pc){t}
+
+
+get-declare-lists:
+	(classname, progname, Guard(g,p))
+		-> <get-declare-lists> (classname, progname, p)
+
+get-declare-lists:
+	(classname, progname, New(n,c))
+		-> []
 		
+
+get-declare-lists:
+	(classname, progname, Parallel(p,q))
+		-> <union>(<get-declare-lists> (classname, progname, p), <get-declare-lists> (classname, progname, q))
+
+get-declare-lists:
+	(classname, progname, Choice(p,q))
+		-> <union>(<get-declare-lists> (classname, progname, p), <get-declare-lists> (classname, progname, q))
+
+get-declare-lists:
+	(classname, progname, Sequence(p,q))
+		-> <union>(<get-declare-lists> (classname, progname, p), <get-declare-lists> (classname, progname, q))
+*/
+	
+path-to-variable-name:
+	PathStart(name, maybeprimed)
+		-> <concat-strings>["path_", name]
+
+path-to-variable-name:
+	Path(p, PathComponent(att, maybeprimed))
+		-> <concat-strings>[<path-to-variable-name> p, "_", att]
+
+path-to-variable-name:
+	This()
+		-> "path_this"
+
+path-to-variable-name:
+	Input(i)
+		-> <concat-strings>["path_", i, "_in"]
+
+path-to-variable-name:
+	Output(o)
+		-> <concat-strings>["path_", o, "_out"]

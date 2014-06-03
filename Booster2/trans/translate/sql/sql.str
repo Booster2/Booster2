@@ -59,7 +59,7 @@ rules
 					rollback;
 					end; 
 					start transaction;
-	 			    [<foldout(declare-statement)> (declares, "; ")]
+	 			    [<foldout(declare-statement)> (declares, " ")]
 	 			    [<map(proc-stmt)> statements]
 	 			    commit;
 	 			  	end //
@@ -72,7 +72,7 @@ rules
 	 			  create function `[name]` ( [<foldout(proc-param-without-inout)> (inputs, ",")])
 	 			  	returns [<column-type> retType]
 	 				begin
-	 			    [<foldout(declare-statement)> (declares, "; ")]
+	 			    [<foldout(declare-statement)> (declares, " ")]
 	 			    [<map(proc-stmt)> statements]
 	 			  	end //
 	 			  delimiter ;]
@@ -174,35 +174,34 @@ rules
 		
 	proc-stmt:
 		VariableAssign(name, expr)
-			-> $[set @[name] = [<sql-expression> expr];]
+			-> $[set @[name] = [<sql-expression> expr];["\r"]]
 
 	proc-stmt:
 		BeginEnd(DeclareList(declares), StatementList(stmts)) 
 			-> $[begin
-				 [<foldout(declare-statement)> (declares, "; ")]
+				 [<foldout(declare-statement)> (declares, " ")]
 				 [<map(proc-stmt)> stmts]
 				 end;["\r\r"]]
 	proc-stmt:
 		IfThen(expr, StatementList(stmts), elseifs, None()) 
 			-> $[if [<sql-expression> expr]
 				 then [<map(proc-stmt)> stmts]
-				 [<foldout(elseif)> (elseifs, "\n")]
+				 [<foldout(elseif)> (elseifs, "\r")]
 				 end if;["\r\r"]]
 
 	proc-stmt:
 		IfThen(expr, StatementList(stmts), elseifs, StatementList(stmts')) 
 			-> $[if [<sql-expression> expr]
 				 then [<map(proc-stmt)> stmts]
-				 [<foldout(elseif)> (elseifs, "\n")]
+				 [<foldout(elseif)> (elseifs, "\r")]
 				 else [<map(proc-stmt)> stmts']
 				 end if;["\r\r"]]
 
 	proc-stmt:
 		Update(uo,tr,[(name, expr)],wp,obp,lp) 
-			-> $[ set @updateValue = [<sql-expression> expr];
-				
+			-> $[
 				update [<foldout(update-option)> (uo, " ")] [<table-reference> tr]
-				set [name] = @updateValue
+				set [name] = [<sql-expression> expr]
 				[<maybe-output(where-part)> wp]
 				[<maybe-output(order-by-part)> obp]
 				[<maybe-output(limit-part)> lp];["\r\r"]]
@@ -981,7 +980,7 @@ rules
 		
 	declare-statement:
 		Declare(names, type, default) 
-			-> $[declare [<foldout(column-name)> (names, ", ")] [<column-type> type] [<maybe-output(declare-default)> default]]
+			-> $[declare [<foldout(column-name)> (names, ", ")] [<column-type> type] [<maybe-output(declare-default)> default];]
 
 		
 		

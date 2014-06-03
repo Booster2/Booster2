@@ -279,6 +279,11 @@ rules
 			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 
+	infer-types:
+		(context, Path(Input(i){}, PathComponent(attname, maybeprimed)){})
+			-> Path(Input(i){Reference(c)}, PathComponent(attname, maybeprimed)){t}
+		where
+			[(c, (ds, t, o, min, max, tname))] := <filter(\ ((c,a), desc) -> (c, desc) where <equal>(a, attname)\)><LookupTable>"Attribute"
 
 
 	// Binary relations: pushing types left to right
