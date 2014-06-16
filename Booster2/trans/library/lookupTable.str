@@ -3,6 +3,8 @@ module lookupTable
 imports
   include/Booster2  
   
+  parse
+  
 rules
 	// removes the first element of a list for which s applies 
 	remove-first(s) = split-fetch(s) ; conc
@@ -66,7 +68,7 @@ rules
 				) \)
 				
 	updateClassMethod = (\ (cname, mname, constraint, extcname, exts, inputs, outputs) -> (cname, mname, constraint, extcname, exts, inputs, outputs) where
-				<replaceMethod(\ ((cn, mn), (c, gc, exts', done, is, os)) -> ((cn, mn), (And(c, constraint), gc, <union>([extcname], <union>(exts', exts)), done, is, os)) \)> (cname, mname) \)
+				<replaceMethod(\ ((cn, mn), (c, gc, exts', done, is, os)) -> ((cn, mn), (Conjuncts([c, constraint]), gc, <union>([extcname], <union>(exts', exts)), done, is, os)) \)> (cname, mname) \)
 				
 
 	addClassInvariant = (\ (cname, inv) -> (cname, inv) where

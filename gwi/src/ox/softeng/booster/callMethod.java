@@ -91,7 +91,13 @@ public class callMethod extends HttpServlet {
 					}
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
-						methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
+						if(requestParameters.get(paramName) != null)
+						{
+							methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
+						}
+						else{
+							methodInputParameterValues.put(paramName, null);
+						}
 					}
 					else if(paramType.equalsIgnoreCase("Decimal"))
 					{
@@ -146,7 +152,13 @@ public class callMethod extends HttpServlet {
 			        }
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
-						cs.setInt(paramNo,(Integer)pairs.getValue());
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.INTEGER);
+						}
+						else{
+							cs.setInt(paramNo,(Integer)pairs.getValue());
+						}
 						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("Decimal"))

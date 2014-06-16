@@ -52,11 +52,10 @@ rules
 			-> Guard(False(), Skip())
 
 	program:
-		(classname, methodname, And(constraint1, constraint2))
-			-> Parallel(program1, program2)
+		(classname, methodname, Conjuncts(constraints))
+			-> Parallels(programs)
 		with
-			program1 := <program> (classname, methodname, constraint1);
-			program2 := <program> (classname, methodname, constraint2)
+			programs := <map(\ p -> <program> (classname, methodname, p)\)> constraints
 
 	program:
 		(classname, methodname, Or(constraint1, constraint2))
@@ -153,11 +152,11 @@ rules
  /* Optional-to-Mandatory */
 	program:			
 		(classname, methodname, BinRel(Path(a {Reference(name4) },b) { Optional(Reference(name2)) }, Equal(), Null()))
-			-> Parallel(Assign(path3 { Optional(Reference(name2)) }, Null()),
+			-> Parallels([Assign(path3 { Optional(Reference(name2)) }, Null()),
 						Guard(BinRel(path3 { Optional(Reference(name2)) } , NotEqual(), Null() ),
 							  Assign(PathStart(name2, None()) {Set(Reference(name2))},
 							  		 BinOp(PathStart(name2, None()) {Set(Reference(name2))}, Minus(),
-							  		 	   SetExtent([path3 { Optional(Reference(name2)) }]) { Set(Reference(name2))}))))
+							  		 	   SetExtent([path3 { Optional(Reference(name2)) }]) { Set(Reference(name2))})))])
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
@@ -171,11 +170,11 @@ rules
  /* Optional-to-Optional */
 	program:			
 		(classname, methodname, BinRel(Path(a { Reference(name4) },b) { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }))
-			-> Parallel(Assign(path3 { Optional(Reference(name2)) }, Null(){ Optional(Reference(name2)) }),
+			-> Parallels([Assign(path3 { Optional(Reference(name2)) }, Null(){ Optional(Reference(name2)) }),
 						Choice(Guard(BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null(){ Optional(Reference(name2)) }),
 							  Assign(Path(path3 { Optional(Reference(name2)) }, PathComponent(name6, None())) { Optional(Reference(name4)) },
 							  		 Null())),
-							  Guard(BinRel(path3 { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }),Skip())))
+							  Guard(BinRel(path3 { Optional(Reference(name2)) }, Equal(), Null(){ Optional(Reference(name2)) }),Skip()))])
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
@@ -187,13 +186,13 @@ rules
  /* Optional-to-Set-valued */
 	program:			
 		(classname, methodname, BinRel(Path(a { Reference(name4) },b) {Optional(Reference(name2))}, Equal(), Null()))
-			-> Parallel(Assign(path3 {Optional(Reference(name2))}, Null()),
+			-> Parallels([Assign(path3 {Optional(Reference(name2))}, Null()),
 						Guard(BinRel(path3 {Optional(Reference(name2))}, NotEqual(), Null()),
 							  Assign(Path(path3{Optional(Reference(name2))}, 
 							  		 			PathComponent(name6, None())){Set(Reference(name4))},
 							  		 BinOp(Path(path3 {Optional(Reference(name2))}, 
 							  		 			PathComponent(name6, None())) {Set(Reference(name4))}, Minus(),  
-							  		 	   SetExtent([a { Reference(name4) }]){Set(Reference(name4))}))))
+							  		 	   SetExtent([a { Reference(name4) }]){Set(Reference(name4))})))])
 		where
 			<not(is-pre-state)> Path(a { Reference(name4) },b) {Optional(Reference(name2))};		
 			<is-class-name> name2;
@@ -205,10 +204,10 @@ rules
  /* Set-valued-to-Mandatory */
 	program:			
 		(classname, methodname, BinRel(expression { Reference(name2)}, NotIn(), Path(a { Reference(name4) },b) { Set(Reference(name2))}))
-			-> Parallel(Assign(path3 { Set(Reference(name2))}, BinOp(path3 { Set(Reference(name2))}, Minus(), SetExtent([expression{Reference(name2)}]){ Set(Reference(name2))})),
+			-> Parallels([Assign(path3 { Set(Reference(name2))}, BinOp(path3 { Set(Reference(name2))}, Minus(), SetExtent([expression{Reference(name2)}]){ Set(Reference(name2))})),
 					    Assign(PathStart(name2, None()){ Set(Reference(name2))},
 					    	   BinOp(PathStart(name2, None()){ Set(Reference(name2))}, Minus(), 
-					    	   		 SetExtent([expression{ Reference(name2)}]){ Set(Reference(name2))})))
+					    	   		 SetExtent([expression{ Reference(name2)}]){ Set(Reference(name2))}))])
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
@@ -220,10 +219,10 @@ rules
  /* Set-valued-to-Optional */
 	program:			
 		(classname, methodname, BinRel(expression { Reference(name2) }, NotIn(), Path(a { Reference(name4) },b) { Set(Reference(name2)) }))
-			-> Parallel(Assign(path3 { Set(Reference(name2)) },
+			-> Parallels([Assign(path3 { Set(Reference(name2)) },
 							   BinOp(path3, Minus(), SetExtent([expression{ Reference(name2) }]){ Set(Reference(name2)) })),
 						Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
-							   Null()))
+							   Null())])
 		where
 			<not(is-pre-state)> Path(a { Reference(name4) },b) { Set(Reference(name2)) };
 			<is-class-name> name2;
@@ -236,11 +235,11 @@ rules
  /* Set-valued-to-Set-valued */
 	program:			
 		(classname, methodname, BinRel(expression { Reference(name2) }, NotIn(), Path(a{Reference(name4)},b) { Set(Reference(name2)) }))
-			-> Parallel(Assign(path3,
+			-> Parallels([Assign(path3,
 							   BinOp(path3{ Set(Reference(name2)) }, Minus(), SetExtent([expression{ Reference(name2) }]){ Set(Reference(name2)) })),
 						Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())),
 							   BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())), Minus(),  
-							   		 SetExtent([a {Reference(name4)}]{Set(Reference(name4))}))))
+							   		 SetExtent([a {Reference(name4)}]{Set(Reference(name4))})))])
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
@@ -254,8 +253,8 @@ rules
 		(classname, methodname, BinRel(Path(a { Reference(name4) },b){ Reference(name2) }, Equal(), Output(o) {Reference(name2)}))
 			-> Guard(BinRel(Output(o){Reference(name2)}, NotIn(), PathStart(name2, None()){Set(Reference(name2))}), 
 				Sequence(New(Output(o){Reference(name2)}, PathStart(name2, None()){Set(Reference(name2))})
-					,Parallel(Assign(path3{ Reference(name2) }, Output(o){Reference(name2)}), 
-						 Assign(Path(Output(o){Reference(name2)},PathComponent(name6, None())){Reference(name4)},a {Reference(name4)}))))
+					,Parallels([Assign(path3{ Reference(name2) }, Output(o){Reference(name2)}), 
+						 Assign(Path(Output(o){Reference(name2)},PathComponent(name6, None())){Reference(name4)},a {Reference(name4)})])))
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
@@ -269,9 +268,9 @@ rules
 /* Mandatory-to-Optional */
 	program:
 		(classname, methodname, BinRel(Path(a { Reference(name4)},b) { Reference(name2) }, Equal(), expression { Reference(name2) }))
-			-> Parallel(Parallel(Assign(path3{ Reference(name2) }, expression{ Reference(name2) }),
-								 Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())){ Reference(name4)}, a { Reference(name4)})),
-						Assign(Path(path3{ Reference(name2) }, PathComponent(name6, None())){ Reference(name4)}, Null()) )
+			-> Parallels([Assign(path3{ Reference(name2) }, expression{ Reference(name2) }),
+						  Assign(Path(expression{ Reference(name2) }, PathComponent(name6, None())){ Reference(name4)}, a { Reference(name4)}),
+						  Assign(Path(path3{ Reference(name2) }, PathComponent(name6, None())){ Reference(name4)}, Null()) ])
 		where
 			<not(is-pre-state)> (Path(a,b));
 			<is-class-name> name2;
@@ -293,11 +292,11 @@ rules
 							   BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Set(Reference(name4)) }, Union(),
 							   		 SetExtent([a { Reference(name4) }]) { Set(Reference(name4)) })))
 */
-		-> Parallel(Parallel(Assign(path3{ Reference(name2) }, expression { Reference(name2) } ), 
-							  Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
+		-> Parallels([Assign(path3{ Reference(name2) }, expression { Reference(name2) } ), 
+					  Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							 			BinOp(Path(expression { Reference(name2) }, PathComponent(name6, None())){Set(Reference(name4))},
 							 					Union(),
-							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))}))),
+							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))})),
 		   Choice(
 			Guard(BinRel(a{ Reference(name4) }, In(), PathStart(name4,None()){Set(Reference(name4))}),
 					Assign(Path(path3, PathComponent(name6, None())){Set(Reference(name4))},
@@ -306,7 +305,7 @@ rules
 							 					SetExtent([a{ Reference(name4)}]){Set(Reference(name4))}))),
 			Guard(Not(BinRel(a{ Reference(name4) }, In(), PathStart(name4,None()){Set(Reference(name4))})),
 					Skip())
-			))
+			)])
 								 
 		where
 			<not(is-pre-state)> Path(a{ Reference(name4) },b){ Reference(name2) };
@@ -320,17 +319,17 @@ rules
 	program:			
 		(classname, methodname, BinRel(Path(a { Reference(name4)},b) { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) }))
 			-> Guard(BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), PathStart(name2, None()){ Optional(Reference(name2)) }),
-					 Parallel(Parallel(Assign(path3{ Optional(Reference(name2)) }, expression { Optional(Reference(name2)) } ),
-					 		  		   Choice(Guard(And(BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), Null()),
-					 		  			                BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })),
+					 Parallels([Assign(path3{ Optional(Reference(name2)) }, expression { Optional(Reference(name2)) } ),
+					 		    Choice(Guard(Conjuncts([BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), Null()),
+					 		  			                BinRel(path3{ Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })]),
 					 		  				        Assign(PathStart(name2, None()){ Set(Reference(name2)) }, BinOp(PathStart(name2, None()) { Set(Reference(name2)) }, Minus(), 
 					 		  							  		        SetExtent([Path(a { Reference(name4)}, 
 					 		  											                PathComponent(name3, None())){ Optional(Reference(name2)) }]){ Set(Reference(name2)) }))),
-					 		  			      Guard(Or(BinRel(path3{ Optional(Reference(name2)) }, Equal(), Null()),
+					 		  		   Guard(Or(BinRel(path3{ Optional(Reference(name2)) }, Equal(), Null()),
 					 		  			      		   BinRel(path3{ Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) })),
-					 		  			      		Skip()))),
+					 		  			      		Skip())),
 					 		  Assign(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Reference(name4)},
-					 		  	     a { Reference(name4)})))
+					 		  	     a { Reference(name4)})]))
 		where
 			<is-class-name> name2;
 			<not(is-pre-state)> (Path(a,b));
@@ -342,29 +341,29 @@ rules
 /* Optional-to-optional */
 	program:			
 		(classname, methodname, BinRel(Path(a {Reference(name4)},b) { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) }))
-			-> Parallel(Parallel(Assign(path3 { Optional(Reference(name2)) }, expression { Optional(Reference(name2)) }),
-								 Choice(Guard(And(BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
-								 				  BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })),
+			-> Parallels([Assign(path3 { Optional(Reference(name2)) }, expression { Optional(Reference(name2)) }),
+						  Choice(Guard(Conjuncts([BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
+								 				  BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })]),
 								 			  Assign(Path(Path(a {Reference(name4)}, PathComponent(name3, None())){ Optional(Reference(name2)) },
 								 			  			  PathComponent(name6, None())){ Optional(Reference(name4)) },
 								 			  		 Null())),
-								 		Guard(Or(BinRel(path3 { Optional(Reference(name2)) }, Equal(), Null()),
-								 				 BinRel(path3 { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) })),
-								 			  Skip()))),
-						Parallel(Choice(Guard(And(BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+								 		Guard(Not(Conjuncts([BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
+								 				  BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), expression { Optional(Reference(name2)) })])),
+								 			  Skip())),
+						  Choice(Guard(Conjuncts([BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
 														   NotEqual(), Null()),
 												  BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
-														   NotEqual(), a {Reference(name4)})),
+														   NotEqual(), a {Reference(name4)})]),
 											  Assign(Path(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
 											  			  PathComponent(name3, None())){ Optional(Reference(name2)) },
 											  		 Null())),
-										Guard(Or(BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
-													   Equal(), Null()),
-												 BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
-													   Equal(), a {Reference(name4)})),
+										Guard(Not(Conjuncts([BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), Null()),
+												  BinRel(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), a {Reference(name4)})])),
 											  Skip())),
-								 Assign(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
-								 		a {Reference(name4)})))
+						   Assign(Path(expression { Optional(Reference(name2)) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+								 		a {Reference(name4)})])
 		where
 			<is-class-name> name2;
 			<not(is-pre-state)> (Path(a,b)); 	
@@ -376,13 +375,12 @@ rules
 /* Optional-to-Set-valued */
 	program:			
 		(classname, methodname, BinRel(Path(a {Reference(name4)},b) {Optional(Reference(name2))}, Equal(), expression{Optional(Reference(name2))}))
-			-> 	Parallel(
-			  		Parallel(
+			-> 	Parallels([
 			  			Choice(
 					 		Guard(
-								And(
+								Conjuncts([
 									BinRel(path3{Optional(Reference(name2))}, NotEqual(), Null()),
-								 	BinRel(path3{Optional(Reference(name2))}, NotEqual(), expression{Optional(Reference(name2))})),
+								 	BinRel(path3{Optional(Reference(name2))}, NotEqual(), expression{Optional(Reference(name2))})]),
 								Assign(
 									Path(
 										Path(a {Reference(name4)}, PathComponent(name3,None())){Optional(Reference(name2))}, 
@@ -393,19 +391,18 @@ rules
 								 			PathComponent(name6, None())){Set(Reference(name4))}, Minus(), 
 								 	SetExtent([a {Reference(name4)}]){Set(Reference(name4))}))),
 							Guard(
-								Or(
-									BinRel(path3{Optional(Reference(name2))}, Equal(), Null()),
-								 	BinRel(path3{Optional(Reference(name2))}, Equal(), expression{Optional(Reference(name2))})),
+								Not(Conjuncts([
+									BinRel(path3{Optional(Reference(name2))}, NotEqual(), Null()),
+								 	BinRel(path3{Optional(Reference(name2))}, NotEqual(), expression{Optional(Reference(name2))})])),
 					  		    Skip())
 
 							),
-					  		    Assign(path3{Optional(Reference(name2))}, expression{Optional(Reference(name2))})
-						),
-					Assign(
-						Path(expression {Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))},
-						BinOp(
-							Path(expression{Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))}, Union(), 
-							SetExtent([a {Reference(name4)}]){Set(Reference(name4))})))
+					  	Assign(path3{Optional(Reference(name2))}, expression{Optional(Reference(name2))}),
+						Assign(
+							Path(expression {Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))},
+							BinOp(
+								Path(expression{Optional(Reference(name2))}, PathComponent(name6, None())){Set(Reference(name4))}, Union(), 
+								SetExtent([a {Reference(name4)}]){Set(Reference(name4))}))])
 			
 		where
 			<is-class-name> name2;
@@ -421,19 +418,17 @@ rules
 		(classname, methodname, BinRel(expression {Reference(name2)}, In(), Path(a {Reference(name4)},b) {Set(Reference(name2))}))
 			-> (Guard(
 					BinRel(expression {Reference(name2)}, NotIn(), path3), 
-					Parallel(
-							Parallel(
-									Assign(
+					Parallels([Assign(
 										path3{Set(Reference(name2))},
 							  			BinOp(path3{Set(Reference(name2))}, Union(), SetExtent([expression {Reference(name2)}]))), 
-									Assign(
+							 	Assign(
 										Path(expression {Reference(name2)}, PathComponent(name6, None())),
-							   			a {Reference(name4)})),
-							Assign(Path(Path(expression {Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
+							   			a {Reference(name4)}),
+								Assign(Path(Path(expression {Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
 								 	   			   PathComponent(name3, None())){Set(Reference(name2))},
 								 	   		  BinOp(Path(Path(expression {Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
 								 	   			   	     PathComponent(name3, None())){Set(Reference(name2))}, Minus(), 
-								 	   			   	SetExtent([expression {Reference(name2)}]){Set(Reference(name2))})))))
+								 	   			   	SetExtent([expression {Reference(name2)}]){Set(Reference(name2))}))])))
 		where
 			<is-class-name> name2;
 			<not(is-pre-state)> Path(a{Reference(name4)},b){Set(Reference(name2))};
@@ -445,7 +440,7 @@ rules
 /* Set-valued-to-Optional */
 	program:			
 		(classname, methodname, BinRel(expression{Reference(name2)}, In(), Path(a {Reference(name4)},b){Set(Reference(name2))}))
-			-> Parallel(Parallel(Choice(Guard(BinRel(Path(expression{Reference(name2)}, 
+			-> Parallels([Choice(Guard(BinRel(Path(expression{Reference(name2)}, 
 								 					 PathComponent(name6, None())){Reference(name4)},
 								 				NotEqual(), Null()),
 								 	   Assign(Path(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
@@ -457,9 +452,9 @@ rules
 								 Guard(Not(BinRel(Path(expression{Reference(name2)}, 
 								 					 PathComponent(name6, None())){Reference(name4)},
 								 				NotEqual(), Null())), Skip())),Assign(path3{Set(Reference(name2))},
-										BinOp(path3, Union(), SetExtent([expression{Reference(name2)}]){Set(Reference(name2))}))),
+										BinOp(path3, Union(), SetExtent([expression{Reference(name2)}]){Set(Reference(name2))})),
 						Assign(Path(expression{Reference(name2)}, PathComponent(name6, None())){Reference(name4)},
-							   a {Reference(name4)}))
+							   a {Reference(name4)})])
 		where
 			<is-class-name> name2;
 			<not(is-pre-state)> Path(a{Reference(name4)},b){Set(Reference(name2))};
@@ -471,12 +466,12 @@ rules
 /* Set-valued-to-Set-valued */
 	program:			
 		(classname, methodname, BinRel(expression{Reference(name2)}, In(), Path(a { Reference(name4) },b){Set(Reference(name2))}))
-			-> Parallel(Assign(path3 {Set(Reference(name2))},
+			-> Parallels([Assign(path3 {Set(Reference(name2))},
 							   BinOp(path3{Set(Reference(name2))}, Union(), 
 							   		 SetExtent([expression{Reference(name2)}]){Set(Reference(name2))})),
 						Assign(Path(expression{Reference(name2)}, PathComponent(name6, None())){ Set(Reference(name4)) },
 							   BinOp(Path(expression{Reference(name2)}, PathComponent(name6, None())){ Set(Reference(name4)) }, Union(), 
-							   		 SetExtent([a { Reference(name4) }]){ Set(Reference(name4)) })))
+							   		 SetExtent([a { Reference(name4) }]){ Set(Reference(name4)) }))])
 		where
 			<is-class-name> name2;
 			<not(is-pre-state)> (Path(a,b));

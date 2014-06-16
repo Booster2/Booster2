@@ -38,6 +38,12 @@ exports
   'ALL' ID ':' Expression '.' GuardedCommand -> GuardedCommand {cons("Any"), prefer}
   'ANY' ID ':' Expression '.' GuardedCommand -> GuardedCommand {cons("All"), prefer}
   "(" GuardedCommand ")" -> GuardedCommand {bracket}
+
+%% These should not available in the user syntax, but are there to help with
+%% normalisation and simplification
+
+  "parallels" { GuardedCommand "||" }* -> GuardedCommand {cons("Parallels")}
+
   GuardedCommand -> BoosterTerm
   
 priorities

@@ -18,7 +18,7 @@ rules
 		(cname, mname, prog) 
 			-> (cname, mname, prog) 
 		where 
-			prog' := <innermost(simplify <+ simplify-assume-inv)> prog;
+			prog' := <innermost(conjoin <+ simplify <+ simplify-assume-inv)> prog;
 			<updateMethodProgram>(cname, mname, prog')
 			
 	
@@ -53,61 +53,6 @@ rules
 			(ds, Reference(classname'), opp, min, max, s) := <lookup>((classname, attname), <LookupTable>"Attribute")
 
 			
-	// Some normalisation rules?
-			
-	 simplify:
-		And(p, And(q,r))
-			-> And(And(p,q), r)
-	
-	simplify:
-		Parallel(p, Parallel(q,r))
-			-> Parallel(Parallel(p,q),r)
-	
-	simplify:
-		BinRel(a, Equal(), b)
-			-> BinRel(b, Equal(), a)
-		where
-			<string-lt>(<expression>b, <expression>a);
-			<not(equal)>(Null(), b)
-
-	simplify:
-		BinRel(a, NotEqual(), b)
-			-> BinRel(b, NotEqual(), a)
-		where
-			<string-lt>(<expression>b, <expression>a);
-			<not(equal)>(Null(), b)
-
-	simplify:
-		And(a, b)
-			-> And(b, a)
-		where
-			<string-lt>(<constraint>b, <constraint>a)
-
-	simplify:
-		And(And(a, b), c)
-			-> And(And(a, c), b)
-		where
-			<string-lt>(<constraint>b, <constraint>c)
-
-
-	simplify:
-		Or(a, b)
-			-> Or(b, a)
-		where
-			<string-lt>(<constraint>b, <constraint>a)
-
-	simplify:
-		Parallel(a, b)
-			-> Parallel(b, a)
-		where
-			<string-lt>(<guardedCommand>b, <guardedCommand>a)
-			
-	simplify:
-		Parallel(p, Guard(c, q))
-			-> Guard(c, Parallel(p,q))
-			
-	simplify:
-		Implies(a, b) -> Or(b, Not(a))
 			
 /*	simplify:
 		BinRel(expr, Equal(), This())
@@ -121,75 +66,256 @@ rules
 		where
 			<not(eq)>(This(), expr)
 */
+
+	simplify:
+		Conjuncts([]) -> True()
+
+	simplify:
+		Conjuncts([x]) -> x
+
+	simplify:
+		Conjuncts(ps) 
+			-> Conjuncts(ps')
+		where
+			cs := <filter( ?Conjuncts(_))> ps;
+			ps' := <union>(<diff>(ps, cs), <concat> <map(\ Conjuncts(xs) -> xs\)> cs);
+			<not(equal)>(ps, ps')
+			
+	simplify:
+		Parallels(ps) 
+			-> Parallels(ps')
+		where
+			cs := <filter( ?Parallels(_))> ps;
+			ps' := <union>(<diff>(ps, cs), <concat> <map(\ Parallels(xs) -> xs\)> cs);
+			<not(equal)>(ps, ps')
+
+		
+
+	simplify:
+		Or(a, Conjuncts(cs))
+			-> a
+		where <elem>(a, cs)
+
+	simplify:
+		Or(Conjuncts(as), Conjuncts(bs))
+			-> Or(Conjuncts(cs), Conjuncts(ds))
+		where
+			cs := <isect>(as,bs);
+			<not(equal)>(cs, []);
+			ds := <union>(<diff>(as, cs), <diff>(bs, cs))
+
 	simplify:
 		Not(True()) -> False()
 
 	simplify:
 		Not(False()) -> True()
 		
-	simplify:
-		Choice(Guard(And(c1,c2),p1),
-		       Guard(And(c1,c3),p2))
-		->
-			Guard(c1, Choice(Guard(c2,p1),
-		       				 Guard(c3,p2)))
-
-	simplify:
-		Choice(Guard(c1,p1),
-		       Guard(And(c1,c3),p2))
-		->
-			Guard(c1, Choice(Guard(True(),p1),
-		       				 Guard(c3,p2)))
 
 	simplify:
 		Choice(Guard(c1,p1),
 		       Guard(c1,p2))
 		->
 			Guard(c1, Choice(p1,p2))
-
+	
 	simplify:
-		Choice(Parallel(a,b),
-			   Parallel(a,c))
+		Choice(Guard(Conjuncts(cs),p1),
+		       Guard(Conjuncts(cs'),p2))
 		->
-			Parallel(a, Choice(b,c))
+			Guard(Conjuncts(cs1), Choice(Guard(Conjuncts(cs2),p1),
+		       				 Guard(Conjuncts(cs3),p2)))
+		where
+			cs1 := <isect>(cs,cs');
+			<not(equal)>(cs1, []);
+			cs2 := <diff>(cs, cs1);
+			cs3 := <diff>(cs', cs1)
 
-	simplify:
-		Choice(Parallel(b,a),
-			   Parallel(c,a))
+/*	simplify:
+		Choice(Guard(c1,p1),
+		       Guard(Conjuncts(cs),p2))
 		->
-			Parallel(a, Choice(b,c))
+			Guard(c1, Choice(Guard(True(),p1),
+		       				 Guard(Conjuncts(cs'),p2)))
+		where
+			<elem>(c1, cs);
+			cs' := <diff>(cs, [c1])
 
 	simplify:
-		Choice(Parallel(a, b),
-			   Parallel(c,a))
+		Choice(Guard(Conjuncts(cs),p1),
+		       Guard(c1,p2))
 		->
-			Parallel(a, Choice(b,c))
+			Guard(c1, Choice(Guard(Conjuncts(cs'),p1),
+		       				 Guard(True(),p2)))
+		where
+			<elem>(c1, cs);
+			cs' := <diff>(cs, [c1])
+*/
 
 	simplify:
-		Choice(Parallel(b,a),
-			   Parallel(a, c))
+		Choice(Parallels(as), Parallels(bs))
+			-> Parallels(<union>(cs, Choice(Parallels(ds), Parallels(es))))
+		where
+			cs := <isect>(as,bs);
+			<not(equal)>(cs, []);
+			ds := <diff>(as, cs);
+			es := <diff>(bs, cs)
+
+/*	simplify:
+		Choice(Guard(g1, Parallels(as)), Guard(Not(g1), Parallels(bs)))
+			-> Parallels(<union>(cs, [Choice(Guard(g1, Parallels(ds)), Guard(Not(g1), Parallels(es)))]))
+		where
+			cs := <isect>(as,bs);
+			<not(equal)>(cs, []);
+			ds := <diff>(as, cs);
+			es := <diff>(bs, cs)
+*/
+	simplify:
+		Choice(Guard(g1, Parallels(as)), Guard(g2, Parallels(bs)))
+			-> Parallels(<union>([Guard(Or(g1, g2), Parallels(cs))], [Choice(Guard(g1, Parallels(ds)), Guard(g2, Parallels(es)))]))
+		where
+			cs := <isect>(as,bs);
+			<not(equal)>(cs, []);
+			ds := <diff>(as, cs);
+			es := <diff>(bs, cs)
+
+
+/*	simplify:
+		Choice(Guard(g1, Parallels(as)),
+			   Guard(Not(g1), a))
 		->
-			Parallel(a, Choice(b,c))
+			Parallels([a, Choice(Guard(g1, Parallels(bs)),Guard(Not(g1), Skip()))])
+		where
+			<elem> (a, as);
+			bs := <diff>(as, [a])
 
 	simplify:
-		And(True(), constraint)
-			-> constraint
+		Choice(Guard(g1, a),
+			   Guard(Not(g1), Parallels(as)))
+		->
+			Parallel(a, Choice(Guard(g1, Skip()),Guard(Not(g1), Parallels(bs))))
+		where
+			<elem> (a, as);
+			bs := <diff>(as, [a])
+*/
+
+/*	simplify:
+		Choice(Guard(And(a,b), p),
+			   Guard(And(a,c), q))
+		-> Guard(a, Choice(Guard(b,p), 
+						   Guard(c,q)))
+
+	simplify:
+		Choice(Guard(And(b,a), p),
+			   Guard(And(c,a), q))
+		-> Guard(a, Choice(Guard(b,p), 
+					       Guard(c,q)))
+
+	simplify:
+		Choice(Guard(And(b,a), p),
+			   Guard(a, q))
+		-> Guard(a, Choice(Guard(b,p), 
+					       q))
+
+	simplify:
+		Choice(Guard(And(a,b), p),
+			   Guard(a, q))
+		-> Guard(a, Choice(Guard(b,p), 
+					       q))
+
+	simplify:
+		Choice(Guard(a, p),
+			   Guard(And(c,a), q))
+		-> Guard(a, Choice(p, 
+					       Guard(c,q)))
+*/
+
+/*			
+	simplify:
+		Guard(c, Choice(Guard(Not(c), p),
+						q))
+		-> Guard(c, q)
+
+	simplify:
+		Guard(Not(c), Choice(Guard(c, p),
+						q))
+		-> Guard(c, q)
+
+	simplify:
+		Guard(c, Choice(q,
+						Guard(Not(c), p)))
+		-> Guard(c, q)
+
+	simplify:
+		Guard(Not(c), Choice(q,
+							 Guard(c, p)))
+		-> Guard(c, q)
+*/
+
+/*	simplify:
+		Guard(c, Parallel(Choice(p, Guard(Not(c), q)), r))
+			-> Guard(c, Parallel(Choice(p,q), r))	
 			
 	simplify:
-		And(constraint, True())
-			-> constraint
+		Guard(Not(c), Choice(Guard(c,p), r))
+			-> Guard(Not(c), Choice(Guard(False(),p), r))
+
+*/	simplify:
+		Guard(Not(c), Choice(Guard(c,p), r))
+			-> Guard(Not(c), Choice(Guard(False(),p), r))
+/*
+	simplify:
+		Guard(Not(c), Choice(r, Guard(c,p)))
+			-> Guard(Not(c), Choice(r, Guard(False(),p)))
 
 	simplify:
-		And(False(), constraint)
+		Guard(c, Choice(r, Guard(Not(c),p)))
+			-> Guard(Not(c), Choice(r, Guard(False(),p)))
+*/
+
+	simplify:
+		Choice(Assign(p,e), q)
+			-> Assign(p,e)
+			
+/*	simplify:
+		Choice(Guard(g1, Parallel(Parallel(p1, p2), p3)),
+			   Guard(Not(g2), p1))
+		-> Parallel(p1, Choice(Guard(g1, Parallel(p2,p3)), Guard(Not(g1), Skip())))		
+		
+	simplify:
+		Choice(Parallel(b,a),
+			   Parallel(c,a))
+		->
+			Parallel(a, Choice(b,c))
+*/	
+	simplify:
+		Choice(Guard(False(), p), q)
+			-> q
+
+	simplify:
+		Choice(p, Guard(False(), q))
+			-> p
+			
+
+
+	simplify:
+		Conjuncts(cs)
+			-> Conjuncts(cs')
+		where
+			<elem>(True(), cs);
+			cs' := <diff>(cs, [True()]) 
+			
+
+	simplify:
+		Conjuncts(cs)
 			-> False()
+		where
+			<elem>(False(), cs)
 
 	simplify:
-		And(constraint, False())
-			-> False()
-
-	simplify:
-		And(constraint, constraint)
-			-> constraint
+		Conjuncts(cs)
+			-> Conjuncts(cs')
+		where
+			cs' := <nub> cs;
+			<not(equal)> (cs, cs')
 			
 	simplify:
 		Or(constraint, True())
@@ -202,15 +328,28 @@ rules
 	simplify:
 		Or(constraint, constraint)
 			-> constraint
+
+	simplify:
+		Or(constraint, Not(constraint))
+			-> True()
+
 	
 	simplify:
-		And(Implies(p,q),q)
+		Conjuncts(ps)
+			-> Conjuncts(ps')
+		where
+			imps := <filter(\ Implies(p,q) -> Implies(p,q) where <elem>(q, ps) \)> ps;
+			ps' := <diff>(ps, imps);
+			<not(equal)>(ps, ps') 
+			
+	
+/*		And(Implies(p,q),q)
 			-> q
-	
-	simplify:
+*/	
+/*	simplify:
 		And(And(r, Implies(p,q)),q)
 			-> And(r,q)
-	
+*/	
 		
 	simplify:
 		Implies(True(), constraint)
@@ -253,14 +392,31 @@ rules
 				constraint
 		)) -> Implies(False(), constraint)
 	
-	simplify:
+/*	simplify:
 		Or(p, And(Not(p), q))
-			-> Or(p,q)
-	
+			-> Or(p,q) */
+
+	simplify:
+		Or(Conjuncts(ps), Not(Conjuncts(qs)))
+			-> Or(Conjuncts(ps'), Not(Conjuncts(qs')))
+		where
+			<not(equal)> (<isect>(qs, ps), []);
+			ps' := <diff>(ps, qs);
+			qs' := <diff>(qs, ps)
+
+	simplify:
+		Or(Not(Conjuncts(ps)), Conjuncts(qs))
+			-> Or(Not(Conjuncts(ps')), Conjuncts(qs'))
+		where
+			<not(equal)> (<isect>(qs, ps), []);
+			ps' := <diff>(ps, qs);
+			qs' := <diff>(qs, ps)
+			
+				
 	simplify:
 		Guard(True(), program)
 			-> program
-			
+						
 	simplify:
 		And(constraint, constraint)
 			-> constraint
@@ -348,7 +504,10 @@ rules
 		Not(Implies(a,b))
 			-> And(a, Not(b))		
 			
-			
+	simplify:
+		BinRel(BasicValue(CurrentDateTime()), Equal(), Null())
+			-> False()
+					
 /*	simplify:
 		And(Implies(a,c),Implies(b,c))
 			->
@@ -359,10 +518,10 @@ rules
 			-> Or(Not(p), q)
 */
 
-	simplify:
+/*	simplify:
 		And(Or(a,b), c)
 			-> Or(And(a,c), And(b,c))
-
+*/
 
 	simplify:
 		BinRel(expr, NotEqual(), expr)
@@ -401,6 +560,10 @@ rules
 	simplify:
 		BinRel(expression1, In(), BinOp(expression2, Union(), SetExtent([expression1])))
 			-> True()
+
+	simplify:
+		BinRel(expression1, NotIn(), BinOp(expression2, Union(), SetExtent([expression1])))
+			-> BinRel(expression1, NotIn(), expression2)
 			
 
 	simplify:
@@ -427,14 +590,14 @@ rules
 		Not(BinRel(e1, NotEqual(), e2))
 		 	-> BinRel(e1, Equal(), e2)		
 		 	
-	simplify:
+/*	simplify:
 		Not(BinRel(e1, In(), e2))
 		 	-> BinRel(e1, NotIn(), e2)		
 
 	simplify:
 		Not(BinRel(e1, NotIn(), e2))
 		 	-> BinRel(e1, In(), e2)	
-		 	
+*/		 	
 	
 
 	simplify:
@@ -594,12 +757,22 @@ rules
 			-> Guard(c,Parallel(g,g'))
 				
 	simplify:
-		Parallel(prog, Skip()) -> prog
-		
-		
+		Parallels(ps) 
+			-> Parallels(ps')
+		where
+			<elem>(Skip(), ps);
+			ps' := <diff>(ps, [Skip()])
+	
 	simplify:
-		Parallel(Skip(), prog) -> prog
-		
+		Parallels([])
+			-> Skip()
+
+
+	simplify:
+		Parallels([p])
+			-> p
+					
+				
 	simplify:
 		UnOp(Cardinality(), SetExtent([_]))
 			-> BasicValue(Integer(1)) {BasicType(Int())}	
@@ -645,6 +818,35 @@ rules
 		where
 			<elem>(expr2, exprs)
 			
+
+	simplify:
+		Conjuncts(ps)
+			-> False()
+		where
+			cs := <concat><filter(\Not(Conjuncts(qs)) -> qs\)> ps;
+			<not(equal)>(cs, []);
+			<subseteq>(cs, ps)
+	
+			 
+/*			
+	simplify:
+		Or(And(And(a,b),c),
+		   And(Not(And(a,c)),b))
+		   	-> b
+
+	simplify:
+		Or(And(And(And(d,a),b),c),
+		   And(And(d,Not(And(a,c))),b))
+		   	-> And(d,b)
+*/
+
+/*	simplify:
+		Choice(Guard(And(And(a,b),c), p1),
+		   	   Guard(And(Not(And(a,c)),b), p2))
+		   	-> Guard(b, Choice(Guard(And(a,c), p1),
+		   					   Guard(Not(And(a,c)), p2)))
+*/
+		   	
 /*	simplify:
 		Or(And(expr1, expr2), And(epx2, expr3))
 			-> And(Or(expr1, expr3), expr2)
@@ -654,5 +856,100 @@ rules
 
 	simplify:
 		(Then(x, True())) -> x		
-				
-						
+		
+
+	// Some normalisation rules?
+			
+	 simplify:
+		Conjuncts(ps)
+			-> Conjuncts(ps')
+		where
+			ps' := <qsort(\(p,q) -> <string-lt>(<constraint> p, <constraint>q) \)>ps;
+			<not(equal)>(ps, ps')
+
+	 simplify:
+		Parallels(ps)
+			-> Parallels(ps')
+		where
+			ps' := <qsort(\(p,q) -> <string-lt>(<guardedCommand> p, <guardedCommand>q) \)>ps;
+			<not(equal)>(ps, ps')
+	
+	simplify:
+		BinRel(a, Equal(), b)
+			-> BinRel(b, Equal(), a)
+		where
+			<string-lt>(<expression>b, <expression>a);
+			<not(equal)>(Null(), b)
+
+	simplify:
+		BinRel(a, NotEqual(), b)
+			-> BinRel(b, NotEqual(), a)
+		where
+			<string-lt>(<expression>b, <expression>a);
+			<not(equal)>(Null(), b)
+
+/*
+
+
+	simplify:
+		Or(a, b)
+			-> Or(b, a)
+		where
+			<string-lt>(<constraint>b, <constraint>a)
+		where
+			log(|Error(), "Normalisation 7")
+
+	simplify:
+		Or(Or(a, b), c)
+			-> Or(Or(a, c), b)
+		where
+			<string-lt>(<constraint>c, <constraint>b)
+		where
+			log(|Error(), "Normalisation 8")
+
+	
+	
+			
+	simplify:
+		Parallel(p, Guard(c, q))
+			-> Guard(c, Parallel(p,q))
+		where
+			log(|Error(), "Normalisation 11")
+			
+	simplify:
+		Implies(a, b) -> Or(b, Not(a))
+		where
+			log(|Error(), "Normalisation 12")
+*/
+	simplify:
+		Parallels(ps)
+			-> Guard(Conjuncts(gs), Parallels(ps'))
+		where
+			gs := <filter(\ Guard(g, p) -> g \)> ps;
+			<not(equal)>(gs, []);
+			ps' := <filter((\ Guard(g, p) -> p \) <+ id)> ps
+			
+
+
+conjoin:
+	And(p,q) -> Conjuncts(<union>([p],[q]))		
+
+/* conjoin:
+	Or(p,q) -> Disjuncts(<union>([p],[q]))		
+*/
+
+conjoin:
+	Parallel(p,q) -> Parallels(<union>([p],[q]))		
+
+conjoin:
+	And(Conjuncts(p), Conjuncts(q))
+		-> Conjuncts(<union>(p, q))
+								
+conjoin:
+	And(Conjuncts(p), q)
+		-> Conjuncts(<union>(p, [q]))						
+		
+conjoin:
+	And(q, Conjuncts(p))
+		-> Conjuncts(<union>(p, [q]))								
+		

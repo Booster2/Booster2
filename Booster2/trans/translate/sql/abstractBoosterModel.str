@@ -607,13 +607,35 @@ imports
 			expr' := <booster-to-relational-constraint> (classname, progname, const)
 
 	booster-to-relational-guarded-command:
+		(classname, progname, Parallels(xs))
+			-> <booster-to-relational-guarded-command> (classname, progname, Parallels(ys))
+		where
+			(creates, non-creates) := <partition(?New(_, _))> xs;
+			ys := <concat>[creates, non-creates];
+			<not(equal)>(xs, ys)
+
+
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Parallels([x]))
+			-> <booster-to-relational-guarded-command> (classname, progname, x)
+
+	booster-to-relational-guarded-command:
+		(classname, progname, Parallels([x, xs*]))
+			-> [BeginEnd(DeclareList([]), StatementList([decs*, stmts*]))]
+		where
+			[stmts1*] := <booster-to-relational-guarded-command> (classname, progname, x);
+			[stmts2*] := <booster-to-relational-guarded-command> (classname, progname, Parallels([xs*]));
+			([decs*], [stmts*]) := <partition(?VariableAssign(_, _))> [stmts1*, stmts2*] 
+			
+/*	booster-to-relational-guarded-command:
 		(classname, progname, Parallel(gc1,gc2))
 			-> [BeginEnd(DeclareList([]), StatementList([decs*, stmts*]))]
 		where
 			[stmts1*] := <booster-to-relational-guarded-command> (classname, progname, gc1);
 			[stmts2*] := <booster-to-relational-guarded-command> (classname, progname, gc2);
 			([decs*], [stmts*]) := <partition(?VariableAssign(_, _))> [stmts1*, stmts2*] 		
-
+*/
 	booster-to-relational-guarded-command:
 		(classname, progname, Sequence(gc1,gc2))
 			-> [BeginEnd(DeclareList([]), StatementList(stmts1)),BeginEnd(DeclareList([]), StatementList(stmts2))]
@@ -668,6 +690,21 @@ imports
 			-> Not(const')
 		where
 			const' := <booster-to-relational-constraint> (classname, progname, const)
+
+	booster-to-relational-constraint:
+		(classname, progname, Conjuncts([const]))
+			-> <booster-to-relational-constraint> (classname, progname, const)
+
+	booster-to-relational-constraint:
+		(classname, progname, Conjuncts([const, consts*]))
+			-> And(const1', const2')
+		where
+			const1' := <booster-to-relational-constraint> (classname, progname, const);
+			const2' := <booster-to-relational-constraint> (classname, progname, Conjuncts([consts*]))
+
+	booster-to-relational-constraint:
+		(classname, progname, Conjuncts([]))
+			-> True()
 
 	booster-to-relational-constraint:
 		(classname, progname, And(const1, const2))

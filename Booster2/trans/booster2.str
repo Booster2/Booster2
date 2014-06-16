@@ -35,7 +35,6 @@ imports
   
 rules  
   
-  conjoin-constraints = foldr1((\ [x] -> x\),(\ (x,y) -> And(x,y) \)) <+ !True()	
   
   parseToBooster = (\ x -> <builder-parse(output-to-booster)> ("parsed.boo2", x) \)
   parseToLookupTable = (\ x -> <builder-parse(output-lookup-table)> ("parsed.table", x) \)

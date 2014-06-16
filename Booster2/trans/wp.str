@@ -42,9 +42,8 @@ rules
 	Second argument joins two elements
 	foldr1 fails on the empty list - provide an exception case.
 */
-	conjoin-constraints = foldr1((\ [x] -> x\),(\ (x,y) -> And(x,y) \)) <+ !True()	 	
-
-
+	conjoin-constraints = (\ [] -> True() \) <+ (\ [x] -> x \) <+ (\ [xs*] -> Conjuncts([xs*]) \) 
+	
 	get-mentioned-paths = collect( 	?Path(_,_) <+ 
 									?This() <+ 
 									?ThisPrimed() <+
@@ -98,8 +97,8 @@ where
 				//classInvariant := <make-post-state><conjoin-constraints> <nub><filter(\i -> i where <not(equal)>([], <isect>((<get-modified-attributes> program), (<get-mentioned-attributes> (classname, i, []))))\)> <get-class-invariants> classname;
 				//log(|Error(), "classInvariant", classInvariant);
 				invariant := <conjoin-constraints>[ newClassInvariant, typeConstraint, multiplicityConstraint];
-				//log(|Error(), "wp constraint", And(invariant, constraint ));
-				(constraint6, program2) := <calculate-wp>(<innermost(simplify)> program', <innermost(simplify)> And(invariant, constraint ), classname, methname);
+				//log(|Error(), "wp constraint", Conjuncts([invariant, constraint]));
+				(constraint6, program2) := <calculate-wp>(program', <innermost(simplify)> Conjuncts([invariant, constraint]), classname, methname);
 				//log(|Error(), "weakest precondition", <constraint> constraint6);
 				//log(|Error(), "program 2", <guardedCommand> program2);
 				
@@ -111,13 +110,21 @@ where
 	normalise-choice = innermost(swap-choice)
 	
 	swap-choice:
-		Parallel(p, Choice(q,r))
+		Parallels(ps)
+			-> Choice(<normalise-choice>Parallels(qs1), <normalise-choice>Parallels(qs2))	
+		where
+			[Choice(q,r) | choices] := <filter(?Choice(_,_))> ps;
+			ps' := <diff>(ps,[Choice(q,r)]);
+			qs1 := <union>(ps', [q]);
+			qs2 := <union>(ps', [r])
+		
+/*		Parallel(p, Choice(q,r))
 			-> Choice(Parallel(p,q), Parallel(p,r))
-
-	swap-choice:
+*/
+/*	swap-choice:
 		Parallel(Choice(q,r), p)
 			-> Choice(Parallel(q, p), Parallel(r, p))
-			
+*/			
 
 	/* 	get-mentioned-attributes:
 		takes an expression, in the context of a class, maybe a method name,
@@ -170,7 +177,7 @@ where
 
 	calculate-wp:
 		(Assign(path, expression), constraint1, classname, methname)
-			-> (And( constraint2, True() /*And(constraint3, constraint4) */), Assign(path, expression))
+			-> (Conjuncts([constraint2 /*,constraint3, constraint4 */ ]), Assign(path, expression))
 		where 
 			//log(|Error(), "wp assign", <guardedCommand> Assign(path, expression));
 			//log(|Error(), "wp assign", <guardedCommand> Assign(path, expression));
@@ -183,7 +190,7 @@ where
 
 	calculate-wp:
 		(New(Output(o){ Reference(c)}, PathStart(c, None()) { Set(Reference(c))}), constraint1, classname, methname)
-			-> (And(constraint4, constraint2), New(Output(o){ Reference(c)}, PathStart(c, None()){ Set(Reference(c))}))
+			-> (Conjuncts([constraint4, constraint2]), New(Output(o){ Reference(c)}, PathStart(c, None()){ Set(Reference(c))}))
 		where 
 			//log(|Error(), "calculate-wp, New");
 			constraint2 := <literal-substitute>(constraint1, [(PathStart(c, Some(Primed())) { Set(Reference(c))}, BinOp(PathStart(c, None()){ Set(Reference(c))},Union(), SetExtent([Output(o){ Reference(c)}]){ Set(Reference(c))}))]); 
@@ -199,7 +206,7 @@ where
 		
 	calculate-wp:
 		(Guard(constraint1, program1), constraint2, classname, methname)
-			-> (And(And(constraint1, constraint4), constraint3), Guard(<make-pre-state> constraint1, program2))
+			-> (Conjuncts([constraint1, constraint4, constraint3]), Guard(<make-pre-state> constraint1, program2))
 		where
 			//log(|Error(), "wp guard", <guardedCommand> Guard(constraint1, program1));
 			(constraint3, program2) := <calculate-wp> (program1, constraint2, classname, methname);
@@ -229,26 +236,17 @@ where
 			(constraint2, program3) := <calculate-wp> (program1, constraint1, classname, methname);
 			(constraint3, program4) := <calculate-wp> (program2, constraint1, classname, methname)
 
-	/* calculate-wp:
-		(Choice(program1, program2), constraint1, classname, methname)
-			-> (Or(And(constraint2, constraint4), And(And(constraint3,constraint5), Not(And(constraint2, constraint4)))), 
-				Choice(Guard(<make-pre-state> constraint4,program3), 
-					   Guard(<make-pre-state> constraint5,program4)))
-				where
-			(constraint2, program3) := <calculate-wp> (program1, constraint1, classname, methname);
-			(constraint3, program4) := <calculate-wp> (program2, constraint1, classname, methname);
-			constraint4 := <ensure-branch-completes> program3;
-			constraint5 := <ensure-branch-completes> program4;
-			log(|Error(), "wp-choice", <constraint> <innermost(simplify)> And(constraint2, constraint4));
-			log(|Error(), "wp-choice", <constraint> <innermost(simplify)> constraint1)
-*/
-
 	calculate-wp:
-		(Parallel(program1, program2), constraint1, classname, methname)
-			-> (constraint3, Parallel(program3, program4))
+		(Parallels([program1]), constraint1, classname, methname)
+			-> <calculate-wp> (program1, constraint1, classname, methname)
+
+			
+	calculate-wp:
+		(Parallels([program1, programs*]), constraint1, classname, methname)
+			-> (constraint3, Parallels([program3, program4]))
 		where
 			//<debug> ("parallel wp", <constraint> <innermost(simplify)>constraint1);
-			(constraint2, program3) := <calculate-wp> (program2, constraint1, classname, methname);
+			(constraint2, program3) := <calculate-wp> (Parallels([programs*]), constraint1, classname, methname);
 			//<debug> ("constraint2", <constraint> <innermost(simplify)>constraint2);
 			(constraint3, program4) := <calculate-wp> (program1, constraint2, classname, methname)
 			//<debug> ("constraint3", <constraint> <innermost(simplify)>constraint3)
@@ -330,7 +328,8 @@ where
 
 	get-mult-constraint:
 		(path, att)
-			-> And(BinRel(UnOp(Cardinality(),path), LessThanEquals(), BasicValue(Integer(max))), BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), BasicValue(Integer(min))))
+			-> Conjuncts([BinRel(UnOp(Cardinality(),path), LessThanEquals(), BasicValue(Integer(max))), 
+						  BinRel(UnOp(Cardinality(),path), GreaterThanEquals(), BasicValue(Integer(min)))])
 		where
 			max := <lookup-max-mult> att;
 			min := <lookup-min-mult> att
@@ -357,11 +356,10 @@ where
 
 
 	aliasing-substitute:
-		(And(p,q), path, expression)
-			-> <innermost(simplify)>And(p',q')
+		(Conjuncts(ps), path, expression)
+			-> Conjuncts(<innermost(simplify)>qs)
 		where
-			p' := <aliasing-substitute> (p, path, expression);
-			q' := <aliasing-substitute> (q, path, expression)
+			qs := <map(\ p -> <aliasing-substitute>(p, path, expression) \)> ps
 
 	aliasing-substitute:
 		(Then(p,q), path, expression)
@@ -438,39 +436,4 @@ where
 	is-correct-type:
 		(Optional(type), Path(pstart {type}, pc))
 			-> pstart 
-
-	ensure-branch-completes:
-		Skip() -> True()
-		
-	ensure-branch-completes:
-		Assign(a,e) -> True()	
-		
-	ensure-branch-completes:
-		New(n, s) -> True()	
-		
-	ensure-branch-completes:
-		New(n, s) -> True()
-	
-	ensure-branch-completes:
-		Guard(g, p) -> And(g, g')
-	where
-		g' := <ensure-branch-completes> p
-		
-	ensure-branch-completes:
-		Parallel(p,q) -> And(g, g')
-	where
-		g := <ensure-branch-completes> p;
-		g' := <ensure-branch-completes> q
-	
-	ensure-branch-completes:
-		Sequence(p,q) -> And(g, g')
-	where
-		g := <ensure-branch-completes> p;
-		g' := <ensure-branch-completes> q
-		
-	ensure-branch-completes:
-		Choice(p,q) -> Or(g, g')
-	where
-		g := <ensure-branch-completes> p;
-		g' := <ensure-branch-completes> q
 		

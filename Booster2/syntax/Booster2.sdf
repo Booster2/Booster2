@@ -178,6 +178,11 @@ Constraint '=>' Constraint 	-> Constraint { cons("Implies"), assoc}
 Constraint ';' Constraint 	-> Constraint { cons("Then"), assoc}
 "(" Constraint ")" 		-> Constraint { bracket}
 
+%% These should not available in the user syntax, but are there to help with
+%% normalisation and simplification
+
+"conjuncts" { Constraint "&" }* -> Constraint {cons("Conjuncts"), deprecated}
+"disjuncts" { Constraint "or" }* -> Constraint {cons("Disjuncts"), deprecated}
 
 %% More complex combinators are provided in the quantifiers: existential
 %% and unviersal.  These use the keywords \verb|exists| and \verb|forall|

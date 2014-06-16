@@ -27,6 +27,11 @@ outputSeqWorkflows = (\ classname -> <foldout(seqwf)>(<filter(\ ((cname, aname),
 outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname), adef) -> ((cname, aname), adef) where <eq>(cname, classname)\)><LookupTable>"ParWorkflows", "\r") \)
 // workflows end
 
+conjunct-to-and: [x] -> x
+conjunct-to-and: [xs*] -> And(<conjunct-to-and> xs', x) where (xs', x) := <split-init-last> [xs*] 
+
+parallel-to-parallels: [x] -> x
+parallel-to-parallels: [xs*] -> Parallel(<parallel-to-parallels> xs', x) where (xs', x) := <split-init-last> [xs*] 
 
 	output-to-booster:
 	 	system
@@ -206,7 +211,11 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	guardedCommand:
 		Guard (constraint, gc)
 			-> $[ [<constraint> constraint] --> ( [<guardedCommand> gc] )]
-				
+	
+
+	guardedCommand:
+		Parallels(ps)
+			-> $[ [<guardedCommand> <parallel-to-parallels>ps]]			
 										
 	constraint: 
 		True() -> $[true]
@@ -220,8 +229,34 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	constraint: 
 		And(constraint1, constraint2) -> $[([<constraint> constraint1] & [<constraint> constraint2])]
 
+/*	constraint:
+		Conjuncts([])
+			-> <constraint> True()
+
+	constraint:
+		Conjuncts([p])
+			-> $[ [c]]
+			where
+				c := <constraint> p			
+*/
+
+	constraint:
+		Conjuncts(ps)
+			-> $[ [<constraint> <conjunct-to-and> ps ]]			
+	
+
 	constraint: 
 		Or(constraint1, constraint2) -> $[([<constraint> constraint1] or [<constraint> constraint2])]
+
+	constraint:
+		Disjuncts([p,q])
+			-> $[ [ds]]
+			where
+				ds := <constraint> Or(p,q)		
+
+	constraint:
+		Disjuncts([p,qs*])
+			-> $[ [<constraint> Or(p,Disjuncts([qs*]))]]			
 
 	constraint: 
 		Then(constraint1, constraint2) -> $[([<constraint> constraint1] ;[<constraint> constraint2])]
@@ -241,6 +276,15 @@ outputParWorkflows = (\ classname -> <foldout(parwf)>(<filter(\ ((cname, aname),
 	constraint:
 		MethodReference(path, substs) -> $[[<expression> path] ( [<substs> substs]) ]
 
+	constraint:
+		x -> $[]
+		where
+			log(|Error(), "Cannot output constraint", x)
+
+	guardedCommand:
+		x -> $[]
+		where
+			log(|Error(), "Cannot output guardedCommand", x)
 
 	expression:
 		UnOp(unop,expr1) -> $[[<get-unop-booster-notation> unop] ( [<expression> expr1] ) ]

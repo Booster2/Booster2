@@ -68,7 +68,7 @@ rules
 	// Methods for retrieving different types of class components
 	getAttributes = <concat> <filter(\ Attributes(attrs) -> attrs \)>
 	getMethods = <concat> <filter(\ Methods(meths) -> meths \)>
-	getInvariants = <concat> <filter(\ Invariant(invs) -> invs \)>
+	getInvariants = <concat> <filter(\ Invariant(invs) -> <innermost(conjoin)> invs \)>
 
 	getClassComponents = \ Class(_, _, c) -> c \
 	getClassName = \ Class(n, _, _) -> n \
@@ -115,8 +115,9 @@ rules
 
  	organise-method:
  		(className, Method(methName, constraint))
- 			-> ((className, methName), (constraint, guardedCommand, exts, False(), [], []))
+ 			-> ((className, methName), (constraint', guardedCommand, exts, False(), [], []))
  		where
+ 			constraint' := <innermost(conjoin)> constraint;
  			guardedCommand := ();
  			exts := []
 			
@@ -277,3 +278,38 @@ rules
 		Set(typedecl, mult) -> Set(type)
 	with
 		type := <get-minimal-type> typedecl
+
+
+/* conjoin: useful for later simplification and normalisation */
+
+conjoin:
+	And(p,q) -> Conjuncts(<union>([p],[q]))		
+
+/* conjoin:
+	Or(p,q) -> Disjuncts(<union>([p],[q]))		
+*/
+
+conjoin:
+	And(Conjuncts(p), Conjuncts(q))
+		-> Conjuncts(<union>(p, q))
+								
+conjoin:
+	And(Conjuncts(p), q)
+		-> Conjuncts(<union>(p, [q]))						
+		
+conjoin:
+	And(q, Conjuncts(p))
+		-> Conjuncts(<union>(p, [q]))								
+
+/*conjoin:
+	Or(Disjuncts(p), Disjuncts(q))
+		-> Disjuncts(<union>(p, q))
+								
+conjoin:
+	Or(Disjuncts(p), q)
+		-> Disjuncts(<union>(p, [q]))						
+		
+conjoin:
+	Or(q, Disjuncts(p))
+		-> Disjuncts(<union>(p, [q]))								
+*/		
