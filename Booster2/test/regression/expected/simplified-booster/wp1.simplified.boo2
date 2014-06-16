@@ -2,4 +2,4 @@ system Test
  
 
 
-	class A  { 		attributes			n  : INT			m  : INT		invariants 			this.n > 10			this.m > 10		methods 			update { (((m? > 10 & n? > 10) & n? : INT) & m? : INT) --> ( (this.m := m?) || (this.n := n?) ) }	}
+	class A  { 		attributes			n  : INT			m  : INT		invariants 			this.n > 10			this.m > 10		methods 			update { (((m? : INT & m? > 10) & n? : INT) & n? > 10) --> ( (this.m := m?) || (this.n := n?) ) }	}
