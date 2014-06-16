@@ -1,0 +1,44 @@
+system SBMF 
+
+class MScCourse{
+  attributes
+	attendants : INT
+    prof : Professor . mscCourse
+  methods
+    subscribe{ attendants' = attendants+1 }
+    unsubscribe{ attendants' = attendants-1}
+  invariants
+    attendants >= 0 & attendants <= 15
+}
+
+class BScCourse{
+  attributes
+	attendants : INT
+    prof : Professor . bscCourse
+  methods
+    subscribe{ attendants' = attendants+1 }
+    unsubscribe{ attendants' = attendants-1}
+  invariants
+    attendants >= 0 & attendants <= 25
+}
+
+class Professor{
+  attributes
+    mscCourse : MScCourse . prof
+    bscCourse : BScCourse . prof
+    coll : Colloquium
+  invariants
+    mscCourse.attendants + bscCourse.attendants <= 30
+}
+
+class Colloquium{
+  attributes
+    speakers : INT
+  methods
+    participate {speakers' >= speakers}
+    withdraw    {speakers' < speakers}
+  invariants
+    speakers >= 0
+}
+
+
