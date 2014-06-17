@@ -50,6 +50,12 @@
 							(No. of values: {{attribute.stringValues.length}})
 						</span>
 					</span>
+					<span ng-if="attribute.attPrimType == 'Password'" >
+						<span style="white-space: pre-line; "ng-repeat="value in attribute.stringValues">********<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set' " class="noValues">
+							(No. of values: {{attribute.stringValues.length}})
+						</span>
+					</span>
 					<span ng-if="attribute.attPrimType == 'Integer'">
 						<span ng-repeat="value in attribute.intValues">{{value}}<br/></span>
 						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">

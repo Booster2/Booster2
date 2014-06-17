@@ -488,6 +488,17 @@ imports
 				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
 
 	booster-to-relational-guarded-command:
+		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){t}, expr))
+			-> [VariableAssign(pn', expr'), Update([],
+				TableName(tablename),[(attname, FunctionCall("SHA2", [LocalVariable(pn'),Int(512)]))],Where(expr''),None(),None())]
+			where 
+				<?BasicType(Password()) <+ ?Optional(BasicType(Password()))> t;
+				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){BasicType(t)};
+				attname := <get-path-attribute-name> Path(ps, pc);
+				expr' := <booster-to-relational-expression> (classname, progname, expr);
+				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){BasicType(t)})
+
+	booster-to-relational-guarded-command:
 		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){BasicType(t)}, expr))
 			-> [VariableAssign(pn', expr'), Update([],
 				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]

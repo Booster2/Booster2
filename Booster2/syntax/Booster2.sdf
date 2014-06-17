@@ -130,6 +130,7 @@ PrimTypeDecl -> BoosterTerm
 'TIME' -> BasicTypeDecl {cons("Time")}
 'DATETIME' -> BasicTypeDecl {cons("DateTime")}
 'BOOLEAN' -> BasicTypeDecl {cons("Boolean")}
+'PASSWORD' -> BasicTypeDecl {cons("Password")}
  
 
 %% Mupliticties can come in many forms.  See
@@ -274,6 +275,7 @@ DECIMAL		-> BasicValue {cons("Decimal")}
 'time'		-> TypeExtent {cons("Time"), prefer}
 'datetime'	-> TypeExtent {cons("DateTime"), prefer}
 'boolean'	-> TypeExtent {cons("Boolean"), prefer}
+'password'	-> TypeExtent {cons("Password"), prefer}
     
 %% A path is either a \emph{path start}, or it is a path followed by a
 %% path component, using the standard 'dot' (\verb|.|) notation.

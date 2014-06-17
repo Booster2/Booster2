@@ -114,6 +114,11 @@ public class ObjectView extends HttpServlet {
 						JSONArray stringValues = (JSONArray) jsono.get("stringValues");
 						stringValues.add(rs.getString("STRING_VALUE"));
 					}
+					else if("Password".equalsIgnoreCase(attPrimType))
+					{
+						JSONArray stringValues = (JSONArray) jsono.get("stringValues");
+						stringValues.add("********");
+					}
 					else if("Integer".equalsIgnoreCase(attPrimType))
 					{
 						JSONArray intValues = (JSONArray) jsono.get("intValues");
@@ -173,13 +178,17 @@ public class ObjectView extends HttpServlet {
 					{
 						intValues.add(rs.getInt("INT_VALUE"));
 					}
-					if("Decimal".equalsIgnoreCase(attPrimType))
+					else if("Decimal".equalsIgnoreCase(attPrimType))
 					{
 						decimalValues.add(rs.getBigDecimal("DECIMAL_VALUE").stripTrailingZeros());
 					}
 					else if("String".equalsIgnoreCase(attPrimType))
 					{
 						stringValues.add(rs.getString("STRING_VALUE"));
+					}
+					else if("Password".equalsIgnoreCase(attPrimType))
+					{
+						stringValues.add("********");
 					}
 					else if("Time".equalsIgnoreCase(attPrimType))
 					{

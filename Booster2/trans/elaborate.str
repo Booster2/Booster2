@@ -201,22 +201,7 @@ rules
 		(context, CurrentTime() {} ) -> CurrentTime() { Optional(BasicType(Time())) }
 
 	infer-types:
-		(context, TypeExtent(Boolean()) {} ) -> TypeExtent(Boolean()) { Set(BasicType(Boolean())) }
-
-	infer-types:
-		(context, TypeExtent(String()) {} ) -> TypeExtent(String()) { Set(BasicType(String())) }
-
-	infer-types:
-		(context, TypeExtent(Int()) {} ) -> TypeExtent(Int()) { Set(BasicType(Int())) }
-
-	infer-types:
-		(context, TypeExtent(DateTime()) {} ) -> TypeExtent(DateTime()) { Set(BasicType(DateTime())) }
-
-	infer-types:
-		(context, TypeExtent(Date()) {} ) -> TypeExtent(Date()) { Set(BasicType(Date())) }
-
-	infer-types:
-		(context, TypeExtent(Time()) {} ) -> TypeExtent(Time()) { Set(BasicType(Time())) }
+		(context, TypeExtent(t) {} ) -> <get-type-extent> t
 
 
 	infer-types:

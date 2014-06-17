@@ -18,6 +18,7 @@ exports
     'time' -> ID {reject}
     'datetime' -> ID {reject}
     'boolean' -> ID {reject}
+    'password' -> ID {reject}
     'attributes' -> ID {reject}
     'extends' -> ID {reject}
     'system' -> ID {reject}

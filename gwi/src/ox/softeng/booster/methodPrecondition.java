@@ -90,7 +90,7 @@ public class methodPrecondition extends HttpServlet {
 					}
 					else{
 		
-						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
 						{
 							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
 						}
@@ -145,7 +145,7 @@ public class methodPrecondition extends HttpServlet {
 		        String paramType = paramTypes.get(pairs.getKey());
 		        if(paramInOuts.get(pairs.getKey() + "_in").equalsIgnoreCase("input"))
 		        {
-			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
 			        {
 						if(pairs.getValue() == null)
 						{

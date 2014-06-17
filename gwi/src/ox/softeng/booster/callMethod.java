@@ -85,7 +85,7 @@ public class callMethod extends HttpServlet {
 				paramTypes.put(paramName, paramType);
 				if(inOut.equalsIgnoreCase("input"))
 				{
-					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
 					{
 						methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
 					}
@@ -145,7 +145,7 @@ public class callMethod extends HttpServlet {
 		        String paramType = paramTypes.get(pairs.getKey());
 		        if(paramInOuts.get(pairs.getKey() + "_in").equalsIgnoreCase("input"))
 		        {
-			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
 			        {
 			        	cs.setString(paramNo,(String)pairs.getValue());
 			        	System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());

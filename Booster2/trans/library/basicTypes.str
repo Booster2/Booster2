@@ -128,6 +128,20 @@ imports
 		
 	get-type-name-for-metadata:
 		Boolean() -> "Boolean"
+
+/* Password */
+
+	get-type-extent:
+		Password() -> TypeExtent(Password()){ Set(BasicType(Password())) }
+		
+	get-type-booster-notation:
+		Password() -> $[PASSWORD]
+
+	get-type-booster-to-sql:
+		Password() -> Varchar(1000)
+		
+	get-type-name-for-metadata:
+		Password() -> "Password"
 		
 		
 /****
