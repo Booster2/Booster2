@@ -83,7 +83,12 @@ boosterApp.config(function($routeProvider) {
 		templateUrl : 'pages/queries.html',
 		controller  : 'queriesController'
 	})
-
+	
+	.when('/modelbrowser', {
+		templateUrl : 'pages/modelBrowser.html',
+		controller  : 'modelBrowserController',
+		service: 'modelBrowserService'
+	})
 	.when('/utilities', {
 		templateUrl : 'pages/utilities.html',
 		controller  : 'utilitiesController'
@@ -165,6 +170,15 @@ boosterApp.controller('utilitiesController', function($scope) {
 
 });
 
+boosterApp.controller('modelBrowserController', ['$scope', 'modelBrowserService', function($scope, modelBrowserService) {
+	
+	
+	// create a message to display in our view
+	modelBrowserService.getModel().then(function(model) {
+		$scope.model = model;
+	});
+}]);
+
 boosterApp.controller('methodDialogController', ['$log','$scope','methodPreconditionService', function($log, $scope, methodPreconditionService) {
 	$scope.precondition = true;
 	$scope.changeinputs = function(classname, methodname, oid) {
@@ -222,6 +236,19 @@ boosterApp.factory('classListService', function($http) {
 		getClassList: function() {
 			//return the promise directly.
 			return $http.get('/gwi/ClassList')
+			.then(function(result) {
+				//resolve the promise as the data
+				return result.data;
+			});
+		}
+	};
+});
+
+boosterApp.factory('modelBrowserService', function($http) {
+	return {
+		getModel: function() {
+			//return the promise directly.
+			return $http.get('/gwi/ModelBrowser')
 			.then(function(result) {
 				//resolve the promise as the data
 				return result.data;

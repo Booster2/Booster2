@@ -15,7 +15,7 @@ body{
     margin: 0;
     padding: 0;
 }
-.attribute-name {
+.attribute-name, .method-name {
 	font-weight: 700;
 }
 
@@ -125,4 +125,54 @@ tfoot {
     right: 0px;
     padding: 10px 12px;
     pointer-events: none;
+}
+
+.nav-sidebar {
+    background-color: #f5f5f5;
+    margin-bottom: 20px;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+.nav-sidebar > li > a {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.nav-sidebar > .active > a {
+    background-color: #428bca;
+    color: #fff;
+}
+
+.class-section {
+	padding-left: 2em;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	margin-bottom: 1em;
+	background-color: #E0E7EE;
+	-webkit-border-radius: 12px; 
+	-moz-border-radius: 12px; 
+	border-radius: 12px; 
+}
+
+.class, .classname {
+	font-size: 140% !important;
+	color: #883366;
+}
+
+.attributes, .methods {
+	font-size: 120%;
+	padding-left: 3em;
+	color: #883366;
+}
+
+.attribute, .method{
+	padding-left: 6em;
+}
+
+.prim-type {
+	color: 	#883366;
+	font-style: italic;
+}
+
+.method-body {
+	padding-left: 1em;
 }

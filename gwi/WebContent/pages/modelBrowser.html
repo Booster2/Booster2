@@ -1,0 +1,36 @@
+<div class="row row-offcanvas row-offcanvas-left" data-spy="scroll" data-target="#model-navigation">
+	<a href="#utilities" class="btn btn-primary">Return to Utilities...</a>
+	<h1 class="page-header">Model Browser</h1>
+	<div id="model-navigation" class="col-sm-4 col-md-3 sidebar-offcanvas hidden-print"
+		role="navigation"  data-spy="affix" data-offset-top="10" data-offset-bottom="10">
+		
+		<ul class="nav nav-sidebar affix-top">
+			<li ng-repeat="class in model.classes"><a href="#{{class.name}}">{{class.name}}</a></li>
+		</ul>	
+		
+	</div>
+	<div class="col-sm-8 col-md-9 main">
+		<section class="class-section" id="{{class.name}}" ng-repeat="class in model.classes">
+			<span class="class">class</span> <span class="classname"><a id="{{class.name}}" href="">{{class.name}}</a></span> {<br /> 
+			<span class="attributes">attributes</span><br />
+			<span ng-repeat="att in class.attributes">
+				<span class="attribute"><span class="attribute-name">{{att.name}}</span> : 
+				<span ng-if="att.primType != 'ClassRef' && att.primType != 'SetValue'" class="prim-type">{{att.primType}}</span>
+				<span ng-if="att.primType == 'ClassRef' && att.direction == 'Bi'">
+					<span ng-if="att.typeMultiplicity=='Set'">SET (</span>
+						<a href="">{{att.className}}</a> . <a href="">{{att.oppAttName}}</a></span>
+					<span ng-if="att.typeMultiplicity=='Set'">) [0..*]</span>
+				<span ng-if="att.primType != 'SetValue'" class="prim-type">{{att.setName}}</span>
+				</span> <br />
+			</span> <span ng-if="class.methods.length > 0" class="attributes">methods</span>
+			<br />
+				<p class="method" ng-repeat="method in class.methods">
+					<span class="method-name">{{method.name}}</span> {<br/> 
+						<span class="method-body">{{method.html}}</span>
+					<br />}
+				</p>
+			}
+		</section>
+	</div>
+		
+</div>
