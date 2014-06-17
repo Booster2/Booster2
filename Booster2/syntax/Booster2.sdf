@@ -154,7 +154,7 @@ Multiplicity -> BoosterTerm
 %% a method body may also be defined as a guarded command.
 
 ID '{' Constraint '}' -> Method {cons("Method")}
-ID '{' Expression '}' -> Method {cons("Method"), deprecated}
+%% ID '{' Expression '}' -> Method {cons("Method"), deprecated}
 ID '{' GuardedCommand '}' -> Method {cons("Method")}
 
 Method -> BoosterTerm
@@ -162,7 +162,7 @@ Method -> BoosterTerm
 %% In its simplest form, a constraint is either \verb|true|,
 %% \verb|false|, or a relation between expressions: 
 	 
-'true' 			-> Constraint {cons("True")}
+'true' 				-> Constraint {cons("True")}
 'false' 			-> Constraint {cons("False")}
 Relation 			-> Constraint 
 
@@ -261,6 +261,8 @@ ValueExpression -> BoosterTerm
 INT 		-> BasicValue {cons("Integer")}
 STRING		-> BasicValue {cons("String")}
 DECIMAL		-> BasicValue {cons("Decimal")}
+'true'		-> BasicValue {cons("True")}
+'false'		-> BasicValue {cons("False")}
 
 'currentdatetime' -> BasicValue {cons("CurrentDateTime")}
 'currentdate' -> BasicValue {cons("CurrentDate")}

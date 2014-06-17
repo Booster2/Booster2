@@ -99,6 +99,16 @@ public class callMethod extends HttpServlet {
 							methodInputParameterValues.put(paramName, null);
 						}
 					}
+					else if(paramType.equalsIgnoreCase("Boolean"))
+					{
+						if(requestParameters.get(paramName) != null && requestParameters.get(paramName)[0].equalsIgnoreCase("true"))
+						{
+							methodInputParameterValues.put(paramName,1);
+						}
+						else{
+							methodInputParameterValues.put(paramName,0);
+						}
+					}
 					else if(paramType.equalsIgnoreCase("Decimal"))
 					{
 					    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
@@ -155,6 +165,17 @@ public class callMethod extends HttpServlet {
 						if(pairs.getValue() == null)
 						{
 							cs.setNull(paramNo, java.sql.Types.INTEGER);
+						}
+						else{
+							cs.setInt(paramNo,(Integer)pairs.getValue());
+						}
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					}
+					else if(paramType.equalsIgnoreCase("Boolean"))
+					{
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.BIT);
 						}
 						else{
 							cs.setInt(paramNo,(Integer)pairs.getValue());

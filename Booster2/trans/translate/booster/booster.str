@@ -303,6 +303,12 @@ parallel-to-parallels: [xs*] -> Parallel(<parallel-to-parallels> xs', x) where (
 
 	expression:
 		BasicValue(CurrentTime()) -> $[CurrentTime]
+
+	expression:
+		BasicValue(True()) -> $[true]
+
+	expression:
+		BasicValue(False()) -> $[false]
 			
 	expression:
 		TypeExtent(t) -> <get-type-booster-notation> t 

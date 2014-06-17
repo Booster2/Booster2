@@ -21,6 +21,13 @@
 									type="password" 
 									name="{{param.paramName}}" 
 									placeholder="{{param.paramName.unCamelCase()}}" />
+							<input  ng-model="param.paramValue" 
+									ng-change="changeinputs(classname, methodname, oid);"
+									class="form-control" 
+									ng-if="param.paramType === 'Boolean'" 
+									type="checkbox" 
+									name="{{param.paramName}}" 
+									placeholder="{{param.paramName.unCamelCase()}}" />
 							<p class="input-group" ng-if="param.paramType === 'Date'" ng-controller="DatepickerDemoCtrl">
               					<input 	type="text" 
              							ng-controller="DatepickerDemoCtrl"

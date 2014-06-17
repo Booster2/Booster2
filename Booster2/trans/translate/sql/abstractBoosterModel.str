@@ -917,6 +917,14 @@ imports
 			-> Decimal(d)
 
 	booster-to-relational-expression:
+		(classname, progname, BasicValue(True()))
+			-> Int(1)
+
+	booster-to-relational-expression:
+		(classname, progname, BasicValue(False()))
+			-> Int(0)
+
+	booster-to-relational-expression:
 		(classname, progname, PathStart(v, None()) {Reference(sn)})
 			-> String(v)
 		where

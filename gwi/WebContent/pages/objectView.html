@@ -62,6 +62,16 @@
 							(No. of values: {{attribute.intValues.length}})
 						</span>
 					</span>
+					<span ng-if="attribute.attPrimType == 'Boolean'">
+						<span ng-repeat="value in attribute.intValues">
+							<input type="checkbox" ng-if="value == 0" disabled="disabled">
+							<input type="checkbox" checked="checked" ng-if="value == 1" disabled="disabled">
+							<span ng-if="value == null">Not set</span>
+							<br/></span>
+						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">
+							(No. of values: {{attribute.intValues.length}})
+						</span>
+					</span>
 					<span ng-if="attribute.attPrimType == 'Decimal'">
 						<span ng-repeat="value in attribute.decimalValues">{{value}}<br/></span>
 						<span ng-if="attribute.attTypeMult=='Set'" class="noValues">

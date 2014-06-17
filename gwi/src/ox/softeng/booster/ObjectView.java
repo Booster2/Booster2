@@ -124,6 +124,11 @@ public class ObjectView extends HttpServlet {
 						JSONArray intValues = (JSONArray) jsono.get("intValues");
 						intValues.add(rs.getInt("INT_VALUE"));
 					}
+					else if("Boolean".equalsIgnoreCase(attPrimType))
+					{
+						JSONArray intValues = (JSONArray) jsono.get("intValues");
+						intValues.add(rs.getInt("INT_VALUE"));
+					}
 					else if("Decimal".equalsIgnoreCase(attPrimType))
 					{
 						JSONArray decimalValues = (JSONArray) jsono.get("decimalValues");
@@ -175,6 +180,10 @@ public class ObjectView extends HttpServlet {
 					obj.put("attTypeMult", attTypeMult );
 					obj.put("attClassName", rs.getString("CLASS_NAME"));
 					if("Integer".equalsIgnoreCase(attPrimType))
+					{
+						intValues.add(rs.getInt("INT_VALUE"));
+					}
+					else if("Boolean".equalsIgnoreCase(attPrimType))
 					{
 						intValues.add(rs.getInt("INT_VALUE"));
 					}
