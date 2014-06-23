@@ -193,6 +193,18 @@ rules
 		classname -> invs
 			where (is,as,a,m,invs,w) := <lookup>(classname, <LookupTable> "Class")
 		
+	get-class-unique-atts:
+		classname 
+			-> uniqueatts'
+		where
+			(_,as,a,_,_,_) := <lookup>(classname, <LookupTable> "Class");
+			log(|Error(), "as", <filter(\ cn -> <\(_,_,atts,_,_,_) -> atts\> <lookup>(cn, <LookupTable> "Class") \)> as);
+			subatts := <nub><concat><map(\ cn -> <\(_,_,atts,_,_,_) -> atts\> <lookup>(cn, <LookupTable> "Class") \)> as;
+			log(|Error(), "subatts", subatts);
+			uniqueatts := <cart(id)>([classname], <diff>(a, subatts));
+			log(|Error(), "uniqueatts", uniqueatts);
+			uniqueatts' := <map(\ (c',a') -> ((c',a'), <lookup>(<id>, <LookupTable> "Attribute")) \)> uniqueatts
+				
 
 /***** TODO *****/
 /*

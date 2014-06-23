@@ -115,7 +115,8 @@ rules
 			<map(\ cname' -> cname' where
 				submethods := <filter(\ (cname'', mname'') -> (cname'', mname'') where (c',gc',exts',False(), inputs, outputs) := <lookup>((cname'', mname''),<LookupTable> "Method")  \)><\ (is,as,a,m,c,w) -> <cart(id)>(as,[mname])\> <lookup>(cname', <LookupTable> "Class"); 
 				<equal>([],submethods);
-					(<addClassMethod> (cname', mname, (c, gc, <union>(e, [cname]), done, inputs, outputs)) 
+				newConstraint := <innermost(\ BinRel(Output(o), In(), PathStart(cname'', Some(Primed()))) -> BinRel(Output(o), In(), PathStart(cname', Some(Primed()))) where <equal>(cname'', cname) \)> c;
+					(<addClassMethod> (cname', mname, (newConstraint, gc, <union>(e, [cname]), done, inputs, outputs)) 
 					<+ <updateClassMethod> (cname', mname, c, cname, e, inputs, outputs))
 			 \)> cnames
 

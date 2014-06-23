@@ -187,9 +187,11 @@ imports
 
 	booster-to-relational-class:
 		(cname, (dscs, ascs, as, ms, cs, wfs)) 
-			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns*])
+			-> Table(cname, [Column(identity , "", False(), Int(), AutoIncrement(), Primary(), None()), columns1*, columns2*])
 		where 
-			[columns*] := <filter(get-attribute-column)><filter(\((cname',aname), adef) -> ((cname',aname), adef) where <equal>(cname', cname) \)> <LookupTable> "Attribute";
+			uniqueatts := <get-class-unique-atts> cname;
+			[columns1*] := <filter(get-attribute-column)> uniqueatts;
+			[columns2*] := <filter(get-inheritance-column)> <cart(id)> ([cname], dscs);
 			//log(|Error(), "columns", [columns*]);
 			/* log(|Error(), "columns", <filter(\((cname,aname), adef) -> ((cname,aname), adef) \)> <LookupTable> "Attribute"); */ 
 			identity := <concat-strings> [cname, "Id"]
@@ -258,7 +260,12 @@ imports
 			not(<lookup-opposite>(cname, attname));
 			<updateAttributeTableName> (cname, attname, cname)
 
-				
+	get-inheritance-column:
+		(class, subclass)
+			-> Column(subclasstableid, "", True(), Int(), NoExtra(), NoKey(),Some(Reference(subclass, [subclasstableid])))
+		where
+			subclasstableid := <concat-strings>([subclass, "Id"]);
+			classtableid := <concat-strings>([class, "Id"])					
 			
 	get-assoc-table:
 		((cname, attname), (ds, t, (oname, oaname), min, max, tn))
