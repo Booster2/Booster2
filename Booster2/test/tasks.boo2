@@ -1,0 +1,72 @@
+System TaskManager
+
+class Project
+{
+	attributes
+		title (ID) : String
+		phases : SET (Phase.forProject)[*]
+		projectRoles : SET(ProjectRole.forProject)[*]
+		projectTasks : SET(Task.forProjects)[*]
+	methods
+		create{project! : Project' & project!.title'=title?}
+		destroy{project? : Project & project?.projectRoles={} & project?.projectTasks={} & project? /: Projects'}
+		addPerson{createProjectRole(project?=this) }
+}
+
+class Phase
+{
+	attributes
+	
+		phase (ID) : String
+		startDate (ID) : Date
+		endDate (ID) : [Date]
+		forProject: Project.phases
+		phaseTasks : SET(Task.forPhases)[*]
+}
+
+class ProjectRole
+{
+	attributes
+		role (ID) : Role
+		peopleWithRole : SET(Person.projectRoles)[*]
+		forProject (ID) : Project.projectRoles
+	methods
+		createProjectRole{projectRole! : ProjectRole' & projectRole!.role'=role? & person? : projectRole!.peopleWithRole' & projectRole!.forProject=project?}
+}
+
+class Role
+{
+	attributes
+		title (ID) : String
+		description : [String]
+}
+
+class Person
+{
+	attributes
+		prenomials (ID) : Prenomial
+		firstName (ID) : String
+		middleNames : String
+		lastName (ID) : String
+		postfixes : String
+		projectRoles : SET(ProjectRole.peopleWithRole)[*]
+		personTasks : SET(Task.assignedTo)[*]
+}
+
+class Prenomial
+{
+	attributes
+		affix (ID) : String
+}
+
+class Task
+{
+	attributes
+		taskNumber : INT
+		title : String
+		description : String
+		forProjects : SET(Project.projectTasks)[*]
+		forPhases : SET(Phase.phaseTasks)[*]
+		assignedTo : SET(Person.personTasks)[*]
+}
+
