@@ -251,7 +251,12 @@ BasicValue -> ValueExpression {cons("BasicValue")}
 TypeExtent -> ValueExpression {cons("TypeExtent")}
 Path		-> ValueExpression {} 
 'null'		-> ValueExpression {cons("Null"), prefer}
+"{" ID ":" Expression "@" Path "}" -> ValueExpression {cons("SetComprehension")}
+"{" ID ":" Expression "|" Constraint "@" Path "}" -> ValueExpression {cons("SetComprehension")}
 "{" {Expression "," }* "}" -> ValueExpression {cons("SetExtent")}
+%% "{" ID ":" Expression "@" Path "}" -> ValueExpression {cons("SetComprehension")}
+%% 
+
 
 ValueExpression -> BoosterTerm
 
