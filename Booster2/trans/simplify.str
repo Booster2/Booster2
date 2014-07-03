@@ -293,8 +293,36 @@ rules
 	simplify:
 		Choice(p, Guard(False(), q))
 			-> p
+	
+	/* conjoin nested guards */
+	/* a--> b--> c -> a & b --> c*/
+	simplify:
+		Guard(c,Guard(c2,p))
+			-> Guard(And(c,c2),p)
 			
-
+	/* a [] a -> a */
+	simplify:
+		Choice(a,a)
+			-> a
+			
+	/* a --> skip -> skip */
+	
+	simplify:
+		Guard(a,Skip())
+			-> Skip()
+			
+	/* True() --> p -> p */
+	
+	simplify:
+		Guard(True(),p)
+			-> Skip()
+			
+	/* Choice elimination. a --> c [] b --> c -> a or b --> c  */
+	
+	simplify:
+		Choice(Guard(a,c),Guard(b,c))
+			-> Guard(Or(a,b),c)
+	
 
 	simplify:
 		Conjuncts(cs)
@@ -371,6 +399,7 @@ rules
 		Implies(p, Implies(p, constraint))
 			-> Implies(p, constraint)
 
+	/* Is this true if there is a primed attribute in the constraint? For that one it would be the constraint itself? */
 	simplify:
 		Implies(constraint, constraint)
 			-> True()
@@ -436,8 +465,17 @@ rules
 	simplify:
 		Or(False(), constraint)
 			-> constraint
-		
+	
+	/* False & ...*/
+	simplify:
+		And(constraint, False())
+			-> False()
 
+	simplify:
+		And(False(), constraint)
+			-> False()
+	/**/
+	
 	simplify:
 		And(And(constraint, constraint1), constraint  )
 			-> And(constraint1, constraint)
@@ -445,6 +483,27 @@ rules
 	simplify:
 		And(And(constraint1, constraint), constraint  )
 			-> And(constraint1, constraint)
+	
+	/* True & a & b -> a & b*/
+	simplify:
+		And(True(), And(constraint, constraint1))
+			-> And(constraint, constraint1)
+			
+	simplify:
+		And(And(constraint, constraint1),True())
+			-> And(constraint, constraint1)
+	
+	/* True & a -> a*/
+	simplify:
+		And(True(), constraint)
+			-> constraint
+			
+	simplify:
+		And(constraint, True())
+			-> constraint
+		
+	
+			
 /*			
 	simplify:
 		And(BinRel(expression1, Equal(), expression2), BinRel(expression1, NotEqual(), expression2))
