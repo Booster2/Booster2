@@ -4,9 +4,9 @@ class Project
 {
 	attributes
 		title (ID) : String
-		phases : SET (Phase.forProject)[*]
-		projectRoles : SET(ProjectRole.forProject)[*]
-		projectTasks : SET(Task.forProjects)[*]
+		phases : SET (Phase.forProject)
+		projectRoles : SET(ProjectRole.forProject)
+		projectTasks : SET(Task.forProjects)
 	methods
 		create{project! /: Project & project! : Project' & project!.title'=title?}
 		destroy{project? : Project & project?.projectRoles={} & project?.projectTasks={} & project? /: Project'}
@@ -23,15 +23,15 @@ class Phase
 		startDate (ID) : Date
 		endDate (ID) : [Date]
 		forProject: Project.phases
-		phaseTasks : SET(Task.forPhases)[*]
-		phaseTargets : SET(Target.targetForPhase)[*]
+		phaseTasks : SET(Task.forPhases)
+		phaseTargets : SET(Target.targetForPhase)
 }
 
 class ProjectRole
 {
 	attributes
 		role (ID) : Role
-		peopleWithRole : SET(Person.projectRoles)[*]
+		peopleWithRole : SET(Person.projectRoles)
 		forProject (ID) : Project.projectRoles
 	methods
 		createProjectRole{projectRole! : ProjectRole' & projectRole!.role'=role? & person? : projectRole!.peopleWithRole' & projectRole!.forProject=project?}
@@ -52,9 +52,9 @@ class Person
 		middleNames : String
 		lastName (ID) : String
 		postfixes : String
-		projectRoles : SET(ProjectRole.peopleWithRole)[*]
-		personTasks : SET(Task.assignedTo)[*]
-		personTargets : SET(Target.targetForPerson)[*]
+		projectRoles : SET(ProjectRole.peopleWithRole)
+		personTasks : SET(Task.assignedTo)
+		personTargets : SET(Target.targetForPerson)
 }
 
 class Prenomial
@@ -69,10 +69,10 @@ class Task
 		taskNumber (ID) : INT
 		title (ID) : String
 		description : String
-		forProjects : SET(Project.projectTasks)[*]
-		forPhases : SET(Phase.phaseTasks)[*]
-		assignedTo : SET(Person.personTasks)[*]
-		taskTargets : SET(Target.targetForTask)[*]
+		forProjects : SET(Project.projectTasks)
+		forPhases : SET(Phase.phaseTasks)
+		assignedTo : SET(Person.personTasks)
+		taskTargets : SET(Target.targetForTask)
 	methods
 		createTask
 		{
