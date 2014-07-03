@@ -8,9 +8,11 @@ class Project
 		projectRoles : SET(ProjectRole.forProject)[*]
 		projectTasks : SET(Task.forProjects)[*]
 	methods
-		create{project! : Project' & project!.title'=title?}
-		destroy{project? : Project & project?.projectRoles={} & project?.projectTasks={} & project? /: Projects'}
-		addPerson{createProjectRole(project?=this) }
+		create{project! /: Project & project! : Project' & project!.title'=title?}
+		destroy{project? : Project & project?.projectRoles={} & project?.projectTasks={} & project? /: Project'}
+		addPerson1{ProjectRole.createProjectRole(project?=this) } // maybe we could use a substitution syntax: [project?=this]ProjectRole.createProjectRole
+		addPerson2{ProjectRole.createProjectRole() & project?=this} // this should be valid too
+		/*newPhase{phase! : phases' & phase!.phase' = phase? & phase!.startDate = startDate? & endDate? /= null => phase!.endDate'=endDate?}*/ // this fails WP
 }
 
 class Phase
@@ -22,6 +24,7 @@ class Phase
 		endDate (ID) : [Date]
 		forProject: Project.phases
 		phaseTasks : SET(Task.forPhases)[*]
+		phaseTargets : SET(Target.targetForPhase)[*]
 }
 
 class ProjectRole
@@ -51,6 +54,7 @@ class Person
 		postfixes : String
 		projectRoles : SET(ProjectRole.peopleWithRole)[*]
 		personTasks : SET(Task.assignedTo)[*]
+		personTargets : SET(Target.targetForPerson)[*]
 }
 
 class Prenomial
@@ -62,11 +66,53 @@ class Prenomial
 class Task
 {
 	attributes
-		taskNumber : INT
-		title : String
+		taskNumber (ID) : INT
+		title (ID) : String
 		description : String
 		forProjects : SET(Project.projectTasks)[*]
 		forPhases : SET(Phase.phaseTasks)[*]
 		assignedTo : SET(Person.personTasks)[*]
+		taskTargets : SET(Target.targetForTask)[*]
+	methods
+		createTask
+		{
+			task! /: Task & task! : Task' & task!.title=title?
+			// Barfs on this:
+			/* &
+			(exists num : INT @ ((forall task2 : Task @ num /= task2.taskNumber) => task!.taskNumber'=num ))
+			*/
+			// Using set comprehension
+			/*
+			 & (exists num : INT @ (num /: {task2 : Task @ task2.taskNumber} => task!.taskNumber'=num ))
+			 */
+			 // constraint wise:
+			 /*
+			 &
+			 task!.taskNumber : {num : INT | (num /: {task2 : Task @ task2.taskNumber}) @ num}
+			 */
+		}
+	invariants
+		forall task : Task @ (forall task2 : Task @ (task /= task2 & task.taskNumber /= task2.taskNumber)) /* All task numbers are unique */
+		/*forall task : Task' @ task /: Task & (exists num : INT @ ((forall task2 : Task @ num /= task2.taskNumber) => task.taskNumber'=num )) */ /* Choose a new task number - doesn't like Task' */
+		
+}
+
+set TargetTypeEnum {deadline,target,planning} // must be hit, to be aimed for no guarentees, for planning
+
+class TargetType
+{
+	attributes
+		targetTypeId (ID) : String
+		targetTypeCtl : TargetTypeEnum
+}
+
+class Target
+{
+	attributes
+		targetDate (ID) : Date
+		targetType : TargetType
+		targetForTask: [Task.taskTargets]
+		targetForPerson : [Person.personTargets]
+		targetForPhase : [Phase.phaseTargets]
 }
 
