@@ -104,7 +104,7 @@ where
 				
 				constraint7 := <make-pre-state> constraint6; 
 				//log(|Error(), "weakest precondition", <constraint> constraint6);
-				<updateMethodProgram> (classname, methname, Guard(constraint7, program2))
+				<updateMethodProgram> (classname, methname, Guard(<innermost(simplify)> constraint7, <innermost(simplify)> program2))
 		
 		
 	normalise-choice = innermost(swap-choice)

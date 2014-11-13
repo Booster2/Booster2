@@ -98,8 +98,8 @@ rules
 	       
 	// prefix at position i
 	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
-	where wi := <getPos> ([wfs*],i);
-	       <prefix_d> wi;
+	where  wi := <getPos> ([wfs*],i);
+		   <prefix_d> wi;
 	       gi1 := <sel_g1>(wi);
 		   ai1 := <sel_a1>(wi);
 		   wi1 := <sel_w1>(wi);
@@ -112,22 +112,25 @@ rules
 		   formset := <conc> ([loc_cond], formset_rest)
 		   
 	// Choice case
-	preIter: ((cname,pname,[wfs*]),i,t) -> formset
+	preIter: ((cname,pname,[wfs*],changed),i,t) -> formset
 	where  wi := <getPos>([wfs*],i);
-			<choice_d> wi;
+	       <choice_d> wi;
+		   log(|Error(),"check2");
 	       gi1 := <sel_g1>(wi);
 		   ai1 := <sel_a1>(wi);
 		   wi1 := <sel_w1>(wi);
 		   gi2 := <sel_g2>(wi);
 		   ai2 := <sel_a2>(wi);
 		   wi2 := <sel_w2>(wi);
-		
+		   	
 		   par1 := <reduceWaits> (<listUpdate> ([wfs*], i, wi1)); 
 		   par2 := <reduceWaits> (<listUpdate> ([wfs*], i, wi2)); 
 
+		   
            if not(<guard_false> gi1) then <pre> (cname,pname,par1) end;
            if not(<guard_false> gi2) then <pre> (cname,pname,par2) end;
            
+                     
            if <guard_false> gi1 ; <guard_false> gi2 then loc_cond := False() else 
            if <guard_false> gi1 then loc_cond := And ((<get> gi2) ,(<precond_wp> ((cname,ai2) , <lookupMap> par2))) else 
            if <guard_false> gi2 then loc_cond := And ((<get> gi1) ,(<precond_wp> ((cname,ai1) , <lookupMap> par1))) else
@@ -141,14 +144,14 @@ rules
            	    )   
            end end end;
           
+                      
            formset_rest := <preIter> ((cname,pname,[wfs*],True()),<addi>(i,1),t);
            formset := <conc> ([loc_cond], formset_rest)
            
         
 	precond_wp: ((cname,MethodReference(path,[substs*])),post) -> constraint7
 	where
-		log(|Error(),"check");
-		
+			
 		class_name := cname;					// should be replaced by the class to which the method reference refers
 		method_name := <getMethodName> path;	// the method name should be calculated properly
 		// as we call the precondition calculation after compile, we shoud get here a non-empty guarded command
