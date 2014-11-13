@@ -28,6 +28,7 @@ rules
 			<type-inference-wf> system
 			
 			
+			
 	unrollSubclasses = <map((\ (c, cdef) -> c \) ; unrollSubclass)><LookupTable> "Class"		
 	updateDone = replaceMethod(\ ((cn, mn), (c, gc', exts', done, ins, outs)) -> ((cn, mn), (c, gc', exts', True(), ins, outs)) \)
 	
@@ -117,7 +118,7 @@ rules
 				<equal>([],submethods);
 				newConstraint := <innermost(\ BinRel(Output(o), In(), PathStart(cname'', Some(Primed()))) -> BinRel(Output(o), In(), PathStart(cname', Some(Primed()))) where <equal>(cname'', cname) \)> c;
 					(<addClassMethod> (cname', mname, (newConstraint, gc, <union>(e, [cname]), done, inputs, outputs)) 
-					<+ <updateClassMethod> (cname', mname, c, cname, e, inputs, outputs))
+					<+ <updateClassMethod> (cname', mname, newConstraint, cname, e, inputs, outputs))
 			 \)> cnames
 
 		
@@ -251,7 +252,6 @@ rules
 			<lookup>(sname, <LookupTable>"Set")
 
 
-
 	infer-types:
 		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
@@ -259,11 +259,25 @@ rules
 			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
 	infer-types:
+		(context, Path(ps {Reference(c)}, PathComponent(attname, maybeprimed) ) {oldType})
+			-> Path(ps {Reference(c)}, PathComponent(attname, maybeprimed)) { type}
+		where
+			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute");
+			<not(equal)>(oldType, type)
+
+
+	infer-types:
 		(context, Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed) ))
 			-> Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed)) { type}
 		where
 			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute")
 
+	infer-types:
+		(context, Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed) ) {oldType})
+			-> Path(ps {Optional(Reference(c))}, PathComponent(attname, maybeprimed)) { type}
+		where
+			type := <\ (ds,t,o,min,max,tname) -> t\><lookup>((c, attname), <LookupTable>"Attribute");
+			<not(equal)>(oldType, type)
 
 	infer-types:
 		(context, Path(Input(i){}, PathComponent(attname, maybeprimed)){})

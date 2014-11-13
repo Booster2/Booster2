@@ -17,7 +17,7 @@ imports
 
  rules
  		booster-to-relational:	
-		x -> Schema(<LookupTable> "Name", [ metatables*, settables*, tables*, tables'* ], [procedures*, procedures'*], StatementList([metaStatements*, statements*]))
+		x -> Schema(<LookupTable> "Name", [ metatables*, settables*, tables*, tables'* ], [procedures*, procedures'*,procedures''*], StatementList([metaStatements*, statements*]))
 		 where
 			[metatables*] := <booster-to-metatables> x; 
 			[tables*] := <map(booster-to-relational-class)> <qsort(swap)><LookupTable> "Class" ;
@@ -25,6 +25,7 @@ imports
 			[settables*] := <map(get-set-table)> <LookupTable> "SetDef" ;
 			[procedures*] := <map(booster-to-relational-procedure)> <LookupTable> "Method" ;
 			[procedures'*] := <concat><map(availability-procedure)> <LookupTable> "Method" ;
+			[procedures''*] := <map(\(cname, cdef) -> <function-to-get-id> cname \)> <LookupTable> "Class";
 			[metaStatements*] := <booster-to-metadata> x;
 			[statements*] := <concat><map(booster-to-data-inserts)> <LookupTable> "SetDef" 
 			 
@@ -93,9 +94,11 @@ imports
 						["class","attName","primType","typeMultiplicity","oppAttName","className","setName","direction","tableName","isId"], 
 						[String(classname),String(attname),String(primType),String(typeMultiplicity),oppAttName,String(className),String(setName),String(direction),String(tableName),Int(isId)], None())
 		where
+			<calculate-table-name> (classname, attname);
 			(primType, typeMultiplicity,className,setName) := <attribute-type-metadata> t;
 			(direction, oppAttName) := <get-direction> (classname, attname);
 			tableName := <lookup-attribute-table-name>(classname, attname);
+			/* log(|Error(), "TableName", (tableName, classname, attname)); */
 			isId := <((<elem> (Identity(), ds) ; !1 ) <+ !0)> ds
 
 	booster-to-metadata-method:
@@ -204,7 +207,7 @@ imports
 		where
 			name := <concat-strings> [cname, "_", mname];
 			params := <nub><union> (<map(convert-input)>is, <map(convert-output)> os);
-			statements := <booster-to-relational-guarded-command> (cname, mname, gc)
+			statements := <booster-to-relational-guarded-command> gc
 
 	booster-to-data-inserts:
 		(name,values) 
@@ -379,23 +382,23 @@ imports
 
 			 	
 	booster-to-relational-guarded-command:
-		(classname, progname, Skip())
+		Skip()
 			-> [ VariableAssign("dummySkip", Int(1)) ]
 			
 			
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps {Optional(Reference(tablename))}, pc){t}, expr))
+		Assign(Path(ps {Optional(Reference(tablename))}, pc){t}, expr)
 			-> [VariableAssign(pn', expr'), Update([],
 				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
 				pn' := <path-to-variable-name> Path(ps {Optional(Reference(tablename))}, pc){t};
 				attname := <get-path-attribute-name> Path(ps, pc);
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps {Optional(Reference(tablename))}, pc){t})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-path-to-where-clause> Path(ps {Optional(Reference(tablename))}, pc){t}
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Union(), SetExtent([expr]))))
+		Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Union(), SetExtent([expr])))
 			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), IfThen(	Equal( Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
@@ -422,11 +425,11 @@ imports
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
 				column2 := <concat-strings>[classname'', "_", attname''];
-				expr1 := <booster-to-relational-expression> (classname, progname, ps);
-				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
+				expr1 := <booster-to-relational-expression> ps;
+				expr2 := <booster-to-relational-expression> expr 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Union(), SetExtent([expr]))))
+		Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Union(), SetExtent([expr])))
 			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), IfThen(	Equal( Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
@@ -453,11 +456,11 @@ imports
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
 				column2 := <concat-strings>[classname'', "_", attname''];
-				expr1 := <booster-to-relational-expression> (classname, progname, ps);
-				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
+				expr1 := <booster-to-relational-expression> ps;
+				expr2 := <booster-to-relational-expression> expr 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Minus(), SetExtent([expr]))))
+		Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Minus(), SetExtent([expr])))
 			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), Delete(	None(), None(), None(), 
 						tablename, 
 						Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
@@ -472,11 +475,11 @@ imports
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
 				column2 := <concat-strings>[classname'', "_", attname''];
-				expr1 := <booster-to-relational-expression> (classname, progname, ps);
-				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
+				expr1 := <booster-to-relational-expression> ps;
+				expr2 := <booster-to-relational-expression> expr 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Minus(), SetExtent([expr]))))
+		Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Minus(), SetExtent([expr])))
 			-> [VariableAssign(pn1, expr1), VariableAssign(pn2, expr2), Delete(	None(), None(), None(), 
 						tablename, 
 						Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
@@ -491,53 +494,54 @@ imports
 				column1 := <concat-strings>[classname', "_", attname];
 				(classname'', attname'') := <lookup-opposite> (classname', attname);
 				column2 := <concat-strings>[classname'', "_", attname''];
-				expr1 := <booster-to-relational-expression> (classname, progname, ps);
-				expr2 := <booster-to-relational-expression> (classname, progname, expr) 
+				expr1 := <booster-to-relational-expression> ps;
+				expr2 := <booster-to-relational-expression> expr 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){t}, expr))
+		Assign(Path(ps { Reference(tablename) }, pc){t}, expr)
 			-> [VariableAssign(pn', expr'), Update([],
 				TableName(tablename),[(attname, FunctionCall("SHA2", [LocalVariable(pn'),Int(512)]))],Where(expr''),None(),None())]
 			where 
 				<?BasicType(Password()) <+ ?Optional(BasicType(Password()))> t;
 				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){BasicType(t)};
 				attname := <get-path-attribute-name> Path(ps, pc);
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){BasicType(t)})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-path-to-where-clause> Path(ps { Reference(tablename) }, pc){BasicType(t)}
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){BasicType(t)}, expr))
+		Assign(Path(ps { Reference(cname) }, pc){BasicType(t)}, expr)
 			-> [VariableAssign(pn', expr'), Update([],
-				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
+				tr,[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
-				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){BasicType(t)};
+				pn' := <path-to-variable-name> Path(ps { Reference(cname) }, pc){BasicType(t)};
 				attname := <get-path-attribute-name> Path(ps, pc);
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){BasicType(t)})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-path-to-where-clause> Path(ps { Reference(cname) }, pc){BasicType(t)};
+				tr := <get-table-reference> cname
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){Optional(BasicType(t))}, expr))
+		Assign(Path(ps { Reference(tablename) }, pc){Optional(BasicType(t))}, expr)
 			-> [VariableAssign(pn', expr'), Update([],
 				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
 				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){Optional(BasicType(t))};
 				attname := <get-path-attribute-name> Path(ps, pc);
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){BasicType(t)})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-path-to-where-clause> Path(ps { Reference(tablename) }, pc){BasicType(t)}
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps { Reference(tablename) }, pc){Reference(t)}, expr))
+		Assign(Path(ps { Reference(tablename) }, pc){Reference(t)}, expr)
 			-> [VariableAssign(pn', expr'), Update([],
 				TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())]
 			where 
 				<is-set-name> t;
 				pn' := <path-to-variable-name> Path(ps { Reference(tablename) }, pc){Reference(t)};
 				attname := <get-path-attribute-name> Path(ps, pc);
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(tablename) }, pc){Reference(t)})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-path-to-where-clause> Path(ps { Reference(tablename) }, pc){Reference(t)}
 				
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)}, expr))
+		Assign(Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)}, expr)
 			-> [VariableAssign(png, Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
@@ -566,12 +570,12 @@ imports
 				//log(|Error(), "guarded-command to relational", tablename);
 				(cname', aname') := <lookup-opposite> (classname', attname);
 				oppattname := <concat-strings>[cname', "_", aname'];
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-to-relational-expression> (classname, progname, ps { Reference(classname') });
-				expr''' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-to-relational-expression> ps { Reference(classname') };
+				expr''' := <booster-path-to-where-clause> Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)}
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Assign(Path(ps { Reference(classname') }, PathComponent(attname, None())){Optional(Reference(t))}, expr))
+		Assign(Path(ps { Reference(classname') }, PathComponent(attname, None())){Optional(Reference(t))}, expr)
 			-> [VariableAssign(png, Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
@@ -600,34 +604,45 @@ imports
 				//log(|Error(), "guarded-command to relational", tablename);
 				(cname', aname') := <lookup-opposite> (classname', attname);
 				oppattname := <concat-strings>[cname', "_", aname'];
-				expr' := <booster-to-relational-expression> (classname, progname, expr);
-				expr'' := <booster-to-relational-expression> (classname, progname, ps { Reference(classname') });
-				expr''' := <booster-path-to-where-clause> (classname, progname, Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)})
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-to-relational-expression> ps { Reference(classname') };
+				expr''' := <booster-path-to-where-clause> Path(ps { Reference(classname') }, PathComponent(attname, None())){Reference(t)}
 				
 	booster-to-relational-guarded-command:
-		(classname, progname, New(Output(obj), PathStart(cls, None())))
+		New(Output(obj), PathStart(cls, None()))
 			-> [Insert(None(), None(), Into(), cls, [], [], None()),
-				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([Output(obj)])), None())]
+				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([Output(obj)])), None()),
+				subclassesinserts*]
+			where
+			directSubclasses := <\ (ds,_,_,_,_,_) -> ds \> <lookup>(cls, <LookupTable> "Class");
+			[subclassesinserts*] := <concat><map(\c -> <create-class>(cls, c, Output(obj))\)> directSubclasses
 	
 
-/*	booster-to-relational-guarded-command:
-		(classname, progname, Guard(const, gc))
-			-> []
-		where
-			[] := <booster-to-relational-guarded-command> (classname, progname, gc);
-			expr' := <booster-to-relational-constraint> (classname, progname, const)
-*/
+	create-class:
+		(classname, subclassname, thisIdExpr)
+			 -> [Insert(None(), None(), Into(), subclassname, [], [], None()),
+			 	 Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([LocalVariable(subclassnamepk)])), None()),
+				 Update([], TableName(classname),[(subclassnameid, LocalVariable(subclassnamepk))],Where(Equal(ColumnName(classnameid), thisIdExpr)),None(),None()),
+				 subclassesinserts*]
+			where
+			subclassnamepk := <concat-strings>[subclassname, "_PK"];
+			classnameid := <concat-strings>[classname, "Id"];
+			subclassnameid := <concat-strings>[subclassname, "Id"];
+			directSubclasses := <\ (ds,_,_,_,_,_) -> ds \> <lookup>(subclassname, <LookupTable> "Class");
+			[subclassesinserts*] := <concat><map(\c -> <create-class>(subclassname, c, LocalVariable(subclassnamepk))\)> directSubclasses
+			
+
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Guard(const, gc))
+		Guard(const, gc)
 			-> [IfThen(expr', StatementList([stmts*]),[],None())]
 		where
-			[stmts*] := <booster-to-relational-guarded-command> (classname, progname, gc);
-			expr' := <booster-to-relational-constraint> (classname, progname, const)
+			[stmts*] := <booster-to-relational-guarded-command> gc;
+			expr' := <booster-to-relational-constraint> const
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Parallels(xs))
-			-> <booster-to-relational-guarded-command> (classname, progname, Parallels(ys))
+		Parallels(xs)
+			-> <booster-to-relational-guarded-command> Parallels(ys)
 		where
 			(creates, non-creates) := <partition(?New(_, _))> xs;
 			ys := <concat>[creates, non-creates];
@@ -636,60 +651,53 @@ imports
 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Parallels([x]))
-			-> <booster-to-relational-guarded-command> (classname, progname, x)
+		Parallels([x])
+			-> <booster-to-relational-guarded-command> x
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Parallels([x, xs*]))
+		Parallels([x, xs*])
 			-> [BeginEnd(DeclareList([]), StatementList([decs*, stmts*]))]
 		where
-			[stmts1*] := <booster-to-relational-guarded-command> (classname, progname, x);
-			[stmts2*] := <booster-to-relational-guarded-command> (classname, progname, Parallels([xs*]));
+			[stmts1*] := <booster-to-relational-guarded-command> x;
+			[stmts2*] := <booster-to-relational-guarded-command> Parallels([xs*]);
 			([decs*], [stmts*]) := <partition(?VariableAssign(_, _))> [stmts1*, stmts2*] 
 			
-/*	booster-to-relational-guarded-command:
-		(classname, progname, Parallel(gc1,gc2))
-			-> [BeginEnd(DeclareList([]), StatementList([decs*, stmts*]))]
-		where
-			[stmts1*] := <booster-to-relational-guarded-command> (classname, progname, gc1);
-			[stmts2*] := <booster-to-relational-guarded-command> (classname, progname, gc2);
-			([decs*], [stmts*]) := <partition(?VariableAssign(_, _))> [stmts1*, stmts2*] 		
-*/
+
 	booster-to-relational-guarded-command:
-		(classname, progname, Sequence(gc1,gc2))
+		Sequence(gc1,gc2)
 			-> [BeginEnd(DeclareList([]), StatementList(stmts1)),BeginEnd(DeclareList([]), StatementList(stmts2))]
 		where
-			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
-			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+			stmts1 := <booster-to-relational-guarded-command> gc1;
+			stmts2 := <booster-to-relational-guarded-command> gc2 		
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Choice(Guard(constraint1, gc1),Guard(constraint2, Skip())))
+		Choice(Guard(constraint1, gc1),Guard(constraint2, Skip()))
 			-> [IfThen(expr1, StatementList(stmts1),[],None())]
 		where
-			expr1 := <booster-to-relational-constraint> (classname, progname, constraint1);
-			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1) 		
+			expr1 := <booster-to-relational-constraint> constraint1;
+			stmts1 := <booster-to-relational-guarded-command> gc1 		
 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Choice(Guard(constraint1, gc1),Guard(constraint2, gc2)))
+		Choice(Guard(constraint1, gc1),Guard(constraint2, gc2))
 			-> [IfThen(expr1, StatementList(stmts1),[ElseIf(expr2,StatementList(stmts2) )],None())]
 		where
-			expr1 := <booster-to-relational-constraint> (classname, progname, constraint1);
-			expr2 := <booster-to-relational-constraint> (classname, progname, constraint2);
-			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
-			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+			expr1 := <booster-to-relational-constraint> constraint1;
+			expr2 := <booster-to-relational-constraint> constraint2;
+			stmts1 := <booster-to-relational-guarded-command> gc1;
+			stmts2 := <booster-to-relational-guarded-command> gc2 		
 
 	booster-to-relational-guarded-command:
-		(classname, progname, Choice(gc1,gc2))
+		Choice(gc1,gc2)
 			-> [IfThen(True(), StatementList(stmts1),[],StatementList(stmts2))]
 		where
-			stmts1 := <booster-to-relational-guarded-command> (classname, progname, gc1);
-			stmts2 := <booster-to-relational-guarded-command> (classname, progname, gc2) 		
+			stmts1 := <booster-to-relational-guarded-command> gc1;
+			stmts2 := <booster-to-relational-guarded-command> gc2 		
 
 
 
 	booster-to-relational-guarded-command:
-		(classname, progname, gc)
+		gc
 			-> []
 		where
 			log(|Error(), "cannot convert guarded command", gc);
@@ -697,95 +705,95 @@ imports
 
 
 	booster-to-relational-constraint:
-		(classname, progname, True())
+		True()
 			-> True()
 
 	booster-to-relational-constraint:
-		(classname, progname, False())
+		False()
 			-> False()
 
 	booster-to-relational-constraint:
-		(classname, progname, Not(const))
+		Not(const)
 			-> Not(const')
 		where
-			const' := <booster-to-relational-constraint> (classname, progname, const)
+			const' := <booster-to-relational-constraint> const
 
 	booster-to-relational-constraint:
-		(classname, progname, Conjuncts([const]))
-			-> <booster-to-relational-constraint> (classname, progname, const)
+		Conjuncts([const])
+			-> <booster-to-relational-constraint> const
 
 	booster-to-relational-constraint:
-		(classname, progname, Conjuncts([const, consts*]))
+		Conjuncts([const, consts*])
 			-> And(const1', const2')
 		where
-			const1' := <booster-to-relational-constraint> (classname, progname, const);
-			const2' := <booster-to-relational-constraint> (classname, progname, Conjuncts([consts*]))
+			const1' := <booster-to-relational-constraint> const;
+			const2' := <booster-to-relational-constraint> Conjuncts([consts*])
 
 	booster-to-relational-constraint:
-		(classname, progname, Conjuncts([]))
+		Conjuncts([])
 			-> True()
 
 	booster-to-relational-constraint:
-		(classname, progname, And(const1, const2))
+		And(const1, const2)
 			-> And(const1', const2')
 		where
-			const1' := <booster-to-relational-constraint> (classname, progname, const1);
-			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+			const1' := <booster-to-relational-constraint> const1;
+			const2' := <booster-to-relational-constraint> const2
 
 	booster-to-relational-constraint:
-		(classname, progname, Or(const1, const2))
+		Or(const1, const2)
 			-> Or(const1', const2')
 		where
-			const1' := <booster-to-relational-constraint> (classname, progname, const1);
-			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+			const1' := <booster-to-relational-constraint> const1;
+			const2' := <booster-to-relational-constraint> const2
 
 	booster-to-relational-constraint:
-		(classname, progname, Implies(const1, const2))
+		Implies(const1, const2)
 			-> Or(const2', Not(const1'))
 		where
-			const1' := <booster-to-relational-constraint> (classname, progname, const1);
-			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+			const1' := <booster-to-relational-constraint> const1;
+			const2' := <booster-to-relational-constraint> const2
 
 	booster-to-relational-constraint:
-		(classname, progname, Then(const1, const2))
+		Then(const1, const2)
 			-> And(const1', const2')
 		where
-			const1' := <booster-to-relational-constraint> (classname, progname, const1);
-			const2' := <booster-to-relational-constraint> (classname, progname, const2)
+			const1' := <booster-to-relational-constraint> const1;
+			const2' := <booster-to-relational-constraint> const2
 
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, Equal(), Null()))
+		BinRel(expr1, Equal(), Null())
 			-> IsNull(expr1',None())
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1)
+			expr1' := <booster-to-relational-expression> expr1
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, Equal(), expr2))
+		BinRel(expr1, Equal(), expr2)
 			-> Equal(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, NotEqual(), Null()))
+		BinRel(expr1, NotEqual(), Null())
 			-> IsNull(expr1', Not())
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1)
+			expr1' := <booster-to-relational-expression> expr1
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, NotEqual(), expr2))
+		BinRel(expr1, NotEqual(), expr2)
 			-> NotEqual(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, In(), TypeExtent(t)))
+		BinRel(expr1, In(), TypeExtent(t))
 			-> True()
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, In(), Path(ps {Reference(cname)}, PathComponent(attname, maybeprimed)){Set(Reference(t))}))
+		BinRel(expr1, In(), Path(ps {Reference(cname)}, PathComponent(attname, maybeprimed)){Set(Reference(t))})
 			-> NotEqual( Select([],
 										[FunctionCall("count", [Star()])], 
 										Some(FromPart([TableName(tablename)])), 
@@ -805,13 +813,13 @@ imports
 				<is-class-name> t;
 				tablename := <concat-strings>[cname, "_", attname];
 				column1 := <concat-strings>[cname, "_", attname];
-				expr' := <booster-to-relational-expression> (classname, progname, expr1);
+				expr' := <booster-to-relational-expression> expr1;
 				(cname', aname') := <lookup-opposite> (cname, attname);
 				column2 := <concat-strings>[cname', "_", aname'];
-				expr'' := <booster-to-relational-expression> (classname, progname, ps { Reference(cname) })
+				expr'' := <booster-to-relational-expression> ps { Reference(cname) }
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, NotIn(), Path(ps {Reference(cname)}, PathComponent(attname, maybeprimed)){Set(Reference(t))}))
+		BinRel(expr1, NotIn(), Path(ps {Reference(cname)}, PathComponent(attname, maybeprimed)){Set(Reference(t))})
 			-> Equal( Select([],
 										[FunctionCall("count", [Star()])], 
 										Some(FromPart([TableName(tablename)])), 
@@ -831,56 +839,56 @@ imports
 				<is-class-name> t;
 				tablename := <concat-strings>[cname, "_", attname];
 				column1 := <concat-strings>[cname, "_", attname];
-				expr' := <booster-to-relational-expression> (classname, progname, expr1);
+				expr' := <booster-to-relational-expression> expr1;
 				(cname', aname') := <lookup-opposite> (cname, attname);
 				column2 := <concat-strings>[cname', "_", aname'];
-				expr'' := <booster-to-relational-expression> (classname, progname, ps { Reference(cname) })
+				expr'' := <booster-to-relational-expression> ps { Reference(cname) }
 
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, In(), expr2))
+		BinRel(expr1, In(), expr2)
 			-> InSet(expr1', None(), expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, NotIn(), expr2))
+		BinRel(expr1, NotIn(), expr2)
 			-> InSet(expr1', Not(), expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, LessThan(), expr2))
+		BinRel(expr1, LessThan(), expr2)
 			-> LessThan(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, GreaterThan(), expr2))
+		BinRel(expr1, GreaterThan(), expr2)
 			-> GreaterThan(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, LessThanEquals(), expr2))
+		BinRel(expr1, LessThanEquals(), expr2)
 			-> LessThanEqual(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, BinRel(expr1, GreaterThanEquals(), expr2))
+		BinRel(expr1, GreaterThanEquals(), expr2)
 			-> GreaterThanEqual(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-constraint:
-		(classname, progname, Forall(var, Path(ps {Reference(cname)}, PathComponent(attname, None())){Set(t)}, constraint))
+		Forall(var, Path(ps {Reference(cname)}, PathComponent(attname, None())){Set(t)}, constraint)
 			-> Equal( Select([],
 							[FunctionCall("count", [Star()])], 
 							Some(FromPart([TableName(tablename)])), 
@@ -897,102 +905,102 @@ imports
 			where
 				tablename := <concat-strings>[cname, "_", attname];
 				column1 := <concat-strings>[cname, "_", attname];
-				expr'' := <booster-to-relational-expression> (classname, progname, ps { Reference(cname) });
+				expr'' := <booster-to-relational-expression> ps { Reference(cname) };
 				const' := <literal-substitute> (constraint, [(PathStart(var, None()), Input(var){t})]);
 				sysvar := <concat-strings>[var, "_in"];
-				const'' := <booster-to-relational-constraint> (classname, progname, const');
+				const'' := <booster-to-relational-constraint> const';
 				(cname', aname') := <lookup-opposite> (cname, attname);
 				oppattname := <concat-strings>[cname', "_", aname'];
 				const''' := <literal-substitute> (const'', [(SystemVariable(sysvar), ColumnName(oppattname))])
 
 	booster-to-relational-constraint:
-		(classname, progname, constraint)
+		constraint
 			-> True()
 		where
 			log(|Error(), "cannot convert constraint", constraint)
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(String(str)))
+		BasicValue(String(str))
 			-> String(str)
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(Integer(i)))
+		BasicValue(Integer(i))
 			-> Int(i)
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(Decimal(d)))
+		BasicValue(Decimal(d))
 			-> Decimal(d)
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(True()))
+		BasicValue(True())
 			-> Int(1)
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(False()))
+		BasicValue(False())
 			-> Int(0)
 
 	booster-to-relational-expression:
-		(classname, progname, PathStart(v, None()) {Reference(sn)})
+		PathStart(v, None()) {Reference(sn)}
 			-> String(v)
 		where
 			<is-set-name> sn
 
 	booster-to-relational-expression:
-		(classname, progname, PathStart(v, None()) {Optional(Reference(sn))})
+		PathStart(v, None()) {Optional(Reference(sn))}
 			-> String(v)
 		where
 			<is-set-name> sn
 
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(CurrentDateTime()))
+		BasicValue(CurrentDateTime())
 			-> FunctionCall("NOW", [])
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(CurrentDate()))
+		BasicValue(CurrentDate())
 			-> FunctionCall("CURDATE", [])
 
 	booster-to-relational-expression:
-		(classname, progname, BasicValue(CurrentTime()))
+		BasicValue(CurrentTime())
 			-> FunctionCall("CURTIME", [])
 
 
 
 	booster-to-relational-expression:
-		(classname, progname, TypeExtent(t))
+		TypeExtent(t)
 			-> Null()
 
 
 	booster-to-relational-expression:
-		(classname, progname, Null())
+		Null()
 			-> Null()
 
 	booster-to-relational-expression:
-		(classname, progname, SetExtent(exprs))
+		SetExtent(exprs)
 			-> SetExpression(exprs)
 
 	booster-to-relational-expression:
-		(classname, progname, Input(n))
+		Input(n)
 			-> SystemVariable(m)
 		where 
 			m := <concat-strings>[n, "_in"]
 
 	booster-to-relational-expression:
-		(classname, progname, Output(n))
+		Output(n)
 			-> SystemVariable(m)
 		where 
 			m := <concat-strings>[n, "_out"]
 
 	booster-to-relational-expression:
-		(classname, progname, This())
+		This()
 			-> SystemVariable("this")
 
 	booster-to-relational-expression:
-		(classname, progname, ThisPrimed())
+		ThisPrimed()
 			-> Null()
 			
 	booster-to-relational-expression:
-		(classname, progname, Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {t})
+		Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {t}
 		// select name from class where classId = expr
 			-> Select([], [ColumnName(name)], Some(FromPart([TableName(c)])), 
 						  Where(Equal(expr, ColumnName(<concat-strings>[c, "Id"]))), 
@@ -1005,10 +1013,10 @@ imports
 						  None())
 		where
 			< ?BasicType(b) <+ ?Optional(BasicType(b))> t;
-			expr :=  <booster-to-relational-expression> (classname, progname, p)
+			expr :=  <booster-to-relational-expression> p
 
 	booster-to-relational-expression:
-		(classname, progname, Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {Reference(sn)})
+		Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {Reference(sn)}
 		// select name from class where classId = expr
 			-> Select([], [ColumnName(name)], Some(FromPart([TableName(c)])), 
 						  Where(Equal(expr, ColumnName(<concat-strings>[c, "Id"]))), 
@@ -1021,10 +1029,10 @@ imports
 						  None())
 		where
 			<is-set-name> sn;
-			expr :=  <booster-to-relational-expression> (classname, progname, p)
+			expr :=  <booster-to-relational-expression> p
 
 	booster-to-relational-expression:
-		(classname, progname, Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {Optional(Reference(sn))})
+		Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {Optional(Reference(sn))}
 		// select name from class where classId = expr
 			-> Select([], [ColumnName(name)], Some(FromPart([TableName(c)])), 
 						  Where(Equal(expr, ColumnName(<concat-strings>[c, "Id"]))), 
@@ -1037,10 +1045,10 @@ imports
 						  None())
 		where
 			<is-set-name> sn;
-			expr :=  <booster-to-relational-expression> (classname, progname, p)
+			expr :=  <booster-to-relational-expression> p
 			
 	booster-to-relational-expression:
-		(classname, progname, Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {t})
+		Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {t}
 		// select name from class where classId = expr
 			-> Select([], [ColumnName(oppcname)], Some(FromPart([TableName(tname)])), 
 						  Where(Equal(expr, ColumnName(cname))), 
@@ -1049,18 +1057,18 @@ imports
 						  None(), 
 						  None(), 
 						  None(), 
-						  None(), 
+						  None(),
 						  None())
 		where
 			< ?Optional(Reference(b)) <+ ?Reference(b)> t;
-			expr :=  <booster-to-relational-expression> (classname, progname, p);
+			expr :=  <booster-to-relational-expression> p;
 			tname := <concat-strings>[c, "_",name];
 			cname := tname;
 			(classname', attname') := <lookup-opposite> (c, name); 
 			oppcname := <concat-strings>[classname', "_", attname']
 				 				
 	booster-to-relational-expression:
-		(classname, progname, Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {t})
+		Path(p {Reference(c)}, PathComponent(name, maybePrimed)) {t}
 		// select name from class where classId = expr
 			-> Select([], [ColumnName(name)], Some(FromPart([TableName(tname)])), 
 						  Where(Equal(expr, ColumnName(<concat-strings>[tname, "Id"]))), 
@@ -1072,7 +1080,7 @@ imports
 						  None(), 
 						  None())
 		where
-			expr :=  <booster-to-relational-expression> (classname, progname, p);
+			expr :=  <booster-to-relational-expression> p;
 			tname := <concat-strings>[c, "_",name];
 			< ?Set(b)> t
 				 				
@@ -1080,35 +1088,35 @@ imports
 
 
 	booster-to-relational-expression:
-		(classname, progname, BinOp(expr1, Plus(), expr2))
+		BinOp(expr1, Plus(), expr2)
 			-> Plus(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-expression:
-		(classname, progname, BinOp(expr1, Minus(), expr2))
+		BinOp(expr1, Minus(), expr2)
 			-> Minus(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-expression:
-		(classname, progname, BinOp(expr1, Times(), expr2))
+		BinOp(expr1, Times(), expr2)
 			-> Multiply(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-expression:
-		(classname, progname, BinOp(expr1, Divide(), expr2))
+		BinOp(expr1, Divide(), expr2)
 			-> Divide(expr1', expr2')
 		where
-			expr1' := <booster-to-relational-expression> (classname, progname, expr1);
-			expr2' := <booster-to-relational-expression> (classname, progname, expr2)
+			expr1' := <booster-to-relational-expression> expr1;
+			expr2' := <booster-to-relational-expression> expr2
 
 	booster-to-relational-expression:
-		(classname, progname, UnOp(Cardinality(), (Path(ps{Reference(cname)}, PathComponent(aname, maybeprimed)){Set(Reference(t))})))
+		UnOp(Cardinality(), (Path(ps{Reference(cname)}, PathComponent(aname, maybeprimed)){Set(Reference(t))}))
 			-> Select(	[],
 											[FunctionCall("count", [Star()])], 
 											Some(FromPart([TableName(tablename)])), 
@@ -1122,42 +1130,42 @@ imports
 											None())
 		where
 			tablename := <concat-strings>[cname, "_", aname];
-			expr' := <booster-path-to-where-clause> (classname, progname, (Path(ps{Reference(cname)}, PathComponent(aname, maybeprimed)){Set(Reference(t))}))
+			expr' := <booster-path-to-where-clause> (Path(ps{Reference(cname)}, PathComponent(aname, maybeprimed)){Set(Reference(t))})
 			
 
 	booster-to-relational-expression:
-		(expr, cname)
+		expr
 			-> Null()
 		where
 			log(|Error(), "cannot convert expression", expr)
 
 
 	booster-path-to-where-clause:
-		(classname, progname, Path(p {Reference(cname)}, PathComponent(name, None())){t})
+		Path(p {Reference(cname)}, PathComponent(name, None())){t}
 			-> Equal(expr, ColumnName(<concat-strings>[cname, "Id"]))
 		where 
 			< ?BasicType(t') <+ ?Optional(BasicType(t')) <+ ?Reference(t') ; <is-set-name> t'> t;
-			expr := <booster-to-relational-expression> (classname, progname, p)
+			expr := <booster-to-relational-expression> p
 
 
 	booster-path-to-where-clause:
-		(classname, progname, Path(p {Reference(cname)}, PathComponent(attname, None())){t})
+		Path(p {Reference(cname)}, PathComponent(attname, None())){t}
 			-> Equal(expr, ColumnName(<concat-strings>[cname, "_",attname]))
 		where 
-			expr := <booster-to-relational-expression> (classname, progname, p)
+			expr := <booster-to-relational-expression> p
 	
 	
 	
 	booster-path-to-where-clause:
-		(classname, progname, Output(n))
+		Output(n)
 			-> True()
 
 	booster-path-to-where-clause:
-		(classname, progname, This())
+		This()
 			-> True()
 
 	booster-path-to-where-clause:
-		(classname, progname, ThisPrimed())
+		ThisPrimed()
 			-> True()
 	
 	remove-inputs: 
@@ -1182,7 +1190,7 @@ imports
 			guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> (c, []) \) <+ !True() >  gc;
 			//log(|Error(), "guard-without-inputs", <constraint> guard-without-inputs);
 			statements1 := [
-				IfThen(<booster-to-relational-constraint> (cname, mname, guard-without-inputs), 
+				IfThen(<booster-to-relational-constraint> guard-without-inputs, 
 					StatementList([Return(Int(1))]), 
 					[], 
 					StatementList([Return(Int(0))]))
@@ -1192,7 +1200,7 @@ imports
 			params2 := <map(convert-input)>is;
 			guard := <(\ Guard(c, p) -> c\) <+ !True() >  gc;
 			statements2 := [
-				IfThen(<booster-to-relational-constraint> (cname, mname, guard), 
+				IfThen(<booster-to-relational-constraint> guard, 
 					StatementList([Return(Int(1))]), 
 					[], 
 					StatementList([Return(Int(0))]))
@@ -1232,7 +1240,7 @@ procedure-to-get-applicable-references:
 		guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> (c,[Input(i){type}])\) <+ !True() >  gc;
 		//log(|Error(), "available-references", <constraint> guard-without-inputs);
 		tidname := <concat-strings> [tname, "Id"];
-		expr' := <booster-to-relational-constraint> (cname, mname, guard-without-inputs);
+		expr' := <booster-to-relational-constraint> guard-without-inputs;
 		//log(|Error(), expr');
 		expr'' := <literal-substitute> (expr', [(SystemVariable(<concat-strings>[i, "_in"]), ColumnName(tidname))]);
 		statements := [InsertInto(
@@ -1250,75 +1258,13 @@ procedure-to-get-applicable-references:
 											None(), 
 											None()))]
 
-
-/*
-get-declare-lists:
-	(classname, progname, Skip()) -> []
-	
-get-declare-lists:
-	(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Minus(), SetExtent([expr]))))
-		-> [VariableAssign(pn,e')]
+function-to-get-id:
+	cname
+		-> Function(functionName, [Input("this", Int())], Varchar(10000), DeclareList([]), StatementList([returnStatement]))
 	where
-		e' := <booster-to-relational-expression> (classname, progname, expr);
-		pn := <path-to-variable-name> path
+		functionName := <concat-strings>["get_", cname,"_desc"];
+		returnStatement := Return(<get-object-desc> (cname, This(){Reference(cname)}))
 
-get-declare-lists:
-	(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Minus(), SetExtent([expr]))))
-		-> [VariableAssign(pn,e')]
-	where
-		e' := <booster-to-relational-expression> (classname, progname, expr);
-		pn := <path-to-variable-name> path
-
-get-declare-lists:
-	(classname, progname, Assign(path, BinOp(Path(ps { Reference(classname')}, pc), Union(), SetExtent([expr]))))
-		-> [VariableAssign(pn,e')]
-	where
-		e' := <booster-to-relational-expression> (classname, progname, expr);
-		pn := <path-to-variable-name> path
-
-get-declare-lists:
-	(classname, progname, Assign(path, BinOp(Path(ps { Optional(Reference(classname'))}, pc), Union(), SetExtent([expr]))))
-		-> [VariableAssign(pn,e')]
-	where
-		e' := <booster-to-relational-expression> (classname, progname, expr);
-		pn := <path-to-variable-name> path
-
-
-
-get-declare-lists:
-	(classname, progname, Assign(Path(ps {Optional(Reference(tablename))}, pc){t}, expr)) -> [VariableAssign(pn,e')]
-	where
-		e' := <booster-to-relational-expression> (classname, progname, expr);
-		pn := <path-to-variable-name> Path(ps {Optional(Reference(tablename))}, pc){t}
-
-get-declare-lists:
-	(classname, progname, Assign(Path(ps {Reference(tablename)}, pc){t}, expr)) -> [VariableAssign(pn,e')]
-	where
-		e' := <booster-to-relational-expression> (classname, progname, expr);
-		pn := <path-to-variable-name> Path(ps {Reference(tablename)}, pc){t}
-
-
-get-declare-lists:
-	(classname, progname, Guard(g,p))
-		-> <get-declare-lists> (classname, progname, p)
-
-get-declare-lists:
-	(classname, progname, New(n,c))
-		-> []
-		
-
-get-declare-lists:
-	(classname, progname, Parallel(p,q))
-		-> <union>(<get-declare-lists> (classname, progname, p), <get-declare-lists> (classname, progname, q))
-
-get-declare-lists:
-	(classname, progname, Choice(p,q))
-		-> <union>(<get-declare-lists> (classname, progname, p), <get-declare-lists> (classname, progname, q))
-
-get-declare-lists:
-	(classname, progname, Sequence(p,q))
-		-> <union>(<get-declare-lists> (classname, progname, p), <get-declare-lists> (classname, progname, q))
-*/
 	
 path-to-variable-name:
 	PathStart(name, maybeprimed)
@@ -1339,3 +1285,39 @@ path-to-variable-name:
 path-to-variable-name:
 	Output(o)
 		-> <concat-strings>["path_", o, "_out"]
+
+		
+get-table-reference:
+	cname 
+		-> TableName(cname)
+	where
+		([],_,_,_,_,_) := <lookup>(cname, <LookupTable> "Class")
+
+get-table-reference:
+	cname 
+		-> tr
+	where
+		(is,_,_,_,_,_) := <lookup>(cname, <LookupTable> "Class");
+		tr := <foldl(\ (cn1,t1) -> InnerJoin(<get-table-reference> cn1, t1, On(Equal(TableColumnName(cname, attname), TableColumnName(cn1, attname)))) where attname := <concat-strings>[cn1,"Id"]\)> (is, TableName(cname))
+		
+get-object-desc:
+	(cname, objIdExpr)
+		-> FunctionCall("concat_ws", <union>([String(",")], exprs))
+	where
+		idatts := <get-class-ids> cname;
+		exprs := <map(\ ((c,a), (_,t,_,_,_,_)) -> <booster-to-relational-expression> Path(objIdExpr {Reference(c)}, PathComponent(a, None())) {t}\)> idatts
+		/* ;
+		log(|Error(), exprs) */
+
+calculate-table-name:
+	(cname, aname) 
+		-> (cname, aname)
+	where
+		superclasses := <get-class-superclasses> cname;
+		[tname] := <filter(\ sc -> sc where <lookup>((sc, aname), <LookupTable>"Attribute"); 
+											[] := <filter(\ sc' -> sc' where <lookup>((sc', aname), <LookupTable>"Attribute")\)> <get-class-superclasses> sc  \)>
+											<conc> ([cname], superclasses); 
+		<updateAttributeTableName>(cname, aname, tname)
+	
+		
+	

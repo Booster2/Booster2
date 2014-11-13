@@ -1,32 +1,23 @@
-    <div class="navbar navbar-default" >
-    	<div class="navbar-inner">
-   			<table style="width: 100%;">
-   				<tr>
-   					<td style="width: 12em; text-align: left;">
-   						<a class="btn btn-default" ng-disabled="object.first == 0 || object.first == object.objectID"
-   							ng-href="#object/{{object.className}}/{{object.first}}"><i class="fa fa-fast-backward"></i></a>
-						&nbsp;
-						<a class="btn btn-default" ng-disabled="object.prev == 0 || object.prev == object.objectID"
-							ng-href="#object/{{object.className}}/{{object.prev}}"><i class="fa fa-play fa-flip-horizontal"></i></a>
-   					</td>
-   					<td style="text-align: center;">
-   						<h5>Browse : <span>{{object.className.unCamelCase()}}</span></h5>
-						<h4>{{object.description}}</h4>
-   					</td>
-   					<td style="width: 12em; text-align: right;">
-   						<a class="btn btn-default" ng-disabled="object.next == 0 || object.next == object.objectID"
-   							ng-href="#object/{{object.className}}/{{object.next}}"><i class="fa fa-play"></i></a>
-						&nbsp;
-						<a class="btn btn-default" ng-disabled="object.last == 0 || object.last == object.objectID"
-							ng-href="#object/{{object.className}}/{{object.last}}"><i class="fa fa-fast-forward"></i></a>
-   					</td>
- 				</tr>
-   			</table>
-     	</div>
+    <div class="well row" >
+		<div class="col-md-2" style=" text-align: left;">
+					<a class="btn btn-default" ng-disabled="object.first == 0 || object.first == object.objectID"
+						ng-href="#object/{{object.className}}/{{object.first}}"><i class="fa fa-fast-backward"></i></a>
+					&nbsp;
+					<a class="btn btn-default" ng-disabled="object.prev == 0 || object.prev == object.objectID"
+						ng-href="#object/{{object.className}}/{{object.prev}}"><i class="fa fa-play fa-flip-horizontal"></i></a>
+		</div>
+		<div class="col-md-8" style=" text-align: center;">
+					<h5>Browse : <span>{{object.className.unCamelCase()}}</span></h5>
+					<h4>{{object.description}}</h4>
+		</div>
+		<div class="col-md-2" style=" text-align: right;">
+					<a class="btn btn-default" ng-disabled="object.next == 0 || object.next == object.objectID"
+						ng-href="#object/{{object.className}}/{{object.next}}"><i class="fa fa-play"></i></a>
+					&nbsp;
+					<a class="btn btn-default" ng-disabled="object.last == 0 || object.last == object.objectID"
+						ng-href="#object/{{object.className}}/{{object.last}}"><i class="fa fa-fast-forward"></i></a>
+		</div>	
     </div>
-
-<!-- 	<h4 style="float: left; "></h4>
-	<h4 style="float: right; " ></h4> -->
 		
 		<div class="btn-toolbar" role="toolbar">
 			<div class="btn-group" ng-repeat="method in object.methods">

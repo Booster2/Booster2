@@ -69,4 +69,14 @@
     <servlet-name>ClassCardinality</servlet-name>
     <url-pattern>/ClassCardinality</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>ModelBrowser</display-name>
+    <servlet-name>ModelBrowser</servlet-name>
+    <servlet-class>ox.softeng.booster.ModelBrowser</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ModelBrowser</servlet-name>
+    <url-pattern>/ModelBrowser</url-pattern>
+  </servlet-mapping>
 </web-app>

@@ -557,11 +557,11 @@ rules
 			
 	sql-expression:
 		ColumnName(name)
-			-> $[[name]]
+			-> $[`[name]`]
 
 	sql-expression:
 		TableColumnName(tname, cname)
-			-> $[[tname].[cname]]
+			-> $[`[tname]`.`[cname]`]
 
 	sql-expression:
 		ExpressionAs(expr, i)
@@ -625,6 +625,8 @@ rules
 			   [<maybe-output(mode-part)> mp])]
 	
 
+	sql-expression:
+		Output(o) -> $[[o]_out]
 				
 	sql-expression:
 		expr -> 
@@ -917,6 +919,10 @@ rules
 
 	jog:
 		GroupBy() -> "group by"
+
+	join-condition:
+		None()
+			-> $[]
 			
 	join-condition:
 		On(expr)
@@ -959,7 +965,7 @@ rules
 
     into-part:
     	Some(Into(vars))
-    		-> $[into [<foldout(column-name <+ sql-expression)> (vars, ", ")]] 
+    		-> $[into [<foldout(sql-expression <+ column-name )> (vars, ", ")]] 
 
 
 	charset:
