@@ -39,30 +39,30 @@ imports
 
 		where
 			idColumn := Column("id" , "", False(), Int(), AutoIncrement(), Primary(), None());
-			nameColumn := Column("className" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			setColumn := Column("setName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			tableColumn := Column("tableName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			columnColumn := Column("columnName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			nameColumn := Column("className" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			setColumn := Column("setName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			tableColumn := Column("tableName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			columnColumn := Column("columnName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
 			htmlColumn := Column("html" , "", False(), Text(), NoExtra(), NoKey(), None());
 
-			classColumn := Column("class" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			attNameColumn := Column("attName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			primTypeColumn := Column("primType" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			typeMultiplicityColumn := Column("typeMultiplicity" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			classNameColumn := Column("className" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			setNameColumn := Column("setName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			directionColumn := Column("direction" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			tableNameColumn := Column("tableName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			oppAttColumn := Column("oppAttName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			classColumn := Column("class" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			attNameColumn := Column("attName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			primTypeColumn := Column("primType" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			typeMultiplicityColumn := Column("typeMultiplicity" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			classNameColumn := Column("className" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			setNameColumn := Column("setName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			directionColumn := Column("direction" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			tableNameColumn := Column("tableName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			oppAttColumn := Column("oppAttName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
 			isIdColumn := Column("isId" , "", False(), Bit(), NoExtra(), NoKey(), None());
-			methodNameColumn := Column("methodName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			methodNameColumn := Column("methodName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
 			isObjectMethodColumn := Column("isObjectMethod" , "", False(), Bit(), NoExtra(), NoKey(), None());
-			paramNameColumn := Column("paramName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			paramTypeColumn := Column("paramType" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			paramMultiplicityColumn := Column("paramMultiplicity" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
+			paramNameColumn := Column("paramName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			paramTypeColumn := Column("paramType" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			paramMultiplicityColumn := Column("paramMultiplicity" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
 			paramInOutColumn := Column("paramInOut" , "", False(), Varchar(10), NoExtra(), NoKey(), None());
-			paramClassNameColumn := Column("paramClassName" , "", False(), Varchar(500), NoExtra(), NoKey(), None());
-			paramSetNameColumn := Column("paramSetName" , "", False(), Varchar(500), NoExtra(), NoKey(), None())
+			paramClassNameColumn := Column("paramClassName" , "", False(), Varchar(200), NoExtra(), NoKey(), None());
+			paramSetNameColumn := Column("paramSetName" , "", False(), Varchar(200), NoExtra(), NoKey(), None())
 
 
 	booster-to-metadata:
@@ -227,7 +227,7 @@ imports
 
 	get-attribute-column:
 		((cname, attname), (ds, Reference(tname), opp, 1, 1, tablename))
-			-> Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(tname, [tname])))
+			-> Column(attname, "", False(), Varchar(200), NoExtra(), NoKey(),Some(Reference(tname, [tname])))
 		where
 			<is-set-name> tname;
 			<updateAttributeTableName> (cname, attname,cname)
@@ -250,7 +250,7 @@ imports
 
 	get-attribute-column:
 		((cname, attname), (ds, Optional(Reference(tname)), opp, 0, 1, tablename))
-			-> Column(attname, "null", True(), Varchar(500), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
+			-> Column(attname, "null", True(), Varchar(200), NoExtra(), NoKey(),Some(Reference(cname, [cname])))
 		where
 			<is-set-name> tname;
 			<updateAttributeTableName> (cname, attname,cname)
@@ -304,7 +304,7 @@ imports
 			-> Table(tablename, 
 				[Column(tableid, "", False(), Int(), AutoIncrement(), Primary(),None()),
 				 Column(firstcolname, "", False(), Int(), NoExtra(), NoKey(),Some(Reference(cname, [<concat-strings>[cname, "Id"]]))), 
-				 Column(attname, "", False(), Varchar(500), NoExtra(), NoKey(),Some(Reference(tname, [tname])))])
+				 Column(attname, "", False(), Varchar(200), NoExtra(), NoKey(),Some(Reference(tname, [tname])))])
 		where
 			<is-set-name> tname;
 			tablename := <concat-strings> [cname, "_", attname];
@@ -793,6 +793,55 @@ imports
 			-> True()
 
 	booster-to-relational-constraint:
+		BinRel(Output(o), NotIn(), PathStart(cname, maybeprimed){Set(Reference(cname))})
+			-> True()
+			where
+				<is-class-name> cname
+				
+
+
+
+	booster-to-relational-constraint:
+		BinRel(expr1, In(), PathStart(cname, maybeprimed){Set(Reference(cname))})
+			-> NotEqual( Select([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(cname)])), 
+										Where(Equal(ColumnName(column1), expr')),
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int(0))
+			where
+				<is-class-name> cname;
+				column1 := <concat-strings>[cname, "Id"];
+				expr' := <booster-to-relational-expression> expr1
+
+	booster-to-relational-constraint:
+		BinRel(expr1, In(), PathStart(sname, maybeprimed){Set(Reference(sname))})
+			-> NotEqual( Select([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(sname)])), 
+										Where(Equal(ColumnName(sname), expr')),
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int(0))
+			where
+				<is-set-name> sname;
+				expr' := <booster-to-relational-expression> expr1
+
+				
+
+
+	booster-to-relational-constraint:
 		BinRel(expr1, In(), Path(ps {Reference(cname)}, PathComponent(attname, maybeprimed)){Set(Reference(t))})
 			-> NotEqual( Select([],
 										[FunctionCall("count", [Star()])], 
@@ -1171,12 +1220,28 @@ imports
 	remove-inputs: 
 		(c,is) ->
 			<topdown(\ trm -> <remove-input <+ !trm> (trm, is) \)> c
+
+	remove-outputs: 
+		(c,os) ->
+			<topdown(\ trm -> <remove-output <+ !trm> (trm, os) \)> c
+
+	remove-inputs-and-outputs: 
+		(c,ios) ->
+			<topdown(\ trm -> <remove-output <+ !trm> (trm, ios) \)>
+				<topdown(\ trm -> <remove-input <+ !trm> (trm, ios) \)> c
+
 	
 	remove-input:
 		(BinRel(exp1, relop, exp2), is) -> True() 
 			where 
-				ios := <collect-all(?Input(i) <+ ?Output(o))> BinRel(exp1, relop, exp2);
-				<not(subseteq)>(ios, is)
+				is' := <collect-all(?Input(i))> BinRel(exp1, relop, exp2);
+				<not(subseteq)>(is', is)
+
+	remove-output:
+		(BinRel(exp1, relop, exp2), os) -> True() 
+			where 
+				os' := <collect-all(?Output(o))> BinRel(exp1, relop, exp2);
+				<not(subseteq)>(os', os)
 	
 	availability-procedure:
 		((cname, mname), (c,gc,exts,d,is,os))
@@ -1187,8 +1252,8 @@ imports
 			// Function to test the availability without inputs
 			name1 := <concat-strings> [cname, "_", mname, "_available"];
 			params1 := [Input("this", Int())];
-			guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> (c, []) \) <+ !True() >  gc;
-			//log(|Error(), "guard-without-inputs", <constraint> guard-without-inputs);
+			guard-without-inputs := <innermost(simplify)><(\ Guard(c, p) -> <remove-inputs-and-outputs> (c, []) \) <+ !True() >  gc;
+			// log(|Error(), "guard-without-inputs", <constraint> guard-without-inputs);
 			statements1 := [
 				IfThen(<booster-to-relational-constraint> guard-without-inputs, 
 					StatementList([Return(Int(1))]), 
@@ -1198,7 +1263,7 @@ imports
 			// Function to test the availability with inputs
 			name2 := <concat-strings> [cname, "_", mname, "_available_inputs"];
 			params2 := <map(convert-input)>is;
-			guard := <(\ Guard(c, p) -> c\) <+ !True() >  gc;
+			guard := <innermost(simplify)><(\ Guard(c, p) -> <remove-outputs> (c, [])\) <+ !True() >  gc;
 			statements2 := [
 				IfThen(<booster-to-relational-constraint> guard, 
 					StatementList([Return(Int(1))]), 
@@ -1237,18 +1302,20 @@ procedure-to-get-applicable-references:
 		tname := <get-reference-class-name> type;
 		name := <concat-strings> [cname, "_", mname,"_",i,"_choice"];
 		params := [Input("this", Int())];
-		guard-without-inputs := <(\ Guard(c, p) -> <remove-inputs> (c,[Input(i){type}])\) <+ !True() >  gc;
+		guard-without-inputs := <innermost(simplify)><(\ Guard(c, p) -> <remove-inputs-and-outputs> (c,[Input(i){type}])\) <+ !True() >  gc;
 		//log(|Error(), "available-references", <constraint> guard-without-inputs);
 		tidname := <concat-strings> [tname, "Id"];
+		dummyVariable := <concat-strings>["dummyVariable_",tidname];
 		expr' := <booster-to-relational-constraint> guard-without-inputs;
 		//log(|Error(), expr');
-		expr'' := <literal-substitute> (expr', [(SystemVariable(<concat-strings>[i, "_in"]), ColumnName(tidname))]);
+		expr'' := <literal-substitute> (expr', [(SystemVariable(<concat-strings>[i, "_in"]), TableColumnName(dummyVariable, tidname))]);
+		//log(|Error(), "get-applicable-references", (cname, mname, <constraint> guard-without-inputs));
 		statements := [InsertInto(
 							"CLASS_DESCS", 
 							["OBJECT_ID"], 
 							Select([],
 									[ColumnName(tidname)], 
-											Some(FromPart([TableName(tname)])), 
+											Some(FromPart([Aliased(tname, Alias(dummyVariable), [])])), 
 											Where(expr''), 
 											None(), 
 											None(), 

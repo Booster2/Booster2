@@ -156,10 +156,30 @@ rules
 		(classname, attname)
 			-> <\ (ds, t, opp, min, max, tname) -> opp \> <lookup>((classname, attname), <LookupTable> "Attribute")
 
-	lookup-attribute-table-name:
+/*	lookup-attribute-table-name:
 		(classname, attname)
 			-> <\ (ds, t, opp, min, max, tname) -> tname \> <lookup>((classname, attname), <LookupTable> "Attribute")
+*/
+	lookup-attribute-table-name:
+		(classname, attname)
+			-> <concat-strings>[classname, "_", attname] 
+		where
+			(ds, t, (oppc, oppa), min, mult, tname) := <lookup>((classname, attname), <LookupTable> "Attribute") 
 
+	lookup-attribute-table-name:
+		(classname, attname)
+			-> tname 
+		where
+			(ds, t, opp, 1, 1, tname) := <lookup>((classname, attname), <LookupTable> "Attribute") 
+
+	lookup-attribute-table-name:
+		(classname, attname)
+			-> tname 
+		where
+			(ds, t, opp, 0, 1, tname) := <lookup>((classname, attname), <LookupTable> "Attribute") 
+
+
+			
 
 /*
 	set-attribute-table-name:

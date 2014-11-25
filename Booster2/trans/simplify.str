@@ -307,15 +307,15 @@ rules
 			
 	/* a --> skip -> skip */
 	
-	simplify:
+	/* simplify:
 		Guard(a,Skip())
 			-> Skip()
-			
+	*/		
 	/* True() --> p -> p */
 	
-	simplify:
+	 simplify:
 		Guard(True(),p)
-			-> Skip()
+			-> p
 			
 	/* Choice elimination. a --> c [] b --> c -> a or b --> c  */
 	
