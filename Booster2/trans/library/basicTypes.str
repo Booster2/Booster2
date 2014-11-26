@@ -68,7 +68,7 @@ imports
 		String(s) -> $[[s]]
 
 	get-type-booster-to-sql:
-		String() -> Varchar(1000)
+		String() -> Varchar(5000)
 		
 	get-type-name-for-metadata:
 		String() -> "String"
