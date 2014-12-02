@@ -1,4 +1,18 @@
 module names
+
+imports 
+  include/Booster2
+
+namespaces Class
+
+rules
+
+  Class(name, _, _) :
+  	defines Class name
+  	
+  PathStart(x, _) :
+  	refers to Class x
+  	
 /* 
 
 imports

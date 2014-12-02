@@ -1,6 +1,8 @@
 module booster2
 
 imports
+	
+  names
 
   include/Booster2
 

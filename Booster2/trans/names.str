@@ -7,6 +7,7 @@ imports
 
 
 imports
+  include/Booster2
 
 
 signature
@@ -17,4 +18,31 @@ signature
     CurrentFile : ImportAnno
 
   constructors
-    
+    Class : Namespace
+
+
+rules
+
+  nam-get-definition-keys :
+    Class(name, _, _) -> [name]
+
+  nam-get-definitions :
+    Class(name, _, _) -> [(Class(), [name])]
+
+  nam-annotate-names(|paths__, path__):
+    Class(name, _, _) -> <Class(nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    Class(name, _, _) -> <id>
+
+
+rules
+
+  nam-get-uses-keys :
+    PathStart(x, _) -> [x]
+
+  nam-get-uses :
+    PathStart(x, _) -> [(Class(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    PathStart(x, _) -> <PathStart(nam-annotate-use(|paths__, Class()), id)>
