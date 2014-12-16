@@ -340,6 +340,39 @@ rules
 			
 /* Optional-to-optional */
 	program:			
+		(classname, methodname, BinRel(Path(a {Reference(name4)},b) { Optional(Reference(name2)) }, Equal(), expression { Reference(name2) }))
+			-> Parallels([Assign(path3 { Optional(Reference(name2)) }, expression { Reference(name2) }),
+						  Choice(Guard(Conjuncts([BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
+								 				  BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), expression { Reference(name2) })]),
+								 			  Assign(Path(Path(a {Reference(name4)}, PathComponent(name3, None())){ Optional(Reference(name2)) },
+								 			  			  PathComponent(name6, None())){ Optional(Reference(name4)) },
+								 			  		 Null())),
+								 		Guard(Not(Conjuncts([BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
+								 				  BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), expression { Reference(name2) })])),
+								 			  Skip())),
+						  Choice(Guard(Conjuncts([BinRel(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), Null()),
+												  BinRel(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), a {Reference(name4)})]),
+											  Assign(Path(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+											  			  PathComponent(name3, None())){ Optional(Reference(name2)) },
+											  		 Null())),
+										Guard(Not(Conjuncts([BinRel(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), Null()),
+												  BinRel(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+														   NotEqual(), a {Reference(name4)})])),
+											  Skip())),
+						   Assign(Path(expression { Reference(name2) }, PathComponent(name6, None())){ Optional(Reference(name4)) },
+								 		a {Reference(name4)})])
+		where
+			<is-class-name> name2;
+			<not(is-pre-state)> (Path(a,b)); 	
+			name3 := <get-path-attribute-name>(Path(a,b));
+			(name2, name6) := <lookup-opposite>((name4, name3));
+			Optional(Reference(name4)) := <lookup-attribute-type> ((name2, name6));
+			path3 := <make-pre-state> (Path(a,b))
+
+	program:
 		(classname, methodname, BinRel(Path(a {Reference(name4)},b) { Optional(Reference(name2)) }, Equal(), expression { Optional(Reference(name2)) }))
 			-> Parallels([Assign(path3 { Optional(Reference(name2)) }, expression { Optional(Reference(name2)) }),
 						  Choice(Guard(Conjuncts([BinRel(path3 { Optional(Reference(name2)) }, NotEqual(), Null()),
