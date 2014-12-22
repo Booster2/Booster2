@@ -112,11 +112,23 @@
 
 		<move file="./source/${basename}${suffix}" todir="./output/${folderName}"/>
 
-		<exec dir="." executable="diff" resultproperty="diffresult">
-			<arg line="-wqbB" /> <!-- Ignore white space and blank lines, do it quietly -->
-			<arg file="./expected/${folderName}/${basename}${suffix}" />
-			<arg file="./output/${folderName}/${basename}${suffix}" />
-		</exec>
+		<if>
+			<os family="windows" />
+		    <then>
+		  		<exec dir="." executable="fc" resultproperty="diffresult"> <!-- Windows diff -->
+		  			<arg line="/w" /> <!-- Ignore white space, almost, some tests still fail -->
+		  			<arg file="./expected/${folderName}/${basename}${suffix}" />
+		  			<arg file="./output/${folderName}/${basename}${suffix}" />
+		  		</exec>
+		    </then>
+		    <else>
+		  		<exec dir="." executable="diff" resultproperty="diffresult">
+		  			<arg line="-wqbB" /> <!-- Ignore white space and blank lines, do it quietly -->
+		  			<arg file="./expected/${folderName}/${basename}${suffix}" />
+		  			<arg file="./output/${folderName}/${basename}${suffix}" />
+		  		</exec>
+		    </else>
+		</if>
 		<if>
 			<equals arg1="${diffresult}" arg2="0" />
 			<then>
