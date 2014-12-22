@@ -14,3 +14,5 @@ language General properties
   extensions    : boo2
   table         : include/Booster2.tbl
   start symbols : System
+  
+  observer:      editor-analyze (multifile)
