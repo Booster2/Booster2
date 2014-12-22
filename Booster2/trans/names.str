@@ -1,48 +1,29 @@
 module names
 
 imports
-  lib/analysis-library.generated
-  lib/analysis-library-internal.generated
-  lib/index-library.generated
-
-
-imports
+  lib/runtime/nabl/-
+  lib/runtime/task/-
+  lib/runtime/properties/-
+  lib/runtime/types/-
+  lib/runtime/relations/-
+  lib/runtime/editor/-
   include/Booster2
 
 
 signature
   constructors
-    Type        : DefDataKind
-    Import      : DefDataKind
-    Transitive  : ImportAnno
-    CurrentFile : ImportAnno
+    NablNsClass : Namespace
 
+
+signature
   constructors
-    Class : Namespace
+    
 
 
 rules
 
-  nam-get-definition-keys :
-    Class(name, _, _) -> [name]
-
-  nam-get-definitions :
-    Class(name, _, _) -> [(Class(), [name])]
-
-  nam-annotate-names(|paths__, path__):
-    Class(name, _, _) -> <Class(nam-annotate-def(|path__), id, id)>
-
-  nam-unique :
-    Class(name, _, _) -> <id>
+  nabl-custom-properties(add-properties) =
+    ![] ; add-properties
 
 
 rules
-
-  nam-get-uses-keys :
-    PathStart(x, _) -> [x]
-
-  nam-get-uses :
-    PathStart(x, _) -> [(Class(), [x])]
-
-  nam-annotate-names(|paths__, path__):
-    PathStart(x, _) -> <PathStart(nam-annotate-use(|paths__, Class()), id)>
