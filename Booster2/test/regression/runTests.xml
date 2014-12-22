@@ -2,8 +2,13 @@
 
 <project name="Booster2" default="all">
 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
-
+	<!--	<taskdef resource="net/sf/antcontrib/antcontrib.properties" /> -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+	  <classpath>
+	    <pathelement location="./../../lib/ant-contrib-1.0b3.jar"/>
+	  </classpath>
+	</taskdef>
+	
 	<!-- Main target -->
 	<target name="all" depends="empty-folder, run-tests" />
 
