@@ -8,6 +8,8 @@
 	<target name="all" depends="empty-folder, run-tests" />
 
 	<target name="empty-folder">
+		<mkdir dir="./output/succeeded" />
+		<mkdir dir="./output/failed" />
 		<delete>
 			<fileset dir="./output">
 				<include name="**/*.sql" />
