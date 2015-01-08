@@ -122,6 +122,8 @@ context-free syntax
   BasicValue.True = <true> 
   BasicValue.False = <false> 
   BasicValue.CurrentDateTime = <currentdatetime> 
+  BasicValue.CurrentDateTime = <CurrentDateTime> 
+  BasicValue.CurrentDateTime = <currentDateTime> 
   BasicValue.CurrentDate = <currentdate> 
   BasicValue.CurrentTime = <currenttime> 
   TypeExtent.String = <string> {prefer}
@@ -174,7 +176,8 @@ context-free syntax
   SeqWfExpression.Skip = <Skip>  
   SeqWfExpression.Skip = <SKIP> 
   SeqWfExpression.Choice = <<GuardedAction> -\> <SeqWfExpression> [] <GuardedAction> -\> <SeqWfExpression>> 
-  SeqWfExpression.Wait = <WAIT{ <{INT ","}+> } -\> <SeqWfExpression>> 
+  SeqWfExpression.Wait = <WAIT{ <{INT ","}+> } -\> <SeqWfExpression>>
+  SeqWfExpression.Wait = <Wait{ <{INT ","}+> } -\> <SeqWfExpression>> 
   SeqWfExpression.WorkflowReference = ID 
   SeqWfExpression.Prefix = <<GuardedAction> -\> <SeqWfExpression>> 
   SeqWfExpression = <( <SeqWfExpression> )> {bracket}
@@ -187,12 +190,26 @@ context-free syntax
 
 context-free priorities
 
-  SeqWfExpression = GuardedAction '->' SeqWfExpression  > SeqWfExpression = GuardedAction '->' SeqWfExpression '[]' GuardedAction '->' SeqWfExpression 
+		SeqWfExpression.Prefix 
+	> 
+		SeqWfExpression.Choice 
+
+context-free priorities
+	
+		Constraint.Not
+	>
+		Constraint.And
+	>
+		Constraint.Or
+	>
+		Constraint.Implies
+	>
+		Constraint.Then
 
 context-free priorities
 
-  Constraint = 'not' Constraint  > Constraint = Constraint '&' Constraint  > Constraint = Constraint 'or' Constraint  > Constraint = Constraint '=>' Constraint  > Constraint = Constraint ';' Constraint 
-
-context-free priorities
-
-  Expression = ValueExpression  > Expression = UnOp Expression  > Expression = Expression BinOp Expression 
+		Expression = ValueExpression //TODO: this isn't supported in SDF3 anymore
+	>
+		Expression.UnOp
+	>
+		Expression.BinOp
