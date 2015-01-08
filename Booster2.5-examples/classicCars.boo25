@@ -1,4 +1,4 @@
-system ClassicCars 
+System ClassicCars 
 	class ProductLine {
 		attributes
 			productLine  (ID) : String

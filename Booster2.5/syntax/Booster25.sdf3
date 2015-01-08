@@ -15,6 +15,7 @@ context-free start-symbols
 context-free syntax
 
   System.System = <system <ID> <SystemComponent*>> 
+  System.System = <System <ID> <SystemComponent*>> 
   BoosterTerm = System 
   SystemComponent = SetDef 
   SystemComponent = Class 
@@ -33,18 +34,21 @@ context-free syntax
   BoosterTerm = ClassComponents 
   Attribute.Attribute = <<ID> <Decoration*> : <TypeDecl>> 
   BoosterTerm = Attribute 
-  Identity.Identity = <( ID )> 
+  Identity.Identity = <(<>ID<>)> 
   Decoration = Identity 
   TypeDecl = PrimTypeDecl 
   TypeDecl.Optional = <[ <PrimTypeDecl> ]> 
   TypeDecl.Set = <set ( <PrimTypeDecl> ) <Multiplicity>> 
+  TypeDecl.Set = <SET ( <PrimTypeDecl> ) <Multiplicity>> 
   BoosterTerm = TypeDecl 
   PrimTypeDecl.BasicType = BasicTypeDecl 
   PrimTypeDecl.UniDirectional = ID 
   PrimTypeDecl.BiDirectional = <<ID> . <ID>> 
   BoosterTerm = PrimTypeDecl 
-  BasicTypeDecl.String = <STRING> 
+  BasicTypeDecl.String = <STRING>  
+  BasicTypeDecl.String = <String>
   BasicTypeDecl.Int = <INT> 
+  BasicTypeDecl.Int = <Int> 
   BasicTypeDecl.Decimal = <DECIMAL> 
   BasicTypeDecl.Date = <DATE> 
   BasicTypeDecl.Time = <TIME> 
