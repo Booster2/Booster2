@@ -1,0 +1,13 @@
+module editor/Booster25-Outliner
+
+imports
+  
+  include/Booster25
+  lib/runtime/editor/outline-library
+  lib/runtime/editor/origins
+  editor/Booster25-Outliner.generated
+
+rules
+  
+  to-outline-label = fail
+  
