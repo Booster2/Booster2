@@ -39,7 +39,8 @@ SystemComponent -> BoosterTerm
 %% identifier.  A non-empty list of enumerated values is given, within
 %% curly brackets (\verb|{}|).
  
-'set' ID '{' {ID ','}+ '}' -> SetDef {cons("SetDef")}
+%% 'set' ID '{' {ID ','}+ '}' -> SetDef {cons("SetDef")}
+'set' ID '{' {ID ","}+ '}' -> SetDef {cons("SetDef")}
 
 SetDef -> BoosterTerm
 
@@ -57,7 +58,8 @@ Class -> BoosterTerm
 %% An extends clause is the keyword \verb|extends|, and a list of class
 %% names, which must be non-empty.
 
-'extends' {Extension ','}+ -> Extends {cons("Extend")}
+%% 'extends' {Extension ','}+ -> Extends {cons("Extend")}
+'extends' {Extension ","}+ -> Extends {cons("Extend")}
 
 Extends -> BoosterTerm
 

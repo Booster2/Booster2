@@ -1,0 +1,6 @@
+system ClassicCars 
+	class ProductLine {
+		attributes
+			productLine  (ID) : String
+
+	} 

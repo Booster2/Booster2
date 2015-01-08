@@ -3,29 +3,183 @@
 
 module Booster25
 
-imports 
+imports Common	
+        AbstractBoosterModel	
+        Relational
 
-	Common
 
 context-free start-symbols
 
-	Start
+  System
 
 context-free syntax
 
-	Start.Module = <
-		module <ID> 
-		
-		<{Definition "\n\n"}*>
-	>
+  System.System = <system <ID> <SystemComponent*>> 
+  BoosterTerm = System 
+  SystemComponent = SetDef 
+  SystemComponent = Class 
+  BoosterTerm = SystemComponent 
+  SetDef.SetDef = <set <ID> { <{ID ","}+> }> 
+  BoosterTerm = SetDef 
+  Class.Class = <class <ID> <Extends?> { <ClassComponents*> }> 
+  BoosterTerm = Class 
+  Extends.Extend = <extends <{Extension ","}+>> 
+  BoosterTerm = Extends 
+  Extension.Extension = ID 
+  ClassComponents.Attributes = <attributes <Attribute*>> 
+  ClassComponents.Methods = <methods <Method*>> 
+  ClassComponents.Invariant = <invariants <Constraint*>> 
+  ClassComponents.Workflows = <workflows <WorkflowComponent*>> 
+  BoosterTerm = ClassComponents 
+  Attribute.Attribute = <<ID> <Decoration*> : <TypeDecl>> 
+  BoosterTerm = Attribute 
+  Identity.Identity = <( ID )> 
+  Decoration = Identity 
+  TypeDecl = PrimTypeDecl 
+  TypeDecl.Optional = <[ <PrimTypeDecl> ]> 
+  TypeDecl.Set = <set ( <PrimTypeDecl> ) <Multiplicity>> 
+  BoosterTerm = TypeDecl 
+  PrimTypeDecl.BasicType = BasicTypeDecl 
+  PrimTypeDecl.UniDirectional = ID 
+  PrimTypeDecl.BiDirectional = <<ID> . <ID>> 
+  BoosterTerm = PrimTypeDecl 
+  BasicTypeDecl.String = <STRING> 
+  BasicTypeDecl.Int = <INT> 
+  BasicTypeDecl.Decimal = <DECIMAL> 
+  BasicTypeDecl.Date = <DATE> 
+  BasicTypeDecl.Time = <TIME> 
+  BasicTypeDecl.DateTime = <DATETIME> 
+  BasicTypeDecl.Boolean = <BOOLEAN> 
+  BasicTypeDecl.Password = <PASSWORD> 
+  Multiplicity.MultMinAndMax = <[ <INT> .. <INT> ]> 
+  Multiplicity.MultJustMax = <[ .. <INT> ]> 
+  Multiplicity.MultJustMin = <[ <INT> .. ]> 
+  Multiplicity.MultJustMin = <[ <INT> .. * ]> 
+  Multiplicity.MultSingle = <[ <INT> ]> 
+  Multiplicity.MultAny = <[ * ]> 
+  Multiplicity.MultAny =  
+  BoosterTerm = Multiplicity 
+  Method.Method = <<ID> { <Constraint> }> 
+  Method.Method = <<ID> { <GuardedCommand> }> 
+  BoosterTerm = Method 
+  Constraint.True = <true> 
+  Constraint.False = <false> 
+  Constraint = Relation 
+  Constraint.Not = <not <Constraint>> 
+  Constraint.And = <<Constraint> & <Constraint>> {assoc}
+  Constraint.Or = <<Constraint> or <Constraint>> {assoc}
+  Constraint.Implies = <<Constraint> =\> <Constraint>> {assoc}
+  Constraint.Then = <<Constraint> ; <Constraint>> {assoc}
+  Constraint = <( <Constraint> )> {bracket}
+  Constraint.Conjuncts = <conjuncts <{Constraint "&"}*>> {deprecated}
+  Constraint.Disjuncts = <disjuncts <{Constraint "or"}*>> {deprecated}
+  Constraint.Exists = <exists <ID> : <Expression> @ <Constraint>> 
+  Constraint.Forall = <forall <ID> : <Expression> @ <Constraint>> 
+  Constraint = MethodReference 
+  BoosterTerm = Constraint 
+  Relation.BinRel = <<Expression> <BinRel> <Expression>> 
+  BoosterTerm = Relation 
+  BinRel.Equal = <=> 
+  BinRel.NotEqual = </=> 
+  BinRel.In = <:> 
+  BinRel.NotIn = </:> 
+  BinRel.LessThan = <\<> 
+  BinRel.GreaterThan = <\>> 
+  BinRel.LessThanEquals = <\<=> 
+  BinRel.GreaterThanEquals = <\>=> 
+  BinRel.Subset = <\<:> 
+  BinRel.SubsetEquals = <\<\<:> 
+  BinRel.Superset = <:\>> 
+  BinRel.SupersetEquals = <:\>\>> 
+  Expression = ValueExpression 
+  Expression.UnOp = <<UnOp> <Expression>> {left}
+  Expression = <( <Expression> )> {bracket}
+  Expression.BinOp = <<Expression> <BinOp> <Expression>> {left}
+  BoosterTerm = Expression 
+  ValueExpression.BasicValue = BasicValue 
+  ValueExpression.TypeExtent = TypeExtent 
+  ValueExpression = Path 
+  ValueExpression.Null = <null> {prefer}
+  ValueExpression.SetComprehension = <{ <ID> : <Expression> @ <Path> }> 
+  ValueExpression.SetComprehension = <{ <ID> : <Expression> | <Constraint> @ <Path> }> 
+  ValueExpression.SetExtent = <{ <{Expression ","}*> }> 
+  BoosterTerm = ValueExpression 
+  BasicValue.Integer = INT 
+  BasicValue.String = STRING 
+  BasicValue.Decimal = DECIMAL 
+  BasicValue.True = <true> 
+  BasicValue.False = <false> 
+  BasicValue.CurrentDateTime = <currentdatetime> 
+  BasicValue.CurrentDate = <currentdate> 
+  BasicValue.CurrentTime = <currenttime> 
+  TypeExtent.String = <string> {prefer}
+  TypeExtent.Int = <int> {prefer}
+  TypeExtent.Decimal = <decimal> {prefer}
+  TypeExtent.Date = <date> {prefer}
+  TypeExtent.Time = <time> {prefer}
+  TypeExtent.DateTime = <datetime> {prefer}
+  TypeExtent.Boolean = <boolean> {prefer}
+  TypeExtent.Password = <password> {prefer}
+  Path = PathStart 
+  Path.Path = <<Path> . <PathComponent>> {prefer}
+  BoosterTerm = Path 
+  PathStart = Input 
+  PathStart = Output 
+  PathStart = This 
+  PathStart = ThisPrimed 
+  PathStart.PathStart = <<ID> <Primed?>> 
+  BoosterTerm = PathStart 
+  Input.Input = <<ID> ?> 
+  Output.Output = <<ID> !> 
+  This.This = <this> 
+  ThisPrimed.ThisPrimed = <this '> 
+  Primed.Primed = <'> 
+  BoosterTerm = Primed 
+  PathComponent.PathComponent = <<ID> <Primed?>> 
+  PathComponent.PathComponent =  {deprecated}
+  BoosterTerm = PathComponent 
+  UnOp.Head = <head> 
+  UnOp.Tail = <tail> 
+  UnOp.Cardinality = <card> 
+  UnOp.Negative = <-> 
+  BinOp.Plus = <+> 
+  BinOp.Minus = <-> 
+  BinOp.Times = <*> 
+  BinOp.Divide = </> 
+  BinOp.Maximum = <max> 
+  BinOp.Minimum = <min> 
+  BinOp.Intersection = </\\> 
+  BinOp.Union = <\\/> 
+  BinOp.Concat = <++> 
+  MethodReference.MethodReference = <<Path> ( <{Seq1 ","}*> )> 
+  Seq1.Seq = <<Input> = <Expression>> 
+  BoosterTerm = MethodReference 
+  WorkflowComponent = SeqWf 
+  WorkflowComponent = ParWf 
+  SeqWf.SeqWf = <seq <ID> : <SeqWfExpression>> 
+  ParWf.ParWf = <par <ID> : <ParWfExpression>> 
+  ParWf.ParWf2 = <par <Constraint> & <ID> : <ParWfExpression>> 
+  SeqWfExpression.Skip = <Skip> 
+  SeqWfExpression.Choice = <<GuardedAction> -\> <SeqWfExpression> [] <GuardedAction> -\> <SeqWfExpression>> 
+  SeqWfExpression.Wait = <WAIT{ <{INT ","}+> } -\> <SeqWfExpression>> 
+  SeqWfExpression.WorkflowReference = ID 
+  SeqWfExpression.Prefix = <<GuardedAction> -\> <SeqWfExpression>> 
+  SeqWfExpression = <( <SeqWfExpression> )> {bracket}
+  GuardedAction.GA = <<Guard> & <MethodReference>> 
+  GuardedAction = <( <GuardedAction> )> {bracket}
+  Guard.Normal = Constraint 
+  Guard.Delayed = <Delayed <Constraint>> 
+  ParWfExpression.Single = ID 
+  ParWfExpression.Multiple = <<ID> ||| <ParWfExpression>> 
 
-	Definition.Entity = <
-		entity <ID> {
-			<{Property "\n"}*>
-		}
-	>
-  	
-	Property.Property = <<ID> : <Type>>
-	
-	Type.Type = <<ID>>
+context-free priorities
 
+  SeqWfExpression = GuardedAction '->' SeqWfExpression  > SeqWfExpression = GuardedAction '->' SeqWfExpression '[]' GuardedAction '->' SeqWfExpression 
+
+context-free priorities
+
+  Constraint = 'not' Constraint  > Constraint = Constraint '&' Constraint  > Constraint = Constraint 'or' Constraint  > Constraint = Constraint '=>' Constraint  > Constraint = Constraint ';' Constraint 
+
+context-free priorities
+
+  Expression = ValueExpression  > Expression = UnOp Expression  > Expression = Expression BinOp Expression 

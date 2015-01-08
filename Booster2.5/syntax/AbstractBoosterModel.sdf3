@@ -1,0 +1,42 @@
+module AbstractBoosterModel
+
+imports Common	
+        Booster25	
+        Relational
+
+
+context-free start-symbols
+
+  MaxMult Ordering Type GuardedCommand
+
+context-free syntax
+
+  MaxMult.MaxMult = INT 
+  MaxMult.MaxMult = <*> 
+  BoosterTerm = MaxMult 
+  Ordering.Ordering = <SET> 
+  Ordering.Ordering = <OSET> 
+  Ordering.Ordering = <SEQ> 
+  BoosterTerm = Ordering 
+  Type.Null = <null> 
+  Type.Int = <INT> 
+  Type.String = <STRING> 
+  Type.Reference = ID 
+  Type.Optional = <[ <Type> ]> 
+  Type.Set = <set ( <Type> )> 
+  GuardedCommand.Skip = <skip> {prefer}
+  GuardedCommand.Assign = <<Path> := <Expression>> {left}
+  GuardedCommand.New = <new <ID> ! : <ID>> 
+  GuardedCommand.Guard = <<Constraint> --\> <GuardedCommand>> {left}
+  GuardedCommand.Parallel = <<GuardedCommand> || <GuardedCommand>> {left}
+  GuardedCommand.Sequence = <<GuardedCommand> ; <GuardedCommand>> {left}
+  GuardedCommand.Choice = <<GuardedCommand> [ ] <GuardedCommand>> {left}
+  GuardedCommand.Any = <ALL <ID> : <Expression> . <GuardedCommand>> {prefer}
+  GuardedCommand.All = <ANY <ID> : <Expression> . <GuardedCommand>> {prefer}
+  GuardedCommand = <( <GuardedCommand> )> {bracket}
+  GuardedCommand.Parallels = <parallels <{GuardedCommand "||"}*>> 
+  BoosterTerm = GuardedCommand 
+
+priorities
+
+  GuardedCommand = 'skip'  > GuardedCommand = Path ':=' Expression  > GuardedCommand = Constraint '-->' GuardedCommand  > GuardedCommand = GuardedCommand '||' GuardedCommand  > GuardedCommand = GuardedCommand ';' GuardedCommand  > GuardedCommand = GuardedCommand "[" "]" GuardedCommand 
