@@ -1,0 +1,47 @@
+system methodTest
+ 
+   set DayOfWeek{ Monday, Tuesday, Wednesday}
+   
+   set Colour {Red, Green, Blue}
+ 
+   class class1 {
+   	  attributes
+   	  	attA (ID) : INT
+   	  	attB : INT
+   	  	attC : STRING
+   	  	attD : INT
+   	  	attE : INT
+   	  methods
+  	  	m1 { attA' = attA + 1 }
+	
+   }
+
+   class class2 extends class1{
+   	  attributes
+   	  	att1 : INT
+   	  	att2 : STRING
+   	  	att3 : INT
+   }
+	class class3 extends class2, class4{
+		attributes
+			attZ : INT
+		methods
+			m1 { attZ = 3}
+
+	}
+
+	class class5 extends class3, class2 {
+		methods
+			m1 { true }
+	}
+   
+   class class4 {
+      attributes
+   		x : INT
+   }
+   
+   class class6 extends class5{
+   		methods
+   }
+
+

@@ -1,0 +1,37 @@
+system Library
+
+  class Book {
+    attributes
+      title : String
+      borrower : [Reader.borrowed]
+      owner : Lender.holdings
+    invariants
+      owner : borrower.subs
+  }                                   
+
+  class Reader {      
+    attributes
+      name : String
+      borrowed : set(Book.borrower)[*]
+      subs : set(Lender.members)[*]
+    methods
+      subscribe
+	{ lender? : subs' }
+      borrow
+	{ book?.borrower = null 
+	& book? : borrowed' }
+      return
+	{ book? : borrowed 
+	& book? /: borrowed' }
+  }
+
+  class Lender {                      
+    attributes             
+      max : Int
+      members : set(Reader.subs)[*]
+      holdings : set(Book.owner)[*]
+    invariants
+      card(members) <= max
+  }
+
+

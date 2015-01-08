@@ -1,0 +1,138 @@
+ system University
+
+/* class Staff{
+	attributes
+		name (ID) : String
+		supervisees : SET(Student . supervisor)[*]
+	methods
+		create{ s! : Staff' ; s!.name' = name?}
+		newSupervisee { supervisee? : supervisees'}	
+	
+}
+
+class Student{
+	attributes
+		name (ID) : String
+		supervisor : [Staff . supervisees]
+		
+	methods
+		create{ s! : Student' ; s!.name' = name?}
+		setSupervisor { supervisor' = supervisor? }
+}
+
+class Swapper {
+	attributes
+		x (ID) : Int
+		y (ID) : Int
+	methods
+		create { s! : Swapper' & s!.x' = x? & s!.y' = y?}
+		swap { x' = y & y' = x }
+}
+*/
+
+set CreditCardType {Visa, Mastercard, AmericanExpress}
+
+set OrderStatus {Draft, Complete, Prepared, Dispatched}
+
+
+class ProductLine{
+	attributes
+		name (ID) : string
+		description : string
+		products : SET ( Product . productLine ) [*]
+}
+
+class Product {
+	attributes
+		name (ID) : string
+		description : string
+		productLine : ProductLine . products
+		inStock : int
+		cost : decimal 
+		lineItems : set ( LineItem . product ) [*]
+	invariants
+		inStock >= 0
+}
+
+class LineItem {
+	attributes
+		product (ID) : Product . lineItems
+		quantity (ID) : int
+		lineCost (ID) : decimal
+		itemForOrder : Order . lineItems
+		preparedBy : [ StaffMember . preparedLineItems ]
+		preparedOn : [ dateTime ]
+	invariants
+		quantity > 0
+}
+
+class Order {
+	attributes
+		forCustomer : Customer . orders
+		createdOn (ID) : dateTime
+		totalCost : decimal
+		status (ID) : OrderStatus
+		paymentCard : [ CreditCard . usedForPayment ]
+		paymentDate : [ dateTime ]
+		billingAddress : [ Address . billingForOrders ]
+		shippingAddress : [ Address . shippingForOrders ]
+		lineItems : set ( LineItem . itemForOrder)[*]
+		dispatchedBy : [ StaffMember . fulfilledOrders ]
+		dispatchedOn : [ dateTime ]
+	invariants
+		paymentCard : forCustomer . creditCards
+		billingAddress : forCustomer . addresses
+		shippingAddress : forCustomer . addresses
+	methods
+		complete {   status = Draft & 
+					card(lineItems) > 0 &
+					status' = Complete &
+					paymentDate' = currentDateTime &
+					paymentCard' = paymentCard? &
+					billingAddress' = billingAddress?
+					 & shippingAddress' = shippingAddress? 
+		}
+}
+
+class Customer {
+	attributes
+		lastName (ID) : string
+		firstName (ID) : string
+		creditCards : set ( CreditCard . forCustomer)[*]
+		addresses : set ( Address . forCustomer )[*]
+		orders : set ( Order . forCustomer ) [*]
+}
+
+class CreditCard {
+	attributes
+		type (ID) : CreditCardType
+		number (ID) : string
+		forCustomer : Customer . creditCards
+		usedForPayment : set ( Order . paymentCard )[*]
+}
+
+class Address { 
+	attributes
+		line1 (ID) : string
+		line2 (ID) : string
+		line3 (ID) : string
+		country (ID) : Country . countryAddresses
+		postcode : string
+		forCustomer : Customer . addresses
+		billingForOrders : set (Order . billingAddress)[*]
+		shippingForOrders : set (Order . shippingAddress)[*]
+}
+
+class StaffMember {
+	attributes
+		lastName (ID) : string
+		firstName (ID) : string
+		preparedLineItems : SET ( LineItem . preparedBy ) [*]
+		fulfilledOrders : SET ( Order . orderFulfilledBy ) [*]
+}
+
+class Country {
+	attributes
+		name (ID) : string
+		countryAddresses : SET(Address . addressCountry)[*]
+}
