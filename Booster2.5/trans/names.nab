@@ -3,29 +3,102 @@ module names
 imports
 	
 	include/Booster25
-	
-// namespaces
-// 	
-// 	Module
-// 	Entity
-// 	Property
-// 	
-// binding rules
+
+namespaces
+
+	System
+	Set
+	Class
+	Attribute
+	Method
+	This
+	Variable
+
+binding rules // System
+
+	System(s,c):
+		defines System s
+		scopes Class, Set
+
+binding rules // Set
+
+	SetDef(s, values):
+		defines Set s
+
+binding rules // Class
+
+	Class(c,extends,members):
+		defines Class c
+			of type c
+		scopes Method, Attribute, This
+		implicitly defines This This()
+			of type c
+
+binding rules // Attribute
+
+	Attribute(a,dec,a-ty):
+		defines Attribute a
+			of type a-ty
+
+binding rules // Method
+
+	Method(m,body):
+		defines Method m
+		scopes Variable
+
+binding rules // References
+
+	UniDirectional(s):
+		refers to Set s
+	otherwise
+		refers to Class s
+
+	BiDirectional(class, attr):
+		refers to Class class
+		refers to Attribute attr in Class class
+		
+	PathStart(p, prime):
+		refers to Class p
+	otherwise
+		refers to Attribute p in Class c
+		where This() resolves to This this
+		and this has type c
+	otherwise
+		refers to Variable p
+
+// 	Output(v):
+// 		refers to Variable v
 // 
-// 	Module(x, _) : 
-// 		defines Module x
-// 		scopes Entity
-// 		implicitly defines Entity "String"
-// 		implicitly defines Entity "Int"
-// 		
-// 	Entity(x, _) :
-// 		defines Entity x 
-// 			of type Type(x)
-// 		scopes Property
-// 		
-// 	Property(x, t) :
-// 		defines Property x 
-// 			of type t
-// 		
-// 	Type(x) :
-// 		refers to Entity x
+// 	Path(path-start, PathComponent(a, prime)):
+// 		refers to Attribute a in Class c
+// 			where path-start has type c
+// 		refers to Method a in Class c
+// 			where path-start has type c
+
+	Path(Output(v), PathComponent(a, prime)):
+		refers to Variable v
+		refers to Attribute a in Class c
+			where v resolves to Variable v-def
+			and v-def has type c
+			
+	// Path(PathStart(p, prime), PathComponent(m, prime2)):
+	// 	refers to Class p
+	// 	refers to Method m in Class p
+
+	//Is it true that inputs always must be attribute names? Or should is that just a convention?
+	Input(i):
+		refers to Attribute i in Class c
+		where This() resolves to This this
+		and this has type c
+		
+
+binding rules // Variables
+
+	BinRel(Output(v), In(), PathStart(c-ref, prime)):
+		defines Variable v
+			of type c
+			where c-ref resolves to Class c
+			
+	Forall(v, PathStart(v-ty, prime), body):
+		defines Variable v
+			of type v-ty

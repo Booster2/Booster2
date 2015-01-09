@@ -1,0 +1,26 @@
+module trans/types.generated
+
+imports
+  
+  lib/runtime/nabl/-
+  lib/runtime/task/-
+  lib/runtime/types/-
+  lib/runtime/properties/-
+  lib/runtime/relations/-
+
+
+signature constructors
+  
+  
+  
+rules // functions 
+  
+
+rules // relations
+  
+
+rules // rules
+  
+
+rules // projections
+  

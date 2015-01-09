@@ -1,4 +1,4 @@
-system Library
+system Library2
 
   class Book {
     attributes

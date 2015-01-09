@@ -19,6 +19,7 @@ imports
 	check
 	generate
 	pp
+	trans/types.generated
 
 rules // Analysis
 	
