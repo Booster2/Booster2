@@ -14,6 +14,7 @@ signature
   constructors
     NablNsSystem    : Namespace
     NablNsSet       : Namespace
+    NablNsSetVal    : Namespace
     NablNsClass     : Namespace
     NablNsAttribute : Namespace
     NablNsMethod    : Namespace
@@ -36,7 +37,7 @@ rules
 
   nabl-get-scope =
     ?System(s, c)
-    ; ![NablNsClass(), NablNsSet()]
+    ; ![NablNsClass(), NablNsSet(), NablNsSetVal()]
 
   nabl-get-name :
     System(s, c) -> s
@@ -59,7 +60,7 @@ rules
           , NablNsSystem()
           , Unique()
           , Current()
-          , [NablNsClass(), NablNsSet()]
+          , [NablNsClass(), NablNsSet(), NablNsSetVal()]
           , []
           )
         , id
@@ -95,6 +96,37 @@ rules
           , []
           )
         , id
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-get-name :
+    SetVal(value) -> value
+
+  nabl-name-apply(s) =
+    SetVal(s)
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?SetVal(value)
+    ; origin-track-forced(
+        SetVal(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsSetVal()
+          , Unique()
+          , Current()
+          , []
+          , []
+          )
         )
       |
       )
@@ -419,6 +451,16 @@ rules
                     , []
                     )
                }>
+            , <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsSetVal()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
             ]
           )
         , id
@@ -640,6 +682,89 @@ rules
                        }>)
        ; BinRel(
            Output(
+             nabl-store-props(
+             | ctx__
+             , [Prop(Type(), c, [])]
+             )
+           )
+         , In()
+         , PathStart(id, id)
+         ))
+    ; fail
+
+  nabl-get-name :
+    BinRel(
+      Input(v)
+    , In()
+    , PathStart(c-ref, prime)
+    ) -> v
+
+  nabl-name-apply(s) =
+    BinRel(
+      Input(s)
+    , In()
+    , PathStart(id, id)
+    )
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?BinRel(
+       Input(v)
+     , In()
+     , PathStart(c-ref, prime)
+     )
+    ; origin-track-forced(
+        BinRel(
+          origin-track-forced(
+            Input(
+              nabl-def(
+                ?c-uri1__
+              , ?s-uri1__
+              | lang__
+              , ctx__
+              , uniques__
+              , uri__
+              , uri__
+              , NablNsVariable()
+              , Unique()
+              , Current()
+              , []
+              , []
+              )
+            )
+          |
+          )
+        , origin-track-forced(In()|)
+        , origin-track-forced(PathStart(id, id)|)
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
+    ?BinRel(
+       Input(v)
+     , In()
+     , PathStart(c-ref, prime)
+     )
+    ; (where(c := <nabl-use-candidate(
+                   | lang__
+                   , ctx__
+                   , uris__
+                   , <nabl-fix-name> c-ref
+                   )> <{:
+                         id
+                         ; !UseCandidate(
+                              NablNsClass()
+                            , []
+                            , Current()
+                            , True()
+                            , []
+                            )
+                       }>)
+       ; BinRel(
+           Input(
              nabl-store-props(
              | ctx__
              , [Prop(Type(), c, [])]

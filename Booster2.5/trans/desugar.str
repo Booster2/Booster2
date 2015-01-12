@@ -1,0 +1,27 @@
+module trans/desugar
+
+imports
+	
+	src-gen/signatures/Booster25-sig
+
+signature constructors
+	
+	SetVal : Term -> Term
+
+rules
+	
+	desugar-before-analysis = 
+		try(sometd(setdef-add-setvalues))
+	
+	desugar-after-analysis = 
+		try(sometd(setdef-rem-setvalues))
+
+rules // Help NaBL: add SetVal constructors around the values in set definitions
+	
+	setdef-add-setvalues = SetDef(id, map(add-setvalues))
+	
+	add-setvalues = ?s;!SetVal(s)
+
+	setdef-rem-setvalues = SetDef(id, map(rem-setvalues))
+	
+	rem-setvalues = ?SetVal(<id>)

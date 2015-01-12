@@ -8,6 +8,7 @@ namespaces
 
 	System
 	Set
+	SetVal
 	Class
 	Attribute
 	Method
@@ -18,12 +19,15 @@ binding rules // System
 
 	System(s,c):
 		defines System s
-		scopes Class, Set
+		scopes Class, Set, SetVal
 
 binding rules // Set
 
 	SetDef(s, values):
 		defines Set s
+	
+	SetVal(value):
+		defines SetVal value
 
 binding rules // Class
 
@@ -65,6 +69,8 @@ binding rules // References
 		and this has type c
 	otherwise
 		refers to Variable p
+	otherwise
+		refers to SetVal p
 
 // 	Output(v):
 // 		refers to Variable v
@@ -95,6 +101,11 @@ binding rules // References
 binding rules // Variables
 
 	BinRel(Output(v), In(), PathStart(c-ref, prime)):
+		defines Variable v
+			of type c
+			where c-ref resolves to Class c
+			
+	BinRel(Input(v), In(), PathStart(c-ref, prime)):
 		defines Variable v
 			of type c
 			where c-ref resolves to Class c
