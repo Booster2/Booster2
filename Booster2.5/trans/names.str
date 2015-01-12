@@ -239,11 +239,13 @@ rules
 
   nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
     ?Attribute(a, dec, a-ty)
-    ; (where(id)
+    ; (where(ty := <new-task-fixdeps(|ctx__, [])> Id(
+                                                    <get-or-create-property-task(|ctx__, Type())> a-ty
+                                                  ))
        ; Attribute(
            nabl-store-props(
            | ctx__
-           , [Prop(Type(), a-ty, [])]
+           , [Prop(Type(), ty, [])]
            )
          , id
          , id
@@ -468,39 +470,79 @@ rules
       |
       )
 
+  nabl-get-name :
+    Input(v) -> v
+
+  nabl-name-apply(s) =
+    Input(s)
+
   nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
-    ?Path(Output(v), PathComponent(a, prime))
+    ?Input(v)
     ; origin-track-forced(
-        Path(
-          origin-track-forced(
-            Output(
-              nabl-use(
-              | lang__
-              , ctx__
-              , uniques__
-              , uris__
-              , [ <{:
-                     id
-                     ; !UseCandidate(
-                          NablNsVariable()
-                        , []
-                        , Current()
-                        , True()
-                        , []
-                        )
-                   }>
-                ]
-              )
-            )
-          |
+        Input(
+          nabl-use(
+          | lang__
+          , ctx__
+          , uniques__
+          , uris__
+          , [ <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsVariable()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            ]
           )
-        , origin-track-forced(PathComponent(id, id)|)
         )
       |
       )
+
+  nabl-get-name :
+    Output(v) -> v
+
+  nabl-name-apply(s) =
+    Output(s)
+
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?Output(v)
+    ; origin-track-forced(
+        Output(
+          nabl-use(
+          | lang__
+          , ctx__
+          , uniques__
+          , uris__
+          , [ <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsVariable()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            ]
+          )
+        )
+      |
+      )
+
+  nabl-get-name :
+    Path(path-start, PathComponent(a, prime)) -> a
+
+  nabl-name-apply(s) =
+    Path(id, PathComponent(s, id))
+
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?Path(path-start, PathComponent(a, prime))
     ; origin-track-forced(
         Path(
-          origin-track-forced(Output(id)|)
+          id
         , origin-track-forced(
             PathComponent(
               nabl-use(
@@ -508,30 +550,29 @@ rules
               , ctx__
               , uniques__
               , uris__
-              , [ <{c, v-def:
-                     (v-def := <nabl-use-candidate(
-                                | lang__
-                                , ctx__
-                                , uris__
-                                , <nabl-fix-name> v
-                                )> <{:
-                                      id
-                                      ; !UseCandidate(
-                                           NablNsVariable()
-                                         , []
-                                         , Current()
-                                         , True()
-                                         , []
-                                         )
-                                    }>
-                      ; {prev__:
-                          ?prev__
-                          ; c := <new-task-fixdeps(|ctx__, [prev__])> Id(
-                                                                        <get-or-create-property-task(|ctx__, Type())> v-def
-                                                                      )
-                        })
+              , [ <{c:
+                     c := <new-task-fixdeps(|ctx__, [])> Id(
+                                                           <get-or-create-property-task(|ctx__, Type())> path-start
+                                                         )
                      ; !UseCandidate(
                           NablNsAttribute()
+                        , []
+                        , Context(
+                            NablNsClass()
+                          , c
+                          , []
+                          , Current()
+                          )
+                        , True()
+                        , []
+                        )
+                   }>
+                , <{c:
+                     c := <new-task-fixdeps(|ctx__, [])> Id(
+                                                           <get-or-create-property-task(|ctx__, Type())> path-start
+                                                         )
+                     ; !UseCandidate(
+                          NablNsMethod()
                         , []
                         , Context(
                             NablNsClass()
@@ -553,105 +594,55 @@ rules
       |
       )
 
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?This()
+    ; origin-track-forced(
+        nabl-use(
+        | lang__
+        , ctx__
+        , uniques__
+        , uris__
+        , [ <{:
+               id
+               ; !UseCandidate(
+                    NablNsThis()
+                  , []
+                  , Current()
+                  , True()
+                  , []
+                  )
+             }>
+          ]
+        )
+      |
+      )
+
   nabl-get-name :
-    Input(i) -> i
+    BinRelDefLeftInput(v, op, rhs) -> v
 
   nabl-name-apply(s) =
-    Input(s)
+    BinRelDefLeftInput(s, id, id)
 
-  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
-    ?Input(i)
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?BinRelDefLeftInput(v, op, rhs)
     ; origin-track-forced(
-        Input(
-          nabl-use(
+        BinRelDefLeftInput(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
           | lang__
           , ctx__
           , uniques__
-          , uris__
-          , [ <{c, this:
-                 (this := <nabl-use-candidate(
-                           | lang__
-                           , ctx__
-                           , uris__
-                           , <nabl-fix-name> This()
-                           )> <{:
-                                 id
-                                 ; !UseCandidate(
-                                      NablNsThis()
-                                    , []
-                                    , Current()
-                                    , True()
-                                    , []
-                                    )
-                               }>
-                  ; {prev__:
-                      ?prev__
-                      ; c := <new-task-fixdeps(|ctx__, [prev__])> Id(
-                                                                    <get-or-create-property-task(|ctx__, Type())> this
-                                                                  )
-                    })
-                 ; !UseCandidate(
-                      NablNsAttribute()
-                    , []
-                    , Context(
-                        NablNsClass()
-                      , c
-                      , []
-                      , Current()
-                      )
-                    , True()
-                    , []
-                    )
-               }>
-            ]
+          , uri__
+          , uri__
+          , NablNsVariable()
+          , Unique()
+          , Current()
+          , []
+          , []
           )
-        )
-      |
-      )
-
-  nabl-get-name :
-    BinRel(
-      Output(v)
-    , In()
-    , PathStart(c-ref, prime)
-    ) -> v
-
-  nabl-name-apply(s) =
-    BinRel(
-      Output(s)
-    , In()
-    , PathStart(id, id)
-    )
-
-  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
-    ?BinRel(
-       Output(v)
-     , In()
-     , PathStart(c-ref, prime)
-     )
-    ; origin-track-forced(
-        BinRel(
-          origin-track-forced(
-            Output(
-              nabl-def(
-                ?c-uri1__
-              , ?s-uri1__
-              | lang__
-              , ctx__
-              , uniques__
-              , uri__
-              , uri__
-              , NablNsVariable()
-              , Unique()
-              , Current()
-              , []
-              , []
-              )
-            )
-          |
-          )
-        , origin-track-forced(In()|)
-        , origin-track-forced(PathStart(id, id)|)
+        , id
+        , id
         )
       |
       )
@@ -660,81 +651,46 @@ rules
     ; match(implicits__|[])
 
   nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
-    ?BinRel(
-       Output(v)
-     , In()
-     , PathStart(c-ref, prime)
-     )
-    ; (where(c := <nabl-use-candidate(
-                   | lang__
-                   , ctx__
-                   , uris__
-                   , <nabl-fix-name> c-ref
-                   )> <{:
-                         id
-                         ; !UseCandidate(
-                              NablNsClass()
-                            , []
-                            , Current()
-                            , True()
-                            , []
-                            )
-                       }>)
-       ; BinRel(
-           Output(
-             nabl-store-props(
-             | ctx__
-             , [Prop(Type(), c, [])]
-             )
+    ?BinRelDefLeftInput(v, op, rhs)
+    ; (where(t := <new-task-fixdeps(|ctx__, [])> Id(
+                                                   <get-or-create-property-task(|ctx__, Type())> rhs
+                                                 ))
+       ; BinRelDefLeftInput(
+           nabl-store-props(
+           | ctx__
+           , [Prop(Type(), t, [])]
            )
-         , In()
-         , PathStart(id, id)
+         , id
+         , id
          ))
     ; fail
 
   nabl-get-name :
-    BinRel(
-      Input(v)
-    , In()
-    , PathStart(c-ref, prime)
-    ) -> v
+    BinRelDefLeftOutput(v, op, rhs) -> v
 
   nabl-name-apply(s) =
-    BinRel(
-      Input(s)
-    , In()
-    , PathStart(id, id)
-    )
+    BinRelDefLeftOutput(s, id, id)
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
-    ?BinRel(
-       Input(v)
-     , In()
-     , PathStart(c-ref, prime)
-     )
+    ?BinRelDefLeftOutput(v, op, rhs)
     ; origin-track-forced(
-        BinRel(
-          origin-track-forced(
-            Input(
-              nabl-def(
-                ?c-uri1__
-              , ?s-uri1__
-              | lang__
-              , ctx__
-              , uniques__
-              , uri__
-              , uri__
-              , NablNsVariable()
-              , Unique()
-              , Current()
-              , []
-              , []
-              )
-            )
-          |
+        BinRelDefLeftOutput(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsVariable()
+          , Unique()
+          , Current()
+          , []
+          , []
           )
-        , origin-track-forced(In()|)
-        , origin-track-forced(PathStart(id, id)|)
+        , id
+        , id
         )
       |
       )
@@ -743,46 +699,124 @@ rules
     ; match(implicits__|[])
 
   nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
-    ?BinRel(
-       Input(v)
-     , In()
-     , PathStart(c-ref, prime)
-     )
-    ; (where(c := <nabl-use-candidate(
-                   | lang__
-                   , ctx__
-                   , uris__
-                   , <nabl-fix-name> c-ref
-                   )> <{:
-                         id
-                         ; !UseCandidate(
-                              NablNsClass()
-                            , []
-                            , Current()
-                            , True()
-                            , []
-                            )
-                       }>)
-       ; BinRel(
-           Input(
-             nabl-store-props(
-             | ctx__
-             , [Prop(Type(), c, [])]
-             )
+    ?BinRelDefLeftOutput(v, op, rhs)
+    ; (where(t := <new-task-fixdeps(|ctx__, [])> Id(
+                                                   <get-or-create-property-task(|ctx__, Type())> rhs
+                                                 ))
+       ; BinRelDefLeftOutput(
+           nabl-store-props(
+           | ctx__
+           , [Prop(Type(), t, [])]
            )
-         , In()
-         , PathStart(id, id)
+         , id
+         , id
          ))
     ; fail
 
   nabl-get-name :
-    Forall(v, PathStart(v-ty, prime), body) -> v
+    BinRelDefRightInput(lhs, op, v) -> v
 
   nabl-name-apply(s) =
-    Forall(s, PathStart(id, id), id)
+    BinRelDefRightInput(id, id, s)
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
-    ?Forall(v, PathStart(v-ty, prime), body)
+    ?BinRelDefRightInput(lhs, op, v)
+    ; origin-track-forced(
+        BinRelDefRightInput(
+          id
+        , id
+        , nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsVariable()
+          , Unique()
+          , Current()
+          , []
+          , []
+          )
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
+    ?BinRelDefRightInput(lhs, op, v)
+    ; (where(t := <new-task-fixdeps(|ctx__, [])> Id(
+                                                   <get-or-create-property-task(|ctx__, Type())> lhs
+                                                 ))
+       ; BinRelDefRightInput(
+           id
+         , id
+         , nabl-store-props(
+           | ctx__
+           , [Prop(Type(), t, [])]
+           )
+         ))
+    ; fail
+
+  nabl-get-name :
+    BinRelDefRightOutput(lhs, op, v) -> v
+
+  nabl-name-apply(s) =
+    BinRelDefRightOutput(id, id, s)
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?BinRelDefRightOutput(lhs, op, v)
+    ; origin-track-forced(
+        BinRelDefRightOutput(
+          id
+        , id
+        , nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsVariable()
+          , Unique()
+          , Current()
+          , []
+          , []
+          )
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
+    ?BinRelDefRightOutput(lhs, op, v)
+    ; (where(t := <new-task-fixdeps(|ctx__, [])> Id(
+                                                   <get-or-create-property-task(|ctx__, Type())> lhs
+                                                 ))
+       ; BinRelDefRightOutput(
+           id
+         , id
+         , nabl-store-props(
+           | ctx__
+           , [Prop(Type(), t, [])]
+           )
+         ))
+    ; fail
+
+  nabl-get-name :
+    Forall(v, expr, body) -> v
+
+  nabl-name-apply(s) =
+    Forall(s, id, id)
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?Forall(v, expr, body)
     ; origin-track-forced(
         Forall(
           nabl-def(
@@ -799,7 +833,7 @@ rules
           , []
           , []
           )
-        , origin-track-forced(PathStart(id, id)|)
+        , id
         , id
         )
       |
@@ -809,14 +843,16 @@ rules
     ; match(implicits__|[])
 
   nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
-    ?Forall(v, PathStart(v-ty, prime), body)
-    ; (where(id)
+    ?Forall(v, expr, body)
+    ; (where(ty := <new-task-fixdeps(|ctx__, [])> Id(
+                                                    <get-or-create-property-task(|ctx__, Type())> expr
+                                                  ))
        ; Forall(
            nabl-store-props(
            | ctx__
-           , [Prop(Type(), v-ty, [])]
+           , [Prop(Type(), ty, [])]
            )
-         , PathStart(id, id)
+         , id
          , id
          ))
     ; fail

@@ -3,18 +3,31 @@ module trans/desugar
 imports
 	
 	src-gen/signatures/Booster25-sig
+	
+imports
+	
+	trans/lib/origin
 
 signature constructors
 	
-	SetVal : Term -> Term
+	SetVal : ID -> Term
+	
+	BinRelDefLeftInput   : ID * BinRel * Expression -> Term
+	BinRelDefLeftOutput  : ID * BinRel * Expression -> Term
+	BinRelDefRightInput  : Expression * BinRel * ID -> Term
+	BinRelDefRightOutput : Expression * BinRel * ID -> Term
 
 rules
 	
 	desugar-before-analysis = 
-		try(sometd(setdef-add-setvalues))
+		try(sometd(setdef-add-setvalues));
+		bottomup(try(binrel-add-vardef));
+		warning-on-missing-origin
 	
 	desugar-after-analysis = 
-		try(sometd(setdef-rem-setvalues))
+		try(sometd(setdef-rem-setvalues));
+		bottomup(try(binrel-rem-vardef));
+		warning-on-missing-origin
 
 rules // Help NaBL: add SetVal constructors around the values in set definitions
 	
@@ -25,3 +38,15 @@ rules // Help NaBL: add SetVal constructors around the values in set definitions
 	setdef-rem-setvalues = SetDef(id, map(rem-setvalues))
 	
 	rem-setvalues = ?SetVal(<id>)
+
+rules //  Help NaBL: make explicit what are Variable definition sites
+	
+	binrel-add-vardef = ?BinRel(Input(v),  op@In(),    rhs);       !BinRelDefLeftInput  (v,   op, rhs)
+	binrel-add-vardef = ?BinRel(Output(v), op@In(),    rhs);       !BinRelDefLeftOutput (v,   op, rhs)
+	binrel-add-vardef = ?BinRel(lhs,       op@Equal(), Input(v));  !BinRelDefRightInput (lhs, op, v)
+	binrel-add-vardef = ?BinRel(lhs,       op@Equal(), Output(v)); !BinRelDefRightOutput(lhs, op, v)
+	
+	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op, rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
+	binrel-rem-vardef = ?BinRelDefLeftOutput (v,   op, rhs); !BinRel(<custom-origin(|v)>Output(v), op, rhs)
+	binrel-rem-vardef = ?BinRelDefRightInput (lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Input(v))
+	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))

@@ -40,9 +40,10 @@ binding rules // Class
 
 binding rules // Attribute
 
-	Attribute(a,dec,a-ty):
+	Attribute(a,dec, a-ty):
 		defines Attribute a
-			of type a-ty
+			of type ty
+			where a-ty has type ty
 
 binding rules // Method
 
@@ -72,44 +73,56 @@ binding rules // References
 	otherwise
 		refers to SetVal p
 
-// 	Output(v):
-// 		refers to Variable v
-// 
-// 	Path(path-start, PathComponent(a, prime)):
-// 		refers to Attribute a in Class c
-// 			where path-start has type c
-// 		refers to Method a in Class c
-// 			where path-start has type c
-
-	Path(Output(v), PathComponent(a, prime)):
+	Input(v):
 		refers to Variable v
+		
+	Output(v):
+		refers to Variable v
+
+	Path(path-start, PathComponent(a, prime)):
 		refers to Attribute a in Class c
-			where v resolves to Variable v-def
-			and v-def has type c
+			where path-start has type c
+	otherwise
+		refers to Method a in Class c
+			where path-start has type c
+
+	This(): refers to This This()
+
+	// Path(Output(v), PathComponent(a, prime)):
+	// 	refers to Variable v
+	// 	refers to Attribute a in Class c
+	// 		where v resolves to Variable v-def
+	// 		and v-def has type c
 			
 	// Path(PathStart(p, prime), PathComponent(m, prime2)):
 	// 	refers to Class p
 	// 	refers to Method m in Class p
 
 	//Is it true that inputs always must be attribute names? Or should is that just a convention?
-	Input(i):
-		refers to Attribute i in Class c
-		where This() resolves to This this
-		and this has type c
+	// Input(i):
+	// 	refers to Attribute i in Class c
+	// 	where This() resolves to This this
+	// 	and this has type c
 		
 
 binding rules // Variables
 
-	BinRel(Output(v), In(), PathStart(c-ref, prime)):
-		defines Variable v
-			of type c
-			where c-ref resolves to Class c
+	// BinRel(Output(v), In(), PathStart(c-ref, prime)):
+	// 	defines Variable v
+	// 		of type c
+	// 		where c-ref resolves to Class c
+	// 		
+	// BinRel(Input(v), In(), PathStart(c-ref, prime)):
+	// 	defines Variable v
+	// 		of type c
+	// 		where c-ref resolves to Class c
+	
+	BinRelDefLeftInput  (v,   op, rhs): defines Variable v of type t where rhs has type t
+	BinRelDefLeftOutput (v,   op, rhs): defines Variable v of type t where rhs has type t
+	BinRelDefRightInput (lhs, op, v  ): defines Variable v of type t where lhs has type t
+	BinRelDefRightOutput(lhs, op, v  ): defines Variable v of type t where lhs has type t
 			
-	BinRel(Input(v), In(), PathStart(c-ref, prime)):
+	Forall(v, expr, body):
 		defines Variable v
-			of type c
-			where c-ref resolves to Class c
-			
-	Forall(v, PathStart(v-ty, prime), body):
-		defines Variable v
-			of type v-ty
+			of type ty
+			where expr has type ty

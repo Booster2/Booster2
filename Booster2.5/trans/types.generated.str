@@ -8,7 +8,9 @@ imports
   lib/runtime/properties/-
   lib/runtime/relations/-
 
+imports
 
+  
 signature constructors
   
   
@@ -20,6 +22,59 @@ rules // relations
   
 
 rules // rules
+  
+  create-type-task(|ctx) :
+    Input(a) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> a
+  
+  create-type-task(|ctx) :
+    Output(a) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> a
+  
+  create-type-task(|ctx) :
+    PathStart(a, prime) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> a
+  
+  create-type-task(|ctx) :
+    Path(path-start, path-component) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-task(|ctx)> path-component
+  
+  create-type-task(|ctx) :
+    PathComponent(a, prime) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> a
+  
+  create-type-task(|ctx) :
+    t@This() -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> t
+  
+  create-type-task(|ctx) :
+    UniDirectional(s) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> s
+  
+  create-type-task(|ctx) :
+    BiDirectional(class, attr) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-lookup(|ctx)> class
+  
+  create-type-task(|ctx) :
+    Optional(s) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-task(|ctx)> s
+  
+  create-type-task(|ctx) :
+    Set(s, mult) -> <task-create-id(|ctx,[ty])> ty
+    where 
+      ty := <type-task(|ctx)> s
+  
+  create-type-task(|ctx) :
+    ty@BasicType(x) -> <task-create-id(|ctx,[])> ty
   
 
 rules // projections
