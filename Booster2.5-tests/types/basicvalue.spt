@@ -1,0 +1,36 @@
+module types-basicvalue
+
+language Booster25
+
+setup Header [[
+	system debug
+	
+	class A {
+		attributes
+			i : Int
+			d : Decimal
+			b : Boolean
+			s : String
+			dt : DateTime
+			da : Date
+			t : TIME
+			p : PASSWORD
+			a : A
+		invariants
+]]
+
+test Type of Int BasicValue is Int [[         [[10]]    > i ]] run get-type to BasicType(Int)
+test Type of Decimal BasicValue is Decimal [[ [[10.0]]  > d ]] run get-type to BasicType(Decimal)
+test Type of True is Boolean [[               [[true]]  = b ]] run get-type to BasicType(Boolean)
+test Type of False is Boolean [[              [[false]] = b ]] run get-type to BasicType(Boolean)
+test Type of String BasicValue is Boolean [[  [["abc"]] = s ]] run get-type to BasicType(String)
+
+test Type of currentDateTime is DateTime [[	dt = [[currentDateTime]] ]] run get-type to BasicType(DateTime)
+test Type of currentdate is Date [[        	da = [[currentdate]]     ]] run get-type to BasicType(Date)
+test Type of currenttime is Time [[	         t = [[currenttime]]     ]] run get-type to BasicType(Time)
+
+test Type of null is null [[	               a = [[null]]            ]] run get-type to Null()
+
+setup Footer [[
+	}
+]]

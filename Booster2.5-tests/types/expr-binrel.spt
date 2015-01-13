@@ -1,0 +1,26 @@
+module types-expr-binrel
+
+language Booster25
+
+setup Header [[
+	system debug
+	
+	class A {
+		attributes
+			i : Int
+			d : Decimal
+			b : Boolean
+			s : String
+			dt : DateTime
+			da : Date
+			t : TIME
+			p : PASSWORD
+		invariants
+]]
+
+test Type of GreaterThan is Boolean [[ [[i > 10]] ]] run get-type to BasicType(Boolean)
+//TODO: write more tests
+
+setup Footer [[
+	}
+]]

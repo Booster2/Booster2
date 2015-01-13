@@ -1,0 +1,63 @@
+module types-attributes
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Type of attribute definition [[
+	class A {
+		attributes
+			[[i]] : Int
+	}
+]] run get-type to BasicType(Int)
+
+test Type of attribute ref [[
+	class A {
+		attributes
+			i : Int
+		invariants
+			[[i]] > 10
+	}
+]] run get-type to BasicType(Int)
+
+test Type of attribute this ref [[
+	class A {
+		attributes
+			i : Int
+		invariants
+			this.[[i]] > 10
+	}
+]] run get-type to BasicType(Int)
+
+test Type of attribute ref in path [[
+	class A {
+		attributes
+			bs : B.as
+		invariants
+			bs.[[i]] > 10
+	}
+	
+	class B{
+		attributes
+			i : Int
+			as : A.bs
+	}
+]] run get-type to BasicType(Int)
+
+test Type of attribute ref in path [[
+	class A {
+		attributes
+			i : Int
+			bs : B.as
+		invariants
+			bs.as.[[i]] > 10
+	}
+	
+	class B{
+		attributes
+			as : A.bs
+	}
+
+]] run get-type to BasicType(Int)

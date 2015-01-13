@@ -1,0 +1,26 @@
+module types-expr-unop
+
+language Booster25
+
+setup Header [[
+	system debug
+	
+	class A {
+		attributes
+			i : Int
+			d : Decimal
+			b : Boolean
+			s : String
+			dt : DateTime
+			da : Date
+			t : TIME
+			p : PASSWORD
+		invariants
+]]
+
+test Type of Negative Int is Int [[ [[- 10]] > i ]] run get-type to BasicType(Int)
+//TODO: write more tests
+
+setup Footer [[
+	}
+]]
