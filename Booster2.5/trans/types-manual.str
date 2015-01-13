@@ -1,0 +1,18 @@
+module trans/types-manual
+
+imports // constructors
+	
+	src-gen/signatures/Booster25-sig
+
+imports // functions
+	
+	runtime/relations/entries
+
+rules // generate constraints for class <sub: super-class
+
+	nabl-constraint(|ctx) = ?Class(c, Some(x@Extend(e*)), _);!e*;map(try(extends-add-subtyperel(|ctx,c)));fail
+
+  extends-add-subtyperel(|ctx, c) :
+  Extension(s) -> <fail>
+  where 
+  	<new-rel-tuple(|ctx, "<sub:", s)> c

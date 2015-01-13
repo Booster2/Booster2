@@ -22,6 +22,7 @@ imports
 	trans/types.generated
 	trans/desugar
 	trans/api/_runtime
+	trans/types-manual
 
 rules // Analysis
 	
