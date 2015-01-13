@@ -13,11 +13,15 @@ type rules // references
 	PathStart(a, prime) : ty
 	where definition of a : ty
 	
-	Path(path-start, path-component) : ty
-	where path-component : ty
+	Path(path-start, PathComponent(path-component, prime)) : ty
+	where definition of path-component : ty
 	
-	PathComponent(a, prime) : ty
-	where definition of a : ty
+	// Path(path-start, path-component) : ty
+	// where path-component : ty
+	// 
+	// // PathComponent gets its 'refers to' only in the context of Path(_,_) so this doesnt work
+	// PathComponent(a, prime) : ty
+	// where definition of a : ty
 
 	t@This() : ty
 	where definition of t : ty

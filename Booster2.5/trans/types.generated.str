@@ -39,14 +39,9 @@ rules // rules
       ty := <type-lookup(|ctx)> a
   
   create-type-task(|ctx) :
-    Path(path-start, path-component) -> <task-create-id(|ctx,[ty])> ty
+    Path(path-start, PathComponent(path-component, prime)) -> <task-create-id(|ctx,[ty])> ty
     where 
-      ty := <type-task(|ctx)> path-component
-  
-  create-type-task(|ctx) :
-    PathComponent(a, prime) -> <task-create-id(|ctx,[ty])> ty
-    where 
-      ty := <type-lookup(|ctx)> a
+      ty := <type-lookup(|ctx)> path-component
   
   create-type-task(|ctx) :
     t@This() -> <task-create-id(|ctx,[ty])> ty
