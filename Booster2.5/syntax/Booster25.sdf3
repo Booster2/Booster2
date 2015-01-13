@@ -52,6 +52,7 @@ context-free syntax
   BasicTypeDecl.Int = <Int> 
   BasicTypeDecl.Int = <int> 
   BasicTypeDecl.Decimal = <DECIMAL> 
+  BasicTypeDecl.Decimal = <Decimal>
   BasicTypeDecl.Decimal = <decimal> 
   BasicTypeDecl.Date = <DATE> 
   BasicTypeDecl.Date = <Date> 

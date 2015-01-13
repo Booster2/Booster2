@@ -205,6 +205,66 @@ rules
     ; fail
 
   nabl-get-name :
+    Extension(c) -> c
+
+  nabl-name-apply(s) =
+    Extension(s)
+
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?Extension(c)
+    ; origin-track-forced(
+        Extension(
+          nabl-use(
+          | lang__
+          , ctx__
+          , uniques__
+          , uris__
+          , [ <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsClass()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            ]
+          )
+        )
+      |
+      )
+
+  nabl-import-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?Extension(c)
+    ; origin-track-forced(
+        nabl-import(
+        | lang__
+        , ctx__
+        , uniques__
+        , uris__
+        , [ <{:
+               id
+               ; !Wildcard(
+                    [ Import(lang__, NablNsAttribute())
+                    , Import(lang__, NablNsMethod())
+                    ]
+                  , Context(
+                      NablNsClass()
+                    , c
+                    , []
+                    , Current()
+                    )
+                  , Current()
+                  , []
+                  )
+             }>
+          ]
+        )
+      |
+      )
+
+  nabl-get-name :
     Attribute(a, dec, a-ty) -> a
 
   nabl-name-apply(s) =
@@ -402,6 +462,16 @@ rules
                  id
                  ; !UseCandidate(
                       NablNsClass()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            , <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsMethod()
                     , []
                     , Current()
                     , True()

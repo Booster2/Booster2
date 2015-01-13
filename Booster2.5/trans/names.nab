@@ -38,6 +38,9 @@ binding rules // Class
 		implicitly defines This This()
 			of type c
 
+	Extension(c):
+		imports Attribute, Method from Class c
+
 binding rules // Attribute
 
 	Attribute(a,dec, a-ty):
@@ -65,6 +68,8 @@ binding rules // References
 	PathStart(p, prime):
 		refers to Class p
 	otherwise
+		refers to Method p
+	otherwise
 		refers to Attribute p in Class c
 		where This() resolves to This this
 		and this has type c
@@ -86,36 +91,9 @@ binding rules // References
 		refers to Method a in Class c
 			where path-start has type c
 
-	This(): refers to This This()
-
-	// Path(Output(v), PathComponent(a, prime)):
-	// 	refers to Variable v
-	// 	refers to Attribute a in Class c
-	// 		where v resolves to Variable v-def
-	// 		and v-def has type c
-			
-	// Path(PathStart(p, prime), PathComponent(m, prime2)):
-	// 	refers to Class p
-	// 	refers to Method m in Class p
-
-	//Is it true that inputs always must be attribute names? Or should is that just a convention?
-	// Input(i):
-	// 	refers to Attribute i in Class c
-	// 	where This() resolves to This this
-	// 	and this has type c
-		
+	This(): refers to This This()		
 
 binding rules // Variables
-
-	// BinRel(Output(v), In(), PathStart(c-ref, prime)):
-	// 	defines Variable v
-	// 		of type c
-	// 		where c-ref resolves to Class c
-	// 		
-	// BinRel(Input(v), In(), PathStart(c-ref, prime)):
-	// 	defines Variable v
-	// 		of type c
-	// 		where c-ref resolves to Class c
 	
 	BinRelDefLeftInput  (v,   op, rhs): defines Variable v of type t where rhs has type t
 	BinRelDefLeftOutput (v,   op, rhs): defines Variable v of type t where rhs has type t
