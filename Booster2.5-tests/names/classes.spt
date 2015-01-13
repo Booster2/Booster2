@@ -1,0 +1,41 @@
+module names-classes
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Duplicate class fails [[
+	class [[A]] { }
+	class [[A]] { }
+]] 2 errors
+
+test Resolve to class from unidirectional  [[
+	class [[A]] {}
+	
+	class B {
+		attributes
+			as : [[A]]
+	}
+]] resolve #2 to #1
+
+test Resolve to class from bidirectional  [[
+	class [[A]] {
+		attributes
+			bs : B . as
+	}
+	
+	class B {
+		attributes
+			as : [[A]]. bs
+	}
+]] resolve #2 to #1
+
+test Resolve to class from pathstart  [[
+	class [[A]] {
+		methods
+			create { a! : [[A]]' }
+	}
+]] resolve #2 to #1
+

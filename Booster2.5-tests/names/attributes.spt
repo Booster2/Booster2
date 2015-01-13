@@ -1,0 +1,57 @@
+module names-attributes
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Duplicate attribute fails [[
+	class A {
+		attributes
+			[[i]] : Int
+			[[i]] : Int
+	}
+]] 2 errors
+
+test Resolve to attribute from bidirectional  [[
+	class A {
+		attributes
+			[[bs]] : B . as
+	}
+	
+	class B {
+		attributes
+			as : A . [[bs]]
+	}
+]] resolve #2 to #1
+
+test Resolve to attribute from pathcomponent  [[
+	class A {
+		attributes
+			[[i]] : Int
+		methods
+			updateI{
+				a! : A' &
+				a!.[[i]]' = 5
+			}
+	}
+]] resolve #2 to #1
+
+test Resolve to attribute from pathcomponent nested  [[
+	class A {
+		attributes
+			[[bs]] : B . as
+			i : Int
+		methods
+			updateI{
+				a! : A' &
+				a!.bs.as.[[bs]].as.i' = 5
+			}
+	}
+	
+	class B {
+		attributes
+			as : A . bs
+	}
+]] resolve #2 to #1

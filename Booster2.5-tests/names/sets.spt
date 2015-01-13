@@ -1,0 +1,36 @@
+module names-sets
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Duplicate set fails [[
+	set [[A]] {x}
+	set [[A]] {y}
+]] 2 errors
+
+test Duplicate setvalue fails [[
+	set A {[[X]], [[X]]}
+]] 2 errors
+
+test Resolve to set from unidirectional  [[
+	set [[A]] {X, Y}
+
+	class B {
+		attributes
+			a : [[A]]
+	}
+]] resolve #2 to #1
+
+test Resolve to setvalue from pathstart  [[
+	set A {[[X]], Y}
+
+	class B {
+		attributes
+			a : A
+		methods
+			create { b! : B' & b!.a' = [[X]] }
+	}
+]] resolve #2 to #1
