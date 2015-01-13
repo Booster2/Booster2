@@ -71,6 +71,10 @@ rules
     ; match(sibl-uris__|s-uri1__)
     ; match(implicits__|[])
 
+  nabl-get-scope =
+    ?SetDef(s, values)
+    ; ![NablNsThis()]
+
   nabl-get-name :
     SetDef(s, values) -> s
 
@@ -92,16 +96,48 @@ rules
           , NablNsSet()
           , Unique()
           , Current()
-          , []
+          , [NablNsThis()]
           , []
           )
         , id
         )
       |
       )
-    ; match(child-uris__|c-uri1__)
-    ; match(sibl-uris__|s-uri1__)
-    ; match(implicits__|[])
+    ; where(i-2__ := <nabl-def(
+                        ?c-uri2__
+                      , ?s-uri2__
+                      | lang__
+                      , ctx__
+                      , uniques__
+                      , c-uri1__
+                      , s-uri1__
+                      , NablNsThis()
+                      , Unique()
+                      , Current()
+                      , []
+                      , []
+                      )> This())
+    ; match(child-uris__|c-uri2__)
+    ; match(sibl-uris__|s-uri2__)
+    ; match(implicits__|[i-2__])
+
+  nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
+    ?SetDef(s, values)
+    ; (where([i-2__] := implicits__)
+       ; where(id)
+       ; SetDef(
+           nabl-store-props(
+           | ctx__
+           , [Prop(Type(), s, [])]
+           )
+         , id
+         )
+       ; where(id)
+       ; where(<nabl-store-props(
+                | ctx__
+                , [Prop(Type(), s, [])]
+                )> i-2__))
+    ; fail
 
   nabl-get-name :
     SetVal(value) -> value
@@ -133,6 +169,37 @@ rules
     ; match(child-uris__|c-uri1__)
     ; match(sibl-uris__|s-uri1__)
     ; match(implicits__|[])
+
+  nabl-prop-site(|lang__, ctx__, uris__, states__, implicits__) =
+    ?SetVal(value)
+    ; (where(this := <nabl-use-candidate(
+                      | lang__
+                      , ctx__
+                      , uris__
+                      , <nabl-fix-name> This()
+                      )> <{:
+                            id
+                            ; !UseCandidate(
+                                 NablNsThis()
+                               , []
+                               , Current()
+                               , True()
+                               , []
+                               )
+                          }>
+             ; {prev__:
+                 ?prev__
+                 ; ty := <new-task-fixdeps(|ctx__, [prev__])> Id(
+                                                                <get-or-create-property-task(|ctx__, Type())> this
+                                                              )
+               })
+       ; SetVal(
+           nabl-store-props(
+           | ctx__
+           , [Prop(Type(), ty, [])]
+           )
+         ))
+    ; fail
 
   nabl-get-scope =
     ?Class(c, extends, members)

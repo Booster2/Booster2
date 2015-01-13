@@ -25,9 +25,16 @@ binding rules // Set
 
 	SetDef(s, values):
 		defines Set s
-	
+			of type s
+		scopes This
+		implicitly defines This This()
+			of type s
+		
 	SetVal(value):
 		defines SetVal value
+			of type ty
+		where This() resolves to This this
+		and this has type ty
 
 binding rules // Class
 
