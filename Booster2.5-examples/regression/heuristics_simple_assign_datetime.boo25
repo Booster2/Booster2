@@ -1,0 +1,9 @@
+system testSystem9
+
+class A {
+	attributes
+		a : DATETIME
+	methods
+		m1 { a' = d? }
+	
+}

@@ -1,0 +1,9 @@
+system testSystem14
+
+class A {
+	attributes
+		a : INT
+	methods
+		m1 { a > 3 }
+	
+}

@@ -1,0 +1,9 @@
+system testSystem12
+
+class A {
+	attributes
+		a : STRING
+	methods
+		m1 { a' = "Hello, World!" }
+	
+}

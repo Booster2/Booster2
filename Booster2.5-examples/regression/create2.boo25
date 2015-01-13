@@ -1,0 +1,11 @@
+system s2
+
+class A {
+	attributes
+		a : Decimal
+	invariants
+		a < 1.23
+	methods
+		create{ newA! : A' ; newA!.a' = a?}	
+}
+

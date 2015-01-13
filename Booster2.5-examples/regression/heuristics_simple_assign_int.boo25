@@ -1,0 +1,9 @@
+system testSystem11
+
+class A {
+	attributes
+		a : INT
+	methods
+		m1 { a' = 3 }
+	
+}

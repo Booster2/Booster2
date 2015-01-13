@@ -1,0 +1,9 @@
+system testSystem5
+
+class A {
+	attributes
+		a : INT
+	methods
+		m1 { false }
+	
+}

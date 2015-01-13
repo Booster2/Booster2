@@ -1,0 +1,18 @@
+system S17
+      
+      
+class A {
+	attributes
+		a : INT
+	methods
+		create { a! : A'}
+}
+class B extends A {
+	attributes
+		b : INT
+}
+
+class C extends B {
+	attributes
+		c : INT
+}

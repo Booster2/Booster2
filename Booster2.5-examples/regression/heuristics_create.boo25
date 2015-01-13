@@ -1,0 +1,9 @@
+system s4
+
+class A {
+	attributes
+		a : INT
+	methods
+		create { a! : A'}
+}
+

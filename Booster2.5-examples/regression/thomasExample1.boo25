@@ -1,0 +1,19 @@
+system S26
+
+    class A {
+        attributes
+            a_c : SET ( C . c_a )[*]
+    } 
+    
+    class B {
+        attributes
+            b_c : C . c_b
+    }
+    
+    class C {
+        attributes
+            c_a : A . a_c
+            c_b : B . b_c
+        invariants
+            1 > 0
+    }

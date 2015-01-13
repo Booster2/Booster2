@@ -1,0 +1,10 @@
+system methodTest3
+
+   class class1 {
+   	  attributes
+   	  	name : STRING
+   	  methods
+  	  	m1 { name' = n? }	
+  	  invariants
+  	  	name /= "James"
+	}

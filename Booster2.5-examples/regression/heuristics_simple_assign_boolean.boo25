@@ -1,0 +1,9 @@
+system testSystem8
+
+class A {
+	attributes
+		a : BOOLEAN
+	methods
+		m1 { a' = b? }
+	
+}

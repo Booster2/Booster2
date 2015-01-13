@@ -1,0 +1,10 @@
+system S18
+
+class A {
+	attributes
+		a : INT
+	methods
+		updateA { a' = a + 1 }
+		m1 { this . updateA () & a > 3}		
+	
+}

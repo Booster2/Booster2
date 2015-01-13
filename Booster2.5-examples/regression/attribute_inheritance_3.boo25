@@ -1,0 +1,15 @@
+system attributeInheritance3
+
+class a {
+	attributes
+		a : INT
+	
+}
+
+class b{
+	attributes
+		b : STRING
+}
+
+class c extends a,b{
+}

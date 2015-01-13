@@ -1,0 +1,9 @@
+system s1
+
+class A {
+	attributes
+		a : Decimal
+	methods
+		create{ newA! : A'}	
+}
+

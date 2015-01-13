@@ -1,0 +1,20 @@
+system Test6
+
+class A { 
+	attributes
+		n : Int
+		m : Int
+		b : B . a
+	invariants
+		n > 10
+		m > 10
+}
+
+class B {
+	attributes
+		a : A . b
+
+	methods
+		update { a.m' = m? & a.n' = n?}
+
+}

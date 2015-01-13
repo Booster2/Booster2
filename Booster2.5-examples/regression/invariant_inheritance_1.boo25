@@ -1,0 +1,14 @@
+system S6
+
+class a {
+	attributes
+		a : INT
+	invariants
+		a > 0
+	
+}
+
+class b extends a{
+	
+	
+}

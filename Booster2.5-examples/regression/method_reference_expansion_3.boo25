@@ -1,0 +1,16 @@
+system S20
+
+class A {
+	attributes
+		b : B
+	methods
+		m1 { b . updateA () & b.a > 3}		
+	
+}
+
+class B {
+	attributes
+		a : INT
+	methods
+		updateA { a' = a + 1 }
+}

@@ -1,0 +1,11 @@
+system attributeInheritance1
+
+class a {
+	attributes
+		a : INT
+	
+}
+
+class b extends a{
+	
+}

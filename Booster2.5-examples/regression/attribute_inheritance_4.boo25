@@ -1,0 +1,23 @@
+system University1
+
+class Person {
+	attributes
+	  firstName : STRING
+	  lastName : STRING
+}
+
+class Staff extends Person{
+  attributes
+    supervisees : SET(Student . supervisor)[*]
+}
+
+class Student extends Person{
+  attributes
+    supervisor : Staff . supervisees
+
+}
+
+class TA extends Student, Staff {
+  invariants
+    supervisor /= this
+}
