@@ -79,308 +79,358 @@ rules // rules
   nabl-constraint(|ctx) :
     Class(c, extends, members) -> <fail>
     where 
-      relstore11 := <new-rel-tuple(|ctx, "<sub:", c)> Null()
+      relstore6 := <new-rel-tuple(|ctx, "<sub:", c)> Null()
   
   create-type-task(|ctx) :
-    BasicValue(True()) -> <task-create-id(|ctx,[x2988])> x2988
+    BasicValue(True()) -> <task-create-id(|ctx,[x804])> x804
     where 
-      x2988 := <type-is(|ctx)> BasicType(Boolean())
+      x804 := <type-is(|ctx)> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BasicValue(False()) -> <task-create-id(|ctx,[x2989])> x2989
+    BasicValue(False()) -> <task-create-id(|ctx,[x805])> x805
     where 
-      x2989 := <type-is(|ctx)> BasicType(Boolean())
+      x805 := <type-is(|ctx)> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BasicValue(CurrentDate()) -> <task-create-id(|ctx,[x2990])> x2990
+    BasicValue(CurrentDate()) -> <task-create-id(|ctx,[x806])> x806
     where 
-      x2990 := <type-is(|ctx)> BasicType(Date())
+      x806 := <type-is(|ctx)> BasicType(Date())
   
   create-type-task(|ctx) :
-    BasicValue(CurrentDateTime()) -> <task-create-id(|ctx,[x2991])> x2991
+    BasicValue(CurrentDateTime()) -> <task-create-id(|ctx,[x807])> x807
     where 
-      x2991 := <type-is(|ctx)> BasicType(DateTime())
+      x807 := <type-is(|ctx)> BasicType(DateTime())
   
   create-type-task(|ctx) :
-    BasicValue(Decimal(i)) -> <task-create-id(|ctx,[x2992])> x2992
+    BasicValue(Decimal(i)) -> <task-create-id(|ctx,[x808])> x808
     where 
-      x2992 := <type-is(|ctx)> BasicType(Decimal())
+      x808 := <type-is(|ctx)> BasicType(Decimal())
   
   create-type-task(|ctx) :
-    BasicValue(Integer(i)) -> <task-create-id(|ctx,[x2993])> x2993
+    BasicValue(Integer(i)) -> <task-create-id(|ctx,[x809])> x809
     where 
-      x2993 := <type-is(|ctx)> BasicType(Int())
+      x809 := <type-is(|ctx)> BasicType(Int())
   
   create-type-task(|ctx) :
-    BasicValue(String(i)) -> <task-create-id(|ctx,[x2994])> x2994
+    BasicValue(String(i)) -> <task-create-id(|ctx,[x810])> x810
     where 
-      x2994 := <type-is(|ctx)> BasicType(String())
+      x810 := <type-is(|ctx)> BasicType(String())
   
   create-type-task(|ctx) :
-    BasicValue(CurrentTime()) -> <task-create-id(|ctx,[x2995])> x2995
+    BasicValue(CurrentTime()) -> <task-create-id(|ctx,[x811])> x811
     where 
-      x2995 := <type-is(|ctx)> BasicType(Time())
+      x811 := <type-is(|ctx)> BasicType(Time())
   
   create-type-task(|ctx) :
-    Null() -> <task-create-id(|ctx,[x2996])> x2996
+    Null() -> <task-create-id(|ctx,[x812])> x812
     where 
-      x2996 := <type-is(|ctx)> Null()
+      x812 := <type-is(|ctx)> Null()
   
   create-type-task(|ctx) :
-    BinRel(l, op@Equal(), r) -> <task-create-id(|ctx,[x2997])> x2997
-    where 
-      l-ty := <type-task(|ctx)> l;
-      r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq942 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch158 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or363 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq942, relmatch158];
-      <task-create-error-on-failure(|ctx, or363, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or363])> BasicType(Boolean())
-  
-  create-type-task(|ctx) :
-    BinRel(l, op@NotEqual(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@Equal(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq943 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch159 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or364 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq943, relmatch159];
-      <task-create-error-on-failure(|ctx, or364, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or364])> BasicType(Boolean())
+      eq258 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch168 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or234 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq258, relmatch168];
+      <task-create-error-on-failure(|ctx, or234, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or234])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@In(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@NotEqual(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq944 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch160 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or365 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq944, relmatch160];
-      <task-create-error-on-failure(|ctx, or365, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or365])> BasicType(Boolean())
+      eq259 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch169 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or235 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq259, relmatch169];
+      <task-create-error-on-failure(|ctx, or235, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or235])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@NotIn(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@In(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq945 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch161 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or366 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq945, relmatch161];
-      <task-create-error-on-failure(|ctx, or366, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or366])> BasicType(Boolean())
+      eq260 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch170 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or236 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq260, relmatch170];
+      <task-create-error-on-failure(|ctx, or236, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or236])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@Subset(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@NotIn(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq946 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch162 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or367 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq946, relmatch162];
-      <task-create-error-on-failure(|ctx, or367, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or367])> BasicType(Boolean())
+      eq261 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch171 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or237 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq261, relmatch171];
+      <task-create-error-on-failure(|ctx, or237, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or237])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@SubsetEquals(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@Subset(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq947 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch163 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or368 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq947, relmatch163];
-      <task-create-error-on-failure(|ctx, or368, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or368])> BasicType(Boolean())
+      eq262 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch172 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or238 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq262, relmatch172];
+      <task-create-error-on-failure(|ctx, or238, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or238])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@Superset(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@SubsetEquals(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq948 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch164 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or369 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq948, relmatch164];
-      <task-create-error-on-failure(|ctx, or369, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or369])> BasicType(Boolean())
+      eq263 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch173 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or239 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq263, relmatch173];
+      <task-create-error-on-failure(|ctx, or239, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or239])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@SupersetEquals(), r) -> <task-create-id(|ctx,[x2997])> x2997
+    BinRel(l, op@Superset(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq949 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      relmatch165 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
-      or370 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq949, relmatch165];
-      <task-create-error-on-failure(|ctx, or370, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2997 := <type-is(|ctx); task-create-id(|ctx, [or370])> BasicType(Boolean())
+      eq264 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch174 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or240 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq264, relmatch174];
+      <task-create-error-on-failure(|ctx, or240, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or240])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@LessThan(), r) -> <task-create-id(|ctx,[x2998])> x2998
+    BinRel(l, op@SupersetEquals(), r) -> <task-create-id(|ctx,[x813])> x813
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq950 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq951 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or371 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq950, eq951];
-      <task-create-error-on-failure(|ctx, or371, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq952 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or371])> r-ty;
-      relmatch166 := <relation-create-match(|ctx); task-create-id(|ctx, [or371])> ("<sub:", r-ty, l-ty);
-      or372 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq952, relmatch166];
-      <task-create-error-on-failure(|ctx, or372, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2998 := <type-is(|ctx); task-create-id(|ctx, [or372])> BasicType(Boolean())
+      eq265 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      relmatch175 := <relation-create-match(|ctx); task-create-id(|ctx, [r-ty])> ("<sub:", r-ty, l-ty);
+      or241 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq265, relmatch175];
+      <task-create-error-on-failure(|ctx, or241, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x813 := <type-is(|ctx); task-create-id(|ctx, [or241])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@LessThanEquals(), r) -> <task-create-id(|ctx,[x2998])> x2998
+    BinRel(l, op@LessThan(), r) -> <task-create-id(|ctx,[x814])> x814
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq953 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq954 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or373 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq953, eq954];
-      <task-create-error-on-failure(|ctx, or373, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq955 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or373])> r-ty;
-      relmatch167 := <relation-create-match(|ctx); task-create-id(|ctx, [or373])> ("<sub:", r-ty, l-ty);
-      or374 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq955, relmatch167];
-      <task-create-error-on-failure(|ctx, or374, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2998 := <type-is(|ctx); task-create-id(|ctx, [or374])> BasicType(Boolean())
+      eq266 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq267 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or242 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq266, eq267];
+      <task-create-error-on-failure(|ctx, or242, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq268 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or242])> r-ty;
+      relmatch176 := <relation-create-match(|ctx); task-create-id(|ctx, [or242])> ("<sub:", r-ty, l-ty);
+      or243 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq268, relmatch176];
+      relmatch177 := <relation-create-match(|ctx); task-create-id(|ctx, [or242])> ("<sub:", l-ty, r-ty);
+      or244 := <type-is(|ctx)> <task-create-choice(|ctx)> [or243, relmatch177];
+      <task-create-error-on-failure(|ctx, or244, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x814 := <type-is(|ctx); task-create-id(|ctx, [or244])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@GreaterThan(), r) -> <task-create-id(|ctx,[x2998])> x2998
+    BinRel(l, op@LessThanEquals(), r) -> <task-create-id(|ctx,[x814])> x814
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq956 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq957 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or375 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq956, eq957];
-      <task-create-error-on-failure(|ctx, or375, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq958 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or375])> r-ty;
-      relmatch168 := <relation-create-match(|ctx); task-create-id(|ctx, [or375])> ("<sub:", r-ty, l-ty);
-      or376 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq958, relmatch168];
-      <task-create-error-on-failure(|ctx, or376, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2998 := <type-is(|ctx); task-create-id(|ctx, [or376])> BasicType(Boolean())
+      eq269 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq270 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or245 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq269, eq270];
+      <task-create-error-on-failure(|ctx, or245, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq271 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or245])> r-ty;
+      relmatch178 := <relation-create-match(|ctx); task-create-id(|ctx, [or245])> ("<sub:", r-ty, l-ty);
+      or246 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq271, relmatch178];
+      relmatch179 := <relation-create-match(|ctx); task-create-id(|ctx, [or245])> ("<sub:", l-ty, r-ty);
+      or247 := <type-is(|ctx)> <task-create-choice(|ctx)> [or246, relmatch179];
+      <task-create-error-on-failure(|ctx, or247, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x814 := <type-is(|ctx); task-create-id(|ctx, [or247])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinRel(l, op@GreaterThanEquals(), r) -> <task-create-id(|ctx,[x2998])> x2998
+    BinRel(l, op@GreaterThan(), r) -> <task-create-id(|ctx,[x814])> x814
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq959 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq960 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or377 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq959, eq960];
-      <task-create-error-on-failure(|ctx, or377, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq961 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or377])> r-ty;
-      relmatch169 := <relation-create-match(|ctx); task-create-id(|ctx, [or377])> ("<sub:", r-ty, l-ty);
-      or378 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq961, relmatch169];
-      <task-create-error-on-failure(|ctx, or378, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
-      x2998 := <type-is(|ctx); task-create-id(|ctx, [or378])> BasicType(Boolean())
+      eq272 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq273 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or248 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq272, eq273];
+      <task-create-error-on-failure(|ctx, or248, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq274 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or248])> r-ty;
+      relmatch180 := <relation-create-match(|ctx); task-create-id(|ctx, [or248])> ("<sub:", r-ty, l-ty);
+      or249 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq274, relmatch180];
+      relmatch181 := <relation-create-match(|ctx); task-create-id(|ctx, [or248])> ("<sub:", l-ty, r-ty);
+      or250 := <type-is(|ctx)> <task-create-choice(|ctx)> [or249, relmatch181];
+      <task-create-error-on-failure(|ctx, or250, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x814 := <type-is(|ctx); task-create-id(|ctx, [or250])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinOp(l, op@Plus(), r) -> <task-create-id(|ctx,[or380])> l-ty
+    BinRel(l, op@GreaterThanEquals(), r) -> <task-create-id(|ctx,[x814])> x814
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq962 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq963 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or379 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq962, eq963];
-      <task-create-error-on-failure(|ctx, or379, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq964 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or379])> r-ty;
-      relmatch170 := <relation-create-match(|ctx); task-create-id(|ctx, [or379])> ("<sub:", r-ty, l-ty);
-      or380 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq964, relmatch170];
-      <task-create-error-on-failure(|ctx, or380, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq275 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq276 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or251 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq275, eq276];
+      <task-create-error-on-failure(|ctx, or251, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq277 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or251])> r-ty;
+      relmatch182 := <relation-create-match(|ctx); task-create-id(|ctx, [or251])> ("<sub:", r-ty, l-ty);
+      or252 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq277, relmatch182];
+      relmatch183 := <relation-create-match(|ctx); task-create-id(|ctx, [or251])> ("<sub:", l-ty, r-ty);
+      or253 := <type-is(|ctx)> <task-create-choice(|ctx)> [or252, relmatch183];
+      <task-create-error-on-failure(|ctx, or253, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r;
+      x814 := <type-is(|ctx); task-create-id(|ctx, [or253])> BasicType(Boolean())
   
   create-type-task(|ctx) :
-    BinOp(l, op@Minus(), r) -> <task-create-id(|ctx,[or382])> l-ty
+    BinOp(l, op@Plus(), r) -> <task-create-id(|ctx,[op-ty])> op-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq965 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq966 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or381 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq965, eq966];
-      <task-create-error-on-failure(|ctx, or381, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq967 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or381])> r-ty;
-      relmatch171 := <relation-create-match(|ctx); task-create-id(|ctx, [or381])> ("<sub:", r-ty, l-ty);
-      or382 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq967, relmatch171];
-      <task-create-error-on-failure(|ctx, or382, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq278 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq279 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or254 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq278, eq279];
+      <task-create-error-on-failure(|ctx, or254, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq280 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or254])> r-ty;
+      op-ty60 := <type-is(|ctx); task-create-id(|ctx, [eq280])> l-ty;
+      relmatch184 := <relation-create-match(|ctx); task-create-id(|ctx, [or254])> ("<sub:", r-ty, l-ty);
+      op-ty61 := <type-is(|ctx); task-create-id(|ctx, [relmatch184])> l-ty;
+      or255 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      op-ty62 := <type-is(|ctx); task-create-id(|ctx, [or255])> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      relmatch185 := <relation-create-match(|ctx); task-create-id(|ctx, [or254])> ("<sub:", l-ty, r-ty);
+      op-ty63 := <type-is(|ctx); task-create-id(|ctx, [relmatch185])> r-ty;
+      or256 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      op-ty := <type-is(|ctx); task-create-id(|ctx, [or256])> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      <task-create-error-on-failure(|ctx, op-ty, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Times(), r) -> <task-create-id(|ctx,[or384])> l-ty
+    BinOp(l, op@Minus(), r) -> <task-create-id(|ctx,[op-ty])> op-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq968 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq969 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or383 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq968, eq969];
-      <task-create-error-on-failure(|ctx, or383, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq970 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or383])> r-ty;
-      relmatch172 := <relation-create-match(|ctx); task-create-id(|ctx, [or383])> ("<sub:", r-ty, l-ty);
-      or384 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq970, relmatch172];
-      <task-create-error-on-failure(|ctx, or384, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq281 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq282 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or257 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq281, eq282];
+      <task-create-error-on-failure(|ctx, or257, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq283 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or257])> r-ty;
+      op-ty60 := <type-is(|ctx); task-create-id(|ctx, [eq283])> l-ty;
+      relmatch186 := <relation-create-match(|ctx); task-create-id(|ctx, [or257])> ("<sub:", r-ty, l-ty);
+      op-ty61 := <type-is(|ctx); task-create-id(|ctx, [relmatch186])> l-ty;
+      or258 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      op-ty62 := <type-is(|ctx); task-create-id(|ctx, [or258])> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      relmatch187 := <relation-create-match(|ctx); task-create-id(|ctx, [or257])> ("<sub:", l-ty, r-ty);
+      op-ty63 := <type-is(|ctx); task-create-id(|ctx, [relmatch187])> r-ty;
+      or259 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      op-ty := <type-is(|ctx); task-create-id(|ctx, [or259])> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      <task-create-error-on-failure(|ctx, op-ty, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Divide(), r) -> <task-create-id(|ctx,[or386])> l-ty
+    BinOp(l, op@Times(), r) -> <task-create-id(|ctx,[op-ty])> op-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq971 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq972 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or385 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq971, eq972];
-      <task-create-error-on-failure(|ctx, or385, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq973 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or385])> r-ty;
-      relmatch173 := <relation-create-match(|ctx); task-create-id(|ctx, [or385])> ("<sub:", r-ty, l-ty);
-      or386 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq973, relmatch173];
-      <task-create-error-on-failure(|ctx, or386, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq284 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq285 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or260 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq284, eq285];
+      <task-create-error-on-failure(|ctx, or260, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq286 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or260])> r-ty;
+      op-ty60 := <type-is(|ctx); task-create-id(|ctx, [eq286])> l-ty;
+      relmatch188 := <relation-create-match(|ctx); task-create-id(|ctx, [or260])> ("<sub:", r-ty, l-ty);
+      op-ty61 := <type-is(|ctx); task-create-id(|ctx, [relmatch188])> l-ty;
+      or261 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      op-ty62 := <type-is(|ctx); task-create-id(|ctx, [or261])> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      relmatch189 := <relation-create-match(|ctx); task-create-id(|ctx, [or260])> ("<sub:", l-ty, r-ty);
+      op-ty63 := <type-is(|ctx); task-create-id(|ctx, [relmatch189])> r-ty;
+      or262 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      op-ty := <type-is(|ctx); task-create-id(|ctx, [or262])> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      <task-create-error-on-failure(|ctx, op-ty, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Maximum(), r) -> <task-create-id(|ctx,[or388])> l-ty
+    BinOp(l, op@Divide(), r) -> <task-create-id(|ctx,[op-ty])> op-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq974 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq975 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or387 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq974, eq975];
-      <task-create-error-on-failure(|ctx, or387, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq976 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or387])> r-ty;
-      relmatch174 := <relation-create-match(|ctx); task-create-id(|ctx, [or387])> ("<sub:", r-ty, l-ty);
-      or388 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq976, relmatch174];
-      <task-create-error-on-failure(|ctx, or388, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq287 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq288 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or263 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq287, eq288];
+      <task-create-error-on-failure(|ctx, or263, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq289 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or263])> r-ty;
+      op-ty60 := <type-is(|ctx); task-create-id(|ctx, [eq289])> l-ty;
+      relmatch190 := <relation-create-match(|ctx); task-create-id(|ctx, [or263])> ("<sub:", r-ty, l-ty);
+      op-ty61 := <type-is(|ctx); task-create-id(|ctx, [relmatch190])> l-ty;
+      or264 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      op-ty62 := <type-is(|ctx); task-create-id(|ctx, [or264])> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      relmatch191 := <relation-create-match(|ctx); task-create-id(|ctx, [or263])> ("<sub:", l-ty, r-ty);
+      op-ty63 := <type-is(|ctx); task-create-id(|ctx, [relmatch191])> r-ty;
+      or265 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      op-ty := <type-is(|ctx); task-create-id(|ctx, [or265])> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      <task-create-error-on-failure(|ctx, op-ty, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Minimum(), r) -> <task-create-id(|ctx,[or390])> l-ty
+    BinOp(l, op@Maximum(), r) -> <task-create-id(|ctx,[op-ty])> op-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq977 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
-      eq978 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
-      or389 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq977, eq978];
-      <task-create-error-on-failure(|ctx, or389, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
-      eq979 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or389])> r-ty;
-      relmatch175 := <relation-create-match(|ctx); task-create-id(|ctx, [or389])> ("<sub:", r-ty, l-ty);
-      or390 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq979, relmatch175];
-      <task-create-error-on-failure(|ctx, or390, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq290 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq291 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or266 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq290, eq291];
+      <task-create-error-on-failure(|ctx, or266, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq292 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or266])> r-ty;
+      op-ty60 := <type-is(|ctx); task-create-id(|ctx, [eq292])> l-ty;
+      relmatch192 := <relation-create-match(|ctx); task-create-id(|ctx, [or266])> ("<sub:", r-ty, l-ty);
+      op-ty61 := <type-is(|ctx); task-create-id(|ctx, [relmatch192])> l-ty;
+      or267 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      op-ty62 := <type-is(|ctx); task-create-id(|ctx, [or267])> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      relmatch193 := <relation-create-match(|ctx); task-create-id(|ctx, [or266])> ("<sub:", l-ty, r-ty);
+      op-ty63 := <type-is(|ctx); task-create-id(|ctx, [relmatch193])> r-ty;
+      or268 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      op-ty := <type-is(|ctx); task-create-id(|ctx, [or268])> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      <task-create-error-on-failure(|ctx, op-ty, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Intersection(), r) -> <task-create-id(|ctx,[eq980])> l-ty
+    BinOp(l, op@Minimum(), r) -> <task-create-id(|ctx,[op-ty])> op-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq980 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      <task-create-error-on-failure(|ctx, eq980, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq293 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [r-ty])> l-ty;
+      eq294 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [r-ty])> l-ty;
+      or269 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq293, eq294];
+      <task-create-error-on-failure(|ctx, or269, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", l-ty, " in ", op])> l;
+      eq295 := <type-match(|ctx, l-ty); task-create-id(|ctx, [or269])> r-ty;
+      op-ty60 := <type-is(|ctx); task-create-id(|ctx, [eq295])> l-ty;
+      relmatch194 := <relation-create-match(|ctx); task-create-id(|ctx, [or269])> ("<sub:", r-ty, l-ty);
+      op-ty61 := <type-is(|ctx); task-create-id(|ctx, [relmatch194])> l-ty;
+      or270 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      op-ty62 := <type-is(|ctx); task-create-id(|ctx, [or270])> <task-create-choice(|ctx)> [op-ty60, op-ty61];
+      relmatch195 := <relation-create-match(|ctx); task-create-id(|ctx, [or269])> ("<sub:", l-ty, r-ty);
+      op-ty63 := <type-is(|ctx); task-create-id(|ctx, [relmatch195])> r-ty;
+      or271 := <type-is(|ctx)> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      op-ty := <type-is(|ctx); task-create-id(|ctx, [or271])> <task-create-choice(|ctx)> [op-ty62, op-ty63];
+      <task-create-error-on-failure(|ctx, op-ty, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Union(), r) -> <task-create-id(|ctx,[eq981])> l-ty
+    BinOp(l, op@Intersection(), r) -> <task-create-id(|ctx,[eq296])> l-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq981 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      <task-create-error-on-failure(|ctx, eq981, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq296 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      <task-create-error-on-failure(|ctx, eq296, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
-    BinOp(l, op@Concat(), r) -> <task-create-id(|ctx,[eq982])> l-ty
+    BinOp(l, op@Union(), r) -> <task-create-id(|ctx,[eq297])> l-ty
     where 
       l-ty := <type-task(|ctx)> l;
       r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
-      eq982 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
-      <task-create-error-on-failure(|ctx, eq982, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+      eq297 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      <task-create-error-on-failure(|ctx, eq297, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
+  
+  create-type-task(|ctx) :
+    BinOp(l, op@Concat(), r) -> <task-create-id(|ctx,[eq298])> l-ty
+    where 
+      l-ty := <type-task(|ctx)> l;
+      r-ty := <type-task(|ctx); task-create-id(|ctx, [l-ty])> r;
+      eq298 := <type-match(|ctx, l-ty); task-create-id(|ctx, [r-ty])> r-ty;
+      <task-create-error-on-failure(|ctx, eq298, ["Type mismatch: expected ", l-ty, " got ", r-ty, " in ", op])> r
   
   create-type-task(|ctx) :
     UnOp(Head(), e) -> <task-create-id(|ctx,[e-ty])> e-ty
@@ -393,18 +443,18 @@ rules // rules
       e-ty := <type-task(|ctx)> e
   
   create-type-task(|ctx) :
-    UnOp(Cardinality(), e) -> <task-create-id(|ctx,[x2999])> x2999
+    UnOp(Cardinality(), e) -> <task-create-id(|ctx,[x815])> x815
     where 
-      x2999 := <type-is(|ctx)> BasicType(Int())
+      x815 := <type-is(|ctx)> BasicType(Int())
   
   create-type-task(|ctx) :
-    UnOp(op@Negative(), e) -> <task-create-id(|ctx,[or391])> e-ty
+    UnOp(op@Negative(), e) -> <task-create-id(|ctx,[or272])> e-ty
     where 
       e-ty := <type-task(|ctx)> e;
-      eq983 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [e-ty])> e-ty;
-      eq984 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [e-ty])> e-ty;
-      or391 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq983, eq984];
-      <task-create-error-on-failure(|ctx, or391, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", e-ty, " in ", op])> e
+      eq299 := <type-match(|ctx, BasicType(Decimal())); task-create-id(|ctx, [e-ty])> e-ty;
+      eq300 := <type-match(|ctx, BasicType(Int())); task-create-id(|ctx, [e-ty])> e-ty;
+      or272 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq299, eq300];
+      <task-create-error-on-failure(|ctx, or272, ["Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got ", e-ty, " in ", op])> e
   
 
 rules // projections

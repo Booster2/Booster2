@@ -73,17 +73,15 @@ binding rules // References
 		refers to Attribute attr in Class class
 		
 	PathStart(p, prime):
-		refers to Class p
+		refers to Attribute p
 	otherwise
 		refers to Method p
 	otherwise
-		refers to Attribute p in Class c
-		where This() resolves to This this
-		and this has type c
-	otherwise
-		refers to Variable p
+		refers to Class p
 	otherwise
 		refers to SetVal p
+	otherwise
+		refers to Variable p
 
 	Input(v):
 		refers to Variable v

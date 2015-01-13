@@ -528,7 +528,7 @@ rules
           , [ <{:
                  id
                  ; !UseCandidate(
-                      NablNsClass()
+                      NablNsAttribute()
                     , []
                     , Current()
                     , True()
@@ -545,45 +545,10 @@ rules
                     , []
                     )
                }>
-            , <{c, this:
-                 (this := <nabl-use-candidate(
-                           | lang__
-                           , ctx__
-                           , uris__
-                           , <nabl-fix-name> This()
-                           )> <{:
-                                 id
-                                 ; !UseCandidate(
-                                      NablNsThis()
-                                    , []
-                                    , Current()
-                                    , True()
-                                    , []
-                                    )
-                               }>
-                  ; {prev__:
-                      ?prev__
-                      ; c := <new-task-fixdeps(|ctx__, [prev__])> Id(
-                                                                    <get-or-create-property-task(|ctx__, Type())> this
-                                                                  )
-                    })
-                 ; !UseCandidate(
-                      NablNsAttribute()
-                    , []
-                    , Context(
-                        NablNsClass()
-                      , c
-                      , []
-                      , Current()
-                      )
-                    , True()
-                    , []
-                    )
-               }>
             , <{:
                  id
                  ; !UseCandidate(
-                      NablNsVariable()
+                      NablNsClass()
                     , []
                     , Current()
                     , True()
@@ -594,6 +559,16 @@ rules
                  id
                  ; !UseCandidate(
                       NablNsSetVal()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            , <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsVariable()
                     , []
                     , Current()
                     , True()

@@ -18,8 +18,10 @@ setup Header [[
 		invariants
 ]]
 
-test Type of Negative Int is Int [[ [[- 10]] > i ]] run get-type to BasicType(Int)
-//TODO: write more tests
+test Type of Negative Int is Int [[ [[-    10]] > i ]] run get-type to BasicType(Int)
+test Type of Cardinality is Int [[  [[card 10]] > i ]] run get-type to BasicType(Int) //not sure where to use card on
+
+//TODO: write tests for: Head, Tail
 
 setup Footer [[
 	}

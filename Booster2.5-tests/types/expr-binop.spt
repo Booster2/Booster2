@@ -18,8 +18,20 @@ setup Header [[
 		invariants
 ]]
 
-test Type of Int Plus Int is Int [[ [[55 + 10]] > i ]] run get-type to BasicType(Int)
-//TODO: write more tests
+test Type of Int Plus Int is Int [[    [[55   + 10]]   > i ]] run get-type to BasicType(Int)
+test Type of Dec Plus Int is Int [[    [[55.0 + 10]]   > d ]] run get-type to BasicType(Decimal)
+test Type of Int Plus Dec is Int [[    [[55   + 10.0]] > d ]] run get-type to BasicType(Decimal)
+test Type of Dec Plus Dec is Int [[    [[55.0 + 10.0]] > d ]] run get-type to BasicType(Decimal)
+
+test Type of Int Minus Int is Int [[   [[55   - 10]]   > i ]] run get-type to BasicType(Int)
+test Type of Dec Minus Dec is Dec [[   [[55.0 - 10.0]] > d ]] run get-type to BasicType(Decimal)
+test Type of Int Times Int is Int [[   [[55   * 10]]   > i ]] run get-type to BasicType(Int)
+test Type of Dec Times Dec is Dec [[   [[55.0 * 10.0]] > d ]] run get-type to BasicType(Decimal)
+test Type of Int Divide Int is Int [[  [[55   / 10]]   > i ]] run get-type to BasicType(Int)
+test Type of Int Maximum Int is Int [[ [[55 max 10]]   > i ]] run get-type to BasicType(Int)
+test Type of Int Minimum Int is Int [[ [[55 min 10]]   > i ]] run get-type to BasicType(Int)
+
+//TODO: write tests for: Intersection, Union and Concat
 
 setup Footer [[
 	}

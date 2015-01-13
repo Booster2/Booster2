@@ -18,8 +18,17 @@ setup Header [[
 		invariants
 ]]
 
-test Type of GreaterThan is Boolean [[ [[i > 10]] ]] run get-type to BasicType(Boolean)
-//TODO: write more tests
+test Type of Int GreaterThan Int is Boolean [[       [[10   >  10]]   ]] run get-type to BasicType(Boolean)
+test Type of Ded GreaterThan Int is Boolean [[       [[10.0 >  10]]   ]] run get-type to BasicType(Boolean)
+test Type of Int GreaterThan Dec is Boolean [[       [[10   >  10.0]] ]] run get-type to BasicType(Boolean)
+test Type of Dec GreaterThan Dec is Boolean [[       [[10.0 >  10.0]] ]] run get-type to BasicType(Boolean)
+test Type of Int GreaterThanEquals Int is Boolean [[ [[10   >= 10]]   ]] run get-type to BasicType(Boolean)
+test Type of Int LessThan Int is Boolean  [[         [[10   <  10]]   ]] run get-type to BasicType(Boolean)
+test Type of Int LessThanEquals Int is Boolean [[    [[10   <= 10]]   ]] run get-type to BasicType(Boolean)
+test Type of Int Equal Int is Boolean [[             [[10   =  10]]   ]] run get-type to BasicType(Boolean)
+test Type of Int NotEqual Int is Boolean [[          [[10   /= 10]]   ]] run get-type to BasicType(Boolean)
+
+//TODO: write tests for: In, NotIn, Subset, SubsetEquals, Superset, SupersetEquals
 
 setup Footer [[
 	}

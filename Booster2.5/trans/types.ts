@@ -86,7 +86,7 @@ type rules // BinRel, BinOp, UnOp
 		and	(l-ty == BasicType(Decimal()) or 
 		     l-ty == BasicType(Int())) 
 		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
-		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		and	(r-ty == l-ty or r-ty <sub: l-ty or l-ty <sub: r-ty) 
 		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
 
   BinOp(l, op@Plus(), r)
@@ -94,13 +94,15 @@ type rules // BinRel, BinOp, UnOp
 + BinOp(l, op@Times(), r)
 + BinOp(l, op@Divide(), r) 
 + BinOp(l, op@Maximum(), r) 
-+ BinOp(l, op@Minimum(), r) : l-ty
++ BinOp(l, op@Minimum(), r) : op-ty
 	where	l	: l-ty
 		and	r	: r-ty
 		and	(l-ty == BasicType(Decimal()) or 
 		     l-ty == BasicType(Int())) 
 		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
-		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		and	((r-ty ==    l-ty and l-ty => op-ty) or
+		     (r-ty <sub: l-ty and l-ty => op-ty) or
+				 (l-ty <sub: r-ty and r-ty => op-ty)) 
 		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
 
   BinOp(l, op@Intersection(), r)
