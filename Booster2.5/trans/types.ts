@@ -37,6 +37,17 @@ type rules // primitives are their own type (so that a type-lookup can be done o
 
 	ty@BasicType(x) : ty
 
+relations // sub typing
+
+	define transitive <sub:
+	
+	BasicType(Int()) <sub: BasicType(Decimal())
+
+type rules // sub typing
+
+	Class(c,extends,members):-
+	where store Null() <sub: c
+
 type rules // BasicValue
 
 	BasicValue(True())             : BasicType(Boolean())
@@ -63,7 +74,8 @@ type rules // BinRel, BinOp, UnOp
 + BinRel(l, op@SupersetEquals(), r) : BasicType(Boolean())
 	where	l	: l-ty
 		and	r	: r-ty
-		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		      else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
 
   BinRel(l, op@LessThan(), r)
 + BinRel(l, op@LessThanEquals(), r)
@@ -74,7 +86,8 @@ type rules // BinRel, BinOp, UnOp
 		and	(l-ty == BasicType(Decimal()) or 
 		     l-ty == BasicType(Int())) 
 		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
-		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
 
   BinOp(l, op@Plus(), r)
 + BinOp(l, op@Minus(), r)
@@ -87,7 +100,8 @@ type rules // BinRel, BinOp, UnOp
 		and	(l-ty == BasicType(Decimal()) or 
 		     l-ty == BasicType(Int())) 
 		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
-		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
 
   BinOp(l, op@Intersection(), r)
 + BinOp(l, op@Union(), r)
