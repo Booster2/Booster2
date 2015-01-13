@@ -15,13 +15,6 @@ type rules // references
 	
 	Path(path-start, PathComponent(path-component, prime)) : ty
 	where definition of path-component : ty
-	
-	// Path(path-start, path-component) : ty
-	// where path-component : ty
-	// 
-	// // PathComponent gets its 'refers to' only in the context of Path(_,_) so this doesnt work
-	// PathComponent(a, prime) : ty
-	// where definition of a : ty
 
 	t@This() : ty
 	where definition of t : ty
@@ -43,3 +36,74 @@ type rules // model refs
 type rules // primitives are their own type (so that a type-lookup can be done on the AST instead of using the AST itself)
 
 	ty@BasicType(x) : ty
+
+type rules // BasicValue
+
+	BasicValue(True())             : BasicType(Boolean())
+	BasicValue(False())            : BasicType(Boolean())
+	BasicValue(CurrentDate())      : BasicType(Date())
+	BasicValue(CurrentDateTime())  : BasicType(DateTime())
+	BasicValue(Decimal(i))         : BasicType(Decimal())
+	BasicValue(Integer(i))         : BasicType(Int())
+	// BasicValue(String(i))          : BasicType(Password())
+	BasicValue(String(i))          : BasicType(String())
+	BasicValue(CurrentTime())      : BasicType(Time())
+	
+	Null()                         : Null()
+
+type rules // BinRel, BinOp, UnOp
+
+  BinRel(l, op@Equal(), r)
++ BinRel(l, op@NotEqual(), r)
++ BinRel(l, op@In(), r)
++ BinRel(l, op@NotIn(), r) 
++ BinRel(l, op@Subset(), r) 
++ BinRel(l, op@SubsetEquals(), r) 
++ BinRel(l, op@Superset(), r) 
++ BinRel(l, op@SupersetEquals(), r) : BasicType(Boolean())
+	where	l	: l-ty
+		and	r	: r-ty
+		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+
+  BinRel(l, op@LessThan(), r)
++ BinRel(l, op@LessThanEquals(), r)
++ BinRel(l, op@GreaterThan(), r)
++ BinRel(l, op@GreaterThanEquals(), r) : BasicType(Boolean())
+	where	l	: l-ty
+		and	r	: r-ty
+		and	(l-ty == BasicType(Decimal()) or 
+		     l-ty == BasicType(Int())) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
+		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+
+  BinOp(l, op@Plus(), r)
++ BinOp(l, op@Minus(), r)
++ BinOp(l, op@Times(), r)
++ BinOp(l, op@Divide(), r) 
++ BinOp(l, op@Maximum(), r) 
++ BinOp(l, op@Minimum(), r) : l-ty
+	where	l	: l-ty
+		and	r	: r-ty
+		and	(l-ty == BasicType(Decimal()) or 
+		     l-ty == BasicType(Int())) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
+		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+
+  BinOp(l, op@Intersection(), r)
++ BinOp(l, op@Union(), r)
++ BinOp(l, op@Concat(), r) : l-ty
+	where	l	: l-ty
+		and	r	: r-ty
+		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+	
+	UnOp(Head(), e)	
++ UnOp(Tail(), e): e-ty
+	where e : e-ty
+	
+  UnOp(Cardinality(), e): BasicType(Int())
+  
+  UnOp(op@Negative(), e): e-ty
+	where e : e-ty
+    and	(e-ty == BasicType(Decimal()) or 
+		     e-ty == BasicType(Int())) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty] in [op]] on e
