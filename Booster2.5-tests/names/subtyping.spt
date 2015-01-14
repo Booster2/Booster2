@@ -1,0 +1,69 @@
+module names-subtyping
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Resolve to class from extends  [[
+	class [[A]] {}
+	class B extends [[A]]{}
+]] resolve #2 to #1
+
+test Resolve attribute to super class attribute  [[
+	class A {
+		attributes
+			[[i]] : Int
+	}
+	
+	class B extends A{
+		invariants
+			10 > [[i]]
+	}
+]] resolve #2 to #1
+
+test Resolve attribute to super super class attribute  [[
+	class A {
+		attributes
+			[[i]] : Int
+	}
+	
+	class B extends A{}
+	
+	class C extends B{
+		invariants
+			10 > [[i]]
+	}
+]] resolve #2 to #1
+
+test Resolve method to super class method [[
+	class A {
+		attributes
+			a : INT
+		methods
+			[[updateA]] { a' = a + 1 }	
+	}
+	
+	class B extends A{
+		methods
+			m1 { this . [[updateA]] () & a > 3}	
+	}
+]] resolve #2 to #1
+
+test Resolve method to super super class method [[
+	class A {
+		attributes
+			a : INT
+		methods
+			[[updateA]] { a' = a + 1 }	
+	}
+	
+	class B extends A{}
+	
+	class C extends B{
+		methods
+			m1 { this . [[updateA]] () & a > 3}	
+	}
+]] resolve #2 to #1
+

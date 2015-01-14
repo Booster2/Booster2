@@ -104,6 +104,18 @@ type rules // BinRel, BinOp, UnOp
 		     (r-ty <sub: l-ty and l-ty => op-ty) or
 				 (l-ty <sub: r-ty and r-ty => op-ty)) 
 		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+	
+	// Note r is a newly defined variable with the type of l so r-ty == l-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
+  BinOpDefRightInput(l, op@Plus(), r)
++ BinOpDefRightInput(l, op@Minus(), r)
++ BinOpDefRightInput(l, op@Times(), r)
++ BinOpDefRightInput(l, op@Divide(), r)
++ BinOpDefRightInput(l, op@Maximum(), r)
++ BinOpDefRightInput(l, op@Minimum(), r): l-ty
+	where l : l-ty
+		and	(l-ty == BasicType(Decimal()) or 
+		     l-ty == BasicType(Int())) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
 
   BinOp(l, op@Intersection(), r)
 + BinOp(l, op@Union(), r)
