@@ -143,7 +143,7 @@ class StaffMember {
 		lastName (ID) : string
 		firstName (ID) : string
 		preparedLineItems : SET ( LineItem . preparedBy ) [*]
-		fulfilledOrders : SET ( Order . orderFulfilledBy ) [*]
+		fulfilledOrders : SET ( Order . dispatchedBy ) [*]
 	methods
 		create { sm! : StaffMember' & sm!.lastName' = lastName? & sm!.firstName' = firstName?}
 }
@@ -151,7 +151,7 @@ class StaffMember {
 class Country {
 	attributes
 		name (ID) : string
-		countryAddresses : SET(Address . addressCountry)[*]
+		countryAddresses : SET(Address . country)[*]
 	methods
 		create { country! : Country' & country! . name' = name?}
 

@@ -13,7 +13,7 @@ class Book{
 		category : Category
 		genre : Genre
 	methods
-		create { b! : B' ; b!.author' = author? & b!.title' = title? & b!.isbn' = isbn? & b!.noPages' = noPages? & b!.category' = category? & b!.genre' = genre? }
+		create { b! : Book' ; b!.author' = author? & b!.title' = title? & b!.isbn' = isbn? & b!.noPages' = noPages? & b!.category' = category? & b!.genre' = genre? }
 	invariants
 		noPages > 0
 	
@@ -21,10 +21,11 @@ class Book{
 
 class Author {
 	attributes
+		authorBooks : Book . author
 		firstName : string
 		lastName : string
 	methods
-		create {a! : A'; a!.firstName' = firstName? & a!.lastName = lastName?}
+		create {a! : Author'; a!.firstName' = firstName? & a!.lastName = lastName?}
 	
 }
 

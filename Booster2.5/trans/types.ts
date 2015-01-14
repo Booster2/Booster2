@@ -64,6 +64,7 @@ type rules // BasicValue
 	BasicValue(CurrentTime())      : BasicType(Time())
 	
 	Null()                         : Null()
+	SetExtent([])                  : Null()
 
 type rules // BinRel, BinOp, UnOp
 
