@@ -92,12 +92,12 @@ rules // Debugging
 			filename := <guarantee-extension(|"desugared.before.aterm")> path;
 			result   := ast'
 			
-	// // Prints the analyzed annotated abstract syntax ATerm of a selection.
-	// debug-show-analyzed:
-	// 	(selected, position, ast, path, project-path) -> (filename, result)
-	// 	with
-	// 		filename := <guarantee-extension(|"analyzed.aterm")> path;
-	// 		result	 := ast
+	// Prints the analyzed annotated abstract syntax ATerm of a selection.
+	debug-show-analyzed:
+		(selected, position, ast, path, project-path) -> (filename, result)
+		with
+			filename := <guarantee-extension(|"analyzed.aterm")> path;
+			result	 := ast
 	
 	debug-show-analyzed-resolved0:
 		(selected, position, ast, path, project-path) -> (filename, result)

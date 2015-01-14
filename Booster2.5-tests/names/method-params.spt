@@ -27,8 +27,7 @@ test Resolve param to variable from methodcall with path in same class  [[
 	}
 ]] resolve #2 to #1
 
-// TODO: resolving to variables fails from method calls in different classes
-test (TODO) Resolve param to variable from methodcall with path in diff class  [[
+test Resolve param to variable from methodcall with path in diff class  [[
 	class A {
 		attributes
 			i : Int

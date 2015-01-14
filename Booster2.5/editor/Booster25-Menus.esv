@@ -8,6 +8,7 @@ menus
     action: "1) Show abstract syntax"                              = debug-show-aterm (realtime) (meta) (source)
     action: "2) Show desugared-before"                             = debug-show-desugared (realtime) (meta) (source)
     action: "3) Show analyzed"                                     = debug-show-analyzed-resolved0 (meta) (source)
+    action: "3) Show analyzed (unresolved)"                        = debug-show-analyzed (meta)
     action: "4) Show desugared-after"                              = debug-show-analyzed-resolved (meta)
     action: "4) Show desugared-after (no def or use anotations)"   = debug-show-analyzed-resolved2 (meta)
     action: "4) Show desugared-after (no anotations)"              = debug-show-desugared2 (meta)
