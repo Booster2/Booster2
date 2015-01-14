@@ -18,6 +18,9 @@ type rules // references
 
 	t@This() : ty
 	where definition of t : ty
+	
+	Param(a) : ty
+	where definition of a : ty
 
 type rules // model refs
 
@@ -135,3 +138,11 @@ type rules // BinRel, BinOp, UnOp
     and	(e-ty == BasicType(Decimal()) or 
 		     e-ty == BasicType(Int())) 
 		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty] in [op]] on e
+
+type rules // method call params should have correct types
+
+	Seq(l, r):-
+	where	l	: l-ty
+		and	r	: r-ty
+		and (r-ty == l-ty or r-ty <sub: l-ty) 
+		     else error $[Type mismatch: expected [l-ty] got [r-ty]] on r

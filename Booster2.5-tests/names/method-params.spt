@@ -16,6 +16,16 @@ test Resolve param to variable from methodcall  [[
 	}
 ]] resolve #2 to #1
 
+test Error on not existing param  [[
+	class A {
+		attributes
+			i : Int
+		methods
+			updateA { i' = i + a? }
+			m1 { updateA ([[b? = 3]]) }	
+	}
+]] 2 error //TODO: should be 1 error, but cascading errors make 3 also get a type error @see http://yellowgrass.org/issue/TS/1
+
 test Resolve param to variable from methodcall with path in same class  [[
 	class A {
 		attributes
@@ -42,3 +52,5 @@ test Resolve param to variable from methodcall with path in diff class  [[
 			m1 { as . updateA ([[a]]? = 3) }	
 	}
 ]] resolve #2 to #1
+
+//TODO: error on omitted params

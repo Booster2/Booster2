@@ -1,0 +1,47 @@
+module types-method-params
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test No error on correct typed parameter [[
+	class A {
+		attributes
+			a : INT
+		methods
+			m0 { updateA (a? = 7) }	
+			updateA { a' = a + a? }
+	}
+]] 0 errors
+
+test No error on correct sub typed parameter [[
+	class A {
+		attributes
+			a : decimal
+		methods
+			m0 { updateA (a? = 7) }	
+			updateA { a' = a + a? }
+	}
+]] 0 errors
+
+test Error on wrong typed parameter [[
+	class A {
+		attributes
+			a : INT
+		methods
+			m0 { updateA (a? = [["a string"]]) }	
+			updateA { a' = a + a? }
+	}
+]] 1 error
+
+test Error on wrong typed sub type parameter [[
+	class A {
+		attributes
+			a : INT
+		methods
+			m0 { updateA (a? = [[42.0]]) }	
+			updateA { a' = a + a? }
+	}
+]] 1 error
