@@ -4,6 +4,10 @@ class C1 {
 	attributes
    	  	x : INT
    	  methods
+   	  	m1 { x' = x + 1 }
+   	  	m2 { x' = x + 1 }
+   	  	m3 { x' = x + 1 }
+   	  	m4 { x' = x + 1 }
   	  	add1 { x' = x + 1 }
   	  	
   	  	sub1 { x' = x - 1 }

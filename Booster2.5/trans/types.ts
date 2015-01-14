@@ -109,17 +109,23 @@ type rules // BinRel, BinOp, UnOp
 				 (l-ty <sub: r-ty and r-ty => op-ty)) 
 		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
 	
-	// Note r is a newly defined variable with the type of l so r-ty == l-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
-  BinOpDefRightInput(l, op@Plus(), r)
-+ BinOpDefRightInput(l, op@Minus(), r)
-+ BinOpDefRightInput(l, op@Times(), r)
-+ BinOpDefRightInput(l, op@Divide(), r)
-+ BinOpDefRightInput(l, op@Maximum(), r)
-+ BinOpDefRightInput(l, op@Minimum(), r): l-ty
-	where l : l-ty
-		and	(l-ty == BasicType(Decimal()) or 
-		     l-ty == BasicType(Int())) 
-		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
+	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
+  BinOpDefLeftInput (v, op@Plus(),    e)
++ BinOpDefLeftInput (v, op@Minus(),   e)
++ BinOpDefLeftInput (v, op@Times(),   e)
++ BinOpDefLeftInput (v, op@Divide(),  e)
++ BinOpDefLeftInput (v, op@Maximum(), e)
++ BinOpDefLeftInput (v, op@Minimum(), e) 
++ BinOpDefRightInput(e, op@Plus(),    v)
++ BinOpDefRightInput(e, op@Minus(),   v)
++ BinOpDefRightInput(e, op@Times(),   v)
++ BinOpDefRightInput(e, op@Divide(),  v)
++ BinOpDefRightInput(e, op@Maximum(), v)
++ BinOpDefRightInput(e, op@Minimum(), v): e-ty
+	where e : e-ty
+		and	(e-ty == BasicType(Decimal()) or 
+		     e-ty == BasicType(Int())) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty] in [op]] on e
 
   BinOp(l, op@Intersection(), r)
 + BinOp(l, op@Union(), r)

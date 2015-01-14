@@ -16,6 +16,7 @@ signature constructors
 	BinRelDefLeftOutput  : ID * BinRel * Expression -> Term
 	BinRelDefRightInput  : Expression * BinRel * ID -> Term
 	BinRelDefRightOutput : Expression * BinRel * ID -> Term
+	BinOpDefLeftInput    : Expression * BinOp  * ID -> Term
 	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
 
 	Param : ID -> Term
@@ -46,22 +47,26 @@ rules // Help NaBL: add SetVal constructors around the values in set definitions
 
 rules //  Help NaBL: make explicit what are Variable definition sites
 	
-	binrel-add-vardef = ?BinRel(Input(v),  op@In(),      rhs);       !BinRelDefLeftInput  (v,   op, rhs)
-	binrel-add-vardef = ?BinRel(Output(v), op@In(),      rhs);       !BinRelDefLeftOutput (v,   op, rhs)
-	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),   Input(v));  !BinRelDefRightInput (lhs, op, v)
-	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),   Output(v)); !BinRelDefRightOutput(lhs, op, v)
-	binop-add-vardef  = ?BinOp( lhs,       op@Plus(),    Input(v));  !BinOpDefRightInput  (lhs, op, v)
-	binop-add-vardef  = ?BinOp( lhs,       op@Minus(),   Input(v));  !BinOpDefRightInput  (lhs, op, v)
-	binop-add-vardef  = ?BinOp( lhs,       op@Times(),   Input(v));  !BinOpDefRightInput  (lhs, op, v)
-	binop-add-vardef  = ?BinOp( lhs,       op@Divide(),  Input(v));  !BinOpDefRightInput  (lhs, op, v)
-	binop-add-vardef  = ?BinOp( lhs,       op@Maximum(), Input(v));  !BinOpDefRightInput  (lhs, op, v)
-	binop-add-vardef  = ?BinOp( lhs,       op@Minimum(), Input(v));  !BinOpDefRightInput  (lhs, op, v)
+	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);       !BinRelDefLeftInput  (v,   op, rhs)
+	binrel-add-vardef = ?BinRel(Output(v), op@In(),          rhs);       !BinRelDefLeftOutput (v,   op, rhs)
+	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Input(v));  !BinRelDefRightInput (lhs, op, v)
+	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Output(v)); !BinRelDefRightOutput(lhs, op, v)
+	binop-add-vardef  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !BinOpDefLeftInput   (v,   op, rhs)
+	binop-add-vardef  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !BinOpDefRightInput  (lhs, op, v)
 	
 	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op, rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
 	binrel-rem-vardef = ?BinRelDefLeftOutput (v,   op, rhs); !BinRel(<custom-origin(|v)>Output(v), op, rhs)
 	binrel-rem-vardef = ?BinRelDefRightInput (lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Input(v))
 	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))
+	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op, rhs); !BinOp (<custom-origin(|v)>Input(v),  op, rhs)
 	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op, v  ); !BinOp (lhs,                          op, <custom-origin(|v)>Input(v))
+
+	binop-arith = ?Plus()
+	binop-arith = ?Minus()
+	binop-arith = ?Times()
+	binop-arith = ?Divide()
+	binop-arith = ?Maximum()
+	binop-arith = ?Minimum()
 
 rules //  Help NaBL: make explicit what are Function Call parameters
 	

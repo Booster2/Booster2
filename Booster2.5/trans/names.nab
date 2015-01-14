@@ -117,6 +117,7 @@ binding rules // Variables
 	BinRelDefLeftOutput (v,   op, rhs): defines Variable v of type t where rhs has type t
 	BinRelDefRightInput (lhs, op, v  ): defines Variable v of type t where lhs has type t
 	BinRelDefRightOutput(lhs, op, v  ): defines Variable v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   op, rhs): defines Variable v of type t where rhs has type t
 	BinOpDefRightInput  (lhs, op, v  ): defines Variable v of type t where lhs has type t
 			
 	Forall(v, expr, body):
