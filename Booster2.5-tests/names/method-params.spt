@@ -1,0 +1,45 @@
+module names-method-params
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Resolve param to variable from methodcall  [[
+	class A {
+		attributes
+			i : Int
+		methods
+			updateA { i' = i + [[a]]? }
+			m1 { updateA ([[a]]? = 3) }	
+	}
+]] resolve #2 to #1
+
+test Resolve param to variable from methodcall with path in same class  [[
+	class A {
+		attributes
+			i : Int
+			as : A
+		methods
+			updateA { i' = i + [[a]]? }
+			m1 { as . updateA ([[a]]? = 3) }	
+	}
+]] resolve #2 to #1
+
+// TODO: resolving to variables fails from method calls in different classes
+test (TODO) Resolve param to variable from methodcall with path in diff class  [[
+	class A {
+		attributes
+			i : Int
+		methods
+			updateA { i' = i + [[a]]? }
+	}
+	
+	class B {
+		attributes
+			as : A
+		methods
+			m1 { as . updateA ([[a]]? = 3) }	
+	}
+]] resolve #2 to #1

@@ -1,0 +1,5 @@
+module trans/names-manual
+
+signature constructors
+	
+	MethodReference : Term

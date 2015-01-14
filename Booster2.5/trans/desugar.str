@@ -18,16 +18,20 @@ signature constructors
 	BinRelDefRightOutput : Expression * BinRel * ID -> Term
 	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
 
+	Param : ID -> Term
+
 rules
 	
 	desugar-before-analysis = 
 		try(sometd(setdef-add-setvalues));
 		bottomup(try(binrel-add-vardef <+ binop-add-vardef));
+		try(sometd(seq-add-param));
 		warning-on-missing-origin
 	
 	desugar-after-analysis = 
 		try(sometd(setdef-rem-setvalues));
 		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef));
+		try(sometd(seq-rem-param));
 		warning-on-missing-origin
 
 rules // Help NaBL: add SetVal constructors around the values in set definitions
@@ -59,3 +63,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))
 	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op, v  ); !BinOp (lhs,                          op, <custom-origin(|v)>Input(v))
 
+rules //  Help NaBL: make explicit what are Function Call parameters
+	
+	seq-add-param     = ?Seq(Input(v), e);!Seq(<custom-origin(|v)>Param(v), e)
+	seq-rem-param     = ?Seq(Param(v), e);!Seq(<custom-origin(|v)>Input(v), e)

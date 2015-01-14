@@ -23,6 +23,7 @@ imports
 	trans/desugar
 	trans/api/_runtime
 	trans/types-manual
+	trans/names-manual
 
 rules // Analysis
 	

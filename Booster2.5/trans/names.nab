@@ -13,6 +13,7 @@ namespaces
 	Attribute
 	Method
 	This
+	MethodReference
 	Variable
 
 binding rules // System
@@ -60,6 +61,23 @@ binding rules // Method
 	Method(m,body):
 		defines Method m
 		scopes Variable
+	
+	MethodReference(PathStart(m-ref, prime), params):
+		implicitly defines MethodReference MethodReference()
+			of type m-def
+			in params
+			where m-ref resolves to Method m-def
+		
+	MethodReference(Path(path-start, PathComponent(m-ref, prime)), params):
+		implicitly defines MethodReference MethodReference()
+			of type m-def
+			in params
+			where m-ref resolves to Method m-def
+		
+	Param(v):
+		refers to Variable v in Method m
+		where MethodReference() resolves to MethodReference m-ref
+		and m-ref has type m
 
 binding rules // References
 
