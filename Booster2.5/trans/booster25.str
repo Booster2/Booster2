@@ -24,15 +24,16 @@ imports
 	trans/api/_runtime
 	trans/types-manual
 	trans/names-manual
+	trans/lib/nabl-ext
 
 rules // Analysis
 	
 	editor-analyze = analysis-default-editor
 	
 	analysis-single-default-interface = 
-		analysis-single-default(desugar-before-analysis, desugar-after-analysis, id|<language>)
+		analysis-single-default(desugar-before-analysis, desugar-after-analysis, pp-message-top|<language>)
 	analysis-multiple-default-interface = 
-		analysis-multiple-default(parse-file <+ !(), desugar-before-analysis, desugar-after-analysis, id|<language>, <project-path>)
+		analysis-multiple-default(parse-file <+ !(), desugar-before-analysis, desugar-after-analysis, pp-message-top|<language>, <project-path>)
 	
 	editor-save = analysis-save-default(|<language>)
 

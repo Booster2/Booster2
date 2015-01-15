@@ -8,6 +8,7 @@ imports // functions
 	
 	trans/api/_runtime
 	trans/lib/string
+	trans/lib/origin
 
 rules // api for unresolved references error messages
 	
@@ -100,9 +101,12 @@ rules // api for checking something contains all of def
 			a-children-defs         := <map(_nabl-create-collectdefs(|ctx));_task-create-combine(|ctx)>a-children;
 			diff                    := <_task-create-diff(|ctx)> (a-ty-def-children, a-children-defs);
 			diff-filtered           := <filter-propconstraints(|ctx,filters)>diff;
+			// diff-filtered-names     := <_task-create-rewrite(|ctx, "nabl-uri;nabl-uri-name")>diff-filtered;
 			a-msg-on                := <eval(|f-msg-on)>a;
 			msg                     := ["Provide all required ", <_pp-ns>def-child-ns, "s: ", diff-filtered];
 			<_task-create-error-on-success(|ctx, diff-filtered, msg)> a-msg-on
+
+	// task-rewrite: ("nabl-uri;nabl-uri-name", uri) -> <_nabl-uri;_nabl-uri-name> uri
 
 	filter-propconstraints(|ctx, filters) = where(!(filters, []);equal);id
 	filter-propconstraints(|ctx, filters): def-list -> def-list-filtered-rec
@@ -113,3 +117,29 @@ rules // api for checking something contains all of def
 			(nablprop, propvalue) := filter;
 			def-list-filtered     := <_nabl-create-propconstraint(|ctx, nablprop, def-list)> propvalue;
 			def-list-filtered-rec := <filter-propconstraints(|ctx, filters-tail)>def-list-filtered
+
+rules // pp-message
+	
+	pp-message-top = keep-origin((id, strip-annos; pp-message))
+	pp-message = pp-uri-list
+	pp-message : Def(uri) -> <_pp-uri>uri
+	pp-message = not(is-list); (is-string <+ pp-result <+ (strip-annos; write-to-string))
+	pp-message = map(pp-message); concat-strings
+	
+	pp-uri-list: a -> b
+		where
+			Hd;get-uri
+		with
+			b := <map(get-uri;_nabl-uri-name);separate-by(|", ");concat-strings>a
+	
+	get-uri = ?URI(_,_)
+	get-uri = ?Def(<id>)
+	
+	pp-result:
+	    result@Result(_) -> msg
+	    where
+	       if <_task-has-failed> result then
+	         msg := "fail"
+	       else
+	         msg := <_task-get-results; map(pp-message); separate-by(|" or "); concat-strings> result
+	       end
