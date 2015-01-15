@@ -10,8 +10,8 @@ class Project
 	methods
 		create{project! /: Project & project! : Project' & project!.title'=title?}
 		destroy{project? : Project & project?.projectRoles={} & project?.projectTasks={} & project? /: Project'}
-		addPerson1{ProjectRole.createProjectRole(project?=this) } // maybe we could use a substitution syntax: [project?=this]ProjectRole.createProjectRole
-		addPerson2{ProjectRole.createProjectRole() & project?=this} // this should be valid too
+		addPerson1{ProjectRole.createProjectRole(project?=this, role?=role?, person?=person?) } // maybe we could use a substitution syntax: [project?=this]ProjectRole.createProjectRole
+		// addPerson2{ProjectRole.createProjectRole() & project?=this} // this should be valid too
 		/*newPhase{phase! : phases' & phase!.phase' = phase? & phase!.startDate = startDate? & endDate? /= null => phase!.endDate'=endDate?}*/ // this fails WP
 }
 
