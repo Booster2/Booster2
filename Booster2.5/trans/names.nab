@@ -113,14 +113,15 @@ binding rules // References
 
 binding rules // Variables
 	
-	BinRelDefLeftInput  (v,   op, rhs): defines Variable v of type t where rhs has type t
-	BinRelDefLeftOutput (v,   op, rhs): defines Variable v of type t where rhs has type t
-	BinRelDefRightInput (lhs, op, v  ): defines Variable v of type t where lhs has type t
-	BinRelDefRightOutput(lhs, op, v  ): defines Variable v of type t where lhs has type t
-	BinOpDefLeftInput   (v,   op, rhs): defines Variable v of type t where rhs has type t
-	BinOpDefRightInput  (lhs, op, v  ): defines Variable v of type t where lhs has type t
+	BinRelDefLeftInput  (v,   In(),    rhs): defines Variable v of type t where rhs has type Set(t)
+	BinRelDefLeftInput  (v,   NotIn(), rhs): defines Variable v of type t where rhs has type Set(t)
+	BinRelDefLeftInput  (v,   op,      rhs): defines Variable v of type t where rhs has type t
+	BinRelDefLeftOutput (v,   In(),    rhs): defines Variable v of type t where rhs has type Set(t)
+	BinRelDefLeftOutput (v,   NotIn(), rhs): defines Variable v of type t where rhs has type Set(t)
+	BinRelDefLeftOutput (v,   op,      rhs): defines Variable v of type t where rhs has type t
+	BinRelDefRightInput (lhs, op,      v  ): defines Variable v of type t where lhs has type t
+	BinRelDefRightOutput(lhs, op,      v  ): defines Variable v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   op,      rhs): defines Variable v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, op,      v  ): defines Variable v of type t where lhs has type t
 			
-	Forall(v, expr, body):
-		defines Variable v
-			of type ty
-			where expr has type ty
+	Forall(v, exp, body):                    defines Variable v of type t where exp has type Set(t)

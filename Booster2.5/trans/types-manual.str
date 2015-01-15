@@ -8,6 +8,10 @@ imports // functions
 	
 	runtime/relations/entries
 
+signature constructors
+	
+	Set : Term -> Term
+
 rules // generate constraints for class <sub: super-class
 
 	nabl-constraint(|ctx) = ?Class(c, Some(x@Extend(e*)), _);!e*;map(try(extends-add-subtyperel(|ctx,c)));fail

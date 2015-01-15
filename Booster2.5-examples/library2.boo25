@@ -16,14 +16,14 @@ system Library2
       subs : set(Lender.members)[*]
     methods
       subscribe
-	{ lender? : subs' }
+				{ lender? : subs' }
       borrow
-	{ book?.borrower = null 
-	& book? : borrowed' }
+				{ book?.borrower = null 
+				& book? : borrowed' }
       return
-	{ book? : borrowed 
-	& book? /: borrowed' }
-  }
+				{ book? : borrowed 
+				& book? /: borrowed' }
+			  }
 
   class Lender {                      
     attributes             

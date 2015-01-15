@@ -33,7 +33,7 @@ type rules // model refs
 	Optional(s) : ty
 	where s : ty
 	
-	Set(s, mult) : ty
+	Set(s, mult) : Set(ty)
 	where s : ty
 
 type rules // primitives are their own type (so that a type-lookup can be done on the AST instead of using the AST itself)
@@ -70,8 +70,6 @@ type rules // BinRel, BinOp, UnOp
 
   BinRel(l, op@Equal(), r)
 + BinRel(l, op@NotEqual(), r)
-+ BinRel(l, op@In(), r)
-+ BinRel(l, op@NotIn(), r) 
 + BinRel(l, op@Subset(), r) 
 + BinRel(l, op@SubsetEquals(), r) 
 + BinRel(l, op@Superset(), r) 
@@ -80,6 +78,14 @@ type rules // BinRel, BinOp, UnOp
 		and	r	: r-ty
 		and	(r-ty == l-ty or r-ty <sub: l-ty) 
 		      else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		      
+  BinRel(l, op@In(), r)
++ BinRel(l, op@NotIn(), r) : BasicType(Boolean())
+	where	l	: l-ty
+		and	r	: r-set-ty
+		and r-set-ty => Set(r-ty)
+		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		      else error $[Type mismatch: expected [Set(l-ty)] got [r-ty] in [op]] on r
 
   BinRel(l, op@LessThan(), r)
 + BinRel(l, op@LessThanEquals(), r)
