@@ -2,6 +2,7 @@ module trans/desugar
 
 imports
 	
+	src-gen/signatures/AbstractBoosterModel-sig	
 	src-gen/signatures/Booster25-sig
 	
 imports
@@ -19,6 +20,7 @@ signature constructors
 	BinRelDefRightOutput : Expression * BinRel * ID -> Term
 	BinOpDefLeftInput    : Expression * BinOp  * ID -> Term
 	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
+	AssignDefRightInput  : Expression * ID          -> Term
 	SeqDefInput          : Param * ID               -> Term
 
 	Param : ID -> Term
@@ -35,7 +37,7 @@ rules
 		warning-on-missing-origin
 	
 	desugar-after-analysis = 
-		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef <+ param-rem-vardef));
+		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef <+ gcmd-rem-vardef <+ param-rem-vardef));
 		bottomup(try(rem-typeisaset));
 		try(sometd(seq-rem-param));
 		try(sometd(setdef-rem-setvalues));
@@ -59,9 +61,9 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 
 	add-vardef : (term, history) -> (term', history')
 		where
-			if name := <binrel-get-varname <+ binop-get-varname <+ param-get-varname>term; <not(elem)>(name, history) then
+			if name := <binrel-get-varname <+ binop-get-varname <+ gcmd-get-varname <+ param-get-varname>term; <not(elem)>(name, history) then
 				history' := <list-add(|name)> history;
-				term'    := <binrel-add-vardef <+ binop-add-vardef <+ param-add-vardef>term
+				term'    := <binrel-add-vardef <+ binop-add-vardef <+ gcmd-add-vardef <+ param-add-vardef>term
 			end
 
 	list-add(|i): a -> [i|a]
@@ -72,6 +74,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binrel-get-varname = ?BinRel(lhs,       op@Equal(),       Output(v)); !v
 	binop-get-varname  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !v
 	binop-get-varname  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !v
+	gcmd-get-varname   = ?Assign(lhs,                         Input(v));  !v
 	param-get-varname  = ?Seq(p,                              Input(v));  !v
 
 	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);       !BinRelDefLeftInput  (v,   op, rhs)
@@ -80,6 +83,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Output(v)); !BinRelDefRightOutput(lhs, op, v)
 	binop-add-vardef  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !BinOpDefLeftInput   (v,   op, rhs)
 	binop-add-vardef  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !BinOpDefRightInput  (lhs, op, v)
+	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));  !AssignDefRightInput (lhs,     v)
 	param-add-vardef  = ?Seq(p,                              Input(v));  !SeqDefInput         (p,       v)
 	
 	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op, rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
@@ -88,6 +92,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))
 	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op, rhs); !BinOp (<custom-origin(|v)>Input(v),  op, rhs)
 	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op, v  ); !BinOp (lhs,                          op, <custom-origin(|v)>Input(v))
+	gcmd-rem-vardef   = ?AssignDefRightInput (lhs,     v  ); !Assign(lhs,                              <custom-origin(|v)>Input(v))
 	param-rem-vardef  = ?SeqDefInput         (p,       v  ); !Seq(p,                                   <custom-origin(|v)>Input(v))
 
 	binop-arith = ?Plus()
