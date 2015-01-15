@@ -115,10 +115,10 @@ binding rules // Variables
 	
 	BinRelDefLeftInput  (v,   In(),    rhs): defines Variable v of type t where rhs has type Set(t)
 	BinRelDefLeftInput  (v,   NotIn(), rhs): defines Variable v of type t where rhs has type Set(t)
-	BinRelDefLeftInput  (v,   op,      rhs): defines Variable v of type t where rhs has type t
+	BinRelDefLeftInput  (v,   Equal(), rhs): defines Variable v of type t where rhs has type t
 	BinRelDefLeftOutput (v,   In(),    rhs): defines Variable v of type t where rhs has type Set(t)
 	BinRelDefLeftOutput (v,   NotIn(), rhs): defines Variable v of type t where rhs has type Set(t)
-	BinRelDefLeftOutput (v,   op,      rhs): defines Variable v of type t where rhs has type t
+	BinRelDefLeftOutput (v,   Equal(), rhs): defines Variable v of type t where rhs has type t
 	BinRelDefRightInput (lhs, op,      v  ): defines Variable v of type t where lhs has type t
 	BinRelDefRightOutput(lhs, op,      v  ): defines Variable v of type t where lhs has type t
 	BinOpDefLeftInput   (v,   op,      rhs): defines Variable v of type t where rhs has type t

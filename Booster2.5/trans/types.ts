@@ -36,6 +36,14 @@ type rules // model refs
 	Set(s, mult) : Set(ty)
 	where s : ty
 
+type rules // helpers
+
+	TypeIsASet(a) : ty
+	where a : a-ty
+	  and(   (a-ty => Set(a-elem-ty) and a-ty => ty)
+	      or (Set(a-ty) => ty)
+	  )
+
 type rules // primitives are their own type (so that a type-lookup can be done on the AST instead of using the AST itself)
 
 	ty@BasicType(x) : ty

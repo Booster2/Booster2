@@ -7,6 +7,7 @@ imports
 imports
 	
 	trans/lib/origin
+	trans/lib/traverse
 
 signature constructors
 	
@@ -20,19 +21,24 @@ signature constructors
 	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
 
 	Param : ID -> Term
+	
+	TypeIsASet : Term -> Term
 
 rules
 	
 	desugar-before-analysis = 
 		try(sometd(setdef-add-setvalues));
-		bottomup(try(binrel-add-vardef <+ binop-add-vardef));
+		bottomup(try(add-typeisaset));
+		try(sometd(method-add-vardef));
+		// bottomup(try(binrel-add-vardef <+ binop-add-vardef));
 		try(sometd(seq-add-param));
 		warning-on-missing-origin
 	
 	desugar-after-analysis = 
-		try(sometd(setdef-rem-setvalues));
-		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef));
 		try(sometd(seq-rem-param));
+		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef));
+		bottomup(try(rem-typeisaset));
+		try(sometd(setdef-rem-setvalues));
 		warning-on-missing-origin
 
 rules // Help NaBL: add SetVal constructors around the values in set definitions
@@ -47,6 +53,26 @@ rules // Help NaBL: add SetVal constructors around the values in set definitions
 
 rules //  Help NaBL: make explicit what are Variable definition sites
 	
+	method-add-vardef: Method(name, body) -> Method(name, body')
+	with
+		(body', _) := <topdown-fold(try(add-vardef))>(body, [])
+
+	add-vardef : (term, history) -> (term', history')
+		where
+			if name := <binrel-get-varname <+ binop-get-varname>term; <not(elem)>(name, history) then
+				history' := <list-add(|name)> history;
+				term'    := <binrel-add-vardef <+ binop-add-vardef>term
+			end
+
+	list-add(|i): a -> [i|a]
+
+	binrel-get-varname = ?BinRel(Input(v),  op@In(),          rhs);       !v
+	binrel-get-varname = ?BinRel(Output(v), op@In(),          rhs);       !v
+	binrel-get-varname = ?BinRel(lhs,       op@Equal(),       Input(v));  !v
+	binrel-get-varname = ?BinRel(lhs,       op@Equal(),       Output(v)); !v
+	binop-get-varname  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !v
+	binop-get-varname  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !v
+
 	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);       !BinRelDefLeftInput  (v,   op, rhs)
 	binrel-add-vardef = ?BinRel(Output(v), op@In(),          rhs);       !BinRelDefLeftOutput (v,   op, rhs)
 	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Input(v));  !BinRelDefRightInput (lhs, op, v)
@@ -72,3 +98,10 @@ rules //  Help NaBL: make explicit what are Function Call parameters
 	
 	seq-add-param     = ?Seq(Input(v), e);!Seq(<custom-origin(|v)>Param(v), e)
 	seq-rem-param     = ?Seq(Param(v), e);!Seq(<custom-origin(|v)>Input(v), e)
+
+rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _)
+
+	add-typeisaset = ?BinRel(lhs, op@In(), ps@PathStart(_, _));!BinRel(lhs, op, <custom-origin(|ps)>TypeIsASet(ps))
+
+	rem-typeisaset = ?BinRel(lhs, op,      TypeIsASet(ps))    ;!BinRel(lhs, op, ps)
+	

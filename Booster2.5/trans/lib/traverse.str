@@ -1,0 +1,34 @@
+module trans/lib/traverse
+
+imports
+
+	trans/lib/origin
+
+rules // apply strategy on a tree top-down and carry over a history
+
+	// for lists
+	topdown-fold(map-strategy): (x@[], fold-base-value) -> (x, fold-base-value)
+
+	topdown-fold(map-strategy): ([input-head|input-rest], fold-value) -> ([input-head'|input-rest'], fold-value'')
+		with
+			(input-head', fold-value') := <topdown-fold(map-strategy)>(input-head, fold-value);
+			(input-rest', fold-value'') := <topdown-fold(map-strategy)>(input-rest, fold-value')
+
+	// for terms
+	topdown-fold(map-strategy): (term, fold-value) -> (term''', fold-value'')
+		where
+			<explode-term>term
+		with
+			(term', fold-value') := <map-strategy>(term, fold-value);
+			(cons, args) := <explode-term>term';
+			(args', fold-value'') := <topdown-fold(map-strategy)>(args, fold-value');
+			term'' := <mkterm>(cons, args');
+			term''' := <custom-origin(|term)>term''
+
+	// for not(list) not(term)
+	topdown-fold(map-strategy): (term, fold-value) -> (term', fold-value')
+		where
+			<not(is-list)>term;
+			<not(explode-term)>term
+		with
+			(term', fold-value') := <map-strategy>(term, fold-value)
