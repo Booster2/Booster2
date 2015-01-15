@@ -37,6 +37,7 @@ rules // check if method calls provide all required parameters
 	methodreference-get-method = ?MethodReference(Path(_, PathComponent(<id>, _)), _)
 	methodreference-get-params = ?MethodReference(_, <id>)
 	param-get-name             = ?Seq(Param(<id>), _)
+	param-get-name             = ?SeqDefInput(Param(<id>), _)
 	
 	
 	
