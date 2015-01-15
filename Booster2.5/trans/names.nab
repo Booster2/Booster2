@@ -15,6 +15,8 @@ namespaces
 	This
 	MethodReference
 	Variable
+	InputVariable
+	OutputVariable
 
 binding rules // System
 
@@ -61,7 +63,7 @@ binding rules // Method
 	Method(m,body):
 		defines Method m
 			of type m
-		scopes Variable
+		scopes Variable, InputVariable, OutputVariable
 	
 	MethodReference(path, params):
 		implicitly defines MethodReference MethodReference()
@@ -70,7 +72,7 @@ binding rules // Method
 			where path has type m
 
 	Param(v):
-		refers to Variable v in Method m
+		refers to InputVariable v in Method m
 		where MethodReference() resolves to MethodReference m-ref
 		and m-ref has type m
 
@@ -87,20 +89,18 @@ binding rules // References
 		
 	PathStart(p, prime):
 		refers to Attribute p
-	otherwise
-		refers to Method p
-	otherwise
-		refers to Class p
-	otherwise
-		refers to SetVal p
-	otherwise
-		refers to Variable p
+		otherwise refers to Method p
+		otherwise refers to Class p
+		otherwise refers to SetVal p
+		otherwise refers to Variable p
+		otherwise refers to InputVariable p
+		otherwise refers to OutputVariable p
 
 	Input(v):
-		refers to Variable v
+		refers to InputVariable v
 		
 	Output(v):
-		refers to Variable v
+		refers to OutputVariable v
 
 	Path(path-start, PathComponent(a, prime)):
 		refers to Attribute a in Class c
@@ -113,16 +113,16 @@ binding rules // References
 
 binding rules // Variables
 	
-	BinRelDefLeftInput  (v,   In(),    rhs): defines Variable v of type t where rhs has type Set(t)
-	BinRelDefLeftInput  (v,   NotIn(), rhs): defines Variable v of type t where rhs has type Set(t)
-	BinRelDefLeftInput  (v,   Equal(), rhs): defines Variable v of type t where rhs has type t
-	BinRelDefLeftOutput (v,   In(),    rhs): defines Variable v of type t where rhs has type Set(t)
-	BinRelDefLeftOutput (v,   NotIn(), rhs): defines Variable v of type t where rhs has type Set(t)
-	BinRelDefLeftOutput (v,   Equal(), rhs): defines Variable v of type t where rhs has type t
-	BinRelDefRightInput (lhs, op,      v  ): defines Variable v of type t where lhs has type t
-	BinRelDefRightOutput(lhs, op,      v  ): defines Variable v of type t where lhs has type t
-	BinOpDefLeftInput   (v,   op,      rhs): defines Variable v of type t where rhs has type t
-	BinOpDefRightInput  (lhs, op,      v  ): defines Variable v of type t where lhs has type t
-	SeqDefInput         (p,            v  ): defines Variable v of type t where p   has type t
+	BinRelDefLeftInput  (v,   In(),    rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinRelDefLeftInput  (v,   NotIn(), rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinRelDefLeftInput  (v,   Equal(), rhs): defines InputVariable  v of type t where rhs has type t
+	BinRelDefLeftOutput (v,   In(),    rhs): defines OutputVariable v of type t where rhs has type Set(t)
+	BinRelDefLeftOutput (v,   NotIn(), rhs): defines OutputVariable v of type t where rhs has type Set(t)
+	BinRelDefLeftOutput (v,   Equal(), rhs): defines OutputVariable v of type t where rhs has type t
+	BinRelDefRightInput (lhs, op,      v  ): defines InputVariable  v of type t where lhs has type t
+	BinRelDefRightOutput(lhs, op,      v  ): defines OutputVariable v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   op,      rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, op,      v  ): defines InputVariable  v of type t where lhs has type t
+	SeqDefInput         (p,            v  ): defines InputVariable  v of type t where p   has type t
 			
 	Forall(v, exp, body):                    defines Variable v of type t where exp has type Set(t)

@@ -18,7 +18,7 @@ rules // check if method calls provide all required parameters
 	
 	contains-all-errors = ![
 		ContainsAll(
-			NablNsVariable(),
+			NablNsInputVariable(),
 			[],
 			"methpar-1",
 			"methpar-2",

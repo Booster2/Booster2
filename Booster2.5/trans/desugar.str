@@ -104,7 +104,9 @@ rules //  Help NaBL: make explicit what are Function Call parameters
 
 rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _)
 
-	add-typeisaset = ?BinRel(lhs, op@In(), ps@PathStart(_, _));!BinRel(lhs, op, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset = ?BinRel(lhs, op@In(), ps@PathStart(_, _)      );!BinRel(lhs, op, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset = ?Forall(v,            ps@PathStart(_, _), body);!Forall(v,       <custom-origin(|ps)>TypeIsASet(ps), body)
 
-	rem-typeisaset = ?BinRel(lhs, op,      TypeIsASet(ps))    ;!BinRel(lhs, op, ps)
+	rem-typeisaset = ?BinRel(lhs, op,      TypeIsASet(ps)      );!BinRel(lhs, op, ps)
+	rem-typeisaset = ?Forall(v,            TypeIsASet(ps), body);!Forall(v,       ps, body)
 	
