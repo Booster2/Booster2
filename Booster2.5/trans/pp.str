@@ -5,15 +5,18 @@ imports
 	libstratego-gpp
 	lib/runtime/refactoring/-
 	src-gen/pp/Booster25-pp
+	include/Booster25-parenthesize
 
 rules
 	
   pp-Booster25-string =
+  	parenthesize-Booster25;
     prettyprint-SDF-start-symbols
     ; !V([], <id>)
     ; box2text-string(|120)
       
   pp-partial-Booster25-string =
+  	parenthesize-Booster25;
     prettyprint-example
     ; !V([], <id>)
     ; box2text-string(|120)

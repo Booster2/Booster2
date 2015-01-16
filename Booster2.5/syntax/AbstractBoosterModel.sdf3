@@ -37,7 +37,7 @@ context-free syntax
   GuardedCommand.Parallels = <parallels <{GuardedCommand "||"}*>> 
   BoosterTerm = GuardedCommand 
 
-priorities
+context-free priorities
 
 		GuardedCommand.Skip
 	>
