@@ -20,3 +20,6 @@
 */lib
 */*/lib
 */*/*/lib
+*.pp.boo25
+*/*.pp.boo25
+*/*/*.pp.boo25
