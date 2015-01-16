@@ -74,26 +74,32 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binrel-get-varname = ?BinRel(lhs,       op@Equal(),       Output(v)); !v
 	binop-get-varname  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !v
 	binop-get-varname  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !v
+	binop-get-varname  = ?BinOp (SetExtent([Input(v)]), op@<binop-set>, rhs); !v
+	binop-get-varname  = ?BinOp (lhs,       op@<binop-set>,   SetExtent([Input(v)])); !v
 	gcmd-get-varname   = ?Assign(lhs,                         Input(v));  !v
 	param-get-varname  = ?Seq(p,                              Input(v));  !v
 
-	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);       !BinRelDefLeftInput  (v,   op, rhs)
-	binrel-add-vardef = ?BinRel(Output(v), op@In(),          rhs);       !BinRelDefLeftOutput (v,   op, rhs)
-	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Input(v));  !BinRelDefRightInput (lhs, op, v)
-	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Output(v)); !BinRelDefRightOutput(lhs, op, v)
-	binop-add-vardef  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !BinOpDefLeftInput   (v,   op, rhs)
-	binop-add-vardef  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !BinOpDefRightInput  (lhs, op, v)
-	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));  !AssignDefRightInput (lhs,     v)
-	param-add-vardef  = ?Seq(p,                              Input(v));  !SeqDefInput         (p,       v)
+	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);                  !BinRelDefLeftInput  (v,   op, rhs)
+	binrel-add-vardef = ?BinRel(Output(v), op@In(),          rhs);                  !BinRelDefLeftOutput (v,   op, rhs)
+	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Input(v));             !BinRelDefRightInput (lhs, op, v)
+	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Output(v));            !BinRelDefRightOutput(lhs, op, v)
+	binop-add-vardef  = ?BinOp (Input(v),  op@<binop-arith>, rhs);                  !BinOpDefLeftInput   (v,   op, rhs)
+	binop-add-vardef  = ?BinOp (lhs,       op@<binop-arith>, Input(v));             !BinOpDefRightInput  (lhs, op, v)
+	binop-add-vardef  = ?BinOp (SetExtent([Input(v)]), op@<binop-set>, rhs);        !BinOpDefLeftInput   (v,   op, rhs)
+	binop-add-vardef  = ?BinOp (lhs,       op@<binop-set>,   SetExtent([Input(v)]));!BinOpDefRightInput  (lhs, op, v)
+	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));             !AssignDefRightInput (lhs,     v)
+	param-add-vardef  = ?Seq(p,                              Input(v));             !SeqDefInput         (p,       v)
 	
-	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op, rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
-	binrel-rem-vardef = ?BinRelDefLeftOutput (v,   op, rhs); !BinRel(<custom-origin(|v)>Output(v), op, rhs)
-	binrel-rem-vardef = ?BinRelDefRightInput (lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Input(v))
-	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op, v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))
-	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op, rhs); !BinOp (<custom-origin(|v)>Input(v),  op, rhs)
-	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op, v  ); !BinOp (lhs,                          op, <custom-origin(|v)>Input(v))
-	gcmd-rem-vardef   = ?AssignDefRightInput (lhs,     v  ); !Assign(lhs,                              <custom-origin(|v)>Input(v))
-	param-rem-vardef  = ?SeqDefInput         (p,       v  ); !Seq(p,                                   <custom-origin(|v)>Input(v))
+	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op,               rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
+	binrel-rem-vardef = ?BinRelDefLeftOutput (v,   op,               rhs); !BinRel(<custom-origin(|v)>Output(v), op, rhs)
+	binrel-rem-vardef = ?BinRelDefRightInput (lhs, op,               v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Input(v))
+	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op,               v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))
+	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op@<binop-arith>, rhs); !BinOp (<custom-origin(|v)>Input(v),  op, rhs)
+	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op@<binop-arith>, v  ); !BinOp (lhs,                          op, <custom-origin(|v)>Input(v))
+	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op@<binop-set>,   rhs); !BinOp (<custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]),  op, rhs)
+	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op@<binop-set>,   v  ); !BinOp (lhs,                          op, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]))
+	gcmd-rem-vardef   = ?AssignDefRightInput (lhs,                   v  ); !Assign(lhs,                              <custom-origin(|v)>Input(v))
+	param-rem-vardef  = ?SeqDefInput         (p,                     v  ); !Seq(p,                                   <custom-origin(|v)>Input(v))
 
 	binop-arith = ?Plus()
 	binop-arith = ?Minus()
@@ -107,11 +113,22 @@ rules //  Help NaBL: make explicit what are Function Call parameters
 	seq-add-param     = ?Seq(Input(v), e);!Seq(<custom-origin(|v)>Param(v), e)
 	seq-rem-param     = ?Seq(Param(v), e);!Seq(<custom-origin(|v)>Input(v), e)
 
-rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _)
+rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _) and  BinRel(_, SubsetEquals(), _)
 
-	add-typeisaset = ?BinRel(lhs, op@In(), ps@PathStart(_, _)      );!BinRel(lhs, op, <custom-origin(|ps)>TypeIsASet(ps))
-	add-typeisaset = ?Forall(v,            ps@PathStart(_, _), body);!Forall(v,       <custom-origin(|ps)>TypeIsASet(ps), body)
+	add-typeisaset = ?BinRel(lhs,                op@<binrel-set>, ps@PathStart(_, _)      );!BinRel(lhs,                                op, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset = ?BinOp (lhs,                op@<binop-set>,  ps@PathStart(_, _)      );!BinOp (lhs,                                op, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset = ?BinOp (ps@PathStart(_, _), op@<binop-set>,  rhs                     );!BinOp (<custom-origin(|ps)>TypeIsASet(ps), op, rhs)
+	add-typeisaset = ?Forall(v,                                   ps@PathStart(_, _), body);!Forall(v,                                      <custom-origin(|ps)>TypeIsASet(ps), body)
 
-	rem-typeisaset = ?BinRel(lhs, op,      TypeIsASet(ps)      );!BinRel(lhs, op, ps)
-	rem-typeisaset = ?Forall(v,            TypeIsASet(ps), body);!Forall(v,       ps, body)
+	rem-typeisaset = ?TypeIsASet(ps);!ps
 	
+	binrel-set = ?In()
+	binrel-set = ?NotIn()
+	binrel-set = ?Subset()
+	binrel-set = ?SubsetEquals()
+	binrel-set = ?Superset()
+	binrel-set = ?SupersetEquals()
+	
+	binop-set = ?Intersection()
+	binop-set = ?Union()
+	binop-set = ?Concat()

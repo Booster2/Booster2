@@ -37,7 +37,10 @@ type rules // model refs
 	where s : ty
 	
 	TypeExtent(ty) : Set(BasicType(ty))
-
+	
+	SetExtent([a]) : Set(a-ty)
+	where a : a-ty
+	
 type rules // helpers
 
 	TypeIsASet(a) : ty
@@ -149,6 +152,16 @@ type rules // BinRel, BinOp, UnOp
 	where	l	: l-ty
 		and	r	: r-ty
 		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+
+	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)	
+  BinOpDefLeftInput (v, op@Intersection(), e)
++	BinOpDefLeftInput (v, op@Union(),        e)
++	BinOpDefLeftInput (v, op@Concat(),       e)
++	BinOpDefRightInput(e, op@Intersection(), v)
++	BinOpDefRightInput(e, op@Union(),        v)
++	BinOpDefRightInput(e, op@Concat(),       v) : e-ty
+	where	e	: e-ty
+
 	
 	UnOp(Head(), e)	
 + UnOp(Tail(), e): e-ty
