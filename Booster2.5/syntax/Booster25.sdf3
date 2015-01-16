@@ -14,27 +14,51 @@ context-free start-symbols
 
 context-free syntax
 
-  System.System = <system <ID> <SystemComponent*>> 
-  System.System = <System <ID> <SystemComponent*>> 
+  System.System = <
+  	system <ID>
+  	
+  		<{SystemComponent "\n\n"}*>
+  > 
+  System.System = <
+  	System <ID>
+  	
+  		<{SystemComponent "\n\n"}*>
+  > 
   BoosterTerm = System 
   SystemComponent = SetDef 
   SystemComponent = Class 
   BoosterTerm = SystemComponent 
   SetDef.SetDef = <set <ID> { <{ID ","}+> }> 
   BoosterTerm = SetDef 
-  Class.Class = <class <ID> <Extends?> { <ClassComponents*> }> 
+  Class.Class = <
+  	class <ID> <Extends?>{
+  		<{ClassComponents "\n"}*>
+  	}
+  > 
   BoosterTerm = Class 
-  Extends.Extend = <extends <{Extension ","}+>> 
+  Extends.Extend = <extends <{Extension ","}+> > 
   BoosterTerm = Extends 
   Extension.Extension = ID 
-  ClassComponents.Attributes = <attributes <Attribute*>> 
-  ClassComponents.Methods = <methods <Method*>> 
-  ClassComponents.Invariant = <invariants <Constraint*>> 
-  ClassComponents.Workflows = <workflows <WorkflowComponent*>> 
+  ClassComponents.Attributes = <
+  	attributes
+  		<{Attribute "\n"}*>
+  > 
+  ClassComponents.Methods = <
+  	methods
+  		<{Method "\n"}*>
+  > 
+  ClassComponents.Invariant = <
+  	invariants
+  		<{Constraint "\n"}*>
+  > 
+  ClassComponents.Workflows = <
+  	workflows
+  		<{WorkflowComponent "\n"}*>
+  > 
   BoosterTerm = ClassComponents 
-  Attribute.Attribute = <<ID> <Decoration*> : <TypeDecl>> 
+  Attribute.Attribute = <<ID> <Decoration*>: <TypeDecl>> 
   BoosterTerm = Attribute 
-  Identity.Identity = <(<>ID<>)> 
+  Identity.Identity = <(<>ID<>) > 
   Decoration = Identity 
   TypeDecl = PrimTypeDecl 
   TypeDecl.Optional = <[ <PrimTypeDecl> ]> 
@@ -43,7 +67,7 @@ context-free syntax
   BoosterTerm = TypeDecl 
   PrimTypeDecl.BasicType = BasicTypeDecl 
   PrimTypeDecl.UniDirectional = ID 
-  PrimTypeDecl.BiDirectional = <<ID> . <ID>> 
+  PrimTypeDecl.BiDirectional = <<ID>.<ID>> 
   BoosterTerm = PrimTypeDecl 
   BasicTypeDecl.String = <STRING>  
   BasicTypeDecl.String = <String>  
@@ -66,8 +90,8 @@ context-free syntax
   BasicTypeDecl.Password = <Password> 
   Multiplicity.MultMinAndMax = <[ <INT> .. <INT> ]> 
   Multiplicity.MultJustMax = <[ .. <INT> ]> 
+  Multiplicity.MultJustMin = <[<><INT> .. *<>]> 
   Multiplicity.MultJustMin = <[ <INT> .. ]> 
-  Multiplicity.MultJustMin = <[ <INT> .. * ]> 
   Multiplicity.MultSingle = <[ <INT> ]> 
   Multiplicity.MultAny = <[ * ]> 
   Multiplicity.MultAny =  
@@ -136,21 +160,21 @@ context-free syntax
   TypeExtent.Boolean = <boolean> {prefer}
   TypeExtent.Password = <password> {prefer}
   Path = PathStart 
-  Path.Path = <<Path> . <PathComponent>> {prefer}
+  Path.Path = <<Path>.<PathComponent>> {prefer}
   BoosterTerm = Path 
   PathStart = Input 
   PathStart = Output 
   PathStart = This 
   PathStart = ThisPrimed 
-  PathStart.PathStart = <<ID> <Primed?>> 
+  PathStart.PathStart = <<ID><Primed?>> 
   BoosterTerm = PathStart 
-  Input.Input = <<ID> ?> 
-  Output.Output = <<ID> !> 
+  Input.Input = <<ID>?> 
+  Output.Output = <<ID>!> 
   This.This = <this> 
-  ThisPrimed.ThisPrimed = <this '> 
+  ThisPrimed.ThisPrimed = <this'> 
   Primed.Primed = <'> 
   BoosterTerm = Primed 
-  PathComponent.PathComponent = <<ID> <Primed?>> 
+  PathComponent.PathComponent = <<ID><Primed?>> 
   PathComponent.PathComponent =  {deprecated}
   BoosterTerm = PathComponent 
   UnOp.Head = <head> 
