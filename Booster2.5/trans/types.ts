@@ -35,6 +35,8 @@ type rules // model refs
 	
 	Set(s, mult) : Set(ty)
 	where s : ty
+	
+	TypeExtent(ty) : Set(BasicType(ty))
 
 type rules // helpers
 
