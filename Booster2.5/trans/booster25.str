@@ -78,7 +78,8 @@ rules // Editor services
     with
     	ext      := <get-extension> path;
       filename := <guarantee-extension(|$[pp.[ext]])> path;
-      result   := <pp-debug> selected
+      selected':= <try(?System(s, classes);!System(<conc-strings>(s, "Formatted"), classes))>selected;
+      result   := <pp-debug> selected'
 
 rules // Debugging
 	
