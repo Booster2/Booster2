@@ -96,8 +96,9 @@ context-free syntax
   Multiplicity.MultAny = <[ * ]> 
   Multiplicity.MultAny =  
   BoosterTerm = Multiplicity 
-  Method.Method = <<ID> { <Constraint> }> 
-  Method.Method = <<ID> { <GuardedCommand> }> 
+  Method.Method = <<ID> { <ConstraintOrGuardedCommand> }> 
+  ConstraintOrGuardedCommand = Constraint
+  ConstraintOrGuardedCommand = GuardedCommand
   BoosterTerm = Method 
   Constraint.True = <true> 
   Constraint.False = <false> 

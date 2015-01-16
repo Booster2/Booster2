@@ -39,4 +39,14 @@ context-free syntax
 
 priorities
 
-  GuardedCommand = 'skip'  > GuardedCommand = Path ':=' Expression  > GuardedCommand = Constraint '-->' GuardedCommand  > GuardedCommand = GuardedCommand '||' GuardedCommand  > GuardedCommand = GuardedCommand ';' GuardedCommand  > GuardedCommand = GuardedCommand "[" "]" GuardedCommand 
+		GuardedCommand.Skip
+	>
+		GuardedCommand.Assign
+	>
+		GuardedCommand.Guard
+	>
+		GuardedCommand.Parallel
+	>
+		GuardedCommand.Sequence
+	>
+		GuardedCommand.Choice
