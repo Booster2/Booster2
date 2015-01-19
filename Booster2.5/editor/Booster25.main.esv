@@ -24,7 +24,7 @@ language General properties
   start symbols: System
   
   provider:      include/booster25.jar
-  // provider:      include/booster25-java.jar
+  provider:      include/booster25-java.jar
   
   observer:      editor-analyze (multifile)
   
