@@ -28,7 +28,7 @@ context-free syntax
   SystemComponent = SetDef 
   SystemComponent = Class 
   BoosterTerm = SystemComponent 
-  SetDef.SetDef = <set <ID> { <{ID ","}+> }> 
+  SetDef.SetDef = <set <ID> { <{ID ", "}+> }> 
   BoosterTerm = SetDef 
   Class.Class = <
   	class <ID> <Extends?>{
@@ -230,6 +230,11 @@ context-free priorities
 
 context-free priorities
 	
+	{
+		Constraint.Forall
+		Constraint.Exists
+	}
+	>
 		Constraint.Not
 	>
 		Constraint.And
