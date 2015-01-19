@@ -1,20 +1,15 @@
 Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Booster25 Plug-in
 Bundle-SymbolicName: Booster25;singleton:=true
+Export-Package: Booster25
+Bundle-Name: Booster25 Plug-in
 Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.im
+ p.runtime,org.spoofax.interpreter.core,org.spoofax.interpreter.extern
+ aldeps,org.strategoxt.strj,org.eclipse.jface.text,org.spoofax.terms,o
+ rg.eclipse.core.resources,org.spoofax.jsglr,org.strategoxt.imp.runtim
+ e
+Bundle-ManifestVersion: 2
 Bundle-Activator: Booster25.Activator
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.core.resources,
- org.eclipse.ui,
- org.eclipse.jface.text,
- org.eclipse.imp.runtime,
- org.strategoxt.strj,
- org.strategoxt.imp.runtime,
- org.spoofax.jsglr,
- org.spoofax.interpreter.core,
- org.spoofax.terms,
- org.spoofax.interpreter.externaldeps
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: Booster25
+

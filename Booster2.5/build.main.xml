@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="Booster25" default="all">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="all" name="Booster25">
     
     <!-- Key input modules -->
     <property name="sdfmodule" value="Booster25"/>
@@ -10,29 +10,25 @@
 	<property name="sigmodule" value="Booster25-sig"/> 
 	
     <!-- Project directories -->
-    <property name="trans" location="trans"/>
-    <property name="src-gen" location="editor/java"/>
-    <property name="src-dirs" location="editor/java"/>
-    <property name="include" location="include"/>
-    <property name="lib" location="lib"/>
-    <property name="build" location="target/classes"/>
-    <property name="sdf-src-gen" location="src-gen"/>
-	<property name="pp" location="${sdf-src-gen}/pp"/>
-	<property name="signatures" location="${sdf-src-gen}/signatures"/>
-	<property name="lib-gen" location="${include}"/>
-	<property name="syntax" location="${sdf-src-gen}/syntax"/>
-	<property name="syntax.rel" location="${syntax}" relative="yes"/>
-	<property name="trans.rel" location="trans" relative="yes"/>
-	<property name="include.rel" location="${include}" relative="yes"/>
-	<property name="lib-gen.rel" location="${lib-gen}" relative="yes"/>
+    <property location="trans" name="trans"/>
+    <property location="editor/java" name="src-gen"/>
+    <property location="editor/java" name="src-dirs"/>
+    <property location="include" name="include"/>
+    <property location="lib" name="lib"/>
+    <property location="target/classes" name="build"/>
+    <property location="src-gen" name="sdf-src-gen"/>
+	<property location="${sdf-src-gen}/pp" name="pp"/>
+	<property location="${sdf-src-gen}/signatures" name="signatures"/>
+	<property location="${include}" name="lib-gen"/>
+	<property location="src-gen/syntax" name="syntax"/>
+	<property location="${syntax}" name="syntax.rel" relative="yes"/>
+	<property location="trans" name="trans.rel" relative="yes"/>
+	<property location="${include}" name="include.rel" relative="yes"/>
+	<property location="${lib-gen}" name="lib-gen.rel" relative="yes"/>
     
     <!-- Imports -->
     <property name="build.sdf.imports" value=""/>
-    <property name="build.stratego.args" value="
-                    --library
-                    -I &quot;${trans}&quot;
-                    -I &quot;${basedir}&quot;
-                    -la stratego-lib -la stratego-sglr -la stratego-gpp -la stratego-xtc -la stratego-aterm -la stratego-parallel"/>
+    <property name="build.stratego.args" value="                     --library                     -I &quot;${trans}&quot;                     -I &quot;${basedir}&quot;                     -la stratego-lib -la stratego-sglr -la stratego-gpp -la stratego-xtc -la stratego-aterm -la stratego-parallel"/>
     
     <!-- Optional: external .def and .jar locations
     <property name="externaldef" location="syntax/${sdfmodule}.def"/>
@@ -41,7 +37,7 @@
     -->
 
     <!-- Environment configuration for command-line builds -->
-    <condition property="build.strategoxt.sdf" value="${eclipse.spoofaximp.nativeprefix}" else="">
+    <condition else="" property="build.strategoxt.sdf" value="${eclipse.spoofaximp.nativeprefix}">
         <isset property="eclipse.spoofaximp.nativeprefix"/>
     </condition>
     <property name="nativepath" value="${build.strategoxt.sdf}/"/>
@@ -51,7 +47,7 @@
     <import file="build.generated.xml"/>   
 
     <!-- Main target -->
-    <target name="all" depends="spoofaximp.default.jar"/>
-    <target name="generate-sources" depends="generate-sources-ctree" />
-    <target name="package" depends="package-ctree" />
+    <target depends="spoofaximp.default.jar" name="all"/>
+    <target depends="generate-sources-ctree" name="generate-sources"/>
+    <target depends="package-ctree" name="package"/>
 </project>
