@@ -2,7 +2,7 @@ module Booster25.main
 
 imports
   Booster25-Colorer
-  // Booster25-Completions
+  Booster25-Completions
   Booster25-Folding
   Booster25-Menus
   Booster25-Refactorings
