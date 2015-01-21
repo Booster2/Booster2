@@ -1,0 +1,9 @@
+system test
+
+class A{
+	attributes
+		name : string
+	methods
+		m { name' = name?}
+		n { m (name? = "") }
+}

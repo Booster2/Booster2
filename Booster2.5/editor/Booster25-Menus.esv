@@ -37,6 +37,9 @@ menus
     end
   
   menu: "Generation"                   (openeditor) (realtime)
+    action: "Elaborate"              = elaborate-builder
+    action: "Heuristics"             = heuristics-builder
+    action: "WP"                     = wp-builder
+    action: "Simplify"               = simplify-builder
     
-    action: "Generate Java"          = generate-java
 

@@ -1,0 +1,52 @@
+module trans/generate/elaborate
+
+imports
+	include/booster25
+	trans/names
+	trans/api/_runtime
+	trans/api/_runtime-constructors
+	trans/lib/search
+	
+rules
+	
+	elaborate =
+		?ast;
+		try(sometd(inline-extension(|ast)));
+		bottomup(try(inline-method(|ast)))
+	
+	inline-extension(|ast): m -> m
+	
+	inline-method(|ast): MethodReference(path, expr*) -> subst-method-body 
+		 with
+		 	path-ty := <_get-type> path; 
+			<debug> (path, path-ty);
+			_ {Def(path-uri)} := path-ty;
+		  <debug> (path-uri);
+		  Method(_, method-body) := <uri-to-ast(|path-uri)> ast;
+		  <debug> (method-body);
+		  subst-method-body := <literal-substitute> (method-body, expr*);
+		  <debug> (subst-method-body)
+		  
+		  
+	match-subst(|name):
+		Subst(Input(name'), exp)
+			-> exp
+		where 
+			<eq-an>(name, name')
+			
+	literal-substitute:
+		(ast, substs) 
+			-> ast'
+		where
+			ast' := <topdown(try(\ Input(name) -> <fetch-elem(match-subst(|name))> substs \))> ast
+
+			
+	eq-an: (a,b) -> (a,b)
+		where
+			<debug>("equal1", a, b);
+			a' := <_remove-annotations(id)> a;
+			b' := <_remove-annotations(id)> b;
+			<debug>("equal2", a', b');
+			<eq>(a',b')
+					
+	
