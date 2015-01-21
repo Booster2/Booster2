@@ -57,7 +57,6 @@ test Flatten class hierarchy two attribute sections [[
 	class A{
 		attributes
 			name : string
-		attributes
 			name2 : string
 	}
 	class B extends A{
