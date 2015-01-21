@@ -54,3 +54,38 @@ class B {
 		n { a.name' = "James"}
 }
 ]]
+
+test nested inline method references[[
+  class A {
+    attributes
+      name : STRING
+    methods
+      m { name' = name? }
+  }
+
+  class B {
+    attributes
+      a : A
+      num : INT
+    methods
+      f { a.name' = "James" }
+      g { f () & num' = 3 }
+  }
+]] build elaborate-builder-ast to [[
+  class A {
+    attributes
+      name : STRING
+    methods
+      m { name' = name? }
+  }
+
+  class B {
+    attributes
+      a : A
+      num : INT
+    methods
+      f { a.name' = "James" }
+      g { a.name' = "James" & num' = 3 }
+  }
+	
+]]

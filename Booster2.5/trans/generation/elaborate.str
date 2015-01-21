@@ -14,11 +14,22 @@ rules
 	elaborate =
 		?ast;
 		try(sometd(inline-extension(|ast)));
-		bottomup(try(inline-method(|ast)));
+		inline-recursion;
 		try(sometd(flatten-class-hierarchy(|ast)))
+	
+	// inline-recursion AST -> AST
+	inline-recursion:
+		ast -> ast'
+		where
+			ast' := <sometd(inline-method(|ast));inline-recursion <+ id> ast
+			
+
+
 	
 	inline-extension(|ast): m -> m
 	
+	
+	// inline-method (|AST) MethodReference -> Expr
 	inline-method(|ast): MethodReference(path, expr*) -> subst-method-body'
 		 with
 		 	path-ty := <_get-type> path; 
@@ -58,3 +69,6 @@ rules
 			t' :=  <prefix-compose-paths>(path, t)
 		
 rules
+	
+	
+	
