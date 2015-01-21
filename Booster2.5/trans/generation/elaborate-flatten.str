@@ -1,0 +1,45 @@
+module trans/generation/elaborate-flatten
+
+imports
+	include/booster25
+	trans/names
+	trans/api/_runtime
+	trans/api/_runtime-constructors
+	trans/lib/search
+	
+rules
+	
+	flatten-class-hierarchy(|ast):
+		Class(cname, Some(Extend(extension*)), cmember*) -> 
+		Class(cname, Some(Extend(extension*)), cmember'*)
+			with
+				superclass*      := <_relation-lookup(|"<sub:");nub>cname;
+				superclass-def*  := <map(class-get-definition(|ast))>superclass*
+			with // attributes: only pull in ones that are not defined allready (and pull in most specific ones)
+				superclass-attr* := <map(class-get-attributes);concat>superclass-def*
+			with // invariants: pull all invariants in
+				superclass-inv*  := <map(class-get-invariants);concat>superclass-def*
+			with // methods: pull all methods in not defined + pull all bodies of methods defined
+				id
+			with
+				new-attr* := <?a;if ?[] then ![] else ![Attributes(a)] end>superclass-attr*;
+				new-inv*  := <?b;if ?[] then ![] else ![Invariant (b)] end>superclass-inv*;
+				cmember'* := [cmember*, new-attr*, new-inv*]
+				
+	
+	class-get-definition(|ast) : name -> result
+		with
+			target-uri := <_nabl-uri <+ nabl-get-name;_nabl-uri>name;
+			result   := <uri-to-ast(|target-uri)>ast
+	
+	class-get-attributes: Class(_, _, member*) -> attribute*
+		with
+			attribute* := <filter(?Attributes(<id>));concat>member*
+
+	class-get-invariants: Class(_, _, member*) -> invariant*
+		with
+			invariant* := <filter(?Invariant(<id>));concat>member*
+
+rules
+	
+	

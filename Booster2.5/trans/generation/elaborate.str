@@ -6,13 +6,15 @@ imports
 	trans/api/_runtime
 	trans/api/_runtime-constructors
 	trans/lib/search
+	trans/generation/elaborate-flatten
 	
 rules
 	
 	elaborate =
 		?ast;
 		try(sometd(inline-extension(|ast)));
-		bottomup(try(inline-method(|ast)))
+		bottomup(try(inline-method(|ast)));
+		try(sometd(flatten-class-hierarchy(|ast)))
 	
 	inline-extension(|ast): m -> m
 	
