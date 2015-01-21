@@ -19,6 +19,7 @@ imports // generated runtime
 	lib/runtime/nabl/tasks
 	lib/runtime/nabl/query
 	lib/runtime/nabl/uri
+	lib/runtime/relations/query
 	lib/runtime/task/core
 	lib/runtime/task/insert
 	lib/runtime/task/messages
@@ -137,4 +138,6 @@ rules
 	_analysis-propose-completions(|language, project-path) = analysis-propose-completions(|language, project-path)
 	
 	_nabl-get-child-definitions(|namespace) = nabl-get-child-definitions(|namespace)
+	
+	_relation-lookup(|rel) = relation-lookup(|rel)
 	
