@@ -7,6 +7,7 @@ imports
 	trans/api/_runtime-constructors
 	trans/lib/search
 	trans/generation/elaborate-flatten
+	trans/api/path
 	
 rules
 	
@@ -18,16 +19,13 @@ rules
 	
 	inline-extension(|ast): m -> m
 	
-	inline-method(|ast): MethodReference(path, expr*) -> subst-method-body 
+	inline-method(|ast): MethodReference(path, expr*) -> subst-method-body'
 		 with
 		 	path-ty := <_get-type> path; 
-			<debug> (path, path-ty);
 			_ {Def(path-uri)} := path-ty;
-		  <debug> (path-uri);
 		  Method(_, method-body) := <uri-to-ast(|path-uri)> ast;
-		  <debug> (method-body);
 		  subst-method-body := <literal-substitute> (method-body, expr*);
-		  <debug> (subst-method-body)
+		  subst-method-body' := <replace-paths> (subst-method-body, path)
 		  
 		  
 	match-subst(|name):
@@ -39,16 +37,24 @@ rules
 	literal-substitute:
 		(ast, substs) 
 			-> ast'
-		where
+		with
 			ast' := <topdown(try(\ Input(name) -> <fetch-elem(match-subst(|name))> substs \))> ast
-
 			
 	eq-an: (a,b) -> (a,b)
 		where
-			<debug>("equal1", a, b);
 			a' := <_remove-annotations(id)> a;
 			b' := <_remove-annotations(id)> b;
-			<debug>("equal2", a', b');
 			<eq>(a',b')
-					
+
+	replace-paths:
+		(ast, path)
+			-> ast'
+		with
+			ast' := <try(sometd(\t -> <try-replace-term>(path, t)\))> ast
 	
+	try-replace-term:
+		(path, t) -> t'
+		where
+			t' :=  <prefix-compose-paths>(path, t)
+		
+rules
