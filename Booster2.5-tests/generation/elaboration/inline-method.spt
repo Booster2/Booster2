@@ -1,0 +1,26 @@
+module generation-elaboration-inline-method
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Type of attribute definition [[
+class A{
+	attributes
+		name : string
+	methods
+		m { name' = name?}
+		n { m (name? = "") }
+}
+
+]] build elaborate-builder-ast to [[
+class A{
+	attributes
+		name : string
+	methods
+		m { name' = name? }
+		n { name' = "" }
+}	
+]] 
