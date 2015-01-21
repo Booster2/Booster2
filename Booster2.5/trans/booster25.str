@@ -179,13 +179,19 @@ rules // Debugging
 
 
 	elaborate-builder-ast: (selected, position, ast, path, project-path) -> (filename, result)
-		with
+		with // make sure the task engine is set up
     	language := <language>;
     	index-setup(|language, project-path);
-    	task-setup(|project-path);
-
+    	task-setup(|project-path)
+    with // make sure the ast is analyzed
+			if System(name{Def(_)},_) := ast then
+				analyzed-ast := ast
+			else
+				(analyzed-ast, error*, warning*, note*) := <analysis-single-default-interface>(ast, path, project-path)
+			end
+		with // do the actual transformations
 			filename := <guarantee-extension(|"elaborated.boo25")> path;
-		 	result   := <elaborate> ast
+		 	result   := <elaborate> analyzed-ast
 			
 	elaborate-builder: input@(selected, position, ast, path, project-path) -> (filename, result)
 		where
