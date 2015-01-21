@@ -186,3 +186,14 @@ type rules // method call params should have correct types
 		and	r	: r-ty
 		and (r-ty == l-ty or r-ty <sub: l-ty) 
 		     else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
+
+type rules // Method references should have a path that refers to a method		     
+	
+	MethodReference(path, p): BasicType(Boolean())
+		where
+					path : p-ty
+			and p-ty has is-method "true"
+			else error $[Expects a method] on path 
+		
+	
+type rules

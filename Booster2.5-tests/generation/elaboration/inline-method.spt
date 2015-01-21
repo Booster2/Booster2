@@ -6,7 +6,7 @@ setup Common [[
 	system debug
 ]]
 
-test Type of attribute definition [[
+test Simple inline in same class [[
 class A{
 	attributes
 		name : string
@@ -24,3 +24,33 @@ class A{
 		n { name' = "" }
 }	
 ]] 
+
+test Simple inline in different class [[
+class A{
+	attributes
+		name : string
+	methods
+		m { name' = name?}
+}
+
+class B {
+	attributes
+		a : A
+	methods
+		n {a.m(name? = "James")}
+}
+
+]] build elaborate-builder-ast to [[
+class A{
+	attributes
+		name : string
+	methods
+		m { name' = name? }
+}	
+class B {
+	attributes
+		a : A
+	methods
+		n { a.name' = "James"}
+}
+]]

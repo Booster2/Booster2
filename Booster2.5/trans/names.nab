@@ -6,6 +6,10 @@ imports
 	trans/desugar
 	trans/names-manual
 
+properties
+	
+	is-method of Method : Term
+
 namespaces
 
 	System
@@ -65,6 +69,7 @@ binding rules // Method
 	Method(m,body):
 		defines Method m
 			of type m
+			of is-method "true"
 		scopes Variable, InputVariable, OutputVariable
 	
 	MethodReference(path, params):

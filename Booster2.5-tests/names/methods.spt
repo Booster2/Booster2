@@ -23,3 +23,13 @@ test Resolve to method from call  [[
 			m1 { this . [[updateA]] () & a > 3}		
 	}
 ]] resolve #2 to #1
+
+
+test Cannot resolve method from call  [[
+	class A {
+		attributes
+			a : INT
+		methods
+			m1 { [[A]]()}		
+	}
+]] 1 error

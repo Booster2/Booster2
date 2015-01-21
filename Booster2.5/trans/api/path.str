@@ -1,0 +1,35 @@
+module lib/path
+
+imports
+	include/Booster25
+	
+rules
+			
+
+rules
+				
+	compose-paths:
+		(start-path, PathStart(name2, mp))
+			-> Path(start-path, PathComponent(name2, mp))
+	
+	compose-paths:
+		(start-path, Path(path, path-component))
+			-> Path(path', path-component)
+			with
+				path' := <compose-paths>(start-path, path)
+			
+	prefix-compose-paths:
+		(PathStart(_, _) {_}, target-path) -> 
+			target-path
+		where
+			<?Path(_,_) <+ ?PathStart(_,_)> target-path
+		
+	prefix-compose-paths:
+		(Path(path, pc), target-path) -> 
+			<compose-paths> (path, target-path)
+		where
+			<?Path(_,_) <+ ?PathStart(_,_)> target-path
+
+	
+			
+rules		
