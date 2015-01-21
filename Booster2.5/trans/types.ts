@@ -2,6 +2,10 @@ module trans/types
 
 imports
 
+	include/Booster25
+	trans/desugar
+	trans/names-manual
+	
 type rules // references
 
 	Input(a) : ty
@@ -177,7 +181,7 @@ type rules // BinRel, BinOp, UnOp
 
 type rules // method call params should have correct types
 
-	Seq(l, r):-
+	Subst(l, r):-
 	where	l	: l-ty
 		and	r	: r-ty
 		and (r-ty == l-ty or r-ty <sub: l-ty) 

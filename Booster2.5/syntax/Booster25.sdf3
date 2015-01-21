@@ -199,8 +199,8 @@ context-free syntax
   BinOp.Intersection = </\\> 
   BinOp.Union = <\\/> 
   BinOp.Concat = <++> 
-  MethodReference.MethodReference = <<Path> ( <{Seq1 ","}*> )> 
-  Seq1.Seq = <<Input> = <Expression>> 
+  MethodReference.MethodReference = <<Path> ( <{Subst ","}*> )> 
+  Subst.Subst = <<Input> = <Expression>> 
   BoosterTerm = MethodReference 
   WorkflowComponent = SeqWf 
   WorkflowComponent = ParWf 

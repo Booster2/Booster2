@@ -3,6 +3,8 @@ module names
 imports
 	
 	include/Booster25
+	trans/desugar
+	trans/names-manual
 
 namespaces
 
@@ -144,6 +146,6 @@ binding rules // Variables
 	BinOpDefLeftInput   (v,   Concat(),       rhs): defines InputVariable  v of type t where rhs has type Set(t)
 	BinOpDefRightInput  (lhs, Concat(),       v  ): defines InputVariable  v of type t where lhs has type Set(t)
 	AssignDefRightInput (lhs,                 v  ): defines InputVariable  v of type t where lhs has type t
-	SeqDefInput         (p,                   v  ): defines InputVariable  v of type t where p   has type t
+	SubstDefInput         (p,                   v  ): defines InputVariable  v of type t where p   has type t
 			
 	Forall(v, exp, body):                    defines Variable       v of type t where exp has type Set(t)

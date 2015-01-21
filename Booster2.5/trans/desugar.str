@@ -21,7 +21,7 @@ signature constructors
 	BinOpDefLeftInput    : Expression * BinOp  * ID -> Term
 	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
 	AssignDefRightInput  : Expression * ID          -> Term
-	SeqDefInput          : Param * ID               -> Term
+	SubstDefInput          : Param * ID               -> Term
 
 	Param : ID -> Term
 	
@@ -31,7 +31,7 @@ rules
 	
 	desugar-before-analysis = 
 		try(sometd(setdef-add-setvalues));
-		try(sometd(seq-add-param));
+		try(sometd(subst-add-param));
 		bottomup(try(add-typeisaset));
 		try(sometd(method-add-vardef));
 		warning-on-missing-origin
@@ -39,7 +39,7 @@ rules
 	desugar-after-analysis = 
 		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef <+ gcmd-rem-vardef <+ param-rem-vardef));
 		bottomup(try(rem-typeisaset));
-		try(sometd(seq-rem-param));
+		try(sometd(subst-rem-param));
 		try(sometd(setdef-rem-setvalues));
 		warning-on-missing-origin
 
@@ -77,7 +77,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binop-get-varname  = ?BinOp (SetExtent([Input(v)]), op@<binop-set>, rhs); !v
 	binop-get-varname  = ?BinOp (lhs,       op@<binop-set>,   SetExtent([Input(v)])); !v
 	gcmd-get-varname   = ?Assign(lhs,                         Input(v));  !v
-	param-get-varname  = ?Seq(p,                              Input(v));  !v
+	param-get-varname  = ?Subst(p,                              Input(v));  !v
 
 	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);                  !BinRelDefLeftInput  (v,   op, rhs)
 	binrel-add-vardef = ?BinRel(Output(v), op@In(),          rhs);                  !BinRelDefLeftOutput (v,   op, rhs)
@@ -88,7 +88,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binop-add-vardef  = ?BinOp (SetExtent([Input(v)]), op@<binop-set>, rhs);        !BinOpDefLeftInput   (v,   op, rhs)
 	binop-add-vardef  = ?BinOp (lhs,       op@<binop-set>,   SetExtent([Input(v)]));!BinOpDefRightInput  (lhs, op, v)
 	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));             !AssignDefRightInput (lhs,     v)
-	param-add-vardef  = ?Seq(p,                              Input(v));             !SeqDefInput         (p,       v)
+	param-add-vardef  = ?Subst(p,                              Input(v));             !SubstDefInput         (p,       v)
 	
 	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op,               rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
 	binrel-rem-vardef = ?BinRelDefLeftOutput (v,   op,               rhs); !BinRel(<custom-origin(|v)>Output(v), op, rhs)
@@ -99,7 +99,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op@<binop-set>,   rhs); !BinOp (<custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]),  op, rhs)
 	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op@<binop-set>,   v  ); !BinOp (lhs,                          op, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]))
 	gcmd-rem-vardef   = ?AssignDefRightInput (lhs,                   v  ); !Assign(lhs,                              <custom-origin(|v)>Input(v))
-	param-rem-vardef  = ?SeqDefInput         (p,                     v  ); !Seq(p,                                   <custom-origin(|v)>Input(v))
+	param-rem-vardef  = ?SubstDefInput         (p,                     v  ); !Subst(p,                                   <custom-origin(|v)>Input(v))
 
 	binop-arith = ?Plus()
 	binop-arith = ?Minus()
@@ -110,8 +110,8 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 
 rules //  Help NaBL: make explicit what are Function Call parameters
 	
-	seq-add-param     = ?Seq(Input(v), e);!Seq(<custom-origin(|v)>Param(v), e)
-	seq-rem-param     = ?Seq(Param(v), e);!Seq(<custom-origin(|v)>Input(v), e)
+	subst-add-param     = ?Subst(Input(v), e);!Subst(<custom-origin(|v)>Param(v), e)
+	subst-rem-param     = ?Subst(Param(v), e);!Subst(<custom-origin(|v)>Input(v), e)
 
 rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _) and  BinRel(_, SubsetEquals(), _)
 
