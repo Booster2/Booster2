@@ -1,0 +1,27 @@
+module generation-elaboration-flatten-methods2
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Flatten import two methods from two supers [[
+	class A             { attributes i : int         methods	m {i' = i?}	}
+	class B             { attributes j : int         methods	n {j' = j?}	}
+	class C extends A,B {}
+]] build elaborate-builder-ast to [[
+	class A             { attributes i : int         methods	m {i' = i?}	}
+	class B             { attributes j : int         methods	n {j' = j?}	}
+	class C extends A,B { attributes i : int j : int methods	m {i' = i?} n {j' = j?}	}
+]]
+
+test Flatten single method conjoin two supers [[
+	class A             { attributes i1 : int j1 : int          methods	m {i1' = i?}}
+	class B             { attributes k1 : int                   methods	m {k1' = k?}}
+	class C extends A,B {                                       methods	m {j1' = j?}}
+]] build elaborate-builder-ast to [[
+	class A             { attributes i1 : int j1 : int          methods	m {i1' = i?}}
+	class B             { attributes k1 : int                   methods	m {k1' = k?}}
+	class C extends A,B { attributes i1 : int j1 : int k1 : int methods	m {i1' = i? & k1' = k? & j1' = j? }}
+]]

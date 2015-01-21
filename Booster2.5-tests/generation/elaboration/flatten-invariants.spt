@@ -1,4 +1,4 @@
-module generation-elaboration-flatten-attributes
+module generation-elaboration-flatten-invariants
 
 language Booster25
 
