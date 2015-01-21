@@ -1,0 +1,68 @@
+module generation-elaboration-flatten-attributes
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Flatten class hierarchy single attribute [[
+	class A{
+		attributes
+			name : string
+	}
+	class B extends A{}
+]] build elaborate-builder-ast to [[
+	class A{
+		attributes
+			name : string
+	}
+	class B extends A{
+		attributes
+			name : string
+	}
+]] 
+
+test Flatten class hierarchy single attribute transitively [[
+	class A{
+		attributes
+			name : string
+	}
+	class B extends A{}
+	class C extends B{}
+]] build elaborate-builder-ast to [[
+	class A{
+		attributes
+			name : string
+	}
+	class B extends A{
+		attributes
+			name : string
+	}
+	class C extends B{
+		attributes
+			name : string
+	}
+]]
+
+test Flatten class hierarchy two attribute sections [[
+	class A{
+		attributes
+			name : string
+		attributes
+			name2 : string
+	}
+	class B extends A{}
+]] build elaborate-builder-ast to [[
+	class A{
+		attributes
+			name : string
+		attributes
+			name2 : string
+	}
+	class B extends A{
+		attributes
+			name : string
+			name2 : string
+	}
+]] 

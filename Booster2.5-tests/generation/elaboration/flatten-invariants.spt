@@ -1,4 +1,4 @@
-module generation-elaboration-flatten-class-hierarchy
+module generation-elaboration-flatten-attributes
 
 language Booster25
 
@@ -6,41 +6,55 @@ setup Common [[
 	system debug
 ]]
 
-test Flatten class hierarchy single attribute [[
+test Flatten class hierarchy single invariant [[
 	class A{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 	class B extends A{}
 ]] build elaborate-builder-ast to [[
 	class A{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 	class B extends A{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 ]] 
 
-test Flatten class hierarchy single attribute transitively [[
+test Flatten class hierarchy single invariant transitively [[
 	class A{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 	class B extends A{}
 	class C extends B{}
 ]] build elaborate-builder-ast to [[
 	class A{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 	class B extends A{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 	class C extends B{
 		attributes
-			name : string
+			i : int
+		invariants
+			i > 0
 	}
 ]] 
