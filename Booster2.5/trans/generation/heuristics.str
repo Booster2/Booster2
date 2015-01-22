@@ -31,6 +31,18 @@ rules
 	program: Not(c1)         -> Guard(Not(c1),Skip())
 	
 	program: Exists(name, expr, c1) -> Any(name, expr, <program>c1)
-	program: Forall(name, expr, c1) -> All(name, expr, <program>c1) //TODO: check not(is-pre-state)
+	program: Forall(name, expr, c1) -> All(name, expr, <program>c1)
+		where
+			<not(is-pre-state)> c1 //TODO: check not(is-pre-state)
 	
+	program: BinRel(Path(a,b), Equal(), expression) -> Assign(path1, expression)
+		where
+			<not(is-pre-state)> Path(a,b) ;
+			<is-pre-state> expression;
+			path1 := <make-pre-state> Path(a,b)
+
+	program: _ -> Skip()
+		where
+			log(|Warning(), "cannot determine program", relation)
+
 rules

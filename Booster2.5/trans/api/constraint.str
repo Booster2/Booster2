@@ -1,0 +1,28 @@
+module trans/api/constraint
+
+imports
+	
+	include/Booster25
+
+rules // primed    TODO: rewrite
+	
+/* 	make-pre-state:
+		takes a constraint, and returns its representation in the 
+		pre-state of a method 			
+*/
+	make-pre-state:
+		constraint ->
+			<bottomup(try( (\ PathComponent(name, Some(Primed())) -> PathComponent(name, None()) \) <+
+						   (\ PathStart(name, Some(Primed())) -> PathStart(name, None()) \) <+
+						   (\ ThisPrimed() -> This() \)  
+						   		))> constraint 	
+
+/*	is-pre-state
+		takes a constraint, and returns if can be entirely evaluated in the pre-state.  Ie. there are no primes 
+*/
+	is-pre-state:
+		constraint ->
+			<equal>([], <collect(?PathComponent(name, Some(Primed())) <+ 
+								?PathStart(name, Some(Primed())) <+
+								?ThisPrimed() <+
+								?Output(s))> constraint)
