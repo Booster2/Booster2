@@ -22,8 +22,8 @@ rules
 rules
 	
 	// @type Constraint -> GuardedCommand
-	program: True()	         -> Skip()
-	program: False()         -> Guard(False(), Skip())
+	program: |[true]|	       -> |[skip]|
+	program: |[false]|       -> |[false --> skip]|
 	program: And(c1, c2)     -> Parallel(<program>c1, <program>c2)
 	program: Or(c1, c2)      -> Choice(<program>c1, <program>c2)
 	program: Then(c1, c2)    -> Sequence(<program>c1, <program>c2)
