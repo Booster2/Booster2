@@ -1,0 +1,27 @@
+module lib/api/class
+
+imports
+	include/Booster25
+	trans/api/_runtime
+	trans/lib/search
+	
+rules // ast lookup
+				
+	class-get-definition(|ast) : name -> result
+		with
+			target-uri := <_nabl-uri <+ nabl-get-name;_nabl-uri>name;
+			result   := <uri-to-ast(|target-uri)>ast
+
+rules // class getters
+
+	class-get-attributes: Class(_, _, member*) -> attribute*
+		with
+			attribute* := <filter(?Attributes(<id>));concat>member*
+
+	class-get-invariants: Class(_, _, member*) -> invariant*
+		with
+			invariant* := <filter(?Invariant(<id>));concat>member*
+
+	class-get-methods: Class(_, _, member*) -> method*
+		with
+			method* := <filter(?Methods(<id>));concat>member*

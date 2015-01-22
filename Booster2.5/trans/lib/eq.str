@@ -1,0 +1,9 @@
+module trans/lib/eq
+
+rules // equality with ignoring annotations
+
+	eq-an: (a,b) -> (a,b)
+		where
+			a' := <strip-annos> a;
+			b' := <strip-annos> b;
+			<eq>(a', b')

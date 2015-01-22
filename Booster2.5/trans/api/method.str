@@ -1,0 +1,32 @@
+module trans/api/method
+
+imports
+	
+	include/Booster25
+	trans/lib/eq
+
+rules // conjoin methods
+	
+	// @type [Method] -> [Method]
+	method-conjoin-all: [] -> []
+	method-conjoin-all: [m|m-tail*] -> m'*
+		with
+			m-tail'* := <method-conjoin-all>m-tail*;
+			m'*      := <method-conjoin(|m)>m-tail'*
+	
+	// @type (|Method) [Method] -> [Method]
+	method-conjoin(|m): method* -> method'*
+		where
+			is-list
+		with
+			method'* := <one(method-conjoin(|m))>method* <+
+			method'* := [m|method*]
+	
+	// @type (|Method) Method -> Method or fail
+	method-conjoin(|m): Method(name1, body1) -> Method(name, body)
+		where
+			Method(name2, body2) := m;
+			<eq-an>(name1, name2)
+		with
+			name := name1;
+			body := And(body1, body2)

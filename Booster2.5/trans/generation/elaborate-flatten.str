@@ -5,7 +5,8 @@ imports
 	trans/names
 	trans/api/_runtime
 	trans/api/_runtime-constructors
-	trans/lib/search
+	trans/api/class
+	trans/api/method
 	
 rules
 	
@@ -14,6 +15,9 @@ rules
 		Class(cname, ext, cmember'*)
 			with
 				superclass*       := <_relation-lookup(|"<sub:");nub;reverse>cname;
+				// <strip-annos;debug>cname;
+				// <map(_pp-uri);debug><_relation-lookup(|"<sub:")>cname;
+				// <map(_pp-uri);debug>superclass*;
 				superclass-def*   := <map(class-get-definition(|ast))>superclass*
 			with // attributes: only pull in ones that are not defined allready (and pull in most specific ones)
 				attr*             := <class-get-attributes>c;
@@ -33,59 +37,4 @@ rules
 				new-inv*  := <?b;if ?[] then ![] else ![Invariant (b)] end>all-inv*;
 				new-meth* := <?d;if ?[] then ![] else ![Methods   (d)] end>all-meth'*;
 				cmember'* := [new-attr*, new-inv*, new-meth*]
-				
-
-rules // helpers
-
-	// @type [Method] -> [Method]
-	method-conjoin-all: [] -> []
-	method-conjoin-all: [m|m-tail*] -> m'*
-		with
-			m-tail'* := <method-conjoin-all>m-tail*;
-			m'*      := <method-conjoin(|m)>m-tail'*
-	
-	// @type (|Method) [Method] -> [Method]
-	method-conjoin(|m): method* -> method'*
-		where
-			is-list
-		with
-			method'* := <one(method-conjoin(|m))>method* <+
-			method'* := [m|method*]
-	
-	// @type (|Method) Method -> Method or fail
-	method-conjoin(|m): Method(name1, body1) -> Method(name, body)
-		where
-			Method(name2, body2) := m;
-			<eq-an>(name1, name2)
-		with
-			name := name1;
-			body := And(body1, body2)
-
-	eq-an: (a,b) -> (a,b)
-		where
-			a' := <strip-annos> a;
-			b' := <strip-annos> b;
-			<eq>(a', b')
-
-rules // class api
-
-	class-get-definition(|ast) : name -> result
-		with
-			target-uri := <_nabl-uri <+ nabl-get-name;_nabl-uri>name;
-			result   := <uri-to-ast(|target-uri)>ast
-	
-	class-get-attributes: Class(_, _, member*) -> attribute*
-		with
-			attribute* := <filter(?Attributes(<id>));concat>member*
-
-	class-get-invariants: Class(_, _, member*) -> invariant*
-		with
-			invariant* := <filter(?Invariant(<id>));concat>member*
-
-	class-get-methods: Class(_, _, member*) -> method*
-		with
-			method* := <filter(?Methods(<id>));concat>member*
-
-rules
-	
 	
