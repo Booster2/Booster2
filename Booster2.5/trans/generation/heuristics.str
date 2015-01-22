@@ -24,13 +24,12 @@ rules
 	// @type Constraint -> GuardedCommand
 	program: |[true]|	       -> |[skip]|
 	program: |[false]|       -> |[false --> skip]|
-	program: |[~c1 & ~c2]|   -> |[~p1 || ~p2]|             with p1 := <program>c1; p2 := <program>c2
-	program: |[~c1 or ~c2]|  -> |[~p1 [ ] ~p2]|            with p1 := <program>c1; p2 := <program>c2
-	// program: |[~c1 ; ~c2]|   -> |[~p1 [ ] ~p2]|            with p1 := <program>c1; p2 := <program>c2
-	// program: |[~c1 => ~c2]|  -> |[~p1 [ ] ~p2]|            with p1 := <program>c1; p2 := <program>c2
+	program: |[~c1 & ~c2]|   -> |[~p1 || ~p2]|                        with p1 := <program>c1; p2 := <program>c2
+	program: |[~c1 or ~c2]|  -> |[~p1 [ ] ~p2]|                       with p1 := <program>c1; p2 := <program>c2
 	program: Then(c1, c2)    -> Sequence(<program>c1, <program>c2)
-	program: Implies(c1, c2) -> Choice(Guard(c1,<program>c2), Guard(Not(c1),Skip()))
-	program: Not(c1)         -> Guard(Not(c1),Skip())
+	// program: g |[~c1 ; ~c2]|   -> |[~p1 ; ~p2]|            with p1 := <program>c1; p2 := <program>c2
+	program: |[~c1 => ~c2]|  -> |[~c1 --> ~p2 [ ] not ~c1 --> skip]|  with p2 := <program>c2
+	program: |[not ~c1]|     -> |[not ~c1 --> skip]|
 	
 	program: Exists(name, expr, c1) -> Any(name, expr, <program>c1)
 	program: Forall(name, expr, c1) -> All(name, expr, <program>c1)
