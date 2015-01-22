@@ -4,8 +4,8 @@ imports
 	StrategoMix[StrategoHost]
 
 imports
-	src-gen/syntax/Booster25 
-	src-gen/syntax/AbstractBoosterModel
+	Booster25 
+	AbstractBoosterModel
 
 exports
 context-free start-symbols Module [[StrategoHost]]
