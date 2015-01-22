@@ -1,0 +1,44 @@
+module generation-heuristics-booleans
+
+language Booster25
+
+setup Common [[
+system debug
+
+	class A{
+		methods
+]]
+
+test Heuristics And [[
+	m { true & false }
+]] build heuristics-builder-ast to [[
+	m { true & false | skip || false --> skip }
+]]
+
+test Heuristics Or [[
+	m { true or false }
+]] build heuristics-builder-ast to [[
+	m { true or false | skip [ ] false --> skip }
+]]
+
+test Heuristics Implies [[
+	m { true => false }
+]] build heuristics-builder-ast to [[
+	m { true => false | true --> ( false --> skip ) [ ] not true --> skip }
+]]
+
+test Heuristics Then [[
+	m { true ; false }
+]] build heuristics-builder-ast to [[
+	m { true ; false | skip ; false --> skip }
+]]
+
+test Heuristics Not [[
+	m { not false }
+]] build heuristics-builder-ast to [[
+	m { not false | not false --> skip }
+]]
+
+setup Teardown [[
+	}
+]]

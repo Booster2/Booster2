@@ -116,8 +116,8 @@ context-free syntax
   Constraint.Implies = <<Constraint> =\> <Constraint>> {assoc}
   Constraint.Then = <<Constraint> ; <Constraint>> {assoc}
   Constraint = <( <Constraint> )> {bracket}
-  Constraint.Conjuncts = <conjuncts <{Constraint "&"}*>> {deprecated}
-  Constraint.Disjuncts = <disjuncts <{Constraint "or"}*>> {deprecated}
+  // Constraint.Conjuncts = <conjuncts <{Constraint "&"}*>> {deprecated}
+  // Constraint.Disjuncts = <disjuncts <{Constraint "or"}*>> {deprecated}
   Constraint.Exists = <exists <ID> : <Expression> @ <Constraint>> 
   Constraint.Forall = <forall <ID> : <Expression> @ <Constraint>> 
   Constraint = MethodReference 

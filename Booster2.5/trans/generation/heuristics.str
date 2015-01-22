@@ -10,4 +10,27 @@ imports
 	
 rules
 	
-	heuristics = id
+	heuristics = 
+		try(sometd(method-heuristics))
+	
+rules
+	
+	method-heuristics: Method(name, const) -> Method(name, Both(const, gc))
+		with
+			gc := <program>const
+
+rules
+	
+	// @type Constraint -> GuardedCommand
+	program: True()	         -> Skip()
+	program: False()         -> Guard(False(), Skip())
+	program: And(c1, c2)     -> Parallel(<program>c1, <program>c2)
+	program: Or(c1, c2)      -> Choice(<program>c1, <program>c2)
+	program: Then(c1, c2)    -> Sequence(<program>c1, <program>c2)
+	program: Implies(c1, c2) -> Choice(Guard(c1,<program>c2), Guard(Not(c1),Skip()))
+	program: Not(c1)         -> Guard(Not(c1),Skip())
+	
+	program: Exists(name, expr, c1) -> Any(name, expr, <program>c1)
+	program: Forall(name, expr, c1) -> All(name, expr, <program>c1) //TODO: check not(is-pre-state)
+	
+rules
