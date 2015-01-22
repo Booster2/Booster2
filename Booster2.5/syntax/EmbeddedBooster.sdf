@@ -5,11 +5,19 @@ imports
   AbstractBoosterModel
   
 exports
-
-   %%%
-   %% Anti Quotations for Constraints and GuardedCommands
-   %%%
+	
+  %%%
+  %% Quotations for Constraint and GuardedCommand
+  %%%
   context-free syntax
-    "~"       E  -> Constraint  {cons("FromMetaExpr")}
-    "~"       E  -> GuardedCommand  {cons("FromMetaExpr")}
+    "c" "|[" Constraint "]|"     -> E {cons("ToMetaExpr")}
+    "g" "|[" GuardedCommand "]|" -> E {cons("ToMetaExpr")}
+        "|[" BoosterTerm "]|"    -> E {cons("ToMetaExpr")}
+                 
+  %%%
+  %% Anti Quotations for Constraint and GuardedCommand
+  %%%
+  context-free syntax
+    "~"       E  -> Constraint     {cons("FromMetaExpr")}
+    "~"       E  -> GuardedCommand {cons("FromMetaExpr")}
     
