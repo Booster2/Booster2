@@ -34,16 +34,11 @@ rules
 	program: Forall(name, expr, c1) -> All(name, expr, <program>c1)
 		where
 			<not(is-pre-state)> c1
-	
-	program: |[x_a.x_b ' = ~e]|  ->  |[x_a.x_b := ~e]| 
-		where
-			<is-pre-state>e
-			
-	program: |[~e : x_a.x_b ']|  ->  |[x_a.x_b := x_a.x_b \/ {~e}]| 
-		where
-			<is-pre-state>e
-			
-	program: |[x_output ! : x_c1 ']|  ->  |[new x_output ! : x_c1]|
+
+	program: |[x_a '     = ~e]|       ->  |[x_a     := ~e]|                where <is-pre-state>e
+	program: |[x_a.x_b ' = ~e]|       ->  |[x_a.x_b := ~e]|                where <is-pre-state>e
+	program: |[~e : x_a.x_b ']|       ->  |[x_a.x_b := x_a.x_b \/ {~e}]|   where <is-pre-state>e
+	program: |[x_output! : x_c1 ']|   ->  |[new x_output! : x_c1]|
 
 	program: x -> Skip()
 		where

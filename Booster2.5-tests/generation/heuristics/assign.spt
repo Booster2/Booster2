@@ -1,0 +1,52 @@
+module generation-heuristics-create
+
+language Booster25
+
+setup Common [[
+system debug
+	
+	set DayOfWeek { Monday, Tuesday, Wednesday}
+	
+	class A{
+		attributes
+			b : BOOLEAN
+			d : DATETIME
+			e : DayOfWeek
+			i : INT
+			s : STRING
+		methods
+]]
+
+test Heuristics Simple Assign Boolean [[
+	m1 { b' = x? }
+]] build heuristics-builder-ast to [[
+	m1 { b' = x? | b := x? }
+]]
+
+test Heuristics Simple Assign Datetime [[
+	m1 { d' = x? }
+]] build heuristics-builder-ast to [[
+	m1 { d' = x? | d := x? }
+]]
+
+test Heuristics Simple Assign Enum [[
+	m1 { e' = Monday }
+]] build heuristics-builder-ast to [[
+	m1 { e' = Monday | e := Monday }
+]]
+
+test Heuristics Simple Assign Int [[
+	m1 { i' = x? }
+]] build heuristics-builder-ast to [[
+	m1 { i' = x? | i := x? }
+]]
+
+test Heuristics Simple Assign String [[
+	m1 { s' = "Hello, World!" }
+]] build heuristics-builder-ast to [[
+	m1 { s' = "Hello, World!" | s := "Hello, World!" }
+]]
+
+setup Teardown [[
+	}
+]]
