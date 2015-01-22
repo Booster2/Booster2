@@ -6,7 +6,6 @@ imports
 	trans/api/_runtime
 	trans/api/_runtime-constructors
 	trans/lib/search
-	trans/generation/elaborate-flatten
 	trans/api/path
 	
 rules

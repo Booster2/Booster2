@@ -1,34 +1,32 @@
 module trans/generate/elaborate
 
 imports
+	
 	include/booster25
-	trans/names
 	trans/api/_runtime
 	trans/api/_runtime-constructors
-	trans/lib/search
-	trans/generation/elaborate-flatten
 	trans/api/path
+	trans/api/class
+	trans/api/method
+	trans/lib/eq
+	trans/lib/search
+	trans/names
 	
-rules
+rules // elaborate phase
 	
 	elaborate =
 		?ast;
-		try(sometd(inline-extension(|ast)));
-		inline-recursion;
+		inline-methods;
 		try(sometd(flatten-class-hierarchy(|ast)))
-	
-	// inline-recursion AST -> AST
-	inline-recursion:
+
+rules // inline methods
+
+	// inline-methods AST -> AST
+	inline-methods:
 		ast -> ast'
 		where
-			ast' := <sometd(inline-method(|ast));inline-recursion <+ id> ast
+			ast' := <sometd(inline-method(|ast));inline-methods <+ id> ast
 			
-
-
-	
-	inline-extension(|ast): m -> m
-	
-	
 	// inline-method (|AST) MethodReference -> Expr
 	inline-method(|ast): MethodReference(path, expr*) -> subst-method-body'
 		 with
@@ -37,38 +35,59 @@ rules
 		  Method(_, method-body) := <uri-to-ast(|path-uri)> ast;
 		  subst-method-body := <literal-substitute> (method-body, expr*);
 		  subst-method-body' := <replace-paths> (subst-method-body, path)
-		  
-		  
-	match-subst(|name):
-		Subst(Input(name'), exp)
-			-> exp
-		where 
-			<eq-an>(name, name')
-			
+	
+	// @type (AST, [Subst]) -> AST
 	literal-substitute:
-		(ast, substs) 
-			-> ast'
+		(ast, substs) -> ast'
 		with
 			ast' := <topdown(try(\ Input(name) -> <fetch-elem(match-subst(|name))> substs \))> ast
-			
-	eq-an: (a,b) -> (a,b)
-		where
-			a' := <_remove-annotations(id)> a;
-			b' := <_remove-annotations(id)> b;
-			<eq>(a',b')
-
+	
+	// @type Subst -> Constraint or fail
+	match-subst(|name):
+		Subst(Input(name'), exp) -> exp
+		where 
+			<eq-an>(name, name')
+	
+	// @type (AST, Path) -> AST
 	replace-paths:
 		(ast, path)
 			-> ast'
 		with
 			ast' := <try(sometd(\t -> <try-replace-term>(path, t)\))> ast
 	
+	// @type (Path, Constraint) -> Constraint
 	try-replace-term:
 		(path, t) -> t'
 		where
 			t' :=  <prefix-compose-paths>(path, t)
 		
-rules
+rules // flatten class hierarchy
 	
-	
-	
+	// @type (|AST) Class -> Class
+	flatten-class-hierarchy(|ast):
+	c@Class(cname, ext, cmember*) -> 
+		Class(cname, ext, cmember'*)
+			with
+				superclass*       := <_relation-lookup(|"<sub:");nub;reverse>cname;
+				// <strip-annos;debug>cname;
+				// <map(_pp-uri);debug><_relation-lookup(|"<sub:")>cname;
+				// <map(_pp-uri);debug>superclass*;
+				superclass-def*   := <map(class-get-definition(|ast))>superclass*
+			with // attributes: only pull in ones that are not defined allready (and pull in most specific ones)
+				attr*             := <class-get-attributes>c;
+				superclass-attr*  := <map(class-get-attributes);concat>superclass-def*;
+				all-attr*         := [superclass-attr*,attr*]
+			with // invariants: pull all invariants in
+				inv*              := <class-get-invariants>c;
+				superclass-inv*   := <map(class-get-invariants);concat>superclass-def*;
+				all-inv*          := [superclass-inv*,inv*]
+			with // methods: pull all methods in not defined + pull all bodies of methods defined
+				method*           := <class-get-methods>c;
+				superclass-meth*  := <map(class-get-methods);concat>superclass-def*;
+				all-meth*         := [superclass-meth*,method*];
+				all-meth'*        := <reverse;method-conjoin-all;reverse>all-meth*
+			with
+				new-attr* := <?a;if ?[] then ![] else ![Attributes(a)] end>all-attr*;
+				new-inv*  := <?b;if ?[] then ![] else ![Invariant (b)] end>all-inv*;
+				new-meth* := <?d;if ?[] then ![] else ![Methods   (d)] end>all-meth'*;
+				cmember'* := [new-attr*, new-inv*, new-meth*]
