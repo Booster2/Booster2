@@ -105,6 +105,7 @@ context-free syntax
   Method.Method = <<ID> { <ConstraintOrGuardedCommand> }> 
   ConstraintOrGuardedCommand = Constraint
   ConstraintOrGuardedCommand = GuardedCommand
+  ConstraintOrGuardedCommand.Both = <<Constraint> | <GuardedCommand>>
   BoosterTerm = Method 
   Constraint.True = <true> 
   Constraint.False = <false> 
