@@ -1,0 +1,15 @@
+module EmbeddedBooster[E]
+
+imports
+  Booster25
+  AbstractBoosterModel
+  
+exports
+
+   %%%
+   %% Anti Quotations for Constraints and GuardedCommands
+   %%%
+  context-free syntax
+    "~"       E  -> Constraint  {cons("FromMetaExpr")}
+    "~"       E  -> GuardedCommand  {cons("FromMetaExpr")}
+    
