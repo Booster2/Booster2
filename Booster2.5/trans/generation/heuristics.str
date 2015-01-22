@@ -1,0 +1,14 @@
+module trans/generate/heuristics
+
+imports
+	include/booster25
+	trans/names
+	trans/api/_runtime
+	trans/api/_runtime-constructors
+	trans/lib/search
+	trans/generation/elaborate-flatten
+	trans/api/path
+	
+rules
+	
+	heuristics = id
