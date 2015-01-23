@@ -199,7 +199,8 @@ rules // Debugging
 			end
 		with // do the actual transformations
 			filename := <guarantee-extension(|<concat-strings>[<lower-case>ext,".boo25"])> path;
-		 	result   := <s> analyzed-ast
+			desugared-ast := <final-desugar> analyzed-ast;
+		 	result   := <s> desugared-ast
 			
 	builder(s |ext): input@(selected, position, ast, path, project-path) -> (filename, result)
 		where

@@ -7,14 +7,23 @@ system debug
 	
 	class A{
 
-		methods
+		invariants
 ]]
 
-test Simplify true and true [[
-	m1 { true & true }
-]] build simplify-builder-ast to [[
-	m1 { true --> skip }
-]]
+test Simple test: true and true	[[ true & true ]] 
+ 			build simplify-builder-ast to [[ true ]]
+
+test Simple test: true and false	[[ true & false ]] 
+ 			build simplify-builder-ast to [[ false ]]
+
+test Complex test: and-false 	[[ true & false & true & false & true ]] 
+ 			build simplify-builder-ast to [[ false ]]
+
+test Complex test: or-true	[[ true or false or true or false or true ]] 
+ 			build simplify-builder-ast to [[ true ]]
+
+
+
 
 setup Teardown [[
 	}
