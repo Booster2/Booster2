@@ -6,6 +6,8 @@ imports
 	lib/runtime/refactoring/-
 	src-gen/pp/Booster25-pp
 	include/Booster25-parenthesize
+	include/Booster25
+	trans/desugar
 
 rules
 	
@@ -27,6 +29,17 @@ rules
        result := <pp-Booster25-string> ast
     <+ <bottomup(try(not(is-string); not(is-list); not(pp-Booster25-string); debug(!"cannot pp ")))> ast
     ;  result := ""
+
+  pp-Constraint-string =
+  	parenthesize-Booster25;
+    prettyprint-Constraint
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
+rules // desugared ast pping
+	
+  prettyprint-Invariant : Invariant(a, b) -> <prettyprint-Invariant>Invariant(b)
+  is-Invariant = ?Invariant(_,_)
 
 rules
   

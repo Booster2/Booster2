@@ -10,6 +10,7 @@ imports
 	trans/lib/origin
 	trans/lib/traverse
 	trans/api/_runtime
+	trans/pp
 
 signature constructors
 	
@@ -66,10 +67,13 @@ signature constructors
 	Param : ID -> Term
 	
 	TypeIsASet : Term -> Term
+	
+	Invariant : ID * Constraint -> Invariant
 
 rules
 	
 	desugar-before-analysis = 
+		try(sometd(inv-add-name)); // needs to be first as it pps the constraint
 		try(sometd(setdef-add-setvalues));
 		try(sometd(subst-add-param));
 		bottomup(try(add-typeisaset));
@@ -375,4 +379,10 @@ rules // make PathStart(classReference, _) have type set within BinRel(_, In(), 
 
 	add-typeisaset: Intersection(ps@PathStart(_,_), a)		-> Intersection(<custom-origin(|ps)>TypeIsASet(ps), a)
 	add-typeisaset: Union(ps@PathStart(_,_), a)						-> Union(<custom-origin(|ps)>TypeIsASet(ps), a)
+
+rules // rewrite all invariants to get a name
 	
+	inv-add-name: Invariant(c) -> Invariant(<pp-Constraint-string;custom-origin(|c)>c, c)
+	
+rules 
+
