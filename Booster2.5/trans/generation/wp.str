@@ -4,6 +4,7 @@ imports
 	
 	include/Booster25
 	trans/api/_runtime
+	trans/desugar
 
 rules
 	
@@ -15,21 +16,26 @@ rules
 	
 	method-wp(|ast): Method(name, Both(c, gc)) -> Method(name, gc'')
 		with
-			(c', gc') := <gc-wp(|c)>gc;
+			(c', gc') := <gc-wp(|ast,c)>gc;
 			gc'' := |[~c' --> ~gc']|
 	
 rules
 	
-	//@type (|c) gc -> (c, gc)
-	gc-wp(|c): gc -> (c, gc)
-		where
-			Assign(PathStart(name, _), _) := gc;
-			<debug>name;
-			inv* := <_relation-lookup(|"<hasInv:")>name;
-			<debug>inv*
+	// //@type (|c) gc -> (c, gc)
+	// gc-wp(|ast,c): gc -> (c, gc)
+	// 	where
+	// 		Assign(PathStart(name, _), _) := gc;
+	// 		<debug>name;
+	// 		inv* := <collect-all(?Invariant(_,_))>ast;
+	// 		<debug> inv*;
+	// 		inv'* := <filter(debug;_relation-lookup(|"<hasInv:");debug)>inv*
+	// 		
+	// 		// filter(name is in invariant)
+
+
 
 	// catch all
-	gc-wp(|c): gc -> (c, gc)
+	gc-wp(|ast,c): gc -> (c, gc)
 
 rules
 	
