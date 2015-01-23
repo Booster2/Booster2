@@ -28,6 +28,7 @@ imports
 	trans/generation/elaborate
 	trans/generation/heuristics
 	trans/generation/wp
+	trans/generation/simplify
 
 rules // Analysis
 	
@@ -216,7 +217,8 @@ rules // Debugging
 	wp-builder-ast = builder-ast(elaborate ; heuristics ; wp | "Wp")
 	wp-builder = builder(elaborate ; heuristics ; wp | "Wp")
 	
-	simplify-builder = id
+	simplify-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify | "Simplify")
+	simplify-builder = builder(elaborate ; heuristics ; wp ; simplify | "Simplify")
 	
 	generate-sql-builder = id
 	
