@@ -28,6 +28,9 @@ rules
 			inv* := <_relation-lookup(|"<hasInv:")>name;
 			<debug>inv*
 
+	// catch all
+	gc-wp(|c): gc -> (c, gc)
+
 rules
 	
 
