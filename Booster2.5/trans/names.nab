@@ -11,6 +11,7 @@ properties
 	is-method of Method : Term
 	multiplicity of Attribute : Term
 	inverse      of Attribute : Term
+	attribute    of Attribute : Term
 
 namespaces
 
@@ -19,6 +20,7 @@ namespaces
 	SetVal
 	Class
 	Attribute
+	Invariant
 	Method
 	This
 	MethodReference
@@ -52,7 +54,7 @@ binding rules // Class
 	Class(c,extends,members):
 		defines Class c
 			of type c
-		scopes Method, Attribute, This
+		scopes Method, Attribute, Invariant, This
 		implicitly defines This This()
 			of type c
 
@@ -66,9 +68,15 @@ binding rules // Attribute
 			of type ty
 			of multiplicity mu
 			of inverse i
+			of attribute a
 			where a-ty has type ty
 			and a-ty has multiplicity mu
 			and a-ty has inverse i
+			
+binding rules // Invariant
+
+	Invariant(name, constr):
+		defines Invariant name
 
 binding rules // Method
 

@@ -3,6 +3,7 @@ module trans/api/wp
 imports
 	
 	include/Booster25
+	trans/api/_runtime
 
 rules
 	
@@ -20,7 +21,12 @@ rules
 rules
 	
 	//@type (|c) gc -> (c, gc)
-	gc-wp(|c) = ?gc;!(c, gc)
+	gc-wp(|c): gc -> (c, gc)
+		where
+			Assign(PathStart(name, _), _) := gc;
+			<debug>name;
+			inv* := <_relation-lookup(|"<hasInv:")>name;
+			<debug>inv*
 
 rules
 	

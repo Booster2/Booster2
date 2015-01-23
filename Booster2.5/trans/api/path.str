@@ -3,10 +3,7 @@ module lib/path
 imports
 	include/Booster25
 	
-rules
-			
-
-rules
+rules // TODO: comment
 				
 	compose-paths:
 		(start-path, PathStart(name2, mp))
@@ -30,6 +27,14 @@ rules
 		where
 			<?Path(_,_) <+ ?PathStart(_,_)> target-path
 
+rules // collect all paths
 	
-			
-rules		
+	collect-all-paths = collect-all(is-path)
+	
+	is-path = ?PathStart(_,_)
+	is-path = ?Path(_,_)
+	
+	path-suffix-name = ?Path(_, PathComponent(<id>, _))
+	path-suffix-name = ?PathStart(<id>, _)
+	
+rules
