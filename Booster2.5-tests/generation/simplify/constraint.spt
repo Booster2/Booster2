@@ -1,0 +1,21 @@
+module generation-simplify-constraint
+
+language Booster25
+
+setup Common [[
+system debug
+	
+	class A{
+
+		methods
+]]
+
+test Simplify true and true [[
+	m1 { true & true }
+]] build simplify-builder-ast to [[
+	m1 { true --> skip }
+]]
+
+setup Teardown [[
+	}
+]]
