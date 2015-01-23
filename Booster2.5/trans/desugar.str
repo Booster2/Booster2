@@ -386,3 +386,7 @@ rules // rewrite all invariants to get a name
 	
 rules 
 
+	final-desugar = try(sometd(\ Invariant(name, constraint) -> Invariant(constraint) \))
+
+
+rules

@@ -1,0 +1,53 @@
+module trans/generate/simplify
+
+imports
+	include/booster25
+	trans/api/_runtime
+	trans/api/_runtime-constructors
+	trans/api/attribute
+	trans/api/constraint
+	trans/api/expression
+	trans/lib/search
+	trans/names
+	
+	
+rules
+	
+	simplify = 
+		innermost(constraint-simp <+ expression-simp <+ gc-simp)
+	
+rules
+	
+	constraint-simp: |[true & ~e]| 					-> e
+	constraint-simp: |[false & ~e]| 				-> |[ false ]|
+
+	constraint-simp: |[true or ~e]| 				-> |[ true ]|
+	constraint-simp: |[false or ~e]| 				-> e
+
+	constraint-simp: |[ ~c or ~c ]|					-> c
+	constraint-simp: |[ ~c & ~c ]|					-> c
+
+	constraint-simp: |[ ~c or not(~c) ]|		-> |[ true ]|
+	constraint-simp: |[ ~c & not(~c) ]|			-> |[ false ]|
+
+	constraint-simp: |[ not(true) ]| 				-> |[ false ]|
+	constraint-simp: |[ not(false) ]| 			-> |[ true ]|
+	constraint-simp: |[ not(not(~c)) ]| 		-> c
+
+	constraint-simp: |[ not(~a or ~b) ]|		-> |[ not(~a) & not(~b) ]|	
+	constraint-simp: |[ not(~a & ~b) ]|			-> |[ not(~a) or not(~b) ]|	
+	
+
+
+
+rules
+	
+	expression-simp: |[ 0 + ~e ]| 					-> e
+	expression-simp: |[ ~e + 0 ]| 					-> e
+	
+rules
+	
+	gc-simp: |[ ~gc1 || skip ]| 						-> gc1
+	gc-simp: |[ skip || ~gc1 ]| 						-> gc1
+	
+rules

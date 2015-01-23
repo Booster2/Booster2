@@ -1,0 +1,30 @@
+module generation-simplify-constraint
+
+language Booster25
+
+setup Common [[
+system debug
+	
+	class A{
+
+		invariants
+]]
+
+test Simple test: true and true	[[ true & true ]] 
+ 			build simplify-builder-ast to [[ true ]]
+
+test Simple test: true and false	[[ true & false ]] 
+ 			build simplify-builder-ast to [[ false ]]
+
+test Complex test: and-false 	[[ true & false & true & false & true ]] 
+ 			build simplify-builder-ast to [[ false ]]
+
+test Complex test: or-true	[[ true or false or true or false or true ]] 
+ 			build simplify-builder-ast to [[ true ]]
+
+
+
+
+setup Teardown [[
+	}
+]]

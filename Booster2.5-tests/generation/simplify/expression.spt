@@ -1,0 +1,20 @@
+module generation-simplify-expression
+
+language Booster25
+
+setup Common [[
+system debug
+	
+	class A{
+		attributes
+			x : int
+		methods
+]]
+
+test Simplify addition 0 [[
+	m1 { x + 0 > 5 }
+]] build simplify-builder-ast to [[
+	m1 { x > 5 --> skip }
+]]setup Teardown [[
+	}
+]]
