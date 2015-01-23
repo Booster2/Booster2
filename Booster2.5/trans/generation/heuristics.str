@@ -31,10 +31,8 @@ rules
 	program:  |[~c1 => ~c2]| ->  |[~c1 --> ~p2 [ ] not ~c1 --> skip]|  with p2 := <program>c2
 	program:  |[not ~c1]|    ->  |[not ~c1 --> skip]|
 	
-	program: Exists(name, expr, c1) -> Any(name, expr, <program>c1)
-	program: Forall(name, expr, c1) -> All(name, expr, <program>c1)
-		where
-			<not(is-pre-state)> c1
+	program: |[exists x : ~e @ ~c1 ]| -> |[ANY x : ~e . ~p1]|                               with p1 := <program>c1
+	program: |[forall x : ~e @ ~c1 ]| -> |[ALL x : ~e . ~p1]| where <not(is-pre-state)> c1  with p1 := <program>c1
 
 	program: |[x_a '     = ~e]|       ->  |[x_a     := ~e]|                where <is-pre-state>e
 	program: |[x_a.x_b ' = ~e]|       ->  |[x_a.x_b := ~e]|                where <is-pre-state>e
