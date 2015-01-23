@@ -1,0 +1,27 @@
+module trans/api/wp
+
+imports
+	
+	include/Booster25
+
+rules
+	
+	wp = 
+		?ast;
+		try(sometd(method-wp(|ast)))
+
+rules
+	
+	method-wp(|ast): Method(name, Both(c, gc)) -> Method(name, gc'')
+		with
+			(c', gc') := <gc-wp(|c)>gc;
+			gc'' := |[~c' --> ~gc']|
+	
+rules
+	
+	//@type (|c) gc -> (c, gc)
+	gc-wp(|c) = ?gc;!(c, gc)
+
+rules
+	
+
