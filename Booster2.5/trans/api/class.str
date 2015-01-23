@@ -20,7 +20,7 @@ rules // class getters
 
 	class-get-invariants: Class(_, _, member*) -> invariant*
 		with
-			invariant* := <filter(?Invariant(<id>));concat>member*
+			invariant* := <filter(?Invariants(<id>));concat>member*
 
 	class-get-methods: Class(_, _, member*) -> method*
 		with

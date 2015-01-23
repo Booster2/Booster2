@@ -88,6 +88,6 @@ rules // flatten class hierarchy
 				all-meth'*        := <reverse;method-conjoin-all;reverse>all-meth*
 			with
 				new-attr* := <?a;if ?[] then ![] else ![Attributes(a)] end>all-attr*;
-				new-inv*  := <?b;if ?[] then ![] else ![Invariant (b)] end>all-inv*;
+				new-inv*  := <?b;if ?[] then ![] else ![Invariants(b)] end>all-inv*;
 				new-meth* := <?d;if ?[] then ![] else ![Methods   (d)] end>all-meth'*;
 				cmember'* := [new-attr*, new-inv*, new-meth*]

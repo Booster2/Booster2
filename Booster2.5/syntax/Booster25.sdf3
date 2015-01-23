@@ -47,9 +47,9 @@ context-free syntax
   	methods
   		<{Method "\n"}*>
   > 
-  ClassComponents.Invariant = <
+  ClassComponents.Invariants = <
   	invariants
-  		<{Constraint "\n"}*>
+  		<{Invariant "\n"}*>
   > 
   ClassComponents.Workflows = <
   	workflows
@@ -104,7 +104,8 @@ context-free syntax
   // BoosterTerm = Multiplicity 
   Method.Method = <<ID> { 
   	<ConstraintOrGuardedCommand>
-  	 }> 
+  	 }>
+  Invariant.Invariant = Constraint
   ConstraintOrGuardedCommand = Constraint
   ConstraintOrGuardedCommand = GuardedCommand
   ConstraintOrGuardedCommand.Both = <
