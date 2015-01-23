@@ -13,15 +13,54 @@ imports
 signature constructors
 	
 	SetVal : ID -> Term
+
+	Def : ID * Expression * Op * LeftOrRight * InputOrOutput * MaybeSetExtent -> Term
 	
+	Input : InputOrOutput
+	Output : InputOrOutput
+
+	Left : LeftOrRight
+	Right : LeftOrRight
+	
+	SetExtent : MaybeSetExtent
+	None : MaybeSetExtent
+	
+	
+	Equal : Op
+	NotEqual : Op
+	LessThan : Op
+	LessThanEquals : Op
+	GreaterThan : Op
+	GreaterThanEquals : Op
+	In : Op
+	NotIn : Op
+	Subset : Op
+	SubsetEquals : Op
+	Superset : Op
+	SupersetEquals : Op
+	
+	
+	Plus : Op
+	Minus : Op
+	Times : Op
+	Divide : Op
+	Maximum : Op
+	Minimum : Op
+	Intersection : Op
+	Union : Op
+	Concat : Op
+	
+	
+/*	
 	BinRelDefLeftInput   : ID * BinRel * Expression -> Term
 	BinRelDefLeftOutput  : ID * BinRel * Expression -> Term
 	BinRelDefRightInput  : Expression * BinRel * ID -> Term
 	BinRelDefRightOutput : Expression * BinRel * ID -> Term
 	BinOpDefLeftInput    : Expression * BinOp  * ID -> Term
 	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
+*/
 	AssignDefRightInput  : Expression * ID          -> Term
-	SubstDefInput          : Param * ID               -> Term
+	SubstDefInput          : Param * ID             -> Term
 
 	Param : ID -> Term
 	
@@ -37,7 +76,7 @@ rules
 		warning-on-missing-origin
 	
 	desugar-after-analysis = 
-		bottomup(try(binrel-rem-vardef <+ binop-rem-vardef <+ gcmd-rem-vardef <+ param-rem-vardef));
+		bottomup(try(binrel-rem-vardef <+ gcmd-rem-vardef <+ param-rem-vardef));
 		bottomup(try(rem-typeisaset));
 		try(sometd(subst-rem-param));
 		try(sometd(setdef-rem-setvalues));
@@ -68,45 +107,241 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 
 	list-add(|i): a -> [i|a]
 
-	binrel-get-varname = ?BinRel(Input(v),  op@In(),          rhs);       !v
-	binrel-get-varname = ?BinRel(Output(v), op@In(),          rhs);       !v
-	binrel-get-varname = ?BinRel(lhs,       op@Equal(),       Input(v));  !v
-	binrel-get-varname = ?BinRel(lhs,       op@Equal(),       Output(v)); !v
-	binop-get-varname  = ?BinOp (Input(v),  op@<binop-arith>, rhs);       !v
-	binop-get-varname  = ?BinOp (lhs,       op@<binop-arith>, Input(v));  !v
-	binop-get-varname  = ?BinOp (SetExtent([Input(v)]), op@<binop-set>, rhs); !v
-	binop-get-varname  = ?BinOp (lhs,       op@<binop-set>,   SetExtent([Input(v)])); !v
+// Relations
+
+	binrel-get-varname: rel -> name
+		where
+				((Input(name), rhs), _) := <binrel-const> rel
+
+	binrel-get-varname: rel -> name
+		where
+				((lhs, Input(name)), _) := <binrel-const> rel
+
+	binrel-get-varname: rel -> name
+		where
+				((Output(name), rhs), _) := <binrel-const> rel
+
+	binrel-get-varname: rel -> name
+		where
+				((rhs, Output(name)), _) := <binrel-const> rel
+
+// Expressions
+	
+	binop-get-varname: expr -> name
+		where
+				((Input(name), rhs), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+				((lhs, Input(name)), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+				((Output(name), rhs), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+				((lhs, Output(name)), op) := <binop-arith> expr
+				
+	
+	binop-get-varname: expr -> name
+		where
+			((SetExtent([Input(name)]), rhs), op) := <binop-set> expr
+
+	binop-get-varname: expr -> name
+		where
+			((lhs, SetExtent([Input(name)])), op) := <binop-set> expr
+
+	binop-get-varname: expr -> name
+		where
+			((SetExtent([Output(name)]), rhs), op) := <binop-set> expr
+
+	binop-get-varname: expr -> name
+		where
+			((lhs, SetExtent([Output(name)])), op) := <binop-set> expr
+	
+
 	gcmd-get-varname   = ?Assign(lhs,                         Input(v));  !v
 	param-get-varname  = ?Subst(p,                              Input(v));  !v
 
-	binrel-add-vardef = ?BinRel(Input(v),  op@In(),          rhs);                  !BinRelDefLeftInput  (v,   op, rhs)
-	binrel-add-vardef = ?BinRel(Output(v), op@In(),          rhs);                  !BinRelDefLeftOutput (v,   op, rhs)
-	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Input(v));             !BinRelDefRightInput (lhs, op, v)
-	binrel-add-vardef = ?BinRel(lhs,       op@Equal(),       Output(v));            !BinRelDefRightOutput(lhs, op, v)
-	binop-add-vardef  = ?BinOp (Input(v),  op@<binop-arith>, rhs);                  !BinOpDefLeftInput   (v,   op, rhs)
-	binop-add-vardef  = ?BinOp (lhs,       op@<binop-arith>, Input(v));             !BinOpDefRightInput  (lhs, op, v)
-	binop-add-vardef  = ?BinOp (SetExtent([Input(v)]), op@<binop-set>, rhs);        !BinOpDefLeftInput   (v,   op, rhs)
-	binop-add-vardef  = ?BinOp (lhs,       op@<binop-set>,   SetExtent([Input(v)]));!BinOpDefRightInput  (lhs, op, v)
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), None())
+		where
+			((Input(v),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), None())
+		where
+			((Output(v),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), None())
+		where
+			((lhs, Input(v)), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), None())
+		where
+			((lhs, Output(v)), op) := <binrel-const> expr
+
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), SetExtent())
+		where
+			((SetExtent([Input(v)]),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), SetExtent())
+		where
+			((SetExtent([Output(v)]),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), SetExtent())
+		where
+			((lhs, SetExtent([Input(v)])), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), SetExtent())
+		where
+			((lhs, SetExtent([Output(v)])), op) := <binrel-const> expr
+
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), None())
+		where
+			((Input(v),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), None())
+		where
+			((Output(v),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), None())
+		where
+			((lhs, Input(v)), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), None())
+		where
+			((lhs, Output(v)), op) := <binop-arith> expr
+
+
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), SetExtent())
+		where
+			((SetExtent([Input(v)]),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), SetExtent())
+		where
+			((SetExtent([Output(v)]),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), SetExtent())
+		where
+			((lhs, SetExtent([Input(v)])), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), SetExtent())
+		where
+			((lhs, SetExtent([Output(v)])), op) := <binop-arith> expr
+
+
+
 	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));             !AssignDefRightInput (lhs,     v)
 	param-add-vardef  = ?Subst(p,                              Input(v));             !SubstDefInput         (p,       v)
 	
-	binrel-rem-vardef = ?BinRelDefLeftInput  (v,   op,               rhs); !BinRel(<custom-origin(|v)>Input(v),  op, rhs)
-	binrel-rem-vardef = ?BinRelDefLeftOutput (v,   op,               rhs); !BinRel(<custom-origin(|v)>Output(v), op, rhs)
-	binrel-rem-vardef = ?BinRelDefRightInput (lhs, op,               v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Input(v))
-	binrel-rem-vardef = ?BinRelDefRightOutput(lhs, op,               v  ); !BinRel(lhs,                          op, <custom-origin(|v)>Output(v))
-	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op@<binop-arith>, rhs); !BinOp (<custom-origin(|v)>Input(v),  op, rhs)
-	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op@<binop-arith>, v  ); !BinOp (lhs,                          op, <custom-origin(|v)>Input(v))
-	binop-rem-vardef  = ?BinOpDefLeftInput   (v,   op@<binop-set>,   rhs); !BinOp (<custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]),  op, rhs)
-	binop-rem-vardef  = ?BinOpDefRightInput  (lhs, op@<binop-set>,   v  ); !BinOp (lhs,                          op, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]))
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Input(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>Input(v), rhs])
+
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Output(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>Output(v), rhs])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Input(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>Input(v)])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Output(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>Output(v)])
+			
+
+
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Input(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]), rhs])
+
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Output(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>SetExtent([<custom-origin(|v)>Output(v)]), rhs])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Input(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)])])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Output(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Output(v)])])
+			
+	
+	
+	
+	
 	gcmd-rem-vardef   = ?AssignDefRightInput (lhs,                   v  ); !Assign(lhs,                              <custom-origin(|v)>Input(v))
 	param-rem-vardef  = ?SubstDefInput         (p,                     v  ); !Subst(p,                                   <custom-origin(|v)>Input(v))
 
-	binop-arith = ?Plus()
-	binop-arith = ?Minus()
-	binop-arith = ?Times()
-	binop-arith = ?Divide()
-	binop-arith = ?Maximum()
-	binop-arith = ?Minimum()
+
+	create-term : 
+		(op, [param1, param2])
+			-> <mkterm>(<get-constructor> op, [param1, param2])
+	
+
+	binrel-const : Equal(a,b) 						-> ((a,b), Equal())
+	binrel-const : NotEqual(a,b) 					-> ((a,b), NotEqual())
+	binrel-const : LessThan(a,b) 					-> ((a,b), LessThan())
+	binrel-const : GreaterThan(a,b) 			-> ((a,b), GreaterThan())
+	binrel-const : LessThanEquals(a,b) 		-> ((a,b), LessThanEquals())
+	binrel-const : GreaterThanEquals(a,b) -> ((a,b), GreaterThanEquals())
+	binrel-const : In(a,b) 								-> ((a,b), In())
+	binrel-const : NotIn(a,b) 						-> ((a,b), NotIn())
+	binrel-const : Subset(a,b) 						-> ((a,b), Subset())
+	binrel-const : SubsetEquals(a,b) 			-> ((a,b), SubsetEquals())
+	binrel-const : Superset(a,b) 					-> ((a,b), Superset())
+	binrel-const : SupersetEquals(a,b) 		-> ((a,b), SupersetEquals())
+
+	binop-arith : Plus(a,b) 							-> ((a,b), Plus())
+	binop-arith : Minus(a,b) 							-> ((a,b), Minus())
+	binop-arith : Times(a,b) 							-> ((a,b), Times())
+	binop-arith : Divide(a,b) 						-> ((a,b), Divide())
+	binop-arith : Maximum(a,b)	 					-> ((a,b), Maximum())
+	binop-arith : Minimum(a,b) 						-> ((a,b), Minimum())
+	binop-arith : Intersection(a,b)	 			-> ((a,b), Intersection())
+	binop-arith : Union(a,b) 							-> ((a,b), Union())
+	binop-arith : Concat(a,b) 						-> ((a,b), Concat())
+
+	binop-set: Intersection(a,b)					-> (a,b)
+	binop-set: Union(a,b)									-> (a,b)
 
 rules //  Help NaBL: make explicit what are Function Call parameters
 	
@@ -115,20 +350,26 @@ rules //  Help NaBL: make explicit what are Function Call parameters
 
 rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _) and  BinRel(_, SubsetEquals(), _)
 
-	add-typeisaset = ?BinRel(lhs,                op@<binrel-set>, ps@PathStart(_, _)      );!BinRel(lhs,                                op, <custom-origin(|ps)>TypeIsASet(ps))
-	add-typeisaset = ?BinOp (lhs,                op@<binop-set>,  ps@PathStart(_, _)      );!BinOp (lhs,                                op, <custom-origin(|ps)>TypeIsASet(ps))
-	add-typeisaset = ?BinOp (ps@PathStart(_, _), op@<binop-set>,  rhs                     );!BinOp (<custom-origin(|ps)>TypeIsASet(ps), op, rhs)
 	add-typeisaset = ?Forall(v,                                   ps@PathStart(_, _), body);!Forall(v,                                      <custom-origin(|ps)>TypeIsASet(ps), body)
 
 	rem-typeisaset = ?TypeIsASet(ps);!ps
 	
-	binrel-set = ?In()
-	binrel-set = ?NotIn()
-	binrel-set = ?Subset()
-	binrel-set = ?SubsetEquals()
-	binrel-set = ?Superset()
-	binrel-set = ?SupersetEquals()
+	add-typeisaset: In(a,ps@PathStart(_,_))								-> In(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: NotIn(a,ps@PathStart(_,_))						-> NotIn(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Superset(a,ps@PathStart(_,_))					-> Superset(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: SupersetEquals(a,ps@PathStart(_,_))		-> SupersetEquals(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Subset(a,ps@PathStart(_,_))						-> Subset(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: SubsetEquals(a,ps@PathStart(_,_))			-> SubsetEquals(a, <custom-origin(|ps)>TypeIsASet(ps))
+
+	add-typeisaset: Superset(ps@PathStart(_,_), a)				-> Superset(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: SupersetEquals(ps@PathStart(_,_), a)	-> SupersetEquals(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: Subset(ps@PathStart(_,_), a)					-> Subset(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: SubsetEquals(ps@PathStart(_,_), a)		-> SubsetEquals(<custom-origin(|ps)>TypeIsASet(ps), a)
 	
-	binop-set = ?Intersection()
-	binop-set = ?Union()
-	binop-set = ?Concat()
+	add-typeisaset: Intersection(a,ps@PathStart(_,_))			-> Intersection(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Union(a,ps@PathStart(_,_))						-> Union(a, <custom-origin(|ps)>TypeIsASet(ps))
+
+
+	add-typeisaset: Intersection(ps@PathStart(_,_), a)		-> Intersection(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: Union(ps@PathStart(_,_), a)						-> Union(<custom-origin(|ps)>TypeIsASet(ps), a)
+	

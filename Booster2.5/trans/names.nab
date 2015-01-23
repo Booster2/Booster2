@@ -124,14 +124,34 @@ binding rules // References
 
 binding rules // Variables
 	
-	BinRelDefLeftInput  (v,   In(),           rhs): defines InputVariable  v of type t where rhs has type Set(t)
-	BinRelDefLeftInput  (v,   NotIn(),        rhs): defines InputVariable  v of type t where rhs has type Set(t)
-	BinRelDefLeftInput  (v,   Equal(),        rhs): defines InputVariable  v of type t where rhs has type t
-	BinRelDefLeftOutput (v,   In(),           rhs): defines OutputVariable v of type t where rhs has type Set(t)
-	BinRelDefLeftOutput (v,   NotIn(),        rhs): defines OutputVariable v of type t where rhs has type Set(t)
-	BinRelDefLeftOutput (v,   Equal(),        rhs): defines OutputVariable v of type t where rhs has type t
+	Def(v, rhs, In(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type Set(t)
+	Def(v, rhs, In(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type Set(t)
+
+	Def(v, lhs, In(), Right(), Input(), None()): defines InputVariable  v of type t where lhs has type Set(t)
+	Def(v, lhs, In(), Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type Set(t)
+
+
+	Def(v, rhs, NotIn(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type Set(t)
+	Def(v, rhs, NotIn(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type Set(t)
+
+	Def(v, lhs, NotIn(), Right(), Input(), None()): defines InputVariable  v of type t where lhs has type Set(t)
+	Def(v, lhs, NotIn(), Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type Set(t)
+
+
+	Def(v, rhs, Equal(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type t
+	Def(v, rhs, Equal(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type t
+
+	Def(v, lhs, Equal(), Right(), Input(), None()): defines InputVariable  v of type t where lhs has type t
+	Def(v, lhs, Equal(), Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type t
+
+
+	Def(v, lhs, _, Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type t
+	Def(v, lhs, _, Right(), Input(), None()): defines InputVariable  v of type t where lhs has type t
+
+/*
 	BinRelDefRightInput (lhs, op,             v  ): defines InputVariable  v of type t where lhs has type t
 	BinRelDefRightOutput(lhs, op,             v  ): defines OutputVariable v of type t where lhs has type t
+
 	BinOpDefLeftInput   (v,   Plus(),         rhs): defines InputVariable  v of type t where rhs has type t
 	BinOpDefRightInput  (lhs, Plus(),         v  ): defines InputVariable  v of type t where lhs has type t
 	BinOpDefLeftInput   (v,   Minus(),        rhs): defines InputVariable  v of type t where rhs has type t
@@ -144,12 +164,15 @@ binding rules // Variables
 	BinOpDefRightInput  (lhs, Maximum(),      v  ): defines InputVariable  v of type t where lhs has type t
 	BinOpDefLeftInput   (v,   Minimum(),      rhs): defines InputVariable  v of type t where rhs has type t
 	BinOpDefRightInput  (lhs, Minimum(),      v  ): defines InputVariable  v of type t where lhs has type t
+
 	BinOpDefLeftInput   (v,   Intersection(), rhs): defines InputVariable  v of type t where rhs has type Set(t)
 	BinOpDefRightInput  (lhs, Intersection(), v  ): defines InputVariable  v of type t where lhs has type Set(t)
 	BinOpDefLeftInput   (v,   Union(),        rhs): defines InputVariable  v of type t where rhs has type Set(t)
 	BinOpDefRightInput  (lhs, Union(),        v  ): defines InputVariable  v of type t where lhs has type Set(t)
 	BinOpDefLeftInput   (v,   Concat(),       rhs): defines InputVariable  v of type t where rhs has type Set(t)
 	BinOpDefRightInput  (lhs, Concat(),       v  ): defines InputVariable  v of type t where lhs has type Set(t)
+*/
+
 	AssignDefRightInput (lhs,                 v  ): defines InputVariable  v of type t where lhs has type t
 	SubstDefInput         (p,                   v  ): defines InputVariable  v of type t where p   has type t
 			

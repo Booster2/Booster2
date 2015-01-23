@@ -35,7 +35,7 @@ rules
 		where
 			<not(is-pre-state)> c1
 	
-	program: BinRel(Path(a,b), Equal(), expression) -> Assign(path1, expression)
+	program: Equal(Path(a,b), expression) -> Assign(path1, expression)
 		where
 			<not(is-pre-state)> Path(a,b) ;
 			<is-pre-state> expression

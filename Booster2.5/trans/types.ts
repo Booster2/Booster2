@@ -85,99 +85,140 @@ type rules // BasicValue
 
 type rules // BinRel, BinOp, UnOp
 
-  BinRel(l, op@Equal(), r)
-+ BinRel(l, op@NotEqual(), r)
-+ BinRel(l, op@Subset(), r) 
-+ BinRel(l, op@SubsetEquals(), r) 
-+ BinRel(l, op@Superset(), r) 
-+ BinRel(l, op@SupersetEquals(), r) : BasicType(Boolean())
+
+	Equal(l,r)
++ NotEqual(l,r)
++ Subset(l,r)
++ SubsetEquals(l,r)
++ Superset(l,r)
++ SupersetEquals(l,r) : BasicType(Boolean())
 	where	l	: l-ty
 		and	r	: r-ty
 		and	(r-ty == l-ty or r-ty <sub: l-ty) 
-		      else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		      else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
+
+	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
+  Def(v, e, Equal(), leftright, inout, setext)
++ Def(v, e, NotEqual(), leftright, inout, setext): BasicType(Boolean())
+	where e : e-ty
+
+  Def(v, e, Subset(), leftright, inout, setext) 
++ Def(v, e, SubsetEquals(), leftright, inout, setext)
++ Def(v, e, Superset(), leftright, inout, setext)
++ Def(v, e, SupersetEquals(), leftright, inout, setext) : BasicType(Boolean())
+	where e : e-ty
+	and (e-ty => Set(a-ty))
+		else error $[Type mismatch: expected set type, got [e-ty]] on e
+
 		      
-  BinRel(l, op@In(), r)
-+ BinRel(l, op@NotIn(), r) : BasicType(Boolean())
+  In(l, r)
++ NotIn(l, r) : BasicType(Boolean())
 	where	l	: l-ty
 		and	r	: r-set-ty
 		and r-set-ty => Set(r-ty)
 		and	(r-ty == l-ty or r-ty <sub: l-ty) 
-		      else error $[Type mismatch: expected [Set(l-ty)] got [r-ty] in [op]] on r
+		      else error $[Type mismatch: expected [Set(l-ty)] got [r-ty]] on r
 
-  BinRel(l, op@LessThan(), r)
-+ BinRel(l, op@LessThanEquals(), r)
-+ BinRel(l, op@GreaterThan(), r)
-+ BinRel(l, op@GreaterThanEquals(), r) : BasicType(Boolean())
+  Def(v, e, In(), Left(), inout, setext) 
++ Def(v, e, NotIn(), Left(), inout, setext) : BasicType(Boolean())
+	where e : e-ty
+	and (e-ty => Set(a-ty))
+		else error $[Type mismatch: expected set type, got [e-ty]] on e
+
+  Def(v, e, In(), Right(), inout, setext) 
++ Def(v, e, NotIn(), Right(), inout, setext) : BasicType(Boolean())
+	where e : e-ty
+	and not(e-ty => Set(a-ty))
+		else error $[Type mismatch: expected non-set type, got [e-ty]] on e
+
+
+  LessThan(l, r)
++ LessThanEquals(l, r)
++ GreaterThan(l, r)
++ GreaterThanEquals(l, r) : BasicType(Boolean())
 	where	l	: l-ty
 		and	r	: r-ty
 		and	(l-ty == BasicType(Decimal()) or 
 		     l-ty == BasicType(Int())) 
-		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty]] on l
 		and	(r-ty == l-ty or r-ty <sub: l-ty or l-ty <sub: r-ty) 
-		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		     else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
 
-  BinOp(l, op@Plus(), r)
-+ BinOp(l, op@Minus(), r)
-+ BinOp(l, op@Times(), r)
-+ BinOp(l, op@Divide(), r) 
-+ BinOp(l, op@Maximum(), r) 
-+ BinOp(l, op@Minimum(), r) : op-ty
+
+  Def(v, e, LessThan(), leftright, inout, setext) 
++ Def(v, e, LessThanEquals(), leftright, inout, setext) 
++ Def(v, e, GreaterThan(), leftright, inout, setext)
++ Def(v, e, GreaterThanEquals(), leftright, inout, setext) : BasicType(Boolean())
+	where e : e-ty
+	and (e-ty == BasicType(Decimal()) or
+			(e-ty == BasicType(Int())))
+		else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty]] on e
+
+
+
+  Plus(l, r)
++ Minus(l, r)
++ Times(l, r)
++ Divide(l, r) 
++ Maximum(l, r) 
++ Minimum(l, r) : op-ty
 	where	l	: l-ty
 		and	r	: r-ty
 		and	(l-ty == BasicType(Decimal()) or 
 		     l-ty == BasicType(Int())) 
-		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty] in [op]] on l
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [l-ty]] on l
 		and	((r-ty ==    l-ty and l-ty => op-ty) or
 		     (r-ty <sub: l-ty and l-ty => op-ty) or
 				 (l-ty <sub: r-ty and r-ty => op-ty)) 
-		     else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
-	
-	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
-  BinOpDefLeftInput (v, op@Plus(),    e)
-+ BinOpDefLeftInput (v, op@Minus(),   e)
-+ BinOpDefLeftInput (v, op@Times(),   e)
-+ BinOpDefLeftInput (v, op@Divide(),  e)
-+ BinOpDefLeftInput (v, op@Maximum(), e)
-+ BinOpDefLeftInput (v, op@Minimum(), e) 
-+ BinOpDefRightInput(e, op@Plus(),    v)
-+ BinOpDefRightInput(e, op@Minus(),   v)
-+ BinOpDefRightInput(e, op@Times(),   v)
-+ BinOpDefRightInput(e, op@Divide(),  v)
-+ BinOpDefRightInput(e, op@Maximum(), v)
-+ BinOpDefRightInput(e, op@Minimum(), v): e-ty
-	where e : e-ty
+		     else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
+
+  Def(v, e, Plus(), leftright, inout, setext) 
++ Def(v, e, Minus(), leftright, inout, setext) 
++ Def(v, e, Time(), leftright, inout, setext) 
++ Def(v, e, Divide(), leftright, inout, setext) 
++ Def(v, e, Maximum(), leftright, inout, setext) 
++ Def(v, e, Minimum(), leftright, inout, setext) : e-ty
+	where	e	: e-ty
 		and	(e-ty == BasicType(Decimal()) or 
 		     e-ty == BasicType(Int())) 
-		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty] in [op]] on e
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty]] on e
+	
 
-  BinOp(l, op@Intersection(), r)
-+ BinOp(l, op@Union(), r)
-+ BinOp(l, op@Concat(), r) : l-ty
+  Intersection(l, r)
++ Union(l, r)
++ Concat(l, r) : l-ty
 	where	l	: l-ty
 		and	r	: r-ty
-		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty] in [op]] on r
+		and	r-ty == l-ty else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
 
-	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)	
-  BinOpDefLeftInput (v, op@Intersection(), e)
-+	BinOpDefLeftInput (v, op@Union(),        e)
-+	BinOpDefLeftInput (v, op@Concat(),       e)
-+	BinOpDefRightInput(e, op@Intersection(), v)
-+	BinOpDefRightInput(e, op@Union(),        v)
-+	BinOpDefRightInput(e, op@Concat(),       v) : e-ty
+  Def(v, e, Intersection(), leftright, inout, setext) 
++ Def(v, e, Union(), leftright, inout, setext) : e-ty
+	where e : e-ty
+	and (e-ty => Set(a-ty))
+		else error $[Type mismatch: expected set type, got [e-ty]] on e
+	
+
+Def(v, e, Concat(), leftright, inout, setext) : e-ty
 	where	e	: e-ty
+		and	e-ty == BasicType(String()) 
+		     else error $[Type mismatch: expected BasicType(String()) got [e-ty]] on e
+	
+	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)	
+  Def(v, lhs, op, _, _, _) : e-ty
+	where	lhs	: e-ty
 
 	
-	UnOp(Head(), e)	
-+ UnOp(Tail(), e): e-ty
+	Head(e)	
++ Tail(e): e-ty
 	where e : e-ty
 	
-  UnOp(Cardinality(), e): BasicType(Int())
+  Cardinality(e): BasicType(Int())
   
-  UnOp(op@Negative(), e): e-ty
+  Negative(e): e-ty
 	where e : e-ty
     and	(e-ty == BasicType(Decimal()) or 
 		     e-ty == BasicType(Int())) 
-		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty] in [op]] on e
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) got [e-ty]] on e
 
 type rules // method call params should have correct types
 

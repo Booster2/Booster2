@@ -122,24 +122,38 @@ context-free syntax
   Constraint.Forall = <forall <ID> : <Expression> @ <Constraint>> 
   Constraint = MethodReference 
   BoosterTerm = Constraint 
-  Relation.BinRel = <<Expression> <BinRel> <Expression>> 
-  BoosterTerm = Relation 
-  BinRel.Equal = <=> 
-  BinRel.NotEqual = </=> 
-  BinRel.In = <:> 
-  BinRel.NotIn = </:> 
-  BinRel.LessThan = <\<> 
-  BinRel.GreaterThan = <\>> 
-  BinRel.LessThanEquals = <\<=> 
-  BinRel.GreaterThanEquals = <\>=> 
-  BinRel.Subset = <\<:> 
-  BinRel.SubsetEquals = <\<\<:> 
-  BinRel.Superset = <:\>> 
-  BinRel.SupersetEquals = <:\>\>> 
+  //Relation.BinRel = <<Expression> <BinRel> <Expression>> 
+  BoosterTerm = Relation
+  Relation.Equal 									= <<Expression> = <Expression>> {left} 
+  Relation.NotEqual 							= <<Expression> /= <Expression>> {left} 
+  Relation.In 										= <<Expression> : <Expression>> {left} 
+  Relation.NotIn 									= <<Expression> /: <Expression>> {left} 
+  Relation.LessThan 							= <<Expression> \< <Expression>> {left} 
+  Relation.GreaterThan 						= <<Expression> \> <Expression>> {left} 
+  Relation.LessThanEquals 				= <<Expression> \<= <Expression>> {left} 
+  Relation.GreaterThanEquals 			= <<Expression> \>= <Expression>> {left} 
+  Relation.Subset 								= <<Expression> \<: <Expression>> {left} 
+  Relation.SubsetEquals 					= <<Expression> \<\<: <Expression>> {left} 
+  Relation.Superset 							= <<Expression> :\> <Expression>> {left} 
+  Relation.SupersetEquals 				= <<Expression> :\>\> <Expression>> {left} 
+  Expression.Head 								= <head <Expression>> {right}
+  Expression.Tail 								= <tail <Expression>> {right}
+  Expression.Cardinality 					= <card <Expression>> {right}
+  Expression.Negative 						= <- <Expression>> {right}
+  Expression.Plus 								= <<Expression> + <Expression>> {left}
+  Expression.Minus 								= <<Expression> - <Expression>> {left}
+  Expression.Times 								= <<Expression> * <Expression>> {left}
+  Expression.Divide 							= <<Expression> / <Expression>> {left}
+  Expression.Maximum 							= <<Expression> max <Expression>> {left}
+  Expression.Minimum 							= <<Expression> min <Expression>> {left}
+  Expression.Intersection					= <<Expression> /\\ <Expression>> {left}
+  Expression.Union 								= <<Expression> \\/ <Expression>> {left}
+  Expression.Concat 							= <<Expression> ++ <Expression>> {left}
+
+  
+  
   Expression = ValueExpression 
-  Expression.UnOp = <<UnOp> <Expression>> {left}
   Expression = <( <Expression> )> {bracket}
-  Expression.BinOp = <<Expression> <BinOp> <Expression>> {left}
   BoosterTerm = Expression 
   ValueExpression.BasicValue = BasicValue 
   ValueExpression.TypeExtent = TypeExtent 
@@ -202,19 +216,7 @@ context-free syntax
   PathComponent.PathComponent = <<ID><Primed?>> 
   PathComponent.PathComponent =  {deprecated}
   BoosterTerm = PathComponent 
-  UnOp.Head = <head> 
-  UnOp.Tail = <tail> 
-  UnOp.Cardinality = <card> 
-  UnOp.Negative = <-> 
-  BinOp.Plus = <+> 
-  BinOp.Minus = <-> 
-  BinOp.Times = <*> 
-  BinOp.Divide = </> 
-  BinOp.Maximum = <max> 
-  BinOp.Minimum = <min> 
-  BinOp.Intersection = </\\> 
-  BinOp.Union = <\\/> 
-  BinOp.Concat = <++> 
+ 
   MethodReference.MethodReference = <<Path> ( <{Subst ","}*> )> 
   Subst.Subst = <<Input> = <Expression>> 
   BoosterTerm = MethodReference 
@@ -263,8 +265,39 @@ context-free priorities
 
 context-free priorities
 
-		Expression = ValueExpression //TODO: this isn't supported in SDF3 anymore
+/*		Expression = ValueExpression //TODO: this isn't supported in SDF3 anymore
 	>
 		Expression.UnOp
 	>
 		Expression.BinOp
+*/
+
+context-free priorities
+
+// TODO: Confirm this with Spivey's book.
+
+	{	right:
+			Expression.Negative
+			Expression.Cardinality
+			Expression.Head
+			Expression.Tail
+	}
+	>	
+	{	left:
+		Expression.Times
+		Expression.Divide
+		Expression.Intersection
+		Expression.Union
+	} 
+	>
+	{	left:
+		Expression.Plus
+		Expression.Minus
+		Expression.Concat
+	} 
+	>
+	{	left:
+		Expression.Maximum
+		Expression.Minimum
+	} 
+		
