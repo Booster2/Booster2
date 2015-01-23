@@ -17,7 +17,6 @@ imports
 	lib/runtime/editor/-
 	names
 	check
-	generate
 	pp
 	trans/types.generated
 	trans/desugar
@@ -28,6 +27,7 @@ imports
 	
 	trans/generation/elaborate
 	trans/generation/heuristics
+	trans/generation/wp
 
 rules // Analysis
 	
@@ -213,7 +213,8 @@ rules // Debugging
 	heuristics-builder-ast = builder-ast(elaborate ; heuristics | "Heuristics")
 	heuristics-builder = builder(elaborate ; heuristics | "Heuristics")
 		
-	wp-builder = id
+	wp-builder-ast = builder-ast(elaborate ; heuristics ; wp | "Wp")
+	wp-builder = builder(elaborate ; heuristics ; wp | "Wp")
 	
 	simplify-builder = id
 	

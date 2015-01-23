@@ -1,0 +1,9 @@
+module trans/api/wp
+
+imports
+	
+	include/Booster25
+
+rules
+	
+	wp = id
