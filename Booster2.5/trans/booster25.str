@@ -147,6 +147,12 @@ rules // Debugging
 			ast'     := <bottomup(try(\a{_}->a{}\))>ast;
 			result	 := ast'
 	
+	debug-show-origin2:
+		(selected, position, ast, path, project-path) -> None()
+		with
+			ast' := <desugar-before-analysis> ast;
+			<_origin-debug-all>ast'
+				
 	debug-show-origin:
 		(target, position, ast, path, project-path) -> None()
 			with

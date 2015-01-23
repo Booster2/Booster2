@@ -9,6 +9,7 @@ imports
 	
 	trans/lib/origin
 	trans/lib/traverse
+	trans/api/_runtime
 
 signature constructors
 	
@@ -98,11 +99,13 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	with
 		(body', _) := <topdown-fold(try(add-vardef))>(body, [])
 
-	add-vardef : (term, history) -> (term', history')
+	add-vardef : (term, history) -> (term'', history')
 		where
 			if name := <binrel-get-varname <+ binop-get-varname <+ gcmd-get-varname <+ param-get-varname>term; <not(elem)>(name, history) then
 				history' := <list-add(|name)> history;
-				term'    := <binrel-add-vardef <+ binop-add-vardef <+ gcmd-add-vardef <+ param-add-vardef>term
+				term'    := <binrel-add-vardef <+ binop-add-vardef <+ gcmd-add-vardef <+ param-add-vardef>term;
+				Def(v, e, op, leftright, inout, setext) := term';
+				term''   := <custom-origin(|term)>Def(v, e, <custom-origin(|term)>op, <custom-origin(|term)>leftright, <custom-origin(|term)>inout, <custom-origin(|term)>setext)
 			end
 
 	list-add(|i): a -> [i|a]

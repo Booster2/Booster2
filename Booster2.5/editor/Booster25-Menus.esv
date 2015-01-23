@@ -12,7 +12,8 @@ menus
     action: "4) Show desugared-after"                              = debug-show-analyzed-resolved (meta)
     action: "4) Show desugared-after (no def or use anotations)"   = debug-show-analyzed-resolved2 (meta)
     action: "4) Show desugared-after (no anotations)"              = debug-show-desugared2 (meta)
-    action: "Debug Origins" 			                                 = debug-show-origin (meta)
+    action: "Debug Origins of 2)"	                                 = debug-show-origin2 (meta) (source)
+    action: "Debug Origins of 4)"	                                 = debug-show-origin (meta)
     
   menu: "Analysis"                     (meta)
     
