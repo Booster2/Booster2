@@ -1,0 +1,23 @@
+module trans/api/attribute
+
+imports
+	include/Booster25
+	trans/api/_runtime
+	trans/names
+	trans/types-manual
+	
+rules // attribute properties
+	
+	// @type AttrName -> AttrName or fail
+	attr-is-basic     = _get-type;?BasicType(_)
+	attr-is-bidir     = where(get-inverse)
+	attr-is-unidir    = not(attr-is-bidir + attr-is-basic)
+	
+	attr-is-set       = get-multiplicity;?Set()
+	attr-is-optional  = get-multiplicity;?Optional()
+	attr-is-mandatory = get-multiplicity;?Mandatory()
+
+	attr-get-inverse  = get-inverse;not(?None())
+
+rules
+	

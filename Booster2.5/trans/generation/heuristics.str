@@ -4,6 +4,7 @@ imports
 	include/booster25
 	trans/api/_runtime
 	trans/api/_runtime-constructors
+	trans/api/attribute
 	trans/api/constraint
 	trans/lib/search
 	trans/names
@@ -39,6 +40,23 @@ rules
 	program: |[x_a.x_b ' = ~e]|       ->  |[x_a.x_b := ~e]|                where <is-pre-state>e
 	program: |[~e : x_a.x_b ']|       ->  |[x_a.x_b := x_a.x_b \/ {~e}]|   where <is-pre-state>e
 	program: |[x_output! : x_c1 ']|   ->  |[new x_output! : x_c1]|
+
+rules // assign to bidirectional relations
+	
+	program: |[x? : y ']| -> |[(y := y \/ {x?}) || (x?.z := x?.z \/ {this})]|
+		where
+			z := <attr-get-inverse>y;
+			<attr-is-set>y;
+			<attr-is-set>z
+			
+	program: |[y ' = x!]| -> |[x! /: x_classX --> ( (new x! : x_classX) ; ((y := x!) || (x!.z := this)) )]|
+		where
+			z := <attr-get-inverse>y;
+			<attr-is-mandatory>y;
+			<attr-is-mandatory>z;
+			x_classX := <_get-type>x
+
+rules // catch all not supported
 
 	program: x -> Skip()
 		where
