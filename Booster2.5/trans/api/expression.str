@@ -1,0 +1,19 @@
+module api/expression
+
+imports
+	include/booster25
+	trans/api/_runtime
+	trans/names
+
+rules
+	
+	is-obj-expression:
+		expr -> []
+			where
+				ty := <_get-type> expr;
+				ty-uri := <_nabl-uri> ty;
+				ns := <_nabl-uri-namespace> ty-uri;
+				<?NablNsClass()> ns
+		
+	
+	
