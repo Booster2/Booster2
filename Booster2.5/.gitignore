@@ -19,7 +19,6 @@ editor/java/trans
 editor/*.generated.*
 syntax/Booster25*.generated.esv
 syntax/Booster25.generated.pp
-syntax/*.sdf
 trans/*.pp.generated.str
 .settings/org.eclipse.jdt.core.prefs
 utils

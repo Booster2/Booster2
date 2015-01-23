@@ -11,6 +11,10 @@ imports // functions
 signature constructors
 	
 	Set : Term -> Term
+	
+	Mandatory : Multiplicity
+	Optional  : Multiplicity
+	Set       : Multiplicity
 
 rules // generate constraints for class <sub: super-class
 

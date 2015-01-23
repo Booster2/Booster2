@@ -9,6 +9,8 @@ imports
 properties
 	
 	is-method of Method : Term
+	multiplicity of Attribute : Term
+	inverse      of Attribute : Term
 
 namespaces
 
@@ -62,7 +64,11 @@ binding rules // Attribute
 	Attribute(a,dec, a-ty):
 		defines Attribute a
 			of type ty
+			of multiplicity mu
+			of inverse i
 			where a-ty has type ty
+			and a-ty has multiplicity mu
+			and a-ty has inverse i
 
 binding rules // Method
 

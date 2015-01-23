@@ -4,7 +4,9 @@ imports
 
 	include/Booster25
 	trans/desugar
+	trans/names
 	trans/names-manual
+  trans/types-manual
 	
 type rules // references
 
@@ -237,4 +239,20 @@ type rules // Method references should have a path that refers to a method
 			else error $[Expects a method] on path 
 		
 	
+type rules // optional or mandatory (not encoded in type but separate property)
+
+	BasicType(ty)       has multiplicity Mandatory()
+	UniDirectional(a)   has multiplicity Mandatory()
+	BiDirectional(a, b) has multiplicity Mandatory()
+	Set(ty, mu)         has multiplicity Set()
+	Optional(ty)        has multiplicity Optional()
+
+type rules // store inverse for bidirectional
+
+	BasicType(ty)       has inverse None()
+	UniDirectional(a)   has inverse None()
+	BiDirectional(a, b) has inverse b
+	Set(ty, mu)         has inverse i where ty has inverse i
+	Optional(ty)        has inverse i where ty has inverse i
+
 type rules

@@ -4,6 +4,7 @@ imports
 	include/booster25
 	trans/api/_runtime
 	trans/api/_runtime-constructors
+	trans/api/attribute
 	trans/api/constraint
 	trans/lib/search
 	trans/names
@@ -22,25 +23,40 @@ rules
 rules
 	
 	// @type Constraint -> GuardedCommand
-	program: True()	         -> Skip()
-	program: False()         -> Guard(False(), Skip())
-	program: And(c1, c2)     -> Parallel(<program>c1, <program>c2)
-	program: Or(c1, c2)      -> Choice(<program>c1, <program>c2)
-	program: Then(c1, c2)    -> Sequence(<program>c1, <program>c2)
-	program: Implies(c1, c2) -> Choice(Guard(c1,<program>c2), Guard(Not(c1),Skip()))
-	program: Not(c1)         -> Guard(Not(c1),Skip())
+	program:  |[true]|       ->  |[skip]|
+	program:  |[false]|      ->  |[false --> skip]|
+	program:  |[~c1 & ~c2]|  ->  |[~p1 || ~p2]|                        with p1 := <program>c1; p2 := <program>c2
+	program:  |[~c1 or ~c2]| ->  |[~p1 [ ] ~p2]|                       with p1 := <program>c1; p2 := <program>c2
+	program: c|[~c1 ; ~c2]|  -> g|[~p1 ; ~p2]|                         with p1 := <program>c1; p2 := <program>c2
+	program:  |[~c1 => ~c2]| ->  |[~c1 --> ~p2 [ ] not ~c1 --> skip]|  with p2 := <program>c2
+	program:  |[not ~c1]|    ->  |[not ~c1 --> skip]|
 	
-	program: Exists(name, expr, c1) -> Any(name, expr, <program>c1)
-	program: Forall(name, expr, c1) -> All(name, expr, <program>c1)
-		where
-			<not(is-pre-state)> c1
+	program: |[exists x : ~e @ ~c1 ]| -> |[ANY x : ~e . ~p1]|                               with p1 := <program>c1
+	program: |[forall x : ~e @ ~c1 ]| -> |[ALL x : ~e . ~p1]| where <not(is-pre-state)> c1  with p1 := <program>c1
+
+	program: |[x_a '     = ~e]|       ->  |[x_a     := ~e]|                where <is-pre-state>e
+	program: |[x_a.x_b ' = ~e]|       ->  |[x_a.x_b := ~e]|                where <is-pre-state>e
+	program: |[~e : x_a.x_b ']|       ->  |[x_a.x_b := x_a.x_b \/ {~e}]|   where <is-pre-state>e
+	program: |[x_output! : x_c1 ']|   ->  |[new x_output! : x_c1]|
+
+rules // assign to bidirectional relations
 	
-	program: Equal(Path(a,b), expression) -> Assign(path1, expression)
+
+
+	program: |[x? : y ']| -> |[(y := y \/ {x?}) || (x?.z := x?.z \/ {this})]|
 		where
-			<not(is-pre-state)> Path(a,b) ;
-			<is-pre-state> expression
+			z := <attr-get-inverse>y;
+			<attr-is-set>y;
+			<attr-is-set>z
+			
+	program: |[y ' = x!]| -> |[x! /: x_classX --> ( (new x! : x_classX) ; ((y := x!) || (x!.z := this)) )]|
 		where
-			path1 := <make-pre-state> Path(a,b)
+			z := <attr-get-inverse>y;
+			<attr-is-mandatory>y;
+			<attr-is-mandatory>z;
+			x_classX := <_get-type>x
+
+rules // catch all not supported
 
 	program: x -> Skip()
 		where

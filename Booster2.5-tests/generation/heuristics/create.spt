@@ -1,0 +1,22 @@
+module generation-heuristics-create
+
+language Booster25
+
+setup Common [[
+system debug
+
+	class A{
+		attributes
+			a  : INT
+		methods
+]]
+
+test Heuristics Create [[
+	create { a! : A'}
+]] build heuristics-builder-ast to [[
+	create { a! : A' | new a! : A }
+]]
+
+setup Teardown [[
+	}
+]]
