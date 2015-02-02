@@ -3,6 +3,7 @@ module trans/api/wp
 imports
 	
 	include/Booster25
+	trans/api/guarded-command
 
 rules
 	
@@ -16,6 +17,8 @@ rules
 		with
 			(c', gc') := <gc-wp(|c)>gc;
 			gc'' := |[~c' --> ~gc']|
+		where
+			<debug>(<get-modified-attributes> gc)
 	
 rules
 	
