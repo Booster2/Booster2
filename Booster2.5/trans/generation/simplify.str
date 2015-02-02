@@ -24,6 +24,9 @@ rules
 	constraint-simp: |[true or ~e]| 				-> |[ true ]|
 	constraint-simp: |[false or ~e]| 				-> e
 
+	constraint-simp: |[true ; ~e]| 					-> e
+	constraint-simp: |[~e ; true]| 					-> e
+
 	constraint-simp: |[ ~c or ~c ]|					-> c
 	constraint-simp: |[ ~c & ~c ]|					-> c
 
@@ -49,5 +52,9 @@ rules
 	
 	gc-simp: |[ ~gc1 || skip ]| 						-> gc1
 	gc-simp: |[ skip || ~gc1 ]| 						-> gc1
+
+	gc-simp: |[ ~g1 --> (~g2 --> ~p) ]| 			-> |[ ~g1 & ~g2 --> ~p ]|
+	
+
 	
 rules
