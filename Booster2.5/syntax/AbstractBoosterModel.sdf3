@@ -27,7 +27,7 @@ context-free syntax
   GuardedCommand.Skip = <skip> {prefer}
   GuardedCommand.Assign = <<Path> := <Expression>> {left}
   GuardedCommand.New = <new <ID> ! : <ID>> 
-  GuardedCommand.Guard = <<Constraint> --\> <GuardedCommand>> {left}
+  GuardedCommand.Guard = <<Constraint> --\> <GuardedCommand>> {right}
   GuardedCommand.Parallel = <<GuardedCommand> || <GuardedCommand>> {left}
   GuardedCommand.Sequence = <<GuardedCommand> ; <GuardedCommand>> {left}
   GuardedCommand.Choice = <<GuardedCommand> [ ] <GuardedCommand>> {left}
@@ -39,14 +39,12 @@ context-free syntax
 
 context-free priorities
 
-		GuardedCommand.Skip
+		GuardedCommand.Guard
 	>
 		GuardedCommand.Assign
 	>
-		GuardedCommand.Guard
-	>
 		GuardedCommand.Parallel
 	>
-		GuardedCommand.Sequence
-	>
 		GuardedCommand.Choice
+	>
+		GuardedCommand.Sequence
