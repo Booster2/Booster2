@@ -1,0 +1,24 @@
+module trans/api/guarded-command
+
+imports 
+	include/Booster25
+	trans/names
+	trans/api/_runtime
+	
+rules
+
+/* get-modified-paths:
+	Takes a program and returns all the paths that may be modified by it
+*/
+	get-modified-paths = collect(\ Assign(path, expression) -> path \)
+	
+/* get-modified-attributes:
+	Takes a program and returns all the attributes that may be modified by it
+*/
+	get-modified-attributes = 
+		collect(\ Assign(path, expression) -> 
+								path 
+								where
+									<debug>(<_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name ; _pp-uri> path)\)
+
+	
