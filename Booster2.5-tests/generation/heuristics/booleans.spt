@@ -24,7 +24,7 @@ test Heuristics Or [[
 test Heuristics Implies [[
 	m { true => false }
 ]] build heuristics-builder-ast to [[
-	m { true => false | true --> ( false --> skip ) [ ] not true --> skip }
+	m { true => false | true --> false --> skip [ ] not true --> skip }
 ]]
 
 test Heuristics Then [[

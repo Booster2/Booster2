@@ -39,9 +39,9 @@ context-free syntax
 
 context-free priorities
 
-		GuardedCommand.Guard
-	>
 		GuardedCommand.Assign
+	>
+		GuardedCommand.Guard
 	>
 		GuardedCommand.Parallel
 	>
