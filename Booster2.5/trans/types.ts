@@ -159,7 +159,6 @@ type rules // BinRel, BinOp, UnOp
 
 
   Plus(l, r)
-+ Minus(l, r)
 + Times(l, r)
 + Divide(l, r) 
 + Maximum(l, r) 
@@ -175,7 +174,6 @@ type rules // BinRel, BinOp, UnOp
 		     else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
 
   Def(v, e, Plus(), leftright, inout, setext) 
-+ Def(v, e, Minus(), leftright, inout, setext) 
 + Def(v, e, Time(), leftright, inout, setext) 
 + Def(v, e, Divide(), leftright, inout, setext) 
 + Def(v, e, Maximum(), leftright, inout, setext) 
@@ -198,6 +196,27 @@ type rules // BinRel, BinOp, UnOp
 	where e : e-ty
 	and (e-ty => Set(a-ty))
 		else error $[Type mismatch: expected set type, got [e-ty]] on e
+
+
+  Minus(l, r) : op-ty
+	where	l	: l-ty
+		and	r	: r-ty
+		and	(l-ty == BasicType(Decimal()) or 
+		     l-ty == BasicType(Int()) or
+		     l-ty => Set(a-ty)) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) or set type got [l-ty]] on l
+		and	((r-ty ==    l-ty and l-ty => op-ty) or
+		     (r-ty <sub: l-ty and l-ty => op-ty) or
+				 (l-ty <sub: r-ty and r-ty => op-ty)) 
+		     else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
+
+  Def(v, e, Minus(), leftright, inout, setext) : e-ty
+	where	e	: e-ty
+		and	(e-ty == BasicType(Decimal()) or 
+		     e-ty == BasicType(Int()) or
+		     e-ty => Set(a-ty)) 
+		     else error $[Type mismatch: expected BasicType(Decimal()) or BasicType(Int()) or set type, got [e-ty]] on e
+
 	
 
 Def(v, e, Concat(), leftright, inout, setext) : e-ty
@@ -251,7 +270,7 @@ type rules // store inverse for bidirectional
 
 	BasicType(ty)       has inverse None()
 	UniDirectional(a)   has inverse None()
-	BiDirectional(a, b) has inverse (a, b)
+	BiDirectional(a, b) has inverse b
 	Set(ty, mu)         has inverse i where ty has inverse i
 	Optional(ty)        has inverse i where ty has inverse i
 
