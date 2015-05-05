@@ -22,7 +22,41 @@ test Complex test: and-false 	[[ true & false & true & false & true ]]
 test Complex test: or-true	[[ true or false or true or false or true ]] 
  			build simplify-builder-ast to [[ true ]]
 
+test Complex test: lessthan1 [[ 5 < 6 ]]
+			build simplify-builder-ast to [[ true ]]
 
+test Complex test: lessthan2 [[ 6 < 6 ]]
+			build simplify-builder-ast to [[ false ]]
+
+test Complex test: lessthan3 [[ 7 < 6 ]]
+			build simplify-builder-ast to [[ false ]]
+
+test Complex test: greaterthan1 [[ 5 > 6 ]]
+			build simplify-builder-ast to [[ false ]]
+
+test Complex test: greaterthan2 [[ 6 > 6 ]]
+			build simplify-builder-ast to [[ false ]]
+
+test Complex test: greaterthan3 [[ 7 > 6 ]]
+			build simplify-builder-ast to [[ true ]]
+
+test Complex test: lessthanequals1 [[ 5 <= 6 ]]
+			build simplify-builder-ast to [[ true ]]
+
+test Complex test: lessthanequals2 [[ 6 <= 6 ]]
+			build simplify-builder-ast to [[ true ]]
+
+test Complex test: lessthanequals3 [[ 7 <= 6 ]]
+			build simplify-builder-ast to [[ false ]]
+
+test Complex test: greaterthanequals1 [[ 5 >= 6 ]]
+			build simplify-builder-ast to [[ false ]]
+
+test Complex test: greaterthanequals2 [[ 6 >= 6 ]]
+			build simplify-builder-ast to [[ true ]]
+
+test Complex test: greaterthanequals3 [[ 7 >= 6 ]]
+			build simplify-builder-ast to [[ true ]]
 
 
 setup Teardown [[
