@@ -1,7 +1,7 @@
-module trans/generate/heuristics
+module trans/generation/heuristics
 
 imports
-	include/booster25
+	include/Booster25
 	trans/api/_runtime
 	trans/api/_runtime-constructors
 	trans/api/attribute
@@ -9,7 +9,7 @@ imports
 	trans/api/expression
 	trans/lib/search
 	trans/names
-	
+	trans/pp
 	
 rules
 	
@@ -25,12 +25,14 @@ rules
 rules
 	
 	// @type Constraint -> GuardedCommand
-	program:  |[true]|       ->  |[skip]|
+	
+	program:  |[true]|       ->  |[skip]|		
 	program:  |[false]|      ->  |[false --> skip]|
 	program:  |[~c1 & ~c2]|  ->  |[~p1 || ~p2]|                        with p1 := <program>c1; p2 := <program>c2
 	program:  |[~c1 or ~c2]| ->  |[~p1 [ ] ~p2]|                       with p1 := <program>c1; p2 := <program>c2
 	program: c|[~c1 ; ~c2]|  -> g|[~p1 ; ~p2]|                         with p1 := <program>c1; p2 := <program>c2
 	program:  |[~c1 => ~c2]| ->  |[~c1 --> ~p2 [ ] not ~c1 --> skip]|  with p2 := <program>c2
+
 	program:  |[not ~c1]|    ->  |[not ~c1 --> skip]|
 	
 	program: |[exists x : ~e @ ~c1 ]| -> |[ANY x : ~e . ~p1]|                               with p1 := <program>c1
@@ -43,13 +45,17 @@ rules
 
 rules // assign to bidirectional relations
 	
+
 // Mandatory -> Mandatory --- Add
 	program: |[y ' = x!]| -> |[x! /: x_classX --> ( (new x! : x_classX) ; ((y := x!) || (x!.z := this)) )]|
+
 		where
 			z := <attr-get-inverse>y;
 			<attr-is-mandatory>y;
 			<attr-is-mandatory>z;
 			x_classX := <_get-type>x
+
+
 			
 // Mandatory -> Optional --- Add
 	program: |[y ' = ~e]| -> |[~e.z = null --> (y := ~e || ~e.z := this)]|
@@ -173,7 +179,6 @@ rules // assign to bidirectional relations
 			<is-obj-expression> e
 
 
-
 			
 
 
@@ -181,6 +186,6 @@ rules // catch all not supported
 
 	program: x -> Skip()
 		where
-			log(|Warning(), "cannot determine program", x)
+			log(|Warning(), "cannot determine program", <pp-Constraint-string> x)
 
 rules
