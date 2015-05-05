@@ -14,15 +14,19 @@ imports
 rules
 	
 	simplify = 
-		innermost(constraint-simp <+ expression-simp <+ gc-simp)
+		innermost( constraint-simp <+ relation-simp <+ expression-simp <+ gc-simp)
 	
 rules
 	
 	constraint-simp: |[true & ~e]| 					-> e
+	constraint-simp: |[~e & true]| 					-> e
 	constraint-simp: |[false & ~e]| 				-> |[ false ]|
+	constraint-simp: |[~e & false]| 				-> |[ false ]|
 
 	constraint-simp: |[true or ~e]| 				-> |[ true ]|
+	constraint-simp: |[~e or true]| 				-> |[ true ]|
 	constraint-simp: |[false or ~e]| 				-> e
+	constraint-simp: |[~e or false]| 				-> e
 
 	constraint-simp: |[true ; ~e]| 					-> e
 	constraint-simp: |[~e ; true]| 					-> e
@@ -40,11 +44,36 @@ rules
 	constraint-simp: |[ not(~a or ~b) ]|		-> |[ not(~a) & not(~b) ]|	
 	constraint-simp: |[ not(~a & ~b) ]|			-> |[ not(~a) or not(~b) ]|	
 	
+	constraint-simp: |[ true => ~p ]|				-> p
+	constraint-simp: |[ false => ~p ]|			-> |[ true ]|
 
 
 
 rules
 	
+	
+	relation-simp: |[ ~e = ~e ]|						-> |[true]|
+	relation-simp: |[ ~e /= ~e ]|						-> |[false]|
+	relation-simp: |[ ~e < ~e ]|						-> |[false]|
+	relation-simp: |[ ~e <= ~e ]|						-> |[true]|
+	relation-simp: |[ ~e > ~e ]|						-> |[false]|
+	relation-simp: |[ ~e >= ~e ]|						-> |[true]|
+
+	relation-simp: |[ ~e < ~f ]|						-> |[ true ]| where <lt>(<get-int>e,<get-int>f)
+	relation-simp: |[ ~e < ~f ]|						-> |[ false ]| where <geq>(<get-int>e,<get-int>f)
+
+	relation-simp: |[ ~e > ~f ]|						-> |[ true ]| where <gt>(<get-int>e,<get-int>f)
+	relation-simp: |[ ~e > ~f ]|						-> |[ false ]| where <leq>(<get-int>e,<get-int>f)
+
+	relation-simp: |[ ~e <= ~f ]|						-> |[ true ]| where <leq>(<get-int>e,<get-int>f)
+	relation-simp: |[ ~e <= ~f ]|						-> |[ false ]| where <gt>(<get-int>e,<get-int>f)
+
+	relation-simp: |[ ~e >= ~f ]|						-> |[ true ]| where <geq>(<get-int>e,<get-int>f)
+	relation-simp: |[ ~e >= ~f ]|						-> |[ false ]| where <lt>(<get-int>e,<get-int>f)
+
+
+rules
+		
 	expression-simp: |[ 0 + ~e ]| 					-> e
 	expression-simp: |[ ~e + 0 ]| 					-> e
 	
@@ -53,8 +82,13 @@ rules
 	gc-simp: |[ ~gc1 || skip ]| 						-> gc1
 	gc-simp: |[ skip || ~gc1 ]| 						-> gc1
 
-	gc-simp: |[ ~g1 --> (~g2 --> ~p) ]| 			-> |[ ~g1 & ~g2 --> ~p ]|
+	gc-simp: |[ ~g1 --> (~g2 --> ~p) ]| 		-> |[ ~g1 & ~g2 --> ~p ]|
 	
 
+	gc-simp: |[ true --> ~p ]| 							-> p
+	
+rules
+	
+	get-int: BasicValue(Integer(c')) -> <string-to-int> c'	
 	
 rules
