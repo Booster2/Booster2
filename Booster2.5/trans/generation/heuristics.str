@@ -7,6 +7,7 @@ imports
 	trans/api/attribute
 	trans/api/constraint
 	trans/api/expression
+	trans/api/path
 	trans/lib/search
 	trans/names
 	trans/pp
@@ -20,20 +21,20 @@ rules
 	
 	method-heuristics: Method(name, const) -> Method(name, Both(const, gc))
 		with
-			gc := <program>const
+			gc := <program> const
 
 rules
 	
-	// @type Constraint -> GuardedCommand
+	/* @type Constraint -> GuardedCommand */
 	
-	program:  |[true]|       ->  |[skip]|		
-	program:  |[false]|      ->  |[false --> skip]|
+	program:  |[ true ]|       ->  |[ skip ]|		
+	program:  |[ false ]|      ->  |[ false --> skip ]|
 	program:  |[~c1 & ~c2]|  ->  |[~p1 || ~p2]|                        with p1 := <program>c1; p2 := <program>c2
 	program:  |[~c1 or ~c2]| ->  |[~p1 [ ] ~p2]|                       with p1 := <program>c1; p2 := <program>c2
 	program: c|[~c1 ; ~c2]|  -> g|[~p1 ; ~p2]|                         with p1 := <program>c1; p2 := <program>c2
 	program:  |[~c1 => ~c2]| ->  |[~c1 --> ~p2 [ ] not ~c1 --> skip]|  with p2 := <program>c2
 
-	program:  |[not ~c1]|    ->  |[not ~c1 --> skip]|
+	program:  |[not ~c1]|    ->  |[not ~c1 --> skip ]|
 	
 	program: |[exists x : ~e @ ~c1 ]| -> |[ANY x : ~e . ~p1]|                               with p1 := <program>c1
 	program: |[forall x : ~e @ ~c1 ]| -> |[ALL x : ~e . ~p1]| where <not(is-pre-state)> c1  with p1 := <program>c1
@@ -41,14 +42,16 @@ rules
 	program: |[x_a '     = ~e]|       ->  |[x_a     := ~e]|                where <is-pre-state>e
 	program: |[x_a.x_b ' = ~e]|       ->  |[x_a.x_b := ~e]|                where <is-pre-state>e
 	program: |[~e : x_a.x_b ']|       ->  |[x_a.x_b := x_a.x_b \/ {~e}]|   where <is-pre-state>e
-	program: |[x_output! : x_c1 ']|   ->  |[new x_output! : x_c1]|
-
-rules // assign to bidirectional relations
 	
+	program: |[x_output! : x_c' ]|   ->  |[new x_output! : x_c]|
 
-// Mandatory -> Mandatory --- Add
-	program: |[y ' = x!]| -> |[x! /: x_classX --> ( (new x! : x_classX) ; ((y := x!) || (x!.z := this)) )]|
+rules 
+	
+	/* assign to bidirectional relations */
+	
+	/* Mandatory -> Mandatory --- Add */
 
+	program: |[y ' = x! ]| -> |[ x! /: x_classX --> ( (new x! : x_classX) ; ((y := x!) || (x!.z := this)) ) ]| 
 		where
 			z := <attr-get-inverse>y;
 			<attr-is-mandatory>y;
@@ -57,7 +60,7 @@ rules // assign to bidirectional relations
 
 
 			
-// Mandatory -> Optional --- Add
+	/* Mandatory -> Optional --- Add */
 	program: |[y ' = ~e]| -> |[~e.z = null --> (y := ~e || ~e.z := this)]|
 		where
 			z := <attr-get-inverse>y;
@@ -65,7 +68,7 @@ rules // assign to bidirectional relations
 			<attr-is-optional>z;
 			<is-obj-expression> e
 	
-// Mandatory -> Set-valued --- Add
+	/* Mandatory -> Set-valued --- Add */
 	program: |[y ' = ~e]| -> |[(y := ~e || ~e.z := ~e.z \/ {this})]|
 		where
 			z := <attr-get-inverse>y;
@@ -73,7 +76,7 @@ rules // assign to bidirectional relations
 			<attr-is-set>z;
 			<is-obj-expression> e
 
-// Optional -> Mandatory --- Add
+	/* Optional -> Mandatory --- Add */
 	program: |[y ' = x!]| -> |[y = null --> (new x! : x_classX) ; (( y := x! || x!.z := this))  ]|
 		where
 			z := <attr-get-inverse>y;
@@ -81,7 +84,7 @@ rules // assign to bidirectional relations
 			<attr-is-mandatory>z;
 			x_classX := <_get-type>x
 
-// Optional -> Optional --- Add
+	/* Optional -> Optional --- Add */
 	program: |[y ' = ~e]| -> |[~e.z = null --> (y := ~e || ~e.z := this || 
 																(y /= null --> y.z := null
 																[]
@@ -92,7 +95,7 @@ rules // assign to bidirectional relations
 			<attr-is-optional>z;
 			<is-obj-expression> e
 
-// Optional -> Set-valued --- Add
+	/* Optional -> Set-valued --- Add */
 	program: |[y ' = ~e]| -> |[(y := ~e || ~e.z := ~e.z \/ {this} || 
 																(y /= null --> y.z := y.z /\ {this}
 																[]
@@ -103,7 +106,7 @@ rules // assign to bidirectional relations
 			<attr-is-set>z;
 			<is-obj-expression> e
 
-// Set-valued -> Mandatory --- Add
+	/* Set-valued -> Mandatory --- Add */
 	program: |[x! : y ']| -> |[(new x! : x_classX) ; (( y := y \/ {x!} || x!.z := this))  ]|
 		where
 			z := <attr-get-inverse>y;
@@ -111,7 +114,7 @@ rules // assign to bidirectional relations
 			<attr-is-mandatory>z;
 			x_classX := <_get-type>x
 
-// Set-valued -> Optional --- Add
+	/* Set-valued -> Optional --- Add */
 	program: |[~e : y ']| -> |[~e.z = null --> (y := y \/ {~e} || ~e.z := this ) ]|
 		where
 			z := <attr-get-inverse>y;
@@ -119,21 +122,23 @@ rules // assign to bidirectional relations
 			<attr-is-optional>z;
 			<is-obj-expression> e
 
-// Set-valued -> Set-valued --- Add
+	/* Set-valued -> Set-valued --- Add */
 	program: |[~e : y ']| -> |[(y := y \/ {~e}) || (~e.z := ~e.z \/ {this})]|
 		where
 			z := <attr-get-inverse>y;
-			<attr-is-set>y;
-			<attr-is-set>z;
+			<attr-is-set> y;
+			<attr-is-set> z ;
 			<is-obj-expression> e
 
-// Mandatory -> Anything --- Remove
+rules
+
+	/* Mandatory -> Anything --- Remove */
 	program: |[y ' = null]| -> |[false --> skip]|
 		where
 			z := <attr-get-inverse>y;
 			<attr-is-mandatory>y
 
-// Optional -> Mandatory --- Remove
+	/* Optional -> Mandatory --- Remove */
 	program: |[y ' = null]| -> |[false --> skip]|
 		where
 			z := <attr-get-inverse>y;
@@ -141,20 +146,20 @@ rules // assign to bidirectional relations
 			<attr-is-mandatory>z
 	
 
-// Optional -> Optional --- Remove
+	/* Optional -> Optional --- Remove */
 	program: |[y ' = null]| -> |[y /= null --> (y := null || y.z := null) ]|
 		where
 			z := <attr-get-inverse>y;
 			<attr-is-optional>y;
 			<attr-is-optional>z
 			
-// Optional -> Set-valued --- Remove
+	/* Optional -> Set-valued --- Remove */
 	program: |[y ' = null]| -> |[y /= null --> (y := null || y.z := y.z /\ {this}) ]|
 		where
 			z := <attr-get-inverse>y;
 			<attr-is-mandatory>z
 
-// Set-valued -> Mandatory --- Remove
+	/* Set-valued -> Mandatory --- Remove */
 	program: |[~e /: y ']| -> |[false --> skip]|
 		where
 			z := <attr-get-inverse>y;
@@ -162,21 +167,25 @@ rules // assign to bidirectional relations
 			<attr-is-mandatory>z;
 			<is-obj-expression> e
 
-// Set-valued -> Optional --- Remove
-	program: |[~e /: y ']| -> |[~e /: y --> (y := y /\ {~e} || y.z := null) ]|
+	/* Set-valued -> Optional --- Remove */
+	program: |[~e /: y ']| -> |[~e : y --> (y := y - {~e} || y.z := null) ]|
 		where
 			z := <attr-get-inverse>y;
 			<attr-is-set>y;
 			<attr-is-optional>z;
 			<is-obj-expression> e
 
-// Set-valued -> Set-valued --- Remove
-	program: |[~e /: y ']| -> |[~e /: y --> (y := y /\ {~e} || y.z := y.z - {~e}) ]|
+	/* Set-valued -> Set-valued --- Remove */
+	program: |[~e /: ~f]| -> |[~e : ~f_pre --> (~f_pre := ~f_pre - {~e} || ~e.z := ~e.z - {~f_parent}) ]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-set>y;
-			<attr-is-set>z;
-			<is-obj-expression> e
+			<is-pre-state> e;
+			<is-post-state>f;
+			z := <attr-get-inverse> f;
+			<attr-is-set> f;
+			<attr-is-set> z;
+			<is-obj-expression> e;
+			f_pre := <make-pre-state> f;
+			f_parent := <path-prefix> f_pre
 
 
 			
@@ -184,7 +193,7 @@ rules // assign to bidirectional relations
 
 rules // catch all not supported
 
-	program: x -> Skip()
+	program: x -> |[ skip ]|
 		where
 			log(|Warning(), "cannot determine program", <pp-Constraint-string> x)
 
