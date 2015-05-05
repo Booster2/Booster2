@@ -4,8 +4,8 @@
 module Booster25
 
 imports Common	
-        AbstractBoosterModel	
-        Relational
+        AbstractBoosterModel
+        Relational	
 
 
 context-free start-symbols
@@ -24,7 +24,6 @@ context-free syntax
   	
   		<{SystemComponent "\n\n"}*>
   > 
-  // BoosterTerm = System 
   SystemComponent = SetDef 
   SystemComponent = Class 
   // BoosterTerm = SystemComponent 

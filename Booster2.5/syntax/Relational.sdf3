@@ -5,13 +5,26 @@ imports Common
 
 context-free start-symbols
 
-  Schema
+  StatementList
 
 context-free syntax
 
-  Schema.Schema = <schema <ID> { <{Table ","}*> <{Procedure ","}*> <{Statement ","}*> }> 
-  Table.Table = <table <ID> { <{Column ","}*> }> 
-  Column.Column = <column <ID> <STRING> <BOOL> <SQLType> <Extra> <Key> <Reference?>> 
+
+  Statement.DropDatabase = <drop database if exists `<ID>`;> 
+	Statement.CreateDatabase = <create database `<ID>`;>
+	Statement.UseDatabase = <use `<ID>`;
+	SET autocommit=0;>
+	Statement.DropTable = <drop table if exists `<ID>`;>
+  Statement.CreateTable = <create table `<ID>` ( <PrimaryKeyColumn>);>
+  PrimaryKeyColumn.PrimaryKeyColumn = <`<ID>` <ColumnDefault?> <ColumnNullable?> <SQLType> <Extra?> primary key <Reference?>>
+  Statement.CreateColumn = < alter table `<ID>` add column `<ID>` <ColumnDefault?> <ColumnNullable?> <SQLType> <Extra?> <Key?> <Reference?>;>
+  
+  // Schema.Schema = <schema <ID> { <{Table ","}*> <{Procedure ","}*> <{Statement ","}*> }> 
+  // Table.Table = <table <ID> { <{Column ","}*> }> 
+  //Column.Column = <column <ID> <ColumnDefault> <ColumnNullable> <SQLType> <Extra> <Key> <Reference?>>
+  //Column.Column = <column `<ID>`>
+  ColumnDefault.ColumnDefault = <<STRING>>
+  ColumnNullable.ColumnNullable = <<BOOL>>
   SQLType.Varchar = <varchar ( <INT> )> 
   SQLType.Int = <INT> 
   SQLType.Bit = <bit> 
@@ -23,22 +36,23 @@ context-free syntax
   BOOL.False = <false> 
   Extra.AutoIncrement = <auto_increment> 
   Extra.NoExtra = </"/"> 
-  Key.Primary = <Primary> 
+  Key.Primary = <primary key> 
   Key.Unique = <Unique> 
   Key.Multiple = <Multiple> 
   Key.NoKey = <None> 
-  Reference.Reference = <References <ID> ( <{ID ","}*> )> 
-  StatementList.StatementList = <( <{Statement ";"}*> )> 
+  Reference.Reference = <, add foreign key (`<ID>`) references `<ID>` ( <{ColumnName ","}*> )> 
+  StatementList.StatementList = < <{Statement "\n"}*> > 
   Procedure.Procedure = <procedure <ID> ( <{Parameter ","}*> ) <DeclareList> <StatementList>> 
   Procedure.Function = <function <ID> ( <{Parameter ","}*> ) returns <SQLType> <DeclareList> <StatementList>> 
   Parameter.Input = <in <ID> <SQLType>> 
   Parameter.Output = <out <ID> <SQLType>> 
   Parameter.InOut = <inout <ID> <SQLType>> 
-  Statement.IfThen = <if <SQLExpression> then <StatementList> <{ElseIf ";"}*> <Else?> end if> 
-  Statement.BeginEnd = <begin <DeclareList> <StatementList> end> 
+  Statement.IfThen = <if <SQLExpression> then <StatementList> <ElseIf*> <Else?> end if;> 
+  Statement.BeginEnd = <begin <DeclareList> <StatementList> end;> 
+  Statement = StatementList
   Statement = Update 
   Statement = Query 
-  Statement.Insert = Insert 
+  Statement = Insert 
   Statement.InsertInto = InsertInto 
   Statement.Delete = Delete 
   Statement = Return 
@@ -125,7 +139,7 @@ context-free syntax
   SimpleExpression = MatchExpression 
   SimpleExpression = CaseExpression 
   SimpleExpression = IntervalExpression 
-  Literal.String = SQLSTRING 
+  Literal.String = < '<SQLSTRING>' > 
   Literal.Int = INT 
   Literal.Decimal = DECIMAL 
   Literal.True = <true> 
@@ -167,7 +181,7 @@ context-free syntax
   FunctionCall.FunctionCall = <<ID> ( <{Parameter ","}*> )> 
   Parameter = SQLExpression 
   CollationName = ID 
-  Query.Select = <SELECT <{SelectType ""}*> <{SelectExpression ","}+> <FromPart?> <WherePart?> <GroupByPart?> <HavingPart?> <OrderByPart?> <LimitPart?> <ProcedurePart?> <IntoPart?> <ModePart?>> 
+  Query.Select = <SELECT <{SelectType ""}*> <{SelectExpression ","}+> <FromPart?> <WherePart?> <GroupByPart?> <HavingPart?> <OrderByPart?> <LimitPart?> <ProcedurePart?> <IntoPart?> <ModePart?>;> 
   SelectType.All = <ALL> 
   SelectType.Distinct = <DISTINCT> 
   SelectType.DistinctRow = <DISTINCTROW> 
@@ -234,27 +248,30 @@ context-free syntax
   Jog.Join = <JOIN> 
   Jog.OrderBy = <ORDER BY> 
   Jog.GroupBy = <GROUP BY> 
-  Update.Update = <UPDATE <UpdateOption*> <TableReference> SET <UpdateSet+> <WherePart?> <OrderByPart?> <LimitPart?>> 
+  Update.Update = <UPDATE <UpdateOption*> <TableReference> SET <UpdateSet+> <WherePart?> <OrderByPart?> <LimitPart?>;> 
   UpdateOption.LowPriority = <LOW_PRIORITY> 
   UpdateOption.Ignore = <IGNORE> 
   UpdateSet.UpdateSet = <<ID> = <SQLExpression>> 
   UpdateSet.UpdateSetDefault = <<ID> = DEFAULT> 
-  Insert.Insert = <INSERT <InsertPriority?> <Ignore?> <Into?> <ID> ( <{ID ","}*> ) values ( <{SQLExpression ","}*> ) <OnDuplicate?>> 
-  InsertInto.InsertInto = <INSERT INTO <ID> ( <{ID ","}*> ) <Query>> 
+  Insert.Insert = <insert <InsertPriority?> <Ignore?> <Into?> `<ID>` ( <{ ColumnName ","}*> ) values ( <{SQLExpression ","}*> ) <OnDuplicate?>;>
+  ColumnName.ColumnName = <`<ID>`>
+  InsertInto.InsertInto = <insert into <ID> ( <{ID ","}*> ) <Query>;> 
   InsertPriority.LowPriority = <LOW_PRIORITY> 
   InsertPriority.DelayedPriority = <DELAYED> 
   InsertPriority.HighPriority = <HIGH_PRIORITY> 
   Ignore.Ignore = <IGNORE> 
-  Into.Into = <INTO> 
+  Into.Into = <into> 
   Values.Values = <Values> 
   Values.Values = <Value> 
   OnDuplicate.OnDuplicate = <ON DUPLICATE KEY UPDATE <{UpdatePart ","}*>> 
-  Delete.Delete = <DELETE <DeletePriority?> <Quick?> <Ignore?> FROM <ID> <WherePart?> <OrderByPart?> <LimitPart?>> 
+  Delete.Delete = <DELETE <DeletePriority?> <Quick?> <Ignore?> FROM <ID> <WherePart?> <OrderByPart?> <LimitPart?>;> 
   DeletePriority.DeletePriority = <LOW_PRIORITY> 
   Quick.Quick = <QUICK> 
   UpdatePart.UpdatePart = <<ID> = <SQLExpression>> 
-  DeclareList.DeclareList = <<{Declare ";"}*>> 
-  Declare.Declare = <DECLARE <{ID ","}+> <SQLType> <DefaultDeclare?>> 
+  DeclareList.DeclareList = <<Declare*>> 
+  Declare.Declare = <DECLARE <{ID ","}+> <SQLType> <DefaultDeclare?>;> 
   DefaultDeclare.DefaultDeclare = <default <SQLExpression>> 
-  Return.Return = <return <SQLExpression>> 
-  VariableAssign.VariableAssign = <set <ID> = <SQLExpression>> 
+  Return.Return = <return <SQLExpression>;> 
+  VariableAssign.VariableAssign = <set <ID> = <SQLExpression>>
+  
+context-free syntax   

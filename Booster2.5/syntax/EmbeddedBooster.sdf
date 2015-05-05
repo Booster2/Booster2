@@ -24,8 +24,8 @@ exports
     "g" "|[" GuardedCommand "]|" -> E {cons("ToMetaExpr")}
     "e" "|[" Expression "]|"     -> E {cons("ToMetaExpr")}
     "p" "|[" Path "]|"           -> E {cons("ToMetaExpr")}
-        "|[" BoosterTerm "]|"    -> E {cons("ToMetaExpr")}
-                 
+				"|[" BoosterTerm "]|"    -> E {cons("ToMetaExpr")}
+            
   %%%
   %% Anti Quotations for Constraint and GuardedCommand
   %%%
