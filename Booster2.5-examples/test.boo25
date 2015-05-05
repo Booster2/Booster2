@@ -1,9 +1,15 @@
 system test
 
-class A{
+class A {
+
 	attributes
-		name : string
+	  m : int
+		n : int
+		
+	invariants
+		m < 6
+		
 	methods
-		m { name' = name?}
-		n { m (name? = "") }
+		changeN { n' = 5 & n' > 6}
+
 }
