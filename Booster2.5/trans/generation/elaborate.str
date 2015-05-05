@@ -1,4 +1,4 @@
-module trans/generate/elaborate
+module trans/generation/elaborate
 
 imports
 	
