@@ -2,6 +2,8 @@ module api/path
 
 imports
 	include/Booster25
+	trans/api/_runtime
+	trans/names
 	
 rules // TODO: comment
 				
@@ -39,5 +41,7 @@ rules // collect all paths
 	
 	path-prefix = ?Path(<id>, _)
 	path-prefix = ?PathStart(_,_) ; !This()
+
+	is-class-name = _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass() 
 
 rules

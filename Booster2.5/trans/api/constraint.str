@@ -27,6 +27,8 @@ rules // primed    TODO: rewrite
 								?ThisPrimed() <+
 								?Output(s))> constraint)
 
+	is-post-state = not(is-pre-state)
+
 /* conjoin constraints
 	 takes a list of constraints, and produces a single constraint
 */

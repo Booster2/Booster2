@@ -349,6 +349,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 
 	binop-set: Intersection(a,b)					-> (a,b)
 	binop-set: Union(a,b)									-> (a,b)
+	binop-set: Minus(a,b)									-> (a,b)
 
 rules //  Help NaBL: make explicit what are Function Call parameters
 	
@@ -375,10 +376,12 @@ rules // make PathStart(classReference, _) have type set within BinRel(_, In(), 
 	
 	add-typeisaset: Intersection(a,ps@PathStart(_,_))			-> Intersection(a, <custom-origin(|ps)>TypeIsASet(ps))
 	add-typeisaset: Union(a,ps@PathStart(_,_))						-> Union(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Minus(a,ps@PathStart(_,_))						-> Minus(a, <custom-origin(|ps)>TypeIsASet(ps))
 
 
 	add-typeisaset: Intersection(ps@PathStart(_,_), a)		-> Intersection(<custom-origin(|ps)>TypeIsASet(ps), a)
 	add-typeisaset: Union(ps@PathStart(_,_), a)						-> Union(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: Minus(ps@PathStart(_,_), a)						-> Minus(<custom-origin(|ps)>TypeIsASet(ps), a)
 
 rules // rewrite all invariants to get a name
 	

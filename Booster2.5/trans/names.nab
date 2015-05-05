@@ -183,6 +183,8 @@ binding rules // Variables
 	BinOpDefRightInput  (lhs, Intersection(), v  ): defines InputVariable  v of type t where lhs has type Set(t)
 	BinOpDefLeftInput   (v,   Union(),        rhs): defines InputVariable  v of type t where rhs has type Set(t)
 	BinOpDefRightInput  (lhs, Union(),        v  ): defines InputVariable  v of type t where lhs has type Set(t)
+	BinOpDefLeftInput   (v,   Minus(),        rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinOpDefRightInput  (lhs, Minus(),        v  ): defines InputVariable  v of type t where lhs has type Set(t)
 	BinOpDefLeftInput   (v,   Concat(),       rhs): defines InputVariable  v of type t where rhs has type Set(t)
 	BinOpDefRightInput  (lhs, Concat(),       v  ): defines InputVariable  v of type t where lhs has type Set(t)
 */

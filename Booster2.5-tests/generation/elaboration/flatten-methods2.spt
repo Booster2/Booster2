@@ -6,6 +6,8 @@ setup Common [[
 	system debug
 ]]
 
+/* NB. These tests sometimes fail due to a race condition */
+
 test Flatten import two methods from two supers [[
 	class A             { attributes i : int         methods	m {i' = i?}	}
 	class B             { attributes j : int         methods	n {j' = j?}	}
