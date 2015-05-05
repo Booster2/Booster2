@@ -41,7 +41,7 @@ class LineItem {
 		lineCost (ID) : decimal
 		itemForOrder : Order . lineItems
 		preparedBy : [ StaffMember . preparedLineItems ]
-		preparedOn : [ dateTime ]
+		preparedOn : [ datetime ]
 	invariants
 		quantity > 0
 	methods
@@ -54,16 +54,16 @@ class LineItem {
 class Order {
 	attributes
 		forCustomer : Customer . orders
-		createdOn (ID) : dateTime
+		createdOn (ID) : datetime
 		totalCost : decimal
 		status (ID) : OrderStatus
 		paymentCard : [ CreditCard . usedForPayment ]
-		paymentDate : [ dateTime ]
+		paymentDate : [ datetime ]
 		billingAddress : [ Address . billingForOrders ]
 		shippingAddress : [ Address . shippingForOrders ]
 		lineItems : set ( LineItem . itemForOrder)[*]
 		dispatchedBy : [ StaffMember . fulfilledOrders ]
-		dispatchedOn : [ dateTime ]
+		dispatchedOn : [ datetime ]
 	invariants
 		paymentCard : forCustomer . creditCards
 		billingAddress : forCustomer . addresses
