@@ -251,7 +251,7 @@ type rules // store inverse for bidirectional
 
 	BasicType(ty)       has inverse None()
 	UniDirectional(a)   has inverse None()
-	BiDirectional(a, b) has inverse b
+	BiDirectional(a, b) has inverse (a, b)
 	Set(ty, mu)         has inverse i where ty has inverse i
 	Optional(ty)        has inverse i where ty has inverse i
 

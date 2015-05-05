@@ -5,6 +5,11 @@ imports // constructors
 	src-gen/signatures/Booster25-sig
 	trans/desugar
 	trans/names
+	lib/runtime/relations/query
+	
+	trans/api/_runtime
+	trans/api/_runtime-constructors
+
 
 imports // functions
 	
@@ -26,19 +31,31 @@ rules // generate constraints for class <sub: super-class
   extends-add-subtyperel(|ctx, c) :
   Extension(s) -> <fail>
   where 
-  	<new-rel-tuple(|ctx, "<sub:", s)> c
+  	<new-rel-tuple(|ctx, "<sub:", s)> c /*;
+  	<debug>"extends-add-subtyperel";
+  	<debug>c;
+  	<debug>s; 
+  	<debug><_relation-lookup(|"<sub:")> c */
 
 rules // generate Attribute :hasInv> Invariant
 	
 	nabl-constraint(|ctx): Invariant(name, c) -> <fail>
 		with
 			paths := <collect-all-paths>c;
+			/* <debug>"collect-all-paths";
+			<debug>paths; */
 			path-suffix-names := <map(path-suffix-name)>paths;
-			<map(create-hasinv-rel(|ctx, name))>path-suffix-names
+			/*<debug> path-suffix-names;*/
+			<map(create-hasinv-rel(|ctx, name))> path-suffix-names
 
 	create-hasinv-rel(|ctx, invName): attrName -> <id>
 		where
-  		<new-rel-tuple(|ctx, "<hasInv:", attrName)> invName
+  		<new-rel-tuple(|ctx, "<hasInv:", attrName)> invName /*;
+  		<debug>"relation lookup";
+  		<debug>ctx;
+  		<debug>invName;
+  		<debug>attrName;
+  		<debug><_relation-lookup(|"<hasInv:")> attrName */
   		// <new-rel-tuple(|ctx, "<hasInv:", invName)> attrName  // throws stacktrace because cannot use a use on lhs of relation
 
 rules
