@@ -42,5 +42,7 @@ menus
     action: "Heuristics"             = heuristics-builder
     action: "WP"                     = wp-builder
     action: "Simplify"               = simplify-builder
+    action: "Generate SQL-basic"     = generate-sql-builder
+    action: "Generate SQL"     			 = generate-sql-builder-complete
     
 

@@ -19,5 +19,7 @@ rules // attribute properties
 
 	attr-get-inverse  = get-inverse;not(?None())
 
+	attr-parent = _nabl-uri ; _nabl-uri-parent ; _nabl-uri-name
+
 rules
 	

@@ -1,4 +1,4 @@
-module lib/path
+module api/path
 
 imports
 	include/Booster25
@@ -37,4 +37,7 @@ rules // collect all paths
 	path-suffix-name = ?Path(_, PathComponent(<id>, _))
 	path-suffix-name = ?PathStart(<id>, _)
 	
+	path-prefix = ?Path(<id>, _)
+	path-prefix = ?PathStart(_,_) ; !This()
+
 rules

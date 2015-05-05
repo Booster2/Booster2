@@ -18,7 +18,7 @@ rules
 	get-modified-attributes = 
 		collect(\ Assign(path, expression) -> 
 								path 
-								where
-									<debug>(<_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name ; _pp-uri> path)\)
-
-	
+/*								where
+									<debug>(<_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name ; _pp-uri> path)
+*/	
+									\)

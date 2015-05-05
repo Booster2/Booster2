@@ -81,6 +81,7 @@ rules
 	_nabl-resolve-all-tasks(|ctx, ns, a) = nabl-resolve-all-tasks(|ctx, ns, a)
 	_nabl-create-propconstraint(|ctx, prop, a) = nabl-create-propconstraint(|ctx, prop, a)
 	_nabl-create-collectdefs(|ctx) = nabl-create-collectdefs(|ctx)
+	_nabl-collect-use = nabl-collect-use
 	
 	_nabl-uri = nabl-uri
 	

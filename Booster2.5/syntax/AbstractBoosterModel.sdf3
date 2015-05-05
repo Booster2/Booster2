@@ -2,7 +2,6 @@ module AbstractBoosterModel
 
 imports Common	
         Booster25	
-        Relational
 
 
 context-free start-symbols
@@ -14,9 +13,9 @@ context-free syntax
   MaxMult.MaxMult = INT 
   MaxMult.MaxMult = <*> 
   BoosterTerm = MaxMult 
-  Ordering.Ordering = <SET> 
-  Ordering.Ordering = <OSET> 
-  Ordering.Ordering = <SEQ> 
+  Ordering.SetOrdering = <SET> 
+  Ordering.OSetOrdering = <OSET> 
+  Ordering.SeqOrdering = <SEQ> 
   BoosterTerm = Ordering 
   Type.Null = <null> 
   Type.Int = <INT> 

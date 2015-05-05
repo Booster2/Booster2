@@ -29,6 +29,7 @@ imports
 	trans/generation/heuristics
 	trans/generation/wp
 	trans/generation/simplify
+	trans/generation/sql
 
 rules // Analysis
 	
@@ -198,9 +199,9 @@ rules // Debugging
 				(analyzed-ast, error*, warning*, note*) := <analysis-single-default-interface>(ast, path, project-path)
 			end
 		with // do the actual transformations
-			filename := <guarantee-extension(|<concat-strings>[<lower-case>ext,".boo25"])> path;
-			desugared-ast := <final-desugar> analyzed-ast;
-		 	result   := <s> desugared-ast
+			filename := <guarantee-extension(|ext)> path;
+		 	transformed-ast   := <s> analyzed-ast;
+			result := <final-desugar> transformed-ast
 			
 	builder(s |ext): input@(selected, position, ast, path, project-path) -> (filename, result)
 		where
@@ -209,18 +210,27 @@ rules // Debugging
 		 result := <pp-debug> ast'' 
 
 
-	elaborate-builder-ast = builder-ast(elaborate|"Elaborated")
-	elaborate-builder = builder(elaborate |"Elaborated")
+	elaborate-builder-ast = builder-ast(elaborate|"elaborated.boo25")
+	elaborate-builder = builder(elaborate |"elaborated.boo25")
 
-	heuristics-builder-ast = builder-ast(elaborate ; heuristics | "Heuristics")
-	heuristics-builder = builder(elaborate ; heuristics | "Heuristics")
+	heuristics-builder-ast = builder-ast(elaborate ; heuristics | "heuristics.boo25")
+	heuristics-builder = builder(elaborate ; heuristics | "heuristics.boo25")
 		
-	wp-builder-ast = builder-ast(elaborate ; heuristics ; wp | "Wp")
-	wp-builder = builder(elaborate ; heuristics ; wp | "Wp")
+	wp-builder-ast = builder-ast(elaborate ; heuristics ; wp | "wp.boo25")
+	wp-builder = builder(elaborate ; heuristics ; wp | "wp.boo25")
 	
-	simplify-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify | "Simplify")
-	simplify-builder = builder(elaborate ; heuristics ; wp ; simplify | "Simplify")
+	simplify-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify | "simplify.boo25")
+	simplify-builder = builder(elaborate ; heuristics ; wp ; simplify | "simplify.boo25")
 	
-	generate-sql-builder = id
-	
+	generate-sql-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
+	generate-sql-builder = builder(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
+
+
+  generate-sql-builder-complete: input@(selected, position, ast, path, project-path) -> (filename, result')
+  	where
+  		(filename, result) := <generate-sql-builder> input;
+   		stdtxtfile := <concat-strings>[project-path, "/../Booster2.5/sql-gen/standardStuff.sql"];	            
+   		standard-text := <read-text-file> stdtxtfile;
+   		result' := <concat-strings>[result, standard-text]  
+
 			

@@ -26,3 +26,13 @@ rules // primed    TODO: rewrite
 								?PathStart(name, Some(Primed())) <+
 								?ThisPrimed() <+
 								?Output(s))> constraint)
+
+/* conjoin constraints
+	 takes a list of constraints, and produces a single constraint
+*/
+
+	conjoin-constraints: [] -> True()
+	conjoin-constraints: [c] -> c
+	conjoin-constraints: [c,cs*] -> And(c, <conjoin-constraints>[cs*])
+
+rules
