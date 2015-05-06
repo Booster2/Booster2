@@ -32,7 +32,8 @@ rules
 			invariant := <conjoin-constraints><nub><concat><map(\ path -> <filter(invariant-matches-path(|path))> all-model-invariants* \)> assign-paths*;
 			
 			(c', gc') := <gc-wp(|ast,And(<make-pre-state> c, invariant))>gc;
-			gc'' := |[~c' --> ~gc']|
+			gc'' := Guard(c', gc')
+			//g|[~c' --> ~gc']|
 
 rules
 	
