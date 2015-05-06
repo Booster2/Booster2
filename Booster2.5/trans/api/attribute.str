@@ -9,9 +9,10 @@ imports
 rules // attribute properties
 	
 	// @type AttrName -> AttrName or fail
-	attr-is-basic     = _get-type;?BasicType(_)
+	attr-is-basic     = _get-type; ?BasicType(_)
 	attr-is-bidir     = where(get-inverse)
 	attr-is-unidir    = not(attr-is-bidir + attr-is-basic)
+	attr-is-enum 			= _get-type; _nabl-uri ; _nabl-uri-namespace ; ?NablNsSet()
 	
 	attr-is-set       = get-multiplicity;?Set()
 	attr-is-optional  = get-multiplicity;?Optional()
