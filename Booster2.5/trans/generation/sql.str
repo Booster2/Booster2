@@ -35,7 +35,14 @@ rules
 		CreateColumn(tname, cname2 , None(), None(), Int(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-aname, "Id"])])))
 	])
 		where
-			(opp-cname, opp-aname) := <attr-get-inverse> name;
+			opp-aname := <attr-get-inverse> name;
+/************************
+FIXME!!
+*************************/			
+						opp-cname := opp-aname;
+/************************
+FIXME!!
+*************************/			
 			tname := <concat-strings> [<attr-parent> name, "_", name];
 			cname1 := <concat-strings> [<attr-parent> name, "_", name];
 			cname2 := <concat-strings> [opp-cname, "_", opp-aname]

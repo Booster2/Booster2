@@ -93,15 +93,20 @@ rules
 			x_classX := <_get-type>x
 
 	/* Optional -> Optional --- Add */
-	program: |[y ' = ~e]| -> |[~e.z = null --> (y := ~e || ~e.z := this || 
-																(y /= null --> y.z := null
+	program: |[~f = ~e]| -> |[ ~f_pre := ~e ||
+														 ~e.z := ~f_parent ||  
+																(~f_pre /= null --> ~f_pre.z := null
 																[]
-																y = null --> skip))]|
+																~f_pre = null --> skip)]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-optional>y;
-			<attr-is-optional>z;
-			<is-obj-expression> e
+			<is-pre-state> e;
+			<is-post-state>f;
+			z := <attr-get-inverse> f;
+			<attr-is-optional> f;
+			<attr-is-optional> z;
+			<is-obj-expression> e;
+			f_pre := <make-pre-state> f;
+			f_parent := <path-prefix> f_pre
 
 	/* Optional -> Set-valued --- Add */
 	program: |[~f = ~e]| -> |[(~f_pre := ~e || ~e.z := ~e.z \/ {~f_parent} || 
@@ -170,11 +175,13 @@ rules
 	
 
 	/* Optional -> Optional --- Remove */
-	program: |[y ' = null]| -> |[y /= null --> (y := null || y.z := null) ]|
+	program: |[~f = null]| -> |[~f_pre /= null --> (~f_pre := null || ~f_pre.z := null) ]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-optional>y;
-			<attr-is-optional>z
+			<is-post-state>f;
+			z := <attr-get-inverse> f;
+			<attr-is-optional> f;
+			<attr-is-optional> z;
+			f_pre := <make-pre-state> f
 			
 	/* Optional -> Set-valued --- Remove */
 	program: |[~f = null]| -> |[~f_pre /= null --> (~f_pre := null || ~f_pre.z := ~f_pre.z - {~f_parent}) ]|
