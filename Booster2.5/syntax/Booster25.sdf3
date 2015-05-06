@@ -26,17 +26,17 @@ context-free syntax
   > 
   SystemComponent = SetDef 
   SystemComponent = Class 
-  // BoosterTerm = SystemComponent 
+  BoosterTerm = SystemComponent 
   SetDef.SetDef = <set <ID> { <{ID ", "}+> }> 
-  // BoosterTerm = SetDef 
+  BoosterTerm = SetDef 
   Class.Class = <
   	class <ID> <Extends?>{
   		<{ClassComponents "\n"}*>
   	}
   > 
-  // BoosterTerm = Class 
+  BoosterTerm = Class 
   Extends.Extend = <extends <{Extension ","}+> > 
-  // BoosterTerm = Extends 
+  BoosterTerm = Extends 
   Extension.Extension = ID 
   ClassComponents.Attributes = <
   	attributes
@@ -54,20 +54,20 @@ context-free syntax
   	workflows
   		<{WorkflowComponent "\n"}*>
   > 
-  // BoosterTerm = ClassComponents 
+  BoosterTerm = ClassComponents 
   Attribute.Attribute = <<ID> <Decoration*>: <TypeDecl>> 
-  // BoosterTerm = Attribute 
+  BoosterTerm = Attribute 
   Identity.Identity = <(<>ID<>) > 
   Decoration = Identity 
   TypeDecl = PrimTypeDecl 
   TypeDecl.Optional = <[ <PrimTypeDecl> ]> 
   TypeDecl.Set = <set ( <PrimTypeDecl> ) <Multiplicity>> 
   TypeDecl.Set = <SET ( <PrimTypeDecl> ) <Multiplicity>> 
-  // BoosterTerm = TypeDecl 
+  BoosterTerm = TypeDecl 
   PrimTypeDecl.BasicType = BasicTypeDecl 
   PrimTypeDecl.UniDirectional = ID 
   PrimTypeDecl.BiDirectional = <<ID>.<ID>> 
-  // BoosterTerm = PrimTypeDecl 
+  BoosterTerm = PrimTypeDecl 
   BasicTypeDecl.String = <STRING>  
   BasicTypeDecl.String = <String>  
   BasicTypeDecl.String = <string>
@@ -100,7 +100,7 @@ context-free syntax
   Multiplicity.MultSingle = <[ <INT> ]> 
   Multiplicity.MultAny = <[ * ]> 
   Multiplicity.MultAny =  
-  // BoosterTerm = Multiplicity 
+	BoosterTerm = Multiplicity 
   Method.Method = <<ID> { 
   	<ConstraintOrGuardedCommand>
   	 }>
@@ -110,7 +110,7 @@ context-free syntax
   ConstraintOrGuardedCommand.Both = <
   	<Constraint> 
   	| <GuardedCommand>>
-  // BoosterTerm = Method 
+  BoosterTerm = Method 
   Constraint.True = <true> 
   Constraint.False = <false> 
   Constraint = Relation 
@@ -166,7 +166,7 @@ context-free syntax
   ValueExpression.SetComprehension = <{ <ID> : <Expression> @ <Path> }> 
   ValueExpression.SetComprehension = <{ <ID> : <Expression> | <Constraint> @ <Path> }> 
   ValueExpression.SetExtent = <{ <{Expression ","}*> }> 
-  // BoosterTerm = ValueExpression 
+  BoosterTerm = ValueExpression 
   BasicValue.Integer = INT 
   BasicValue.String = STRING 
   BasicValue.Decimal = DECIMAL 
@@ -204,13 +204,13 @@ context-free syntax
   TypeExtent.Password = <password> {prefer}
   Path = PathStart 
   Path.Path = <<Path>.<PathComponent>> {prefer}
-  // BoosterTerm = Path 
+  BoosterTerm = Path 
   PathStart = Input 
   PathStart = Output 
   PathStart = This 
   PathStart = ThisPrimed 
   PathStart.PathStart = <<ID><Primed?>> 
-  // BoosterTerm = PathStart 
+  BoosterTerm = PathStart 
   Input.Input = <<ID>?> 
   Output.Output = <<ID>!> 
   This.This = <this> 
@@ -219,11 +219,11 @@ context-free syntax
   // BoosterTerm = Primed 
   PathComponent.PathComponent = <<ID><Primed?>> 
   PathComponent.PathComponent =  {deprecated}
-  // BoosterTerm = PathComponent 
+  BoosterTerm = PathComponent 
 
   MethodReference.MethodReference = <<Path> ( <{Subst ","}*> )> 
   Subst.Subst = <<Input> = <Expression>> 
-  // BoosterTerm = MethodReference 
+  BoosterTerm = MethodReference 
   WorkflowComponent = SeqWf 
   WorkflowComponent = ParWf 
   SeqWf.SeqWf = <seq <ID> : <SeqWfExpression>> 

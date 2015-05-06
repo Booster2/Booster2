@@ -7,6 +7,7 @@ imports
 imports
 	Booster25 
 	AbstractBoosterModel
+	Common
 	
 exports
 context-free start-symbols Module [[StrategoHost]]

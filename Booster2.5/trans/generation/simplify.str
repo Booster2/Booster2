@@ -1,7 +1,7 @@
-module trans/generate/simplify
+module trans/generation/simplify
 
 imports
-	include/booster25
+	include/Booster25
 	trans/api/_runtime
 	trans/api/_runtime-constructors
 	trans/api/attribute
@@ -89,6 +89,6 @@ rules
 	
 rules
 	
-	get-int: BasicValue(Integer(c')) -> <string-to-int> c'	
+	get-int: BasicValue(Integer(c)) -> <string-to-int> c	
 	
 rules

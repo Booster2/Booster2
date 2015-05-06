@@ -3,16 +3,17 @@ module EmbeddedBooster[E]
 imports
   Booster25
   AbstractBoosterModel
+  Common
  
 exports
   variables
     %% [ij]  [0-9\']*            -> DeciLiteral {prefer}
     %% [ij]  [\_] [a-zA-Z0-9\']* -> DeciLiteral {prefer}
-    [xyz] [0-9\']*            -> ID          {prefer}
-    [xyz] [\_] [a-zA-Z0-9\']* -> ID          {prefer}
+    [xyz] [0-9]*            -> ID          {prefer}
+    [xyz] [\_] [a-zA-Z0-9]* -> ID          {prefer}
 
   context-free restrictions
-    ID -/- [\_a-zA-Z0-9\'] 
+    ID -/- [\_a-zA-Z0-9] 
 
 exports
 	
