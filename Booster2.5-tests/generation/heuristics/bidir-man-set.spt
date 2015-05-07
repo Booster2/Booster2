@@ -1,0 +1,61 @@
+module generation-heuristics-bidir
+
+language Booster25
+
+setup Common [[
+system debug
+		
+class A {
+	attributes
+		bs : SET ( B.a )
+}
+
+class B {
+	attributes
+		a : A.bs
+		methods
+]]
+
+test Heuristics Bidir man-set add [[
+	m1 { a' = a? }
+]] build heuristics-builder-ast to [[
+	m1 { a' = a? 
+		 | 		 a := a? 
+		 		|| a?.bs := a?.bs \/ { this } 
+		 		|| a.bs := a.bs - { this }  }
+]]
+
+test Heuristics Bidir man-set add new [[
+	m1 { b! : B' ; b!.a' = a? }
+]] build heuristics-builder-ast to [[
+	m1 { b! : B' ; b!.a' = a? 
+		 | new b ! : B ; 
+		 			  b!.a := a? || a?.bs := a?.bs \/ { b! }  }
+]]
+          
+
+test Heuristics Bidir man-set add non-post[[
+	m1 { a = a? }
+]] build heuristics-builder-ast to [[
+	m1 { a = a? 
+		 | skip }
+]]
+
+test Heuristics Bidir man-set remove [[
+	m2 { a' = null }
+]] build heuristics-builder-ast to [[
+	m2 { a' = null 
+		 | false --> skip }
+]]
+
+test Heuristics Bidir man-set remove non-post [[
+	m2 { a = null }
+]] build heuristics-builder-ast to [[
+	m2 { a = null
+		 | skip }
+]]
+
+setup Teardown [[
+	}
+	
+]]
