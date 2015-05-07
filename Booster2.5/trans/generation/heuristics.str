@@ -57,22 +57,41 @@ rules
 	
 	/* Mandatory -> Mandatory --- Add */
 
-	program: |[y ' = x! ]| -> |[ x! /: x_classX --> ( (new x! : x_classX) ; ((y := x!) || (x!.z := this)) ) ]| 
+	program: |[y!.z_1 ' = x! ]| -> |[ y!.z_1 := x! || x!.z_2 := y! ]| 
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-mandatory>y;
-			<attr-is-mandatory>z;
-			x_classX := <_get-type>x
+			<attr-is-mandatory> z_1;
+			z_2 := <attr-get-inverse> z_1;
+			<attr-is-mandatory> z_2
 
-
+	/* Mandatory -> Optional --- Add */
+	program: |[x! . y '= ~e]| -> |[ x!.y := ~e 
+																	|| ~e.z := x!
+																	|| (~e.z /= null --> ~e.z.y := null
+																				[]
+																			~e.z = null --> skip)]|
+		where
+			<is-pre-state> e;
+			z := <attr-get-inverse> y;
+			<attr-is-mandatory> y;
+			<attr-is-optional> z;
+			<is-obj-expression> e
 			
 	/* Mandatory -> Optional --- Add */
-	program: |[y ' = ~e]| -> |[~e.z = null --> (y := ~e || ~e.z := this)]|
+	program: |[~f = ~e]| -> |[ ~f_pre := ~e ||
+														 ~e.z := ~f_parent ||  
+														 (~e.z /= null --> ~e.z.y := null
+																[]
+															~e.z = null --> skip)]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-mandatory>y;
-			<attr-is-optional>z;
-			<is-obj-expression> e
+			<is-pre-state> e;
+			<is-post-state>f;
+			y := <path-suffix-name> f;
+			z := <attr-get-inverse> f;
+			<attr-is-mandatory> f;
+			<attr-is-optional> z;
+			<is-obj-expression> e;
+			f_pre := <make-pre-state> f;
+			f_parent := <path-prefix> f_pre
 
 	/* Mandatory -> Set-valued --- Add */
 	program: |[x! . y '= ~e]| -> |[ x!.y := ~e 
