@@ -42,8 +42,6 @@ rules
 	program: |[~f = ~e]|       ->  |[~f_pre := ~e]|
       where 
       	<is-pre-state>e;
-      	<debug> "program";
-      	<debug> f;
       	<attr-is-basic <+ attr-is-enum>f;
   			<is-post-state>f;
 				f_pre := <make-pre-state> f
@@ -85,12 +83,14 @@ rules
 			<is-obj-expression> e
 
 	/* Optional -> Mandatory --- Add */
-	program: |[y ' = x!]| -> |[y = null --> (new x! : x_classX) ; (( y := x! || x!.z := this))  ]|
+	program: |[~f = x!]| -> |[ ~f_pre := x! || x!.z := ~f_parent ]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-optional>y;
-			<attr-is-mandatory>z;
-			x_classX := <_get-type>x
+			<is-post-state>f;
+			z := <attr-get-inverse> f;
+			<attr-is-optional> f;
+			<attr-is-mandatory> z;
+			f_pre := <make-pre-state> f;
+			f_parent := <path-prefix> f_pre
 
 	/* Optional -> Optional --- Add */
 	program: |[~f = ~e]| -> |[ ~f_pre := ~e ||
