@@ -206,8 +206,8 @@ rules // Debugging
 	builder(s |ext): input@(selected, position, ast, path, project-path) -> (filename, result)
 		where
 		 (filename, ast') := <builder-ast(s |ext)> input; 
-     ast'' := <try(?System(s, classes);!System(<conc-strings>(s, ext), classes))>  ast';
-		 result := <pp-debug> ast'' 
+     //ast'' := <try(?System(s, classes);!System(<conc-strings>(s, ext), classes))>  ast';
+		 result := <pp-debug> ast' 
 
 
 	elaborate-builder-ast = builder-ast(elaborate|"elaborated.boo25")
