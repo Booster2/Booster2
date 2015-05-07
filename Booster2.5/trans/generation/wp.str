@@ -8,6 +8,8 @@ imports
 	trans/desugar
 	trans/api/constraint
 	
+	trans/lib/eq
+	
 	api/path
 	
 rules
@@ -85,7 +87,7 @@ rules
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
 			
-			matching-paths* := <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
+			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
 			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
 			//<debug> constraint'
 			
@@ -113,4 +115,8 @@ rules
 			 
 rules
 	
+
+
+	
+rules
 

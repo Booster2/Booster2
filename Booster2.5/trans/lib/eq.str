@@ -7,3 +7,12 @@ rules // equality with ignoring annotations
 			a' := <strip-annos> a;
 			b' := <strip-annos> b;
 			<eq>(a', b')
+
+	/* nub on a list ignoring annotations */
+	nub-an: [] -> []
+	
+	nub-an: [a, as*] -> [a, as*]
+		where
+			[] := <filter(\e -> e where <eq-an>(a,e)\)> [as*]
+
+	nub-an: [a, as*] -> [as*]
