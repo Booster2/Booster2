@@ -4,53 +4,114 @@ imports
 	
 	include/Booster25
 	trans/api/attribute
+	trans/api/method
+	trans/api/type
+	trans/api/path
+	trans/api/_runtime
+	
 	
 rules
 	
-	generate-sql: x -> StatementList(<collect-all(trans-sql)> x)
-	
-	trans-sql: System(name, cs) -> StatementList([
+	generate-sql: x@System(name, cs) -> StatementList([
 		DropDatabase(name),
 		CreateDatabase(name),
 		UseDatabase(name),
-		<metadata-tables> name
-	])
-	
-	trans-sql: Class(name, exts, comps) -> 
-		StatementList([
-			<create-table>(name, <concat-strings>[name, "Id"], None(), None(), Int(), Some(AutoIncrement()), None()),
-			Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(name),String(name)], None())
+		<metadata-tables> name,
+		StatementList(<collect-all(sql-metadata)> x),
+		StatementList(<collect-all(sql-classes)> x),
+//		StatementList([<collect-all(sql-set-classes)> x]),
+		StatementList(<collect-all(sql-assoc-classes)> x),
+ 		StatementList(<collect-all(sql-set-def)> x)
 		])
+	
+	sql-classes: Class(name, exts, comps) -> 
+			<create-table>(name, <concat-strings>[name, "Id"], None(), Int(), None(),Some(AutoIncrement()), None())
+
+	sql-metadata:
+		SetDef(setname, values) ->
+			Insert(None(), None(), Some(Into()), "_Meta_Sets", 
+						  	[ColumnName("setName"),	ColumnName("tablename"),	ColumnName("columnName")], 
+								[String(setname),				String(setname),					String(setname)], 
+			None()) 
+
+
+	sql-metadata: Class(name, exts, comps) -> 
+			Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(name),String(name)], None())
+
+	sql-metadata: a@Attribute(name, decs, type) -> 
+			Insert(None(), None(), Some(Into()), 
+						"_Meta_Attributes", 
+						[ColumnName("class"),	ColumnName("attName"),	ColumnName("primType"),	ColumnName("typeMultiplicity"),	ColumnName("oppAttName"),	ColumnName("className"),	ColumnName("setName"),	ColumnName("direction"),	ColumnName("tableName"),	ColumnName("isId")],
+						[String(classname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						isId], 
+						None())
+			where
+				classname := <attr-parent> name;
+				primType := <prim-type-string> name;
+				typeMultiplicity := <multiplicity-string> name;
+				setName := <set-name> name;
+				direction := <get-dir> name;
+				isId := <is-id> a;
+				opp-aname := <attr-get-inverse <+ !""> name;
+				opp-cname := <attr-parent <+ !""> opp-aname;
+				tname := <concat-strings> [<attr-parent> name, "_", name]
+						 
+	sql-metadata:
+		m@Method(name, gc) ->
+			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Methods", 
+						[ColumnName("class"),ColumnName("methodName"),ColumnName("isObjectMethod"),ColumnName("html")], 
+						[String(classname),String(name),isObjectMethod, String(html)], None()),
+						inParamStmts*,
+						outParamStmts*
+						])
+		where
+			classname := <method-parent>name;
+			isObjectMethod := <is-obj-method> m;
+			html := <string-replace(|"'", "''")> "";
+			[inParamStmts*] := <map(metadata-param)><method-inputs> m;
+			[outParamStmts*] := <map(metadata-param)><method-outputs> m
+						
+						
+	metadata-param: x ->
+			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
+						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
+						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
+						None())
+			where
+				<debug> x;
+				pname := < ?Input(<id>) <+ ?Output(<id>) > x;
+				mname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> pname;
+				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> pname;
+				ptname := <prim-type-string> pname;
+				mult := <multiplicity-string> pname;
+				inout := <in-out-string> x;
+				classname := <class-name> x;
+				setname := <set-name> x
+
+
 
 	// Mandatory or optional basic types get turned into single columns
 	
-	trans-sql: Attribute(name, decs, type) -> CreateColumn(<attr-parent> name, name , None(), None(), Int(), None(), None(), None())
+	sql-classes: Attribute(name, decs, type) -> CreateColumn(<attr-parent> name, name , None(), Int(), None(), None(), None(), None())
 		where
 			BasicType(t) := type
 	
 	
-	trans-sql: Attribute(name, decs, type) -> StatementList([
-		<create-table>(tname, <concat-strings>[tname, "Id"], None(), None(), Int(), Some(AutoIncrement()), None()),
-		CreateColumn(tname, cname1 , None(), None(), Int(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
-		CreateColumn(tname, cname2 , None(), None(), Int(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-aname, "Id"])])))
+	sql-assoc-classes: Attribute(name, decs, type) -> StatementList([
+		<create-table>(tname, <concat-strings>[tname, "Id"], None(), Int(), None(), Some(AutoIncrement()), None()),
+		CreateColumn(tname, cname1 , None(), Int(), None(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
+		CreateColumn(tname, cname2 , None(), Int(), None(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-cname, "Id"])])))
 	])
 		where
 			opp-aname := <attr-get-inverse> name;
-/************************
-FIXME!!
-*************************/			
-						opp-cname := opp-aname;
-/************************
-FIXME!!
-*************************/			
+			opp-cname := <attr-parent>opp-aname;
 			tname := <concat-strings> [<attr-parent> name, "_", name];
 			cname1 := <concat-strings> [<attr-parent> name, "_", name];
 			cname2 := <concat-strings> [opp-cname, "_", opp-aname]
 			 
 			
-	trans-sql: SetDef(name, values) -> StatementList([
+	sql-set-def: SetDef(name, values) -> StatementList([
 		DropTable(name),
-		CreateTable(name, PrimaryKeyColumn(name, None(), None(), Varchar("100"), None(), None())),
+		CreateTable(name, PrimaryKeyColumn(name, None(), Varchar("100"), None(), None(), None())),
 		StatementList(<map(insert-value(|name))> values)
 	])	
 	
@@ -68,62 +129,62 @@ FIXME!!
 	])
 
 	meta-classes-table = !StatementList([
-			<create-table>("_Meta_Classes", "id", None(), None(), Int(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Classes", "className", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Classes", "tableName", None(), None(), Varchar("200"), None(), None(), None())
+			<create-table>("_Meta_Classes", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Classes", "className", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Classes", "tableName", None(), Varchar("200"), None(), None(), None(), None())
 	])
 
 	meta-sets-table = !StatementList([
-			<create-table>("_Meta_Sets", "id", None(), None(), Int(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Sets", "setName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Sets", "tableName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Sets", "columnName", None(), None(), Varchar("200"), None(), None(), None())
+			<create-table>("_Meta_Sets", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Sets", "setName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "tableName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "columnName", None(), Varchar("200"), None(), None(), None(), None())
 	])
 
 	meta-attributes-table = !StatementList([
-			<create-table>("_Meta_Attributes", "id", None(), None(), Int(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Attributes", "class", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "attName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "primTypeName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "typeMultiplicity", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "className", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "setName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "direction", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "tableName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "oppAttName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "isId", None(), None(), Bit(), None(), None(), None())
+			<create-table>("_Meta_Attributes", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Attributes", "class", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "attName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "primType", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "typeMultiplicity", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "className", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "setName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "direction", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "tableName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "oppAttName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "isId", None(), Bit(), None(), None(), None(), None())
 	])
 
 	meta-methods-table = !StatementList([
-			<create-table>("_Meta_Methods", "id", None(), None(), Int(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Methods", "class", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Methods", "methodName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Methods", "isObjectMethod", None(), None(), Bit(), None(), None(), None()),
-			CreateColumn("_Meta_Methods", "html", None(), None(), Text(), None(), None(), None())
+			<create-table>("_Meta_Methods", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Methods", "class", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "methodName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "isObjectMethod", None(), Bit(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "html", None(), Text(), None(), None(), None(), None())
 	])
 
 
 	meta-method-params-table = !StatementList([
-			<create-table>("_Meta_Method_Params", "id", None(), None(), Int(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Method_Params", "class", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "methodName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramType", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramMultiplcity", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramInOut", None(), None(), Varchar("20"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramClassName", None(), None(), Varchar("200"), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramSetName", None(), None(), Varchar("200"), None(), None(), None())
+			<create-table>("_Meta_Method_Params", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Method_Params", "class", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "methodName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramType", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramMultiplicity", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramInOut", None(), Varchar("20"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramClassName", None(), Varchar("200"), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramSetName", None(), Varchar("200"), None(), None(), None(), None())
 			
 	])
 
 
 rules
 	
-			create-table: (name, pkname, pkdefault, pknullable, pktype, pkextra, pkreference)	
+			create-table: (name, pkname, pkdefault, pktype, pknullable, pkextra, pkreference)	
 				-> 		
 				StatementList([
 					DropTable(name),
-					CreateTable(name, PrimaryKeyColumn(pkname, pkdefault, pknullable, pktype, pkextra, pkreference))
+					CreateTable(name, PrimaryKeyColumn(pkname, pkdefault, pktype, pknullable, pkextra, pkreference))
 				])
 
 rules

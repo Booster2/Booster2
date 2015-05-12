@@ -42,6 +42,9 @@ rules // collect all paths
 	path-prefix = ?Path(<id>, _)
 	path-prefix = ?PathStart(_,_) ; !This()
 
-	is-class-name = _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass() 
+	is-class-name = _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
+	
+	in-out-string: Input(_) -> "Input"
+	in-out-string: Output(_) -> "Output" 
 
 rules

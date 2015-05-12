@@ -91,3 +91,10 @@ rules // flatten class hierarchy
 				new-inv*  := <?b;if ?[] then ![] else ![Invariants(b)] end>all-inv*;
 				new-meth* := <?d;if ?[] then ![] else ![Methods   (d)] end>all-meth'*;
 				cmember'* := [new-attr*, new-inv*, new-meth*]
+
+rules
+	
+				 
+
+	
+rules	

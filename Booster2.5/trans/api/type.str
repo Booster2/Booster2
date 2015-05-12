@@ -1,0 +1,49 @@
+module lib/api/type
+
+imports
+	include/Booster25
+	trans/api/_runtime
+	trans/names
+	trans/types-manual
+
+rules 
+
+	prim-type-string = (_get-type ; get-prim-type ; type-to-string) <+ !""
+	multiplicity-string = (_get-type ; get-mult ; mult-to-string) <+ !""
+	
+	get-mult: Set(_) -> Set()
+	get-mult: Optional(_) -> Optional()
+	get-mult: _ -> Mandatory()
+
+	get-prim-type = (?Set(BasicType(<id>)) <+ ?Optional(BasicType(<id>)) <+ ?BasicType(<id>)) 
+		 		
+	type-to-string: String() -> "String"
+	type-to-string: Int() -> "Int"
+	type-to-string: DateTime() -> "DateTime"
+	type-to-string: Date() -> "Date"
+	type-to-string: Time() -> "Time"
+	type-to-string: Decimal() -> "Decimal"
+	
+	multiplicity-to-string = get-multiplicity ; multiplicity-string
+	
+	mult-to-string: Set() -> "Set"
+	mult-to-string: Optional() -> "Optional"
+	mult-to-string: Mandatory() -> "Mandatory"
+
+	class-name: x -> y
+		where
+			y := <_get-type> x;
+			not(<get-prim-type> y);
+			<_nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()> y
+
+	class-name: _ -> ""
+
+	set-name: x -> y
+		where
+			y := <_get-type> x;
+			not(<get-prim-type> y);
+			<_nabl-uri ; _nabl-uri-namespace ; ?NablNsSet()> y
+			
+	set-name: _ -> ""
+			
+rules				

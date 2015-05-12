@@ -10,6 +10,9 @@ imports
 	
 	trans/lib/eq
 	
+	trans/pp
+	
+	
 	api/path
 	
 rules
@@ -32,7 +35,10 @@ rules
 	 		all-model-invariants* := <collect-all(?Invariant(_,_))>ast;
 			assign-paths* := <map(\Assign(path, expr) -> path \)><collect-all(?Assign(_,_))> gc;
 			invariant := <conjoin-constraints><nub><concat><map(\ path -> <filter(invariant-matches-path(|path))> all-model-invariants* \)> assign-paths*;
-			
+			//<debug> "method-wp";
+			//<debug> <pp-Constraint-string> invariant;
+			//<debug> <pp-Constraint-string> <conjoin-constraints><nub><concat><map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
+			//<debug> <map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
 			(c', gc') := <gc-wp(|ast,And(<make-pre-state> c, invariant))>gc;
 			gc'' := Guard(c', gc')
 			//g|[~c' --> ~gc']|
@@ -72,11 +78,9 @@ rules
 			inv -> invp
 	where
 			Invariant(iname, invp) := inv;
-			attsMentioned* := <_relation-lookup(|"<hasInv:")> iname
-			
-			
-	where
+			attsMentioned* := <_relation-lookup(|"<hasInv:")> iname;
 			<elem> (<_nabl-collect-use;_nabl-uri> path, attsMentioned*)
+
 
 	aliasing-subst(|path, expr): constraint -> constraint'
 		where
@@ -86,8 +90,10 @@ rules
 
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
-			
+			//<debug> constraint;
+			//<debug><collect-all-paths> constraint;
 			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
+			//<debug> matching-paths*;
 			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
 			//<debug> constraint'
 			
@@ -95,12 +101,12 @@ rules
 	literal-subst: (constraint, substs) -> constraint'
 		where
 			//<debug> "literal-substitute";
-			substs' := <map(\ (t,e) -> ( <remove-annotations> t , e) \)> substs;
+			substs' := <map(\ (t,e) -> ( <remove-all-annotations> t , e) \)> substs;
 			//<debug> substs';
 			//<debug> constraint;
-			constraint' := <bottomup(try(\ trm -> <lookup> (<remove-annotations> trm  , substs')\))> constraint
+			constraint' := <bottomup(try(\ trm -> <lookup> (<remove-all-annotations> trm  , substs')\))> constraint
 			
-	remove-annotations = bottomup(try(\ t -> t {}\)) 
+	remove-all-annotations = bottomup(try(\ t -> t {}\)) 
 		
 		
 	generate-constraint: (pos, neg, path, expr, constraint) -> Implies(And(constraint1, constraint2), constraint3)

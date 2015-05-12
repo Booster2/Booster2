@@ -10,7 +10,7 @@ rules // attribute properties
 	
 	// @type AttrName -> AttrName or fail
 	attr-is-basic     = _get-type; ?BasicType(_)
-	attr-is-bidir     = where(get-inverse)
+	attr-is-bidir     = where(attr-get-inverse)
 	attr-is-unidir    = not(attr-is-bidir + attr-is-basic)
 	attr-is-enum 			= _get-type; _nabl-uri ; _nabl-uri-namespace ; ?NablNsSet()
 	
@@ -22,5 +22,17 @@ rules // attribute properties
 
 	attr-parent = _nabl-uri ; _nabl-uri-parent ; _nabl-uri-name
 
+
+	is-id: Attribute(name, decs, type) -> True()
+		where <elem>(Identity(), decs)
+
+	is-id: _ -> False()
+
+
+	get-dir = ( attr-is-unidir ; !"Uni") <+ ( attr-is-bidir ; !"Bi" ) <+ !""
+	
+	
 rules
+	
+	
 	
