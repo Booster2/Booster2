@@ -18,15 +18,12 @@ rules
 		UseDatabase(name),
 		<metadata-tables> name,
 		StatementList(<collect-all(sql-metadata)> x),
+ 		StatementList(<collect-all(sql-set-def)> x),
 		StatementList(<collect-all(sql-classes)> x),
-//		StatementList([<collect-all(sql-set-classes)> x]),
-		StatementList(<collect-all(sql-assoc-classes)> x),
- 		StatementList(<collect-all(sql-set-def)> x)
+		StatementList(<collect-all(sql-ref-classes)> x),
+		StatementList(<collect-all(sql-assoc-classes)> x)
 		])
 	
-	sql-classes: Class(name, exts, comps) -> 
-			<create-table>(name, <concat-strings>[name, "Id"], None(), Int(), None(),Some(AutoIncrement()), None())
-
 	sql-metadata:
 		SetDef(setname, values) ->
 			Insert(None(), None(), Some(Into()), "_Meta_Sets", 
@@ -77,7 +74,6 @@ rules
 						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
 						None())
 			where
-				<debug> x;
 				pname := < ?Input(<id>) <+ ?Output(<id>) > x;
 				mname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> pname;
 				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> pname;
@@ -88,18 +84,94 @@ rules
 				setname := <set-name> x
 
 
+	sql-classes: Class(name, exts, comps) -> 
+			<create-table>(name, <concat-strings>[name, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None())
 
+	
 	// Mandatory or optional basic types get turned into single columns
-	
-	sql-classes: Attribute(name, decs, type) -> CreateColumn(<attr-parent> name, name , None(), Int(), None(), None(), None(), None())
+	sql-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, sqltype, nullable, default, None(), None(), None())
 		where
-			BasicType(t) := type
+			not(<attr-is-set> name);
+			sqltype := <_get-type ; get-prim-type ; sql-type> name;
+			tname := <attr-parent> name;
+			default := <column-default> name;
+			nullable := <column-nullable> name
+
+	// Mandatory or optional enum types get turned into single columns with references
+	sql-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, Varchar("100"), nullable, default, None(), None(), Some(Reference(name, setname, [ColumnName(setname)])))
+		where
+			not(<attr-is-set> name);
+			<attr-is-enum> name;
+			setname := <set-name> name;
+			tname := <attr-parent> name;
+			default := <column-default> name;
+			nullable := <column-nullable> name
+
+
+	// Mandatory or optional uni-dir class reference types get turned into single columns with references
+	sql--ref-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, Int(), nullable, default, None(), None(), Some(Reference(name, classname, [ColumnName(idcol)])))
+		where
+			not(<attr-is-set> name);
+			<attr-is-unidir> name;
+			classname := <class-name> name;
+			tname := <attr-parent> name;
+			default := <column-default> name;
+			nullable := <column-nullable> name;
+			idcol := <concat-strings>[classname, "Id"]
+
+	// Set-valued attributes get turned into tables
+	sql-classes: Attribute(name, decs, type) -> 
+		StatementList([
+			<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None()),
+			CreateColumn(tname, firstcolname, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, sqltype, Some(ColumnNotNullable()), None(), None(), None(), None())
+		])
+		where
+			<attr-is-set> name;
+			sqltype := <_get-type ; get-prim-type ; sql-type> name;
+			parent-name := <attr-parent> name;
+			tname := <concat-strings>[parent-name, "_", name];
+			firstcolname := <concat-strings>[parent-name, "Id"]
+
+
+
+	// Set-valued attributes get turned into tables
+	sql-classes: Attribute(name, decs, type) -> 
+		StatementList([
+			<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None()),
+			CreateColumn(tname, firstcolname, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, setname, [ColumnName(setname)])))
+		])
+		where
+			<attr-is-set> name;
+			<attr-is-enum> name;
+			setname := <set-name> name;
+			parent-name := <attr-parent> name;
+			tname := <concat-strings>[parent-name, "_", name];
+			firstcolname := <concat-strings>[parent-name, "Id"]
 	
+
+	// Set-valued attributes get turned into tables
+	sql-ref-classes: Attribute(name, decs, type) -> 
+		StatementList([
+			<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None()),
+			CreateColumn(tname, firstcolname, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, classname, [ColumnName(<concat-strings>[classname, "Id"])])))
+		])
+		where
+			<attr-is-set> name;
+			<attr-is-unidir> name;
+			classname := <class-name> name;
+			parent-name := <attr-parent> name;
+			tname := <concat-strings>[parent-name, "_", name];
+			firstcolname := <concat-strings>[parent-name, "Id"]
+			
+		
 	
 	sql-assoc-classes: Attribute(name, decs, type) -> StatementList([
-		<create-table>(tname, <concat-strings>[tname, "Id"], None(), Int(), None(), Some(AutoIncrement()), None()),
-		CreateColumn(tname, cname1 , None(), Int(), None(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
-		CreateColumn(tname, cname2 , None(), Int(), None(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-cname, "Id"])])))
+		<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(), Some(AutoIncrement()), None()),
+		CreateColumn(tname, cname1 , Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
+		CreateColumn(tname, cname2 , Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-cname, "Id"])])))
 	])
 		where
 			opp-aname := <attr-get-inverse> name;
@@ -111,7 +183,7 @@ rules
 			
 	sql-set-def: SetDef(name, values) -> StatementList([
 		DropTable(name),
-		CreateTable(name, PrimaryKeyColumn(name, None(), Varchar("100"), None(), None(), None())),
+		CreateTable(name, PrimaryKeyColumn(name, Varchar("100"), None(), None(), None(), None())),
 		StatementList(<map(insert-value(|name))> values)
 	])	
 	
@@ -129,62 +201,62 @@ rules
 	])
 
 	meta-classes-table = !StatementList([
-			<create-table>("_Meta_Classes", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Classes", "className", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Classes", "tableName", None(), Varchar("200"), None(), None(), None(), None())
+			<create-table>("_Meta_Classes", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Classes", "className", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Classes", "tableName", Varchar("200"), None(), None(), None(), None(), None())
 	])
 
 	meta-sets-table = !StatementList([
-			<create-table>("_Meta_Sets", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Sets", "setName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Sets", "tableName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Sets", "columnName", None(), Varchar("200"), None(), None(), None(), None())
+			<create-table>("_Meta_Sets", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Sets", "setName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "columnName", Varchar("200"), None(), None(), None(), None(), None())
 	])
 
 	meta-attributes-table = !StatementList([
-			<create-table>("_Meta_Attributes", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Attributes", "class", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "attName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "primType", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "typeMultiplicity", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "className", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "setName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "direction", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "tableName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "oppAttName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "isId", None(), Bit(), None(), None(), None(), None())
+			<create-table>("_Meta_Attributes", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Attributes", "class", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "attName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "primType", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "typeMultiplicity", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "className", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "setName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "direction", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "oppAttName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "isId", Bit(), None(), None(), None(), None(), None())
 	])
 
 	meta-methods-table = !StatementList([
-			<create-table>("_Meta_Methods", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Methods", "class", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Methods", "methodName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Methods", "isObjectMethod", None(), Bit(), None(), None(), None(), None()),
-			CreateColumn("_Meta_Methods", "html", None(), Text(), None(), None(), None(), None())
+			<create-table>("_Meta_Methods", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Methods", "class", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "methodName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "isObjectMethod", Bit(), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "html", Text(), None(), None(), None(), None(), None())
 	])
 
 
 	meta-method-params-table = !StatementList([
-			<create-table>("_Meta_Method_Params", "id", None(), Int(), None(), Some(AutoIncrement()), None()),
-			CreateColumn("_Meta_Method_Params", "class", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "methodName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramType", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramMultiplicity", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramInOut", None(), Varchar("20"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramClassName", None(), Varchar("200"), None(), None(), None(), None()),
-			CreateColumn("_Meta_Method_Params", "paramSetName", None(), Varchar("200"), None(), None(), None(), None())
+			<create-table>("_Meta_Method_Params", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Method_Params", "class", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "methodName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramType", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramMultiplicity", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramInOut", Varchar("20"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramClassName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramSetName", Varchar("200"), None(), None(), None(), None(), None())
 			
 	])
 
 
 rules
 	
-			create-table: (name, pkname, pkdefault, pktype, pknullable, pkextra, pkreference)	
+			create-table: (name, pkname, pktype, pknullable, pkdefault, pkextra, pkreference)	
 				-> 		
 				StatementList([
 					DropTable(name),
-					CreateTable(name, PrimaryKeyColumn(pkname, pkdefault, pktype, pknullable, pkextra, pkreference))
+					CreateTable(name, PrimaryKeyColumn(pkname, pktype, pknullable, pkdefault, pkextra, pkreference))
 				])
 
 rules

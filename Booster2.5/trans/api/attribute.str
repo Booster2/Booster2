@@ -31,6 +31,9 @@ rules // attribute properties
 
 	get-dir = ( attr-is-unidir ; !"Uni") <+ ( attr-is-bidir ; !"Bi" ) <+ !""
 	
+	column-default = (attr-is-optional ; !Some(ColumnDefault(Null()))) <+ !None()
+
+	column-nullable = (attr-is-optional ; !Some(ColumnNullable())) <+ !Some(ColumnNotNullable())
 	
 rules
 	

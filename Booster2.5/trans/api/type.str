@@ -46,4 +46,12 @@ rules
 			
 	set-name: _ -> ""
 			
+			
+	sql-type: String() -> Text()
+	sql-type: Int() -> Int()
+	sql-type: DateTime() -> DateTime()
+	sql-type: Date() -> Date()
+	sql-type: Time() -> Time()
+	sql-type: Decimal() -> Decimal()
+			
 rules				

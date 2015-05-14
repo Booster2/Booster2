@@ -16,22 +16,22 @@ context-free syntax
 	SET autocommit=0;>
 	Statement.DropTable = <drop table if exists `<ID>`;>
   Statement.CreateTable = <create table `<ID>` ( <PrimaryKeyColumn>);>
-  PrimaryKeyColumn.PrimaryKeyColumn = <`<ID>` <ColumnDefault?> <SQLType> <ColumnNullable?> <Extra?> primary key <Reference?>>
-  Statement.CreateColumn = < alter table `<ID>` add column `<ID>` <ColumnDefault?>  <SQLType> <ColumnNullable?> <Extra?> <Key?> <Reference?>;>
+  PrimaryKeyColumn.PrimaryKeyColumn = <`<ID>` <SQLType> <ColumnNullable?> <ColumnDefault?> <Extra?> primary key <Reference?>>
+  Statement.CreateColumn = < alter table `<ID>` add column `<ID>`  <SQLType> <ColumnNullable?> <ColumnDefault?>  <Extra?> <Key?> <Reference?>;>
   
-  // Schema.Schema = <schema <ID> { <{Table ","}*> <{Procedure ","}*> <{Statement ","}*> }> 
-  // Table.Table = <table <ID> { <{Column ","}*> }> 
-  //Column.Column = <column <ID> <ColumnDefault> <ColumnNullable> <SQLType> <Extra> <Key> <Reference?>>
-  //Column.Column = <column `<ID>`>
-  ColumnDefault.ColumnDefault = <<STRING>>
-  ColumnNullable.ColumnNullable = <<BOOL>>
+  ColumnDefault.ColumnDefault = <default <SimpleExpression> >
+
+  ColumnNullable.ColumnNullable = <null>
+  ColumnNullable.ColumnNotNullable = <not null>
   SQLType.Varchar = <varchar ( <INT> )> 
-  SQLType.Int = <INT> 
+  SQLType.Int = <int> 
   SQLType.Bit = <bit> 
-  SQLType.Datetime = <datetime> 
+  SQLType.DateTime = <datetime> 
+  SQLType.TimeStamp = <timestamp> 
   SQLType.Date = <date> 
   SQLType.Time = <time> 
-  SQLType.Text = <text> 
+  SQLType.Text = <text>
+  SQLType.Decimal = <decimal> 
   BOOL.True = <true> 
   BOOL.False = <false> 
   Extra.AutoIncrement = <auto_increment> 
@@ -255,7 +255,7 @@ context-free syntax
   UpdateOption.Ignore = <IGNORE> 
   UpdateSet.UpdateSet = <<ID> = <SQLExpression>> 
   UpdateSet.UpdateSetDefault = <<ID> = DEFAULT> 
-  Insert.Insert = <insert <InsertPriority?> <Ignore?> <Into?> `<ID>` ( <{ ColumnName ","}*> ) values ( <{SQLExpression ","}*> ) <OnDuplicate?>;>
+  Insert.Insert = <	insert <InsertPriority?> <Ignore?> <Into?> `<ID>` ( <{ ColumnName ","}*> ) values ( <{SQLExpression ","}*> ) <OnDuplicate?>;>
   ColumnName.ColumnName = <`<ID>`>
   InsertInto.InsertInto = <insert into <ID> ( <{ID ","}*> ) <Query>;> 
   InsertPriority.LowPriority = <LOW_PRIORITY> 
