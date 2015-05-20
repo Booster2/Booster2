@@ -153,19 +153,19 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	
 	binop-get-varname: expr -> name
 		where
-			((SetExtent([Input(name)]), rhs), op) := <binop-set> expr
+			((SetExtent([Input(name)]), rhs), op) := <binop-arith> expr
 
 	binop-get-varname: expr -> name
 		where
-			((lhs, SetExtent([Input(name)])), op) := <binop-set> expr
+			((lhs, SetExtent([Input(name)])), op) := <binop-arith> expr
 
 	binop-get-varname: expr -> name
 		where
-			((SetExtent([Output(name)]), rhs), op) := <binop-set> expr
+			((SetExtent([Output(name)]), rhs), op) := <binop-arith> expr
 
 	binop-get-varname: expr -> name
 		where
-			((lhs, SetExtent([Output(name)])), op) := <binop-set> expr
+			((lhs, SetExtent([Output(name)])), op) := <binop-arith> expr
 	
 
 	gcmd-get-varname   = ?Assign(lhs,                         Input(v));  !v
@@ -258,6 +258,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 
 
 
+
 	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));             !AssignDefRightInput (lhs,     v)
 	param-add-vardef  = ?Subst(p,                              Input(v));             !SubstDefInput         (p,       v)
 	
@@ -347,9 +348,6 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binop-arith : Union(a,b) 							-> ((a,b), Union())
 	binop-arith : Concat(a,b) 						-> ((a,b), Concat())
 
-	binop-set: Intersection(a,b)					-> (a,b)
-	binop-set: Union(a,b)									-> (a,b)
-	binop-set: Minus(a,b)									-> (a,b)
 
 rules //  Help NaBL: make explicit what are Function Call parameters
 	

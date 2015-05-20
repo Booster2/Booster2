@@ -26,6 +26,16 @@ test No error on correct sub typed parameter [[
 	}
 ]] 0 errors
 
+test No error on correct sub typed parameter [[
+	class A {
+		attributes
+			bs : set(int)
+		methods
+			m0 { updateBs (bs? = 7) }	
+			updateBs { bs' = bs \/ {bs?} }
+	}
+]] 0 errors
+
 test Error on wrong typed parameter [[
 	class A {
 		attributes

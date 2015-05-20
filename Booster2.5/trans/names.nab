@@ -162,6 +162,9 @@ binding rules // Variables
 	Def(v, lhs, _, Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type t
 	Def(v, lhs, _, Right(), Input(), None()): defines InputVariable  v of type t where lhs has type t
 
+	Def(v, lhs, _, Right(), Output(), SetExtent()): defines OutputVariable  v of type t where lhs has type Set(t)
+	Def(v, lhs, _, Right(), Input(), SetExtent()): defines InputVariable  v of type t where lhs has type Set(t)
+
 /*
 	BinRelDefRightInput (lhs, op,             v  ): defines InputVariable  v of type t where lhs has type t
 	BinRelDefRightOutput(lhs, op,             v  ): defines OutputVariable v of type t where lhs has type t
