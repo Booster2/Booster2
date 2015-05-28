@@ -25,7 +25,7 @@ context-free syntax
   Type.Set = <set ( <Type> )> 
   GuardedCommand.Skip = <skip> {prefer}
   GuardedCommand.Assign = <<Path> := <Expression>> {left}
-  GuardedCommand.New = <new <ID> ! : <ID>> 
+  GuardedCommand.New = <new <ID>! : <ID>> 
   GuardedCommand.Guard = <<Constraint> --\> <GuardedCommand>> {right}
   GuardedCommand.Parallel = <<GuardedCommand> || <GuardedCommand>> {left}
   GuardedCommand.Sequence = <<GuardedCommand> ; <GuardedCommand>> {left}
