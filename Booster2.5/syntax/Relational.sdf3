@@ -42,7 +42,29 @@ context-free syntax
   Key.NoKey = <None> 
   Reference.Reference = <, add foreign key (`<ID>`) references `<ID>` ( <{ColumnName ","}*> )> 
   StatementList.StatementList = < <{Statement "\n"}*> > 
-  Procedure.Procedure = <procedure <ID> ( <{Parameter ","}*> ) <DeclareList> <StatementList>> 
+  Statement.DropProcedure = <drop procedure if exists `<ID>`;>
+  Statement.CreateProcedure = 
+	 			  <delimiter //
+	 			  create procedure `<ID>` ( <{Parameter ","}*>)
+	 				begin
+	 				declare exit handler for sqlwarning, sqlexception, not found 
+	 				begin
+					rollback;
+					end; 
+					start transaction;
+	 			    <StatementList>
+	 			  	end //
+	 			  delimiter ;>
+
+  Statement.CreateFunction = 
+	 			  <delimiter //
+	 			  create function `<ID>` ( <{Parameter ","}*>)
+	 			  	returns <SQLType>
+	 				begin
+	 			    <StatementList>
+	 			  end //
+	 			  delimiter ;>  
+  
   Procedure.Function = <function <ID> ( <{Parameter ","}*> ) returns <SQLType> <DeclareList> <StatementList>> 
   Parameter.Input = <in <ID> <SQLType>> 
   Parameter.Output = <out <ID> <SQLType>> 

@@ -21,8 +21,10 @@ rules
  		StatementList(<collect-all(sql-set-def)> x),
 		StatementList(<collect-all(sql-classes)> x),
 		StatementList(<collect-all(sql-ref-classes)> x),
-		StatementList(<collect-all(sql-assoc-classes)> x)
+		StatementList(<collect-all(sql-assoc-classes)> x),
+		StatementList(<collect-all(sql-method)> x)
 		])
+		where <debug> <collect-all(?This())> x
 	
 	sql-metadata:
 		SetDef(setname, values) ->
@@ -64,23 +66,33 @@ rules
 			classname := <method-parent>name;
 			isObjectMethod := <is-obj-method> m;
 			html := <string-replace(|"'", "''")> "";
-			[inParamStmts*] := <map(metadata-param)><method-inputs> m;
-			[outParamStmts*] := <map(metadata-param)><method-outputs> m
+			[inParamStmts*] := <map(metadata-param(|m))><method-inputs> m;
+			[outParamStmts*] := <map(metadata-param(|m))><method-outputs> m
 						
 						
-	metadata-param: x ->
+	metadata-param(|m): x ->
 			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
 						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
 						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
 						None())
 			where
-				pname := < ?Input(<id>) <+ ?Output(<id>) > x;
-				mname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> pname;
-				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> pname;
-				ptname := <prim-type-string> pname;
-				mult := <multiplicity-string> pname;
+				Method(mname, gc) := m;
+				<debug> "Param";
+				<debug> x;
+				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> mname;
+				<debug>cname;
+				<debug>mname;
+				pname := < ?Input(<id>) <+ ?Output(<id>) <+ (?This() ; !"this")> x;
+				<debug> "3";
+				<debug> <_get-type> x;
+				ptname := <prim-type-string> x;
+				<debug> "4";
+				mult := <multiplicity-string> x;
+				<debug> "5";
 				inout := <in-out-string> x;
+				<debug> "6";
 				classname := <class-name> x;
+				<debug> "7";
 				setname := <set-name> x
 
 
@@ -92,7 +104,7 @@ rules
 	sql-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, sqltype, nullable, default, None(), None(), None())
 		where
 			not(<attr-is-set> name);
-			sqltype := <_get-type ; get-prim-type ; sql-type> name;
+			sqltype := <_get-type ; is-prim-type ; sql-type> name;
 			tname := <attr-parent> name;
 			default := <column-default> name;
 			nullable := <column-nullable> name
@@ -128,7 +140,7 @@ rules
 		])
 		where
 			<attr-is-set> name;
-			sqltype := <_get-type ; get-prim-type ; sql-type> name;
+			sqltype := <_get-type ; is-prim-type ; sql-type> name;
 			parent-name := <attr-parent> name;
 			tname := <concat-strings>[parent-name, "_", name];
 			firstcolname := <concat-strings>[parent-name, "Id"]
@@ -191,6 +203,31 @@ rules
 	insert-value(|name): value ->
 		Insert(None(), None(), Some(Into()), name, [ColumnName(name)], [String(value)], None())
 		
+		
+		
+	sql-method:  m@Method(mname, gc) -> 
+		StatementList([
+				DropProcedure(pname),
+				CreateProcedure(pname, params, StatementList([stmts]))
+			])
+			where
+				pname := <concat-strings>[<method-parent> mname, "_", mname];
+				params := <get-sql-params> m;
+				stmts := <sql-gc> gc
+					
+	sql-gc: Skip() -> VariableAssign("dummySkip", Int("1"))	
+	
+/*	sql-gc: Assign(p, expr)
+			-> StatementList([
+				VariableAssign(pn', expr')
+				Update([],TableName(tablename),[(attname, LocalVariable(pn'))],Where(expr''),None(),None())
+			])
+			where 
+				pn' := <path-to-variable-name> Path(ps {Optional(Reference(tablename))}, pc){t};
+				attname := <get-path-attribute-name> Path(ps, pc);
+				expr' := <booster-to-relational-expression> expr;
+				expr'' := <booster-path-to-where-clause> Path(ps {Optional(Reference(tablename))}, pc){t}
+*/	
 	
 	metadata-tables = !StatementList([
 			<meta-classes-table>,

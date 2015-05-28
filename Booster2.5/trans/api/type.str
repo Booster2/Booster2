@@ -8,14 +8,14 @@ imports
 
 rules 
 
-	prim-type-string = (_get-type ; get-prim-type ; type-to-string) <+ !""
+	prim-type-string = (_get-type ; is-prim-type ; type-to-string) <+ (is-class ; !"ClassRef") <+ (is-enum ; !"SetValue")
 	multiplicity-string = (_get-type ; get-mult ; mult-to-string) <+ !""
 	
 	get-mult: Set(_) -> Set()
 	get-mult: Optional(_) -> Optional()
 	get-mult: _ -> Mandatory()
 
-	get-prim-type = (?Set(BasicType(<id>)) <+ ?Optional(BasicType(<id>)) <+ ?BasicType(<id>)) 
+	is-prim-type = (?Set(BasicType(<id>)) <+ ?Optional(BasicType(<id>)) <+ ?BasicType(<id>)) 
 		 		
 	type-to-string: String() -> "String"
 	type-to-string: Int() -> "Int"
@@ -30,19 +30,21 @@ rules
 	mult-to-string: Optional() -> "Optional"
 	mult-to-string: Mandatory() -> "Mandatory"
 
+	is-class = _get-type ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
+	is-enum = _get-type ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsSet()
+
+
 	class-name: x -> y
 		where
 			y := <_get-type> x;
-			not(<get-prim-type> y);
-			<_nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()> y
+			<is-class> x
 
 	class-name: _ -> ""
 
 	set-name: x -> y
 		where
 			y := <_get-type> x;
-			not(<get-prim-type> y);
-			<_nabl-uri ; _nabl-uri-namespace ; ?NablNsSet()> y
+			<is-enum> x
 			
 	set-name: _ -> ""
 			
@@ -54,4 +56,9 @@ rules
 	sql-type: Time() -> Time()
 	sql-type: Decimal() -> Decimal()
 			
+	sql-type: BasicType(t) -> <sql-type> t
+	
+	sql-type: name -> Int() where <is-class> name
+	sql-type: name -> Varchar("100") where <is-enum> name
+	
 rules				
