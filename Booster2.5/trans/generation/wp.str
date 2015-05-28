@@ -36,7 +36,6 @@ rules
 			assign-paths* := <map(\Assign(path, expr) -> path \)><collect-all(?Assign(_,_))> gc;
 			invariant := <conjoin-constraints><nub><concat><map(\ path -> <filter(invariant-matches-path(|path))> all-model-invariants* \)> assign-paths*;
 			//<debug> "method-wp";
-			//<debug> <pp-Constraint-string> invariant;
 			//<debug> <pp-Constraint-string> <conjoin-constraints><nub><concat><map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
 			//<debug> <map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
 			(c', gc') := <gc-wp(|ast,And(<make-pre-state> c, invariant))>gc;
@@ -45,13 +44,15 @@ rules
 
 rules
 	
-	gc-wp(|ast,c): Skip() -> (c, Skip())
+	gc-wp(|ast,c): |[skip]| -> (c, Skip())
 	
 	gc-wp(|ast, c): Assign(path, expr) -> (c', Assign(path, expr)) 
 		where
 			c' := <aliasing-subst(|path, expr)> c
 
-	gc-wp(|ast, c): New(o, cl) -> (c, New(o,cl))
+	gc-wp(|ast, c): New(o, cl) -> (c', New(o,cl))
+		where	
+			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c
 
 	gc-wp(|ast, c): Guard(g,p) -> (And(c,c'), Guard(g, p'))
 		where
@@ -75,27 +76,28 @@ rules
 
 
 	invariant-matches-path(|path):
-			inv -> invp
+			Invariant(iname, invp) -> invp'
 	where
-			Invariant(iname, invp) := inv;
 			attsMentioned* := <_relation-lookup(|"<hasInv:")> iname;
-			<elem> (<_nabl-collect-use;_nabl-uri> path, attsMentioned*)
+			<elem> (<_nabl-collect-use;_nabl-uri> path, attsMentioned*);
+			invp' := <conjoin-constraints><nub-an><map(\p1 -> <literal-subst>(invp, [(p1, path)]) \)><filter(\p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , <_nabl-collect-use;_nabl-uri> path) \)> <collect-all-paths> invp		
 
 
 	aliasing-subst(|path, expr): constraint -> constraint'
 		where
-			//<debug> "aliasing-subst";
+			<debug> "aliasing-subst";
 			path-uri := <_nabl-collect-use;_nabl-uri> path;
-			//<debug> <_pp-uri> path-uri;
+			<debug> <_pp-uri> path-uri;
 
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
-			//<debug> constraint;
-			//<debug><collect-all-paths> constraint;
+			<debug> <pp-Constraint-string> constraint;
+			<debug><map(pp-partial-Booster25-string)><collect-all-paths> constraint;
 			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
-			//<debug> matching-paths*;
-			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
-			//<debug> constraint'
+			//matching-paths'* := <remove-an>(path, matching-paths*);
+			<debug><map(pp-partial-Booster25-string)><remove-an>(path, matching-paths*);
+			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*;
+			<debug> <pp-Constraint-string> constraint'
 			
 			
 	literal-subst: (constraint, substs) -> constraint'
@@ -109,14 +111,17 @@ rules
 	remove-all-annotations = bottomup(try(\ t -> t {}\)) 
 		
 		
+	generate-constraint: ([], neg, path, expr, constraint) -> True()
+
+	generate-constraint: (pos, [], path, expr, constraint) -> Implies(constraint1, constraint3)
+		where
+			constraint1 := <conjoin-constraints> <map(\ p -> Equal(<path-prefix> p, <path-prefix> path) \)> pos;
+			constraint3 := <literal-subst> (constraint, <map(\ p -> (p, expr)\)> pos)
+
 	generate-constraint: (pos, neg, path, expr, constraint) -> Implies(And(constraint1, constraint2), constraint3)
 		where
 			constraint1 := <conjoin-constraints> <map(\ p -> Equal(<path-prefix> p, <path-prefix> path) \)> pos;
 			constraint2 := <conjoin-constraints> <map(\ q -> NotEqual(<path-prefix> q, <path-prefix> path) \)> neg;
-			//<debug> "pos";
-			//<debug> pos;
-			//<debug> "neg";
-			//<debug> neg;
 			constraint3 := <literal-subst> (constraint, <map(\ p -> (p, expr)\)> pos)
 			 
 rules

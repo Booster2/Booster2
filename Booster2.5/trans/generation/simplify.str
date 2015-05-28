@@ -8,6 +8,7 @@ imports
 	trans/api/constraint
 	trans/api/expression
 	trans/lib/search
+	trans/lib/eq
 	trans/names
 	
 	
@@ -52,8 +53,9 @@ rules
 rules
 	
 	
-	relation-simp: |[ ~e = ~e ]|						-> |[true]|
-	relation-simp: |[ ~e /= ~e ]|						-> |[false]|
+	relation-simp: |[ ~e = ~f ]|						-> |[true]| where <eq-an>(e,f)
+	relation-simp: |[ ~e /= ~f ]|						-> |[false]| where <eq-an>(e,f)
+	
 	relation-simp: |[ ~e < ~e ]|						-> |[false]|
 	relation-simp: |[ ~e <= ~e ]|						-> |[true]|
 	relation-simp: |[ ~e > ~e ]|						-> |[false]|
@@ -70,7 +72,8 @@ rules
 
 	relation-simp: |[ ~e >= ~f ]|						-> |[ true ]| where <geq>(<get-int>e,<get-int>f)
 	relation-simp: |[ ~e >= ~f ]|						-> |[ false ]| where <lt>(<get-int>e,<get-int>f)
-
+	
+	relation-simp: |[ ~e : ~f \/ {~e}]|				-> |[true]|
 
 rules
 		
