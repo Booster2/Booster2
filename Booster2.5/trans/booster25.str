@@ -52,6 +52,7 @@ rules // Editor services
 			definition := <_analysis-resolve(|<language>, project-path)> node'
 	
 	resolve-child: Input(a) -> a
+	resolve-child: Output(a) -> a
 
 	// Returns "hover help" information for a particular node in the editor.
 	// For references, this rule is invoked using the resolved term.

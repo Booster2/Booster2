@@ -5,7 +5,7 @@ imports Common
 
 context-free start-symbols
 
-  StatementList
+  Statement
 
 context-free syntax
 
@@ -41,7 +41,7 @@ context-free syntax
   Key.Multiple = <Multiple> 
   Key.NoKey = <None> 
   Reference.Reference = <, add foreign key (`<ID>`) references `<ID>` ( <{ColumnName ","}*> )> 
-  StatementList.StatementList = < <{Statement "\n"}*> > 
+  Statement.StatementList = < <{Statement "\n"}*> > 
   Statement.DropProcedure = <drop procedure if exists `<ID>`;>
   Statement.CreateProcedure = 
 	 			  <delimiter //
@@ -52,7 +52,7 @@ context-free syntax
 					rollback;
 					end; 
 					start transaction;
-	 			    <StatementList>
+	 			    <Statement>
 	 			  	end //
 	 			  delimiter ;>
 
@@ -61,17 +61,16 @@ context-free syntax
 	 			  create function `<ID>` ( <{Parameter ","}*>)
 	 			  	returns <SQLType>
 	 				begin
-	 			    <StatementList>
+	 			    <Statement>
 	 			  end //
 	 			  delimiter ;>  
   
-  Procedure.Function = <function <ID> ( <{Parameter ","}*> ) returns <SQLType> <DeclareList> <StatementList>> 
+  Procedure.Function = <function <ID> ( <{Parameter ","}*> ) returns <SQLType> <DeclareList> <Statement>> 
   Parameter.Input = <in <ID> <SQLType>> 
   Parameter.Output = <out <ID> <SQLType>> 
   Parameter.InOut = <inout <ID> <SQLType>> 
-  Statement.IfThen = <if <SQLExpression> then <StatementList> <ElseIf*> <Else?> end if;> 
-  Statement.BeginEnd = <begin <DeclareList> <StatementList> end;> 
-  Statement = StatementList
+  Statement.IfThen = <if <SQLExpression> then <Statement> <ElseIf*> <Else?> end if;> 
+  Statement.BeginEnd = <begin <DeclareList> <Statement> end;> 
   Statement = Update 
   Statement = Query 
   Statement = Insert 
@@ -82,8 +81,8 @@ context-free syntax
   SQLExpression.Star = <*> 
   SQLExpression.True = <true> 
   SQLExpression.False = <false> 
-  ElseIf.ElseIf = <elseif <SQLExpression> then <StatementList>> 
-  Else.Else = <else <StatementList>> 
+  ElseIf.ElseIf = <elseif <SQLExpression> then <Statement>> 
+  Else.Else = <else <Statement>> 
   SQLExpression.Or = <<SQLExpression> OR <SQLExpression>> 
   SQLExpression.Or = <<SQLExpression> || <SQLExpression>> 
   SQLExpression.Xor = <<SQLExpression> XOR <SQLExpression>> 
@@ -172,7 +171,7 @@ context-free syntax
   Identifier.ColumnName = ID 
   Identifier.TableColumnName = <<ID> . <ID>> 
   Identifier.DBTableColumnName = <<ID> . <ID> . <ID>> 
-  Variable.LocalVariable = <@ <ID>> 
+  Variable.LocalVariable = <@<ID>> 
   Variable.SystemVariable = ID 
   ParamMarker.Marker = <?> 
   MatchExpression.MatchExpression = <MATCH ( <{ID ","}+> ) AGAINST ( <SQLExpression> <SearchModifier?> )> 
@@ -272,7 +271,7 @@ context-free syntax
   Jog.Join = <JOIN> 
   Jog.OrderBy = <ORDER BY> 
   Jog.GroupBy = <GROUP BY> 
-  Update.Update = <UPDATE <UpdateOption*> <TableReference> SET <UpdateSet+> <WherePart?> <OrderByPart?> <LimitPart?>;> 
+  Update.Update = <UPDATE <UpdateOption*> <TableReference> SET <{UpdateSet ","}+ > <WherePart?> <OrderByPart?> <LimitPart?>;> 
   UpdateOption.LowPriority = <LOW_PRIORITY> 
   UpdateOption.Ignore = <IGNORE> 
   UpdateSet.UpdateSet = <<ID> = <SQLExpression>> 
@@ -296,6 +295,6 @@ context-free syntax
   Declare.Declare = <DECLARE <{ID ","}+> <SQLType> <DefaultDeclare?>;> 
   DefaultDeclare.DefaultDeclare = <default <SQLExpression>> 
   Return.Return = <return <SQLExpression>;> 
-  VariableAssign.VariableAssign = <set <ID> = <SQLExpression>>
+  VariableAssign.VariableAssign = <set @<ID> = <SQLExpression>;>
   
 context-free syntax   

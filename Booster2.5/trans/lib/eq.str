@@ -16,3 +16,5 @@ rules // equality with ignoring annotations
 			[] := <filter(\e -> e where <eq-an>(a,e)\)> [as*]
 
 	nub-an: [a, as*] -> [as*]
+	
+	remove-an: (x, as) -> <filter(\ a -> <not(eq-an)> (x, a)\)> as 

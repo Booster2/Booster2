@@ -4,9 +4,19 @@ imports
 	
 	include/Booster25
 	trans/lib/eq
+	trans/api/type
+	trans/api/path
 	trans/api/_runtime
 	trans/api/_runtime-constructors
+		
+		runtime/types/collect
+		
+	trans/names
 
+	lib/runtime/relations/entries
+	lib/runtime/nabl/namegen
+	lib/runtime/nabl/uri
+	
 rules // conjoin methods
 	
 	// @type [Method] -> [Method]
@@ -35,8 +45,25 @@ rules // conjoin methods
 
 	method-parent = _nabl-uri ; _nabl-uri-parent ; _nabl-uri-name
 	
-	is-obj-method: m -> False() where <equal>(<collect-all(?This())> m, [])
+	is-obj-method: m -> False() where <equal>(<collect-all( ?This() <+ ( ?PathStart(_,_) ; path-prefix ; ?This() ) )> m, [])
 	is-obj-method = !True()
 	
-	method-inputs = ?Method(name, <id>) ; collect-all(?Input(_ {Def(_)}))
-	method-outputs = ?Method(name, <id>) ; collect-all(?Output(_ {Def(_)}))
+	method-inputs = ?Method(name, <id>) ; collect-all(is-input) ; nub-an
+	method-outputs = ?Method(name, <id>) ; collect-all(?Output(_)) ; nub-an
+
+
+	is-input = ?Input(_ {Def(_)}) 
+ 	is-input = ?This()
+ 	is-input: ps@PathStart(_{ann}, _) -> This(){Def(ann')}
+ 		where   
+ 			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > ps;
+ 			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
+ 			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsThis(), This(), uq))>ann
+
+	get-params = <concat>[<method-inputs>, <method-outputs>]
+
+	convert-param = ?Input(n) ; !Input(<concat-strings>[n, "_in"], <_get-type ; sql-type> n)
+	convert-param = ?This() ; !Input("this", Int())
+	convert-param = ?Output(n) ; !Output(<concat-strings>[n, "_out"], <_get-type ; sql-type> n)
+	
+	get-sql-params = get-params ; nub-an ; map(convert-param)

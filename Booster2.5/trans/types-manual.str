@@ -42,20 +42,12 @@ rules // generate Attribute :hasInv> Invariant
 	nabl-constraint(|ctx): Invariant(name, c) -> <fail>
 		with
 			paths := <collect-all-paths>c;
-			/* <debug>"collect-all-paths";
-			<debug>paths; */
 			path-suffix-names := <map(path-suffix-name)>paths;
-			/*<debug> path-suffix-names;*/
 			<map(create-hasinv-rel(|ctx, name))> path-suffix-names
 
 	create-hasinv-rel(|ctx, invName): attrName -> <id>
 		where
-  		<new-rel-tuple(|ctx, "<hasInv:", attrName)> invName /*;
-  		<debug>"relation lookup";
-  		<debug>ctx;
-  		<debug>invName;
-  		<debug>attrName;
-  		<debug><_relation-lookup(|"<hasInv:")> attrName */
+  		<new-rel-tuple(|ctx, "<hasInv:", attrName)> invName
   		// <new-rel-tuple(|ctx, "<hasInv:", invName)> attrName  // throws stacktrace because cannot use a use on lhs of relation
 
 rules

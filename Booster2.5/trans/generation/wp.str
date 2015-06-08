@@ -85,19 +85,19 @@ rules
 
 	aliasing-subst(|path, expr): constraint -> constraint'
 		where
-			<debug> "aliasing-subst";
+			//<debug> "aliasing-subst";
 			path-uri := <_nabl-collect-use;_nabl-uri> path;
-			<debug> <_pp-uri> path-uri;
+			//<debug> <_pp-uri> path-uri;
 
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
-			<debug> <pp-Constraint-string> constraint;
-			<debug><map(pp-partial-Booster25-string)><collect-all-paths> constraint;
+			//<debug> <pp-Constraint-string> constraint;
+			//<debug><map(pp-partial-Booster25-string)><collect-all-paths> constraint;
 			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
 			//matching-paths'* := <remove-an>(path, matching-paths*);
-			<debug><map(pp-partial-Booster25-string)><remove-an>(path, matching-paths*);
-			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*;
-			<debug> <pp-Constraint-string> constraint'
+			//<debug><map(pp-partial-Booster25-string)><remove-an>(path, matching-paths*);
+			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
+			//<debug> <pp-Constraint-string> constraint'
 			
 			
 	literal-subst: (constraint, substs) -> constraint'

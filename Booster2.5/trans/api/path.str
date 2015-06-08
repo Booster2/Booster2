@@ -4,6 +4,14 @@ imports
 	include/Booster25
 	trans/api/_runtime
 	trans/names
+	runtime/types/collect
+	
+	trans/api/_runtime-constructors
+		
+
+	lib/runtime/relations/entries
+	lib/runtime/nabl/uri
+	
 	
 rules // TODO: comment
 				
@@ -39,13 +47,29 @@ rules // collect all paths
 	path-suffix-name = ?Path(_, PathComponent(<id>, _))
 	path-suffix-name = ?PathStart(<id>, _)
 	
-	path-prefix = ?Path(<id>, _)
-	path-prefix = ?PathStart(_,_) ; !This()
+	path-prefix: 
+		Path(ps, _) -> ps
+		
+	path-prefix: ps@PathStart(_{ann}, _) -> This(){Def(ann')}
+ 		where   
+ 			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > ps;
+ 			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
+ 			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsThis(), This(), uq))>ann
+			
 
 	is-class-name = _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
 	
 	in-out-string: Input(_) -> "Input"
 	in-out-string: This() -> "Input"
 	in-out-string: Output(_) -> "Output" 
+	
+	
+	path-to-var-name: PathStart(name, maybeprimed) -> <concat-strings>["path_", name]
+	path-to-var-name: Path(p, PathComponent(att, maybeprimed)) -> <concat-strings>[<path-to-var-name> p, "_", att]
+	path-to-var-name: This() -> "path_this"
+	path-to-var-name: Input(i) -> <concat-strings>["path_", i, "_in"]
+	path-to-var-name: Output(o) -> <concat-strings>["path_", o, "_out"]
+	
+
 
 rules
