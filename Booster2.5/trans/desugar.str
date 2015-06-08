@@ -40,6 +40,7 @@ signature constructors
 	SubsetEquals : Op
 	Superset : Op
 	SupersetEquals : Op
+	Assign: Op
 	
 	
 	Plus : Op
@@ -98,7 +99,7 @@ rules // Help NaBL: add SetVal constructors around the values in set definitions
 	rem-setvalues = ?SetVal(<id>)
 
 rules //  Help NaBL: make explicit what are Variable definition sites
-	
+		
 	method-add-vardef: Method(name, body) -> Method(name, body')
 	with
 		(body', _) := <topdown-fold(try(add-vardef))>(body, [])
@@ -337,6 +338,7 @@ rules //  Help NaBL: make explicit what are Variable definition sites
 	binrel-const : SubsetEquals(a,b) 			-> ((a,b), SubsetEquals())
 	binrel-const : Superset(a,b) 					-> ((a,b), Superset())
 	binrel-const : SupersetEquals(a,b) 		-> ((a,b), SupersetEquals())
+	binrel-const : Assign(a,b) 						-> ((a,b), Assign())
 
 	binop-arith : Plus(a,b) 							-> ((a,b), Plus())
 	binop-arith : Minus(a,b) 							-> ((a,b), Minus())
@@ -380,6 +382,7 @@ rules // make PathStart(classReference, _) have type set within BinRel(_, In(), 
 	add-typeisaset: Intersection(ps@PathStart(_,_), a)		-> Intersection(<custom-origin(|ps)>TypeIsASet(ps), a)
 	add-typeisaset: Union(ps@PathStart(_,_), a)						-> Union(<custom-origin(|ps)>TypeIsASet(ps), a)
 	add-typeisaset: Minus(ps@PathStart(_,_), a)						-> Minus(<custom-origin(|ps)>TypeIsASet(ps), a)
+
 
 rules // rewrite all invariants to get a name
 	

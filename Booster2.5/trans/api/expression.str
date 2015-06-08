@@ -4,16 +4,19 @@ imports
 	include/booster25
 	trans/api/_runtime
 	trans/names
+	trans/api/type
 
 rules
 	
-	is-obj-expression:
+	is-obj-expression = is-class
+	
+/*	is-obj-expression:
 		expr -> []
 			where
 				ty := <_get-type> expr;
 				ty-uri := <_nabl-uri> ty;
 				ns := <_nabl-uri-namespace> ty-uri;
 				<?NablNsClass()> ns
-		
+	*/	
 	
 	

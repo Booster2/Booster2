@@ -94,14 +94,18 @@ rules
 			f_parent := <path-prefix> f_pre
 
 	/* Mandatory -> Set-valued --- Add */
-	program: |[x! . y '= ~e]| -> |[ x!.y := ~e 
-														 || ~e.z := ~e.z \/ {x!}]|
+	program: |[~f = ~e]| -> |[ ~f_pre := ~e 
+														 || ~e.z := ~e.z \/ {~f_parent}
+														 || ~f_pre.z := ~f_pre.z - {~f_parent}]|
 		where
 			<is-pre-state> e;
-			z := <attr-get-inverse> y;
-			<attr-is-mandatory> y;
+			<is-post-state>f;
+			<attr-is-mandatory> f;
+			z := <attr-get-inverse> f;
 			<attr-is-set> z;
-			<is-obj-expression> e
+			<is-obj-expression> e;
+			f_pre := <make-pre-state> f;
+			f_parent := <path-prefix> f_pre
 
 
 	
@@ -144,6 +148,7 @@ rules
 			<is-obj-expression> e;
 			f_pre := <make-pre-state> f;
 			f_parent := <path-prefix> f_pre
+			
 
 	/* Optional -> Set-valued --- Add */
 	program: |[~f = ~e]| -> |[(~f_pre := ~e || ~e.z := ~e.z \/ {~f_parent} || 
@@ -174,14 +179,26 @@ rules
 	/* Set-valued -> Optional --- Add */
 	program: |[~e : ~f]| -> |[~e.z = null --> (~f_pre := ~f_pre \/ {~e} || ~e.z := ~f_parent ) ]|
 		where
+			<debug> "set-opt";
 			<is-pre-state> e;
+			<debug> "1";
 			<is-post-state>f;
+			<debug> "2";
 			z := <attr-get-inverse> f;
+			<debug> "3";
 			<attr-is-set> f;
+			<debug> "4";
 			<attr-is-optional> z;
+			<debug> "5";
+			<debug> e;
+			<debug><_get-type> e;
+			<debug><_get-type ; _nabl-uri> e;
 			<is-obj-expression> e;
+			<debug> "6";
 			f_pre := <make-pre-state> f;
-			f_parent := <path-prefix> f_pre
+			<debug> "7";
+			f_parent := <path-prefix> f_pre;
+			<debug> "8"
 
 	/* Set-valued -> Set-valued --- Add */
 	program: |[~e : ~f]| -> |[(~f_pre := ~f_pre \/ {~e}) || (~e.z := ~e.z \/ {~f_parent})]|
@@ -190,6 +207,7 @@ rules
 			<is-post-state>f;
 			z := <attr-get-inverse> f;
 			<attr-is-set> f;
+			<debug> <get-multiplicity>  z;
 			<attr-is-set> z;
 			<is-obj-expression> e;
 			f_pre := <make-pre-state> f;
@@ -245,13 +263,25 @@ rules
 	/* Set-valued -> Optional --- Remove */
 	program: |[~e /: ~f]| -> |[~e : ~f_pre --> (~f_pre := ~f_pre - {~e} || ~e.z := null) ]|
 		where
+			<debug> "set-opt remove";
 			<is-pre-state> e;
+			<debug> "1";
 			<is-post-state>f;
+			<debug> "2";
 			z := <attr-get-inverse> f;
+			<debug> "3";
 			<attr-is-set> f;
+			<debug> "4";
 			<attr-is-optional> z;
+			<debug> "5";
+			<debug> e;
+			<debug> <_get-type> e;
+			<debug> <_get-type ; _nabl-uri> e;
+			<debug> <_get-type ; _nabl-uri; _nabl-uri-namespace> e;
 			<is-obj-expression> e;
+			<debug> "6";
 			f_pre := <make-pre-state> f;
+			<debug> "7";
 			f_parent := <path-prefix> f_pre
 
 

@@ -30,7 +30,9 @@ test Heuristics Bidir man-set add new [[
 ]] build heuristics-builder-ast to [[
 	m1 { b! : B' ; b!.a' = a? 
 		 | new b ! : B ; 
-		 			  b!.a := a? || a?.bs := a?.bs \/ { b! }  }
+		 			  b!.a := a? 
+		 		 || a?.bs := a?.bs \/ { b! }
+		 		 || b!.a.bs := b!.a.bs - { b! }  }
 ]]
           
 

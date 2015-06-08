@@ -108,9 +108,6 @@ binding rules // References
 		refers to Class class
 		refers to Attribute attr in Class class
 	
-	New(v, class):
-		refers to Class class
-		defines OutputVariable v of type class 
 	
 	PathStart(p, prime):
 		refers to Attribute p
@@ -136,20 +133,24 @@ binding rules // References
 
 	This(): refers to This This()		
 
+	New(v, class):
+		refers to Class class
+		defines OutputVariable v of type class
+
 binding rules // Variables
 	
 	Def(v, rhs, In(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type Set(t)
 	Def(v, rhs, In(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type Set(t)
 
-	Def(v, lhs, In(), Right(), Input(), None()): defines InputVariable  v of type t where lhs has type Set(t)
-	Def(v, lhs, In(), Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type Set(t)
+	Def(v, lhs, In(), Right(), Input(), None()): defines InputVariable  v of type Set(t) where lhs has type t
+	Def(v, lhs, In(), Right(), Output(), None()): defines OutputVariable  v of type Set(t) where lhs has type t
 
 
 	Def(v, rhs, NotIn(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type Set(t)
 	Def(v, rhs, NotIn(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type Set(t)
 
-	Def(v, lhs, NotIn(), Right(), Input(), None()): defines InputVariable  v of type t where lhs has type Set(t)
-	Def(v, lhs, NotIn(), Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type Set(t)
+	Def(v, lhs, NotIn(), Right(), Input(), None()): defines InputVariable  v of type Set(t) where lhs has type t
+	Def(v, lhs, NotIn(), Right(), Output(), None()): defines OutputVariable  v of type Set(t) where lhs has type t
 
 
 	Def(v, rhs, Equal(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type t
@@ -164,6 +165,14 @@ binding rules // Variables
 
 	Def(v, lhs, _, Right(), Output(), SetExtent()): defines OutputVariable  v of type t where lhs has type Set(t)
 	Def(v, lhs, _, Right(), Input(), SetExtent()): defines InputVariable  v of type t where lhs has type Set(t)
+
+/*	Def(v, rhs, _, Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type t
+	Def(v, rhs, _, Left(), Input(), None()): defines InputVariable  v of type t where rhs has type t
+
+	Def(v, rhs, _, Left(), Output(), SetExtent()): defines OutputVariable  v of type t where rhs has type Set(t)
+	Def(v, rhs, _, Left(), Input(), SetExtent()): defines InputVariable  v of type t where rhs has type Set(t)
+*/
+
 
 /*
 	BinRelDefRightInput (lhs, op,             v  ): defines InputVariable  v of type t where lhs has type t

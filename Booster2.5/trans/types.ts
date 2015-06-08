@@ -89,6 +89,7 @@ type rules // BinRel, BinOp, UnOp
 
 
 	Equal(l,r)
++ Assign(l,r)
 + NotEqual(l,r)
 + Subset(l,r)
 + SubsetEquals(l,r)
@@ -101,6 +102,7 @@ type rules // BinRel, BinOp, UnOp
 
 	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
   Def(v, e, Equal(), leftright, inout, setext)
++ Def(v, e, Assign(), leftright, inout, setext)
 + Def(v, e, NotEqual(), leftright, inout, setext): BasicType(Boolean())
 	where e : e-ty
 
