@@ -51,7 +51,7 @@ rules
 				isId := <is-id> a;
 				opp-aname := <attr-get-inverse <+ !""> name;
 				opp-cname := <attr-parent <+ !""> opp-aname;
-				tname := <concat-strings> [<attr-parent> name, "_", name]
+				tname := <att-table-name> name
 						 
 	sql-metadata:
 		m@Method(name, gc) ->
@@ -186,15 +186,33 @@ rules
 	sql-method:  m@Method(mname, gc) -> 
 		StatementList([
 				DropProcedure(pname),
-				CreateProcedure(pname, params, stmt)
+				CreateProcedure(pname, params, stmt),
+				DropFunction(name1),
+				CreateFunction(name1, [Input("this", Int())], Bit(), statement1),
+				DropFunction(name2),
+				CreateFunction(name2, params2, Bit(), statement2)
 			])
 			where
 				pname := <concat-strings>[<method-parent> mname, "_", mname];
+				name1 := <concat-strings> [pname, "_available"];
+				name2 := <concat-strings> [name1, "_inputs"];
 				params := <get-sql-params> m;
-				stmt := <sql-gc> gc
+				params2 := <get-sql-inputs> m;
+				stmt := <sql-gc> gc;
+				guard-without-inputs := <guard-without-ins-outs> m;
+				statement1 := IfThen(<sql-const> guard-without-inputs, 
+														Return(Int("1")), 
+														[], 
+														Some(Else(Return(Int("0")))));
+				guard := <guard-without-outs> m;
+				statement2 := IfThen(<sql-const> guard, 
+												Return(Int("1")), 
+												[], 
+												Some(Else(Return(Int("0")))))										
 					
 	sql-gc: Skip() -> VariableAssign("dummySkip", Int("1"))
 
+	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
 
 	sql-gc: Assign(p, expr) -> 
 			StatementList([VariableAssign(pn', expr'), 
@@ -207,6 +225,14 @@ rules
 			tname := <path-prefix ; class-name> p;
 			expr' := <sql-expr> expr;
 			expr'' := <path-where> p
+	
+	sql-gc: New(o, cls)
+			-> 
+			StatementList([Insert(None(), None(), Some(Into()), cls, [], [], None()),
+				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), 
+							Some(Into([<concat-strings>[o, "_out"]])), None())])
+	
+
 	
 	sql-gc: Guard(const, gc) -> IfThen(const', stmt,[],None())
 		where

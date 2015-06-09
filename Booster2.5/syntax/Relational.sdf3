@@ -13,7 +13,7 @@ context-free syntax
   Statement.DropDatabase = <drop database if exists `<ID>`;> 
 	Statement.CreateDatabase = <create database `<ID>`;>
 	Statement.UseDatabase = <use `<ID>`;
-	SET autocommit=0;>
+	SET autocommit=1;>
 	Statement.DropTable = <drop table if exists `<ID>`;>
   Statement.CreateTable = <create table `<ID>` ( <PrimaryKeyColumn>);>
   PrimaryKeyColumn.PrimaryKeyColumn = <`<ID>` <SQLType> <ColumnNullable?> <ColumnDefault?> <Extra?> primary key <Reference?>>
@@ -53,19 +53,20 @@ context-free syntax
 					end; 
 					start transaction;
 	 			    <Statement>
-	 			  	end //
+	 			  commit;
+	 			 	end //
 	 			  delimiter ;>
-
+	Statement.DropFunction = <drop function if exists `<ID>`;>
   Statement.CreateFunction = 
 	 			  <delimiter //
-	 			  create function `<ID>` ( <{Parameter ","}*>)
+	 			  create function `<ID>` ( <{FunctionParameter ","}*>)
 	 			  	returns <SQLType>
 	 				begin
 	 			    <Statement>
 	 			  end //
 	 			  delimiter ;>  
   
-  Procedure.Function = <function <ID> ( <{Parameter ","}*> ) returns <SQLType> <DeclareList> <Statement>> 
+  FunctionParameter.Input = <<ID> <SQLType>> 
   Parameter.Input = <in <ID> <SQLType>> 
   Parameter.Output = <out <ID> <SQLType>> 
   Parameter.InOut = <inout <ID> <SQLType>> 

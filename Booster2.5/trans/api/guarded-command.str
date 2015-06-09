@@ -22,3 +22,6 @@ rules
 									<debug>(<_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name ; _pp-uri> path)
 */	
 									\)
+	get-guard = ?Guard(<id>, gc) <+ !True()
+
+rules

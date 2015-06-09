@@ -38,3 +38,47 @@ rules // primed    TODO: rewrite
 	conjoin-constraints: [c,cs*] -> And(c, <conjoin-constraints>[cs*])
 
 rules
+
+	// remove conjuncts of a constraint that contain inputs or outputs.
+	// Occasionally we wish to exclude some inputs or outputs - we use the parameter
+	// is, os, or ios to control this.
+
+	remove-inputs(|is): c ->
+			<topdown(\ trm -> <remove-input(|is) <+ !trm> trm \)> c
+
+	remove-outputs(|os): c ->
+			<topdown(\ trm -> <remove-output(|os) <+ !trm> trm \)> c
+
+	remove-inputs-and-outputs(|ios): c ->
+			<topdown(\ trm -> <remove-output(|ios) <+ !trm> trm \)>
+				<topdown(\ trm -> <remove-input(|ios) <+ !trm> trm \)> c
+
+	
+	remove-input(|is):
+		constraint -> True() 
+			where 
+				<is-relation> constraint;
+				is' := <collect-all(?Input(_))> constraint;
+				<not(subseteq)>(is', is)
+
+	remove-output(|os):
+		constraint -> True() 
+			where
+				<is-relation> constraint; 
+				os' := <collect-all(?Output(_))> constraint;
+				<not(subseteq)>(os', os)
+
+	is-relation = ?Equal(_,_) <+
+								?NotEqual(_,_) <+
+								?GreaterThan(_,_) <+
+								?GreaterThanEqual(_,_) <+
+								?LessThan(_,_) <+
+								?LessThanEqual(_,_) <+
+								?In(_,_) <+
+								?NotIn(_,_) <+
+								?Subset(_,_) <+
+								?SubsetEquals(_,_) <+
+								?Superset(_,_) <+
+								?SupersetEquals(_,_)
+	
+rules

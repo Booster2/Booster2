@@ -6,18 +6,26 @@ imports
 	trans/lib/eq
 	trans/api/type
 	trans/api/path
+	trans/api/constraint
+	trans/api/guarded-command
 	trans/api/_runtime
 	trans/api/_runtime-constructors
 		
 		runtime/types/collect
 		
 	trans/names
+	trans/generation/simplify
 
 	lib/runtime/relations/entries
 	lib/runtime/nabl/namegen
 	lib/runtime/nabl/uri
 	
 rules // conjoin methods
+	
+	method-body = ?Method(_, <id>)
+	method-name = ?Method(<id>, _)
+	
+	method-comp-name: Method(mname, gc) -> <concat-strings>[<method-parent> mname, "_", mname]
 	
 	// @type [Method] -> [Method]
 	method-conjoin-all: [] -> []
@@ -49,7 +57,7 @@ rules // conjoin methods
 	is-obj-method = !True()
 	
 	method-inputs = ?Method(name, <id>) ; collect-all(is-input) ; nub-an
-	method-outputs = ?Method(name, <id>) ; collect-all(?Output(_)) ; nub-an
+	method-outputs = ?Method(name, <id>) ; collect-all(?Output(_) <+ (?New(o, C) ; !Output(o)) ) ; nub-an
 
 
 	is-input = ?Input(_ {Def(_)}) 
@@ -67,3 +75,11 @@ rules // conjoin methods
 	convert-param = ?Output(n) ; !Output(<concat-strings>[n, "_out"], <_get-type ; sql-type> n)
 	
 	get-sql-params = get-params ; nub-an ; map(convert-param)
+	get-sql-inputs = method-inputs ; nub-an ; map(convert-param)
+	
+	guard-without-ins-outs = method-body ; get-guard ; remove-inputs-and-outputs(|[]) ; simplify
+	
+	guard-without-outs = method-body ; get-guard ; remove-outputs(|[]) ; simplify
+	
+rules	
+	

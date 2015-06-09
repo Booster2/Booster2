@@ -31,9 +31,19 @@ rules // attribute properties
 
 	get-dir = ( attr-is-unidir ; !"Uni") <+ ( attr-is-bidir ; !"Bi" ) <+ !""
 	
-	column-default = (attr-is-optional ; !Some(ColumnDefault(Null()))) <+ !None()
+	//column-default = (attr-is-optional ; !Some(ColumnDefault(Null()))) <+ !None()
+	column-default =  !Some(ColumnDefault(Null()))
 
-	column-nullable = (attr-is-optional ; !Some(ColumnNullable())) <+ !Some(ColumnNotNullable())
+	//column-nullable = (attr-is-optional ; !Some(ColumnNullable())) <+ !Some(ColumnNotNullable())
+	column-nullable = !Some(ColumnNullable())
+	
+	att-table-name: name ->
+		<concat-strings> [<attr-parent> name, "_", name]
+			where 
+				<attr-is-set> name
+				
+	att-table-name: name -> <attr-parent> name
+	
 	
 rules
 	

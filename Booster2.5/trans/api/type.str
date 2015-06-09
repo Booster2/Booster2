@@ -18,7 +18,7 @@ rules
 	is-prim-type = (?Set(BasicType(<id>)) <+ ?Optional(BasicType(<id>)) <+ ?BasicType(<id>)) 
 		 		
 	type-to-string: String() -> "String"
-	type-to-string: Int() -> "Int"
+	type-to-string: Int() -> "Integer"
 	type-to-string: DateTime() -> "DateTime"
 	type-to-string: Date() -> "Date"
 	type-to-string: Time() -> "Time"

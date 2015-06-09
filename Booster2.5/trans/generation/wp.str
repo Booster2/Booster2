@@ -52,7 +52,9 @@ rules
 
 	gc-wp(|ast, c): New(o, cl) -> (c', New(o,cl))
 		where	
-			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c
+			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c;
+			<debug> "wp";
+			<debug> c'
 
 	gc-wp(|ast, c): Guard(g,p) -> (And(c,c'), Guard(g, p'))
 		where
@@ -83,21 +85,32 @@ rules
 			invp' := <conjoin-constraints><nub-an><map(\p1 -> <literal-subst>(invp, [(p1, path)]) \)><filter(\p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , <_nabl-collect-use;_nabl-uri> path) \)> <collect-all-paths> invp		
 
 
+	// Class names cannot be aliased!
+	aliasing-subst(|path, expr): constraint -> <literal-subst> (constraint, [(path, expr)])
+		where
+			PathStart(p, _) := path;
+			<is-class-name> p
+
 	aliasing-subst(|path, expr): constraint -> constraint'
 		where
-			//<debug> "aliasing-subst";
+			<debug> "aliasing-subst";
 			path-uri := <_nabl-collect-use;_nabl-uri> path;
-			//<debug> <_pp-uri> path-uri;
+			<debug> <_pp-uri> path-uri;
 
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
-			//<debug> <pp-Constraint-string> constraint;
-			//<debug><map(pp-partial-Booster25-string)><collect-all-paths> constraint;
+			<debug> "1";
+			<debug> <pp-Constraint-string> constraint;
+			<debug><map(pp-partial-Booster25-string)><collect-all-paths> constraint;
 			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
 			//matching-paths'* := <remove-an>(path, matching-paths*);
-			//<debug><map(pp-partial-Booster25-string)><remove-an>(path, matching-paths*);
-			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
-			//<debug> <pp-Constraint-string> constraint'
+			<debug> "2";
+			<debug>matching-paths*;
+			//<debug>matching-paths'*;
+			<debug><subsets> matching-paths*;
+			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*;
+			<debug> "3";
+			<debug> <pp-Constraint-string> constraint'
 			
 			
 	literal-subst: (constraint, substs) -> constraint'
@@ -115,8 +128,11 @@ rules
 
 	generate-constraint: (pos, [], path, expr, constraint) -> Implies(constraint1, constraint3)
 		where
+			<debug> "a";
 			constraint1 := <conjoin-constraints> <map(\ p -> Equal(<path-prefix> p, <path-prefix> path) \)> pos;
-			constraint3 := <literal-subst> (constraint, <map(\ p -> (p, expr)\)> pos)
+			<debug> "b";
+			constraint3 := <literal-subst> (constraint, <map(\ p -> (p, expr)\)> pos);
+			<debug> "c"
 
 	generate-constraint: (pos, neg, path, expr, constraint) -> Implies(And(constraint1, constraint2), constraint3)
 		where
