@@ -52,9 +52,7 @@ rules
 
 	gc-wp(|ast, c): New(o, cl) -> (c', New(o,cl))
 		where	
-			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c;
-			<debug> "wp";
-			<debug> c'
+			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c
 
 	gc-wp(|ast, c): Guard(g,p) -> (And(c,c'), Guard(g, p'))
 		where
