@@ -93,32 +93,17 @@ rules
 
 	aliasing-subst(|path, expr): constraint -> constraint'
 		where
-			<debug> "aliasing-subst";
 			path-uri := <_nabl-collect-use;_nabl-uri> path;
-			<debug> <_pp-uri> path-uri;
 
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
-			<debug> "1";
-			<debug> <pp-Constraint-string> constraint;
-			<debug><map(pp-partial-Booster25-string)><collect-all-paths> constraint;
 			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
-			//matching-paths'* := <remove-an>(path, matching-paths*);
-			<debug> "2";
-			<debug>matching-paths*;
-			//<debug>matching-paths'*;
-			<debug><subsets> matching-paths*;
-			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*;
-			<debug> "3";
-			<debug> <pp-Constraint-string> constraint'
+			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
 			
 			
 	literal-subst: (constraint, substs) -> constraint'
 		where
-			//<debug> "literal-substitute";
 			substs' := <map(\ (t,e) -> ( <remove-all-annotations> t , e) \)> substs;
-			//<debug> substs';
-			//<debug> constraint;
 			constraint' := <bottomup(try(\ trm -> <lookup> (<remove-all-annotations> trm  , substs')\))> constraint
 			
 	remove-all-annotations = bottomup(try(\ t -> t {}\)) 
@@ -128,11 +113,8 @@ rules
 
 	generate-constraint: (pos, [], path, expr, constraint) -> Implies(constraint1, constraint3)
 		where
-			<debug> "a";
 			constraint1 := <conjoin-constraints> <map(\ p -> Equal(<path-prefix> p, <path-prefix> path) \)> pos;
-			<debug> "b";
-			constraint3 := <literal-subst> (constraint, <map(\ p -> (p, expr)\)> pos);
-			<debug> "c"
+			constraint3 := <literal-subst> (constraint, <map(\ p -> (p, expr)\)> pos)
 
 	generate-constraint: (pos, neg, path, expr, constraint) -> Implies(And(constraint1, constraint2), constraint3)
 		where
