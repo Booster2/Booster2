@@ -214,23 +214,55 @@ rules
 
 	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
 
+	sql-gc: Assign(path, Union(path, SetExtent([expr]))) ->
+			StatementList([	VariableAssign(pn1, expr1), 
+											VariableAssign(pn2, expr2), 
+											IfThen(	Equal( SelectQuery(	[], [FunctionCall("count", [Star()])], 
+															Some(FromPart([TableName(tablename)])), 
+															Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+														  	Equal(ColumnName(column2), LocalVariable(pn2))))), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None()), 
+												  		Int("0")), 
+						StatementList([Insert(None(), None(), Some(Into()), tablename, [ColumnName(column1), ColumnName(column2)], [LocalVariable(pn1), LocalVariable(pn2)], None())]),
+						[],
+						None()
+					)])
+					
+			where
+				pn := <path-to-var-name> path;
+				pn1 := <concat-strings>[pn, "_1"];
+				pn2 := <concat-strings>[pn, "_2"];				
+				expr1 := <path-prefix ; sql-expr> path;
+				expr2 := <sql-expr> expr;
+				tablename := <path-suffix-name ; att-table-name> path;
+				column1 := <path-suffix-name ; att-table-name> path;
+				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path 
+				
+	
+			
 	sql-gc: Assign(p, expr) -> 
 			StatementList([VariableAssign(pn', expr'), 
 										 Update([], TableName(tname),[UpdateSet(attname, LocalVariable(pn'))],Some(Where(expr'')),None(),None())])
 			where
 			not(<attr-is-set> p);
 			attname := <path-suffix-name> p;
-			sqltype := <_get-type ; is-prim-type ; sql-type> p;
 			pn' := <path-to-var-name> p;
 			tname := <path-prefix ; class-name> p;
 			expr' := <sql-expr> expr;
 			expr'' := <path-where> p
 	
+	
 	sql-gc: New(o, cls)
 			-> 
 			StatementList([Insert(None(), None(), Some(Into()), cls, [], [], None()),
-				Select([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), 
-							Some(Into([<concat-strings>[o, "_out"]])), None())])
+				SelectStatement([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), 
+							Some(Into([TableName(<concat-strings>[o, "_out"])])), None())])
 	
 
 	
@@ -238,6 +270,31 @@ rules
 		where
 			const' := <sql-const> const;
 			stmt := <sql-gc> gc
+
+
+	sql-gc: Choice(Guard(constraint1, gc1),Guard(constraint2, Skip()))
+			-> IfThen(expr1, stmt1,[],None())
+		where
+			expr1 := <sql-const> constraint1;
+			stmt1 := <sql-gc> gc1 		
+
+
+	booster-to-relational-guarded-command:
+		Choice(Guard(constraint1, gc1),Guard(constraint2, gc2))
+			-> IfThen(expr1, stmt1,[ElseIf(expr2,stmt2)],None())
+		where
+			expr1 := <sql-const> constraint1;
+			expr2 := <sql-const> constraint2;
+			stmt1 := <sql-gc> gc1;
+			stmt2 := <sql-gc> gc2 		
+
+	booster-to-relational-guarded-command:
+		Choice(gc1,gc2)
+			-> IfThen(True(), stmt1,[],Some(stmt2))
+		where
+			stmt1 := <sql-gc> gc1;
+			stmt2 := <sql-gc> gc2 
+
 
 	sql-gc: gc -> VariableAssign("dummySkip", Int("1"))
 		where
@@ -255,15 +312,54 @@ rules
 	sql-const: And(c1, c2) -> And(<sql-const>c1, <sql-const>c2)
 	sql-const: Or(c1, c2) -> Or(<sql-const>c1, <sql-const>c2)
 	
+	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
+	sql-const: NotEqual(e1, e2) -> NotEqual(<sql-expr>e1, <sql-expr>e2)
 	sql-const: GreaterThan(e1, e2) -> GreaterThan(<sql-expr>e1, <sql-expr>e2)
+	sql-const: LessThan(e1, e2) -> LessThan(<sql-expr>e1, <sql-expr>e2)
+
+	sql-const: c -> <fail> where <debug> "cannot translate constraint" ; <debug> c
+
+	
+	sql-expr: Times(e1, e2) -> Times(<sql-expr>e1, <sql-expr>e2)
+	sql-expr: Plus(e1, e2) -> Plus(<sql-expr>e1, <sql-expr>e2)
+	sql-expr: Minus(e1, e2) -> Minus(<sql-expr>e1, <sql-expr>e2)
 	
 	sql-expr: BasicValue(Integer(n)) -> Int(n)
+	sql-expr: BasicValue(String(n)) -> String(n)
+	sql-expr: BasicValue(Decimal(n)) -> Decimal(n)
 	
 	sql-expr: Input(n) -> SystemVariable(<concat-strings>[n, "_in"])
 	sql-expr: Output(n) -> SystemVariable(<concat-strings>[n, "_out"])
 	sql-expr: This() -> SystemVariable("this")
 	
+	sql-expr: Null() -> Null()
+	
+	sql-expr: PathStart(v,None()) -> String(v) where <is-enum> v
+	
+	sql-expr: pth
+		// select name from class where classId = expr
+			-> SelectQuery([], [ColumnName(attname)], Some(FromPart([TableName(cname)])), 
+						  Some(Where(Equal(expr, ColumnName(<concat-strings>[cname, "Id"])))), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None())
+		where
+			<is-path> pth;
+			cname := <path-prefix ; class-name> pth;
+			not(<attr-is-set> pth);
+			attname := <path-suffix-name> pth;
+			expr :=  <path-prefix ; sql-expr> pth
+	
+	sql-expr: BasicValue(CurrentDateTime()) -> FunctionCall("NOW", [])
+	sql-expr: BasicValue(CurrentDate()) -> FunctionCall("CURDATE", [])
+	sql-expr: BasicValue(CurrentTime()) -> FunctionCall("CURTIME", [])
 
+	sql-expr: e -> <fail> where <debug> "cannot translate expression" ; <debug> e 
+	
 	
 	metadata-tables = !StatementList([
 			<meta-classes-table>,
@@ -338,12 +434,12 @@ rules
 		where 
 			expr := <sql-expr> p
 		
-	path-where: Output(n) -> True()
+/*	path-where: Output(n) -> True()
 
 	path-where: This() -> True()
 
 	path-where: ThisPrimed() -> True()
-
+*/
 
 rules
 	
