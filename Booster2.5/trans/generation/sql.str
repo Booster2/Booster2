@@ -214,6 +214,27 @@ rules
 
 	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
 
+
+	sql-gc:	Assign(path, Minus(path, SetExtent([expr])))
+			-> StatementList([	
+						VariableAssign(pn1, expr1), 
+						VariableAssign(pn2, expr2) /*, 
+						Delete(	None(), None(), None(), tablename, 
+												Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+															Equal(ColumnName(column2), LocalVariable(pn2))))), 
+															None(), None())*/])
+			where
+				pn := <path-to-var-name> path;
+				pn1 := <concat-strings>[pn, "_1"];
+				pn2 := <concat-strings>[pn, "_2"];				
+				expr1 := <path-prefix ; sql-expr> path;
+				expr2 := <sql-expr> expr;
+				tablename := <path-suffix-name ; att-table-name> path;
+				column1 := <path-suffix-name ; att-table-name> path;
+				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path 
+
+
+
 	sql-gc: Assign(path, Union(path, SetExtent([expr]))) ->
 			StatementList([	VariableAssign(pn1, expr1), 
 											VariableAssign(pn2, expr2), 
@@ -315,7 +336,11 @@ rules
 	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
 	sql-const: NotEqual(e1, e2) -> NotEqual(<sql-expr>e1, <sql-expr>e2)
 	sql-const: GreaterThan(e1, e2) -> GreaterThan(<sql-expr>e1, <sql-expr>e2)
+	sql-const: GreaterThanEquals(e1, e2) -> GreaterThanEquals(<sql-expr>e1, <sql-expr>e2)
 	sql-const: LessThan(e1, e2) -> LessThan(<sql-expr>e1, <sql-expr>e2)
+	sql-const: LessThanEquals(e1, e2) -> LessThanEquals(<sql-expr>e1, <sql-expr>e2)
+
+
 
 	sql-const: c -> <fail> where <debug> "cannot translate constraint" ; <debug> c
 
