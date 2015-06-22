@@ -71,9 +71,9 @@ rules
 	is-relation = ?Equal(_,_) <+
 								?NotEqual(_,_) <+
 								?GreaterThan(_,_) <+
-								?GreaterThanEqual(_,_) <+
+								?GreaterThanEquals(_,_) <+
 								?LessThan(_,_) <+
-								?LessThanEqual(_,_) <+
+								?LessThanEquals(_,_) <+
 								?In(_,_) <+
 								?NotIn(_,_) <+
 								?Subset(_,_) <+

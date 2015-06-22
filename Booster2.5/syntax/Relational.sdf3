@@ -47,9 +47,14 @@ context-free syntax
 	 			  <delimiter //
 	 			  create procedure `<ID>` ( <{Parameter ","}*>)
 	 				begin
+	 				declare _errcode CHAR(5) DEFAULT '00000';
+  				declare _msg TEXT;
 	 				declare exit handler for sqlwarning, sqlexception, not found 
 	 				begin
-					rollback;
+	 				  get diagnostics condition 1
+        			_errcode = RETURNED_SQLSTATE, _msg = MESSAGE_TEXT;
+        		call log_debug(_msg);	
+						rollback;
 					end; 
 					start transaction;
 	 			    <Statement>
@@ -100,16 +105,16 @@ context-free syntax
   BooleanPrimary.IsNull = <<BooleanPrimary> IS <Not?> NULL> 
   BooleanPrimary.Iff = <<BooleanPrimary> \<=\> <Predicate>> 
   BooleanPrimary.Equal = <<BooleanPrimary> = <BooleanPrimary>> 
-  BooleanPrimary.GreaterThanEqual = <<BooleanPrimary> \>= <BooleanPrimary>> 
+  BooleanPrimary.GreaterThanEquals = <<BooleanPrimary> \>= <BooleanPrimary>> 
   BooleanPrimary.GreaterThan = <<BooleanPrimary> \> <BooleanPrimary>> 
-  BooleanPrimary.LessThanEqual = <<BooleanPrimary> \<= <BooleanPrimary>> 
+  BooleanPrimary.LessThanEquals = <<BooleanPrimary> \<= <BooleanPrimary>> 
   BooleanPrimary.LessThan = <<BooleanPrimary> \< <BooleanPrimary>> 
   BooleanPrimary.NotEqual = <<BooleanPrimary> \<\> <BooleanPrimary>> 
   BooleanPrimary.NotEqual = <<BooleanPrimary> != <BooleanPrimary>> 
   BooleanPrimary.Equal = <<BooleanPrimary> = <AllAny> <Query>> 
-  BooleanPrimary.GreaterThanEqual = <<BooleanPrimary> \>= <AllAny> <Query>> 
+  BooleanPrimary.GreaterThanEquals = <<BooleanPrimary> \>= <AllAny> <Query>> 
   BooleanPrimary.GreaterThan = <<BooleanPrimary> \> <AllAny> <Query>> 
-  BooleanPrimary.LessThanEqual = <<BooleanPrimary> \<= <AllAny> <Query>> 
+  BooleanPrimary.LessThanEquals = <<BooleanPrimary> \<= <AllAny> <Query>> 
   BooleanPrimary.LessThan = <<BooleanPrimary> \< <AllAny> <Query>> 
   BooleanPrimary.NotEqual = <<BooleanPrimary> \<\> <AllAny> <Query>> 
   BooleanPrimary.NotEqual = <<BooleanPrimary> != <AllAny> <Query>> 

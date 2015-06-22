@@ -757,3 +757,21 @@ END;
 END 
 $$
 DELIMITER ;
+
+CREATE TABLE `debug_log` (
+    `debug_log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `msg` varchar(512) NOT NULL,
+    `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`debug_log_id`)
+);
+
+DROP PROCEDURE IF EXISTS `log_debug`;
+DELIMITER $$
+
+CREATE PROCEDURE `log_debug`(IN lastMsg VARCHAR(512))
+
+BEGIN
+    INSERT INTO debug_log (msg)  VALUES (lastMsg);
+END$$
+
+DELIMITER ;
