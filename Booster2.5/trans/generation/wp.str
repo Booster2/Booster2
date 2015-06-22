@@ -35,7 +35,6 @@ rules
 	 		all-model-invariants* := <collect-all(?Invariant(_,_))>ast;
 			assign-paths* := <map(\Assign(path, expr) -> path \)><collect-all(?Assign(_,_))> gc;
 			invariant := <conjoin-constraints><nub><concat><map(\ path -> <filter(invariant-matches-path(|path))> all-model-invariants* \)> assign-paths*;
-			//<debug> "method-wp";
 			//<debug> <pp-Constraint-string> <conjoin-constraints><nub><concat><map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
 			//<debug> <map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
 			(c', gc') := <gc-wp(|ast,And(<make-pre-state> c, invariant))>gc;
@@ -54,7 +53,7 @@ rules
 		where	
 			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c
 
-	gc-wp(|ast, c): Guard(g,p) -> (And(c,c'), Guard(g, p'))
+	gc-wp(|ast, c): Guard(g,p) -> (And(c,c'), Guard( And(c', g), p'))
 		where
 			(c', p') := <gc-wp(|ast, c)> p	
 
@@ -68,11 +67,19 @@ rules
 			(c', p2') := <gc-wp(|ast, c)> p2;
 			(c'', p1') := <gc-wp(|ast, c')> p1
 
+	gc-wp(|ast, c): Choice(p1,p2) -> ( Or(c1,c2), Choice(Guard(c1, p1'),Guard(c2, p2')))
+		where
+			(c1, p2') := <gc-wp(|ast, c)> p2;
+			(c2, p1') := <gc-wp(|ast, c)> p1
+
 
 
 
 	// catch all
 	gc-wp(|ast,c): gc -> (c, gc)
+		where 
+			<debug> "wp failure!!";
+			<debug> gc
 
 
 	invariant-matches-path(|path):
@@ -89,10 +96,10 @@ rules
 			PathStart(p, _) := path;
 			<is-class-name> p
 
+
 	aliasing-subst(|path, expr): constraint -> constraint'
 		where
 			path-uri := <_nabl-collect-use;_nabl-uri> path;
-
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
 			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
@@ -107,7 +114,7 @@ rules
 	remove-all-annotations = bottomup(try(\ t -> t {}\)) 
 		
 		
-	generate-constraint: ([], neg, path, expr, constraint) -> True()
+//	generate-constraint: ([], neg, path, expr, constraint) -> constraint
 
 	generate-constraint: (pos, [], path, expr, constraint) -> Implies(constraint1, constraint3)
 		where
