@@ -12,6 +12,8 @@ imports
 	lib/runtime/relations/entries
 	lib/runtime/nabl/uri
 	
+	trans/api/attribute
+	trans/pp
 	
 rules // TODO: comment
 				
@@ -55,7 +57,14 @@ rules // collect all paths
  			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > ps;
  			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
  			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsThis(), This(), uq))>ann
-			
+		
+	path-add-this: ps@PathStart(c{ann}, mbp) -> Path(This(){Def(ann')}, PathComponent(c {ann}, mbp))
+ 		where   
+ 			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > ps;
+ 			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
+ 			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsThis(), This(), uq))>ann	
+
+	path-add-this: t -> t
 
 	is-class-name = _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
 	
@@ -70,6 +79,29 @@ rules // collect all paths
 	path-to-var-name: Input(i) -> <concat-strings>["path_", i, "_in"]
 	path-to-var-name: Output(o) -> <concat-strings>["path_", o, "_out"]
 	
+	join-paths: (p, Path(p', PathComponent(c, mbp))) -> <join-paths> (Path(p, PathComponent(c', mbp)), p')
+		where
+/*			<debug> "join-paths 1.0";
+			<debug> (<pp-Path-string>p, <pp-Path-string> Path(p', PathComponent(c, mbp))); 
+			<debug> "join-paths 1.1";
+			<debug> c;
+			<debug> <attr-get-inverse> c;
+			<debug> "join-paths 1.2"; */
+			c' := <attr-get-inverse> c
 
+	join-paths: (p, PathStart(c, mbp)) -> <join-paths> (Path(p, PathComponent(c', mbp)), This())
+		where
+			//<debug> "join-paths 2.0";
+			//<debug> (<pp-Path-string>p, <pp-Path-string> PathStart(c, mbp));
+			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > c;
+			//<debug> "join-paths 2.1";
+			//<debug> <attr-get-inverse> c;
+			//<debug> "join-paths 2.2";
+			c' := <attr-get-inverse> c
+		
+	join-paths: (p,q) -> p	
+		//where
+			//<debug> "join paths";
+			//<debug> (p,q)
 
 rules

@@ -36,6 +36,12 @@ rules
     ; !V([], <id>)
     ; box2text-string(|120)
 
+  pp-Path-string =
+  	parenthesize-Booster25;
+    prettyprint-Path
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
 rules // desugared ast pping
 	
   prettyprint-Invariant : Invariant(a, b) -> <prettyprint-Invariant>Invariant(b)

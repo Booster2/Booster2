@@ -1,0 +1,52 @@
+module generation-heuristics-create
+
+language Booster25
+
+setup Common [[
+system debug
+
+	class A{
+		attributes
+			ab : [B . ba] 
+		invariants
+			ab . i > 0
+			ab . s /= "Hello, World!"
+	}
+	
+	class B {
+		attributes
+			i : INT
+			s : STRING
+			ba : A . ab
+			bc : C . cb
+	}	
+	
+	class C {
+		attributes	
+			cb : B . bc
+		methods
+]]
+
+test Simplify simple one remove [[
+	 
+		m1 { cb. i' = i? }
+]] build simplify-builder-ast to [[
+	
+		m1 { i? > 0 --> cb . i := i? }
+]]
+
+test Simplify simple one remove2 [[
+ 
+		m1 { cb . s ' = s? }
+
+]] build simplify-builder-ast to [[
+
+		m1 { s? /= "Hello, World!" --> cb .s := s? }
+
+]]
+
+
+
+setup Teardown [[
+	}
+]]

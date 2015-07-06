@@ -48,6 +48,18 @@ rules
 	constraint-simp: |[ true => ~p ]|				-> p
 	constraint-simp: |[ false => ~p ]|			-> |[ true ]|
 
+	constraint-simp: |[ ~a => (~b & ~c) ]|	-> |[(~a => ~b) & (~a => ~c)]|
+	
+	constraint-simp: |[ (~e = ~f) => ((~e' /= ~f') => ~c) ]|
+																					-> |[ true ]| where <eq-an> (e, e'); <eq-an> (f, f')
+	constraint-simp: |[ (~e /= ~f) => ((~e' = ~f') => ~c) ]|
+																					-> |[ true ]| where <eq-an> (e, e'); <eq-an> (f, f')
+
+	
+	constraint-simp: |[~a => ( ~b => ~c) ]| -> |[ ~a => ~c]| where <eq-an> (a,b)
+
+//	constraint-simp: |[ ~e = ~f => ~a & 
+//											~e /= ~f => ~a ]|	-> a
 
 
 rules
@@ -73,12 +85,20 @@ rules
 	relation-simp: |[ ~e >= ~f ]|						-> |[ true ]| where <geq>(<get-int>e,<get-int>f)
 	relation-simp: |[ ~e >= ~f ]|						-> |[ false ]| where <lt>(<get-int>e,<get-int>f)
 	
-	relation-simp: |[ ~e : ~f \/ {~e}]|				-> |[true]|
+	relation-simp: |[ ~e : ~f \/ {~e}]|			-> |[true]|
 
 rules
 		
 	expression-simp: |[ 0 + ~e ]| 					-> e
 	expression-simp: |[ ~e + 0 ]| 					-> e
+	
+	expression-simp: |[ ~e \/ ~f - ~f]|			-> e
+	
+	expression-simp: Path(Path(p, PathComponent(a1, mbp)), PathComponent(a2, mbp))			
+																					-> p where 
+																								<eq-an>(a2,<attr-get-inverse> a1);
+																								<not(attr-is-set)> a1;
+																								<not(attr-is-set)> a2
 	
 rules
 	
