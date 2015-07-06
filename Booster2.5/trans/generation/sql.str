@@ -9,6 +9,8 @@ imports
 	trans/api/path
 	trans/api/_runtime
 	
+	// We need this for literal-subst
+	trans/generation/wp
 	
 rules
 	
@@ -186,7 +188,7 @@ rules
 	sql-method:  m@Method(mname, gc) -> 
 		StatementList([
 				DropProcedure(pname),
-				CreateProcedure(pname, params, stmt),
+				CreateProcedure(pname, params, pname, stmt),
 				DropFunction(name1),
 				CreateFunction(name1, [Input("this", Int())], Bit(), statement1),
 				DropFunction(name2),
@@ -214,15 +216,17 @@ rules
 
 	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
 
+	sql-gc: Sequence(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
+
 
 	sql-gc:	Assign(path, Minus(path, SetExtent([expr])))
 			-> StatementList([	
 						VariableAssign(pn1, expr1), 
-						VariableAssign(pn2, expr2) /*, 
+						VariableAssign(pn2, expr2) , 
 						Delete(	None(), None(), None(), tablename, 
 												Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
 															Equal(ColumnName(column2), LocalVariable(pn2))))), 
-															None(), None())*/])
+															None(), None())])
 			where
 				pn := <path-to-var-name> path;
 				pn1 := <concat-strings>[pn, "_1"];
@@ -269,15 +273,45 @@ rules
 			
 	sql-gc: Assign(p, expr) -> 
 			StatementList([VariableAssign(pn', expr'), 
-										 Update([], TableName(tname),[UpdateSet(attname, LocalVariable(pn'))],Some(Where(expr'')),None(),None())])
+										 Update([], TableName(tname),[UpdateSet(ColumnName(attname), LocalVariable(pn'))],Some(Where(expr'')),None(),None())])
 			where
-			not(<attr-is-set> p);
+			not(<attr-is-bidir> p);
 			attname := <path-suffix-name> p;
 			pn' := <path-to-var-name> p;
 			tname := <path-prefix ; class-name> p;
 			expr' := <sql-expr> expr;
 			expr'' := <path-where> p
 	
+		sql-gc: Assign(p, expr) -> 
+			StatementList([	VariableAssign(pn1, expr1), 
+											VariableAssign(pn2, expr2), 
+											IfThen(	Equal( SelectQuery(	[], [FunctionCall("count", [Star()])], 
+															Some(FromPart([TableName(tablename)])), 
+															Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+														  	Equal(ColumnName(column2), LocalVariable(pn2))))), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None()), 
+												  		Int("0")), 
+						StatementList([Insert(None(), None(), Some(Into()), tablename, [ColumnName(column1), ColumnName(column2)], [LocalVariable(pn1), LocalVariable(pn2)], None())]),
+						[],
+						None()
+					)])
+					
+			where
+				<attr-is-bidir> p;
+				pn := <path-to-var-name> p;
+				pn1 := <concat-strings>[pn, "_1"];
+				pn2 := <concat-strings>[pn, "_2"];				
+				expr1 := <path-prefix ; sql-expr> p;
+				expr2 := <sql-expr> expr;
+				tablename := <path-suffix-name ; att-table-name> p;
+				column1 := <path-suffix-name ; att-table-name> p;
+				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> p
 	
 	sql-gc: New(o, cls)
 			-> 
@@ -340,7 +374,97 @@ rules
 	sql-const: LessThan(e1, e2) -> LessThan(<sql-expr>e1, <sql-expr>e2)
 	sql-const: LessThanEquals(e1, e2) -> LessThanEquals(<sql-expr>e1, <sql-expr>e2)
 
+	sql-const: In(expr1, PathStart(cname, _))
+			-> NotEqual( SelectQuery([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(cname)])), 
+										Some(Where(Equal(ColumnName(column1), expr'))),
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int("0"))
+			where
+				<is-class-name> cname;
+				column1 := <concat-strings>[cname, "Id"];
+				expr' := <sql-expr> expr1
 
+	sql-const: In(expr1, PathStart(sname, _))
+			-> NotEqual( SelectQuery([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(sname)])), 
+										Some(Where(Equal(ColumnName(sname), expr'))),
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int("0"))
+			where
+				<is-enum> sname;
+				expr' := <sql-expr> expr1
+				
+	sql-const: In(expr1, pth)
+			-> NotEqual( SelectQuery([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(tablename)])), 
+										Some(Where(And(Equal(ColumnName(column1), expr''),
+												  Equal(ColumnName(column2), expr')))), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int("0"))
+				
+				
+			where
+				<is-class> pth;
+				attname := <path-suffix-name> pth;
+				cname := <path-prefix ; class-name> pth; 
+				tablename := <concat-strings>[cname, "_", attname];
+				column1 := <concat-strings>[cname, "_", attname];
+				expr' := <sql-expr> expr1;
+				opp-aname := <attr-get-inverse> pth;
+				opp-cname := <attr-parent>opp-aname;
+				column2 := <concat-strings>[opp-cname, "_", opp-aname];
+				expr'' := <path-prefix ; sql-expr> pth
+
+
+	sql-const: Forall(var, pth, constraint)
+			-> Equal( SelectQuery([],
+							[FunctionCall("count", [Star()])], 
+							Some(FromPart([TableName(tablename)])), 
+							Some(Where(Not(And(Equal(ColumnName(column1), expr''),
+									const''')))), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None()), 
+					Int("0"))
+			where
+				cname := <path-prefix ; _get-type> pth;
+				attname := <path-suffix-name> pth;
+				tablename := <concat-strings>[cname, "_", attname];
+				column1 := <concat-strings>[cname, "_", attname];
+				expr'' := <path-prefix ; sql-expr> pth;
+				const' := <literal-subst> (constraint, [(PathStart(var, None()), Input(var))]);
+				sysvar := <concat-strings>[var, "_in"];
+				const'' := <sql-const> const';
+				opp-aname := <attr-get-inverse> pth;
+				opp-cname := <attr-parent>opp-aname;
+				oppattname := <concat-strings>[opp-cname, "_", opp-aname];
+				const''' := <literal-subst> (const'', [(SystemVariable(sysvar), ColumnName(oppattname))])
 
 	sql-const: c -> <fail> where <debug> "cannot translate constraint" ; <debug> c
 
@@ -348,6 +472,24 @@ rules
 	sql-expr: Times(e1, e2) -> Times(<sql-expr>e1, <sql-expr>e2)
 	sql-expr: Plus(e1, e2) -> Plus(<sql-expr>e1, <sql-expr>e2)
 	sql-expr: Minus(e1, e2) -> Minus(<sql-expr>e1, <sql-expr>e2)
+	
+	sql-expr: Cardinality(pth)
+	//Path(ps{Reference(cname)}, PathComponent(aname, maybeprimed)){Set(Reference(t))}))
+			-> SelectQuery(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName(tablename)])), 
+											Some(Where(expr')), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None())
+		where
+			tablename := <path-prefix ; _get-type> pth;
+			expr' := <sql-where-expr> pth
+	
 	
 	sql-expr: BasicValue(Integer(n)) -> Int(n)
 	sql-expr: BasicValue(String(n)) -> String(n)
@@ -358,6 +500,11 @@ rules
 	sql-expr: This() -> SystemVariable("this")
 	
 	sql-expr: Null() -> Null()
+	
+	sql-expr: BasicValue(CurrentDateTime()) -> FunctionCall("NOW", [])
+	sql-expr: BasicValue(CurrentDate()) -> FunctionCall("CURDATE", [])
+	sql-expr: BasicValue(CurrentTime()) -> FunctionCall("CURTIME", [])
+
 	
 	sql-expr: PathStart(v,None()) -> String(v) where <is-enum> v
 	
@@ -374,16 +521,50 @@ rules
 						  None())
 		where
 			<is-path> pth;
-			cname := <path-prefix ; class-name> pth;
-			not(<attr-is-set> pth);
 			attname := <path-suffix-name> pth;
+			not(<attr-is-bidir> attname);
+			cname := <path-prefix ; class-name> pth;
 			expr :=  <path-prefix ; sql-expr> pth
+			
+			
+		sql-expr: pth
+		// select name from class where classId = expr
+			-> SelectQuery([], [ColumnName(oppattname)], Some(FromPart([TableName(tname)])), 
+						  Some(Where(Equal(expr, ColumnName(tname)))), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None())
+		where
+			<is-path> pth;
+			attname := <path-suffix-name> pth;
+			<attr-is-bidir> attname;
+			cname := <path-prefix ; class-name> pth;
+			tname := <concat-strings>[cname, "_", attname];
+			expr :=  <path-prefix ; sql-expr> pth;
+			opp-aname := <attr-get-inverse> pth;
+			opp-cname := <attr-parent>opp-aname;
+			oppattname := <concat-strings>[opp-cname, "_", opp-aname]
 	
-	sql-expr: BasicValue(CurrentDateTime()) -> FunctionCall("NOW", [])
-	sql-expr: BasicValue(CurrentDate()) -> FunctionCall("CURDATE", [])
-	sql-expr: BasicValue(CurrentTime()) -> FunctionCall("CURTIME", [])
 
 	sql-expr: e -> <fail> where <debug> "cannot translate expression" ; <debug> e 
+	
+	sql-where-expr: pth
+			-> Equal(expr, ColumnName(<concat-strings>[cname, "Id"]))
+		where 
+			<attr-is-basic> pth;
+			cname := <path-prefix ; _get-type> pth;
+			expr := <path-prefix ; sql-expr> pth
+
+	sql-where-expr: pth
+			-> Equal(expr, ColumnName(<concat-strings>[cname, "_", aname]))
+		where 
+			aname := <path-suffix-name> pth;
+			cname := <path-prefix ; _get-type> pth;
+			expr := <path-prefix ; sql-expr> pth	
 	
 	
 	metadata-tables = !StatementList([

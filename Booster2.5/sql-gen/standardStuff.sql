@@ -760,6 +760,8 @@ DELIMITER ;
 
 CREATE TABLE `debug_log` (
     `debug_log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `methodName` varchar(1000) NOT NULL,
+    `errcode` varchar(10) NOT NULL,
     `msg` varchar(512) NOT NULL,
     `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`debug_log_id`)
@@ -768,10 +770,10 @@ CREATE TABLE `debug_log` (
 DROP PROCEDURE IF EXISTS `log_debug`;
 DELIMITER $$
 
-CREATE PROCEDURE `log_debug`(IN lastMsg VARCHAR(512))
+CREATE PROCEDURE `log_debug`(IN lastMethodName VARCHAR(1000), IN lastErrcode VARCHAR(10), IN lastMsg VARCHAR(512))
 
 BEGIN
-    INSERT INTO debug_log (msg)  VALUES (lastMsg);
+    INSERT INTO debug_log (methodName, errcode, msg)  VALUES (lastMethodName, lastErrcode, lastMsg);
 END$$
 
 DELIMITER ;

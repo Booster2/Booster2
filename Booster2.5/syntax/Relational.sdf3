@@ -53,8 +53,8 @@ context-free syntax
 	 				begin
 	 				  get diagnostics condition 1
         			_errcode = RETURNED_SQLSTATE, _msg = MESSAGE_TEXT;
-        		call log_debug(_msg);	
 						rollback;
+        		call log_debug('<ID>', _errcode, _msg);	
 					end; 
 					start transaction;
 	 			    <Statement>
@@ -80,7 +80,7 @@ context-free syntax
   Statement = Update 
   Statement = Insert 
   Statement.InsertInto = InsertInto 
-  Statement.Delete = Delete 
+  Statement = Delete 
   Statement = Return 
   Statement = VariableAssign 
   SQLExpression.Star = <*> 
@@ -281,7 +281,7 @@ context-free syntax
   Update.Update = <UPDATE <UpdateOption*> <TableReference> SET <{UpdateSet ","}+ > <WherePart?> <OrderByPart?> <LimitPart?>;> 
   UpdateOption.LowPriority = <LOW_PRIORITY> 
   UpdateOption.Ignore = <IGNORE> 
-  UpdateSet.UpdateSet = <<ID> = <SQLExpression>> 
+  UpdateSet.UpdateSet = <<ColumnName> = <SQLExpression>> 
   UpdateSet.UpdateSetDefault = <<ID> = DEFAULT> 
   Insert.Insert = <	insert <InsertPriority?> <Ignore?> <Into?> `<ID>` ( <{ ColumnName ","}*> ) values ( <{SQLExpression ","}*> ) <OnDuplicate?>;>
   ColumnName.ColumnName = <`<ID>`>
