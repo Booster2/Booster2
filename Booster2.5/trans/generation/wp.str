@@ -13,6 +13,16 @@ imports
 	
 	trans/pp
 	
+	lib/runtime/relations/entries
+	lib/runtime/nabl/uri
+
+	trans/names
+	runtime/types/collect
+	
+	trans/api/_runtime-constructors
+	
+//	trans/generation/simplify	
+	
 	
 	api/path
 	
@@ -33,23 +43,12 @@ rules
 	
 	method-wp(|ast): Method(name, Both(c, gc)) -> Method(name, gc'')
 		with
-			//<debug> "method-wp";
-			//<debug> name;
 			cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 	 		all-model-invariants* := <collect-all(?Invariant(_,_))>ast;
 			assign-paths* := <map(\Assign(path, expr) -> path \)><collect-all(?Assign(_,_))> gc;
-			//<debug> "all invariants";
-			//<debug> all-model-invariants*;
-			//<debug> "all paths";
-			//<debug> assign-paths*;
 			invariant := <conjoin-constraints><nub><concat><map(\ path -> <filter(invariant-matches-path(|path, cname))> all-model-invariants* \)> assign-paths*;
-			//<debug> "invariant";
-			//<debug> <pp-Constraint-string> invariant;
-			//<debug> <pp-Constraint-string> <conjoin-constraints><nub><concat><map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
-			//<debug> <map(\ path -> <literal-subst>(<filter(invariant-matches-path(|path))> all-model-invariants*, [(This(), <path-prefix> path) ]) \)> assign-paths*;
-			(c', gc') := <gc-wp(|ast,And(<make-pre-state> c, invariant))>gc;
-			gc'' := Guard(c', gc')
-			//g|[~c' --> ~gc']|
+			(c', gc') := <gc-wp(|ast,And(c, <topdown(try(make-post-state))> invariant))>gc;
+			gc'' := Guard(<make-pre-state> c', gc')
 
 rules
 	
@@ -57,16 +56,13 @@ rules
 	
 	gc-wp(|ast, c): Assign(path, expr) -> (c', Assign(path, expr)) 
 		where
-			//<debug> "assign";
-			//<debug> <pp-Constraint-string> c;
-			//<debug> <pp-Path-string> path;
-			//<debug> <pp-Constraint-string> Equal(expr, expr);
-			c' := <aliasing-subst(|path, expr)> c
-			//<debug> <pp-Constraint-string> c'
+			path' := <make-post-state> path;
+			c' := <aliasing-subst(|path', expr)> c
+
 
 	gc-wp(|ast, c): New(o, cl) -> (c', New(o,cl))
 		where	
-			c' := <aliasing-subst(|PathStart(cl, None()), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c
+			c' := <aliasing-subst(|PathStart(cl, Some(Primed())), Union(PathStart(cl, None()), SetExtent([Output(o)])))>c
 
 	gc-wp(|ast, c): Guard(g,p) -> (And(c,c'), Guard( And(c', g), p'))
 		where
@@ -102,54 +98,19 @@ rules
 	where
 			attsMentioned* := <_relation-lookup(|"<hasInv:")> iname;
 			<elem> (<_nabl-collect-use;_nabl-uri> path, attsMentioned*);
-			
-			/* Going to transform the invariant, as per the documentation */
-			/* Find the paths A.p.x and C.q.x */
-			/* And calculate the invariant in terms of C.q.~p.x */
-			
-			/* A is the class in which the invariant was defined */
 			A := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> iname;
-			//<debug> "A";
-			//<debug> A;
-			//<debug> "C";
-			//<debug> C;
-			//<debug> "C.q.x";
-			//<debug> <pp-Path-string> path;
-			
 			Apxs := <filter(\p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p, <_nabl-collect-use;_nabl-uri> path)\)><collect-all(is-path)> invp;
-			//<debug> "A.p.x";
-			//<debug> <map(pp-Path-string)>Apxs;
 			Cqpxs := <map(\p -> <join-paths> (<path-prefix> path, <path-prefix> p)\)> Apxs;
-			
-			//<debug> "C.q.~p.x";
-			//<debug> <map(pp-Path-string)> Cqpxs;
-
-			//<debug> "new inv";
 			invp' := <conjoin-constraints><nub-an><map(contextualize-invariant(|invp))> Cqpxs
-			//<debug> <pp-Constraint-string> invp'
-			
-			//<debug> "Invariant matches path!";
-			//<debug> <pp-Constraint-string> invp;
-			//<debug> "path";
-			//<debug> <pp-Path-string> path;
-			//<debug> "invariant parent";
-			//<debug> <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> iname;
-			//<debug> "paths mentioned";
-			//<debug> <map(pp-Path-string)><collect-all(is-path)> invp;
-			
-			//<debug> "all paths";
-			//<debug> <collect-all-paths> invp;
-			
-			//<debug> <filter(\p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , <_nabl-collect-use;_nabl-uri> path) \)> <collect-all-paths> invp;
-			//<debug> <map(\p1 -> <literal-subst>(invp, [(p1, path)]) \)><filter(\p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , <_nabl-collect-use;_nabl-uri> path) \)> <collect-all-paths> invp;	
-			//<debug> path;			
-			//invp' := <conjoin-constraints><nub-an><map(\p1 -> <literal-subst>(invp, [(p1, path)]) \)><filter(\p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , <_nabl-collect-use;_nabl-uri> path) \)> <collect-all-paths> invp		
-			//<debug> <pp-Constraint-string> invp'
 
 	contextualize-invariant(|const) : 
-		path -> Forall("o", path , <literal-subst>(const, [(This(), PathStart("o", None()))]))
+		path {ann} -> Forall("o", path , <literal-subst>(const, [(This(), PathStart("o"{Def(ann')}, None()))]))
 		where
-			<attr-is-set> path
+			<attr-is-set> path;
+			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > path;
+			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
+ 			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsVariable(), "o", uq))>ann	
+
 
 	contextualize-invariant(|const) : 
 		path -> <literal-subst>(const, [(This(), path)])
@@ -177,18 +138,15 @@ rules
 			path-uri := <_nabl-collect-use;_nabl-uri> path;
 			// this will collect duplicate paths - n is the same as n, but their locations are different.
 			// nub cannot fix this - do it some other way!
-			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri) \)> <collect-all-paths> constraint;
+			matching-paths* := <nub-an> <filter(\ p -> p where <equal>(<_nabl-collect-use;_nabl-uri> p , path-uri); <is-post-state> p \)> <collect-all-paths> constraint;
+			
 			constraint' := <conjoin-constraints> <map(\s -> <generate-constraint> (s, <diff>(matching-paths*, s), path, expr, constraint)\)><subsets> matching-paths*
 			
 			
 	literal-subst: (constraint, substs) -> constraint''
 		where
-			//<debug> "literal-subst";
-			//<debug> <pp-Constraint-string> constraint;
 			constraint' := <bottomup(try(path-add-this))> constraint;
-			//<debug> <pp-Constraint-string> constraint';
 			substs' := <map(\ (t,e) -> ( <remove-all-annotations><bottomup(try(path-add-this))> t , e) \)> substs;
-			//<debug> substs';
 			constraint'' := <bottomup(try(\ trm -> <lookup> (<remove-all-annotations><path-add-this> trm  , substs')\))> constraint'
 			
 	remove-all-annotations = bottomup(try(\ t -> t {}\)) 
