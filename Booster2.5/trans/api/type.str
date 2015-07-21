@@ -30,8 +30,8 @@ rules
 	mult-to-string: Optional() -> "Optional"
 	mult-to-string: Mandatory() -> "Mandatory"
 
-	is-class = _get-type ; ?Set(<id>) ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
-	is-class = _get-type ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
+	is-class: p -> p where <_get-type ; ?Set(<id>) ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()> p	
+	is-class: p -> p where <_get-type ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()> p
 	
 	is-enum = _get-type ; _nabl-uri ; _nabl-uri-namespace ; ?NablNsSet()
 
