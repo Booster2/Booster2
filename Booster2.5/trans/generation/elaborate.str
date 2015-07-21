@@ -17,7 +17,8 @@ rules // elaborate phase
 	elaborate =
 		?ast;
 		inline-methods;
-		try(sometd(flatten-class-hierarchy(|ast)))
+		try(sometd(flatten-class-hierarchy(|ast)));
+		topdown(try(path-add-this))
 
 rules // inline methods
 
