@@ -216,17 +216,19 @@ rules
 rules
 
 	/* Mandatory -> Anything --- Remove */
-	program: |[y ' = null]| -> |[false --> skip]|
+	program: |[~f = null]| -> |[false --> skip]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-mandatory>y
+			<is-post-state>f;
+			z := <attr-get-inverse> f;
+			<attr-is-mandatory> f
 
 	/* Optional -> Mandatory --- Remove */
-	program: |[y ' = null]| -> |[false --> skip]|
+	program: |[~f = null]| -> |[false --> skip]|
 		where
-			z := <attr-get-inverse>y;
-			<attr-is-optional>y;
-			<attr-is-mandatory>z
+			<is-post-state> f;
+			z := <attr-get-inverse>f;
+			<attr-is-optional> f;
+			<attr-is-mandatory> z
 	
 
 	/* Optional -> Optional --- Remove */
