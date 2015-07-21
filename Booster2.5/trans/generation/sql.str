@@ -3,11 +3,16 @@ module trans/generation/sql
 imports
 	
 	include/Booster25
+	trans/lib/eq
 	trans/api/attribute
 	trans/api/method
 	trans/api/type
 	trans/api/path
+	trans/api/guarded-command
+	trans/api/constraint
 	trans/api/_runtime
+	
+	trans/generation/simplify
 	
 	// We need this for literal-subst
 	trans/generation/wp
@@ -192,7 +197,8 @@ rules
 				DropFunction(name1),
 				CreateFunction(name1, [Input("this", Int())], Bit(), statement1),
 				DropFunction(name2),
-				CreateFunction(name2, params2, Bit(), statement2)
+				CreateFunction(name2, params2, Bit(), statement2),
+				StatementList(availability-procedures*)
 			])
 			where
 				pname := <concat-strings>[<method-parent> mname, "_", mname];
@@ -200,7 +206,8 @@ rules
 				name2 := <concat-strings> [name1, "_inputs"];
 				params := <get-sql-params> m;
 				params2 := <get-sql-inputs> m;
-				stmt := <sql-gc> gc;
+				gc' := Guard(<get-guard ; remove-outputs(|[]) ; simplify> gc, <get-body> gc);
+				stmt := <sql-gc> gc';
 				guard-without-inputs := <guard-without-ins-outs> m;
 				statement1 := IfThen(<sql-const> guard-without-inputs, 
 														Return(Int("1")), 
@@ -210,10 +217,51 @@ rules
 				statement2 := IfThen(<sql-const> guard, 
 												Return(Int("1")), 
 												[], 
-												Some(Else(Return(Int("0")))))										
+												Some(Else(Return(Int("0")))));
+				//<debug> "availability-procedures";
+				booster-params := <get-params ; nub-an> m;
+				availability-procedures* := <map(get-availability-procedure(|mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params										
+				
+	get-availability-procedure(|mname, gc):
+		i -> 
+				StatementList([
+						DropProcedure(pname),
+						CreateProcedure(pname, params, pname, stmt) ])
+				where
+					cname := <method-parent> mname;
+					pname := <concat-strings> [cname, "_", mname,"_",i,"_choice"];
+					params := [Input("this", Int())];
+					guard-without-inputs := <simplify><remove-inputs(|[Input(i)])> <get-guard> gc;
+					tidname := <concat-strings>[<class-name> i, "Id"];
+					dummyVariable := <concat-strings>["dummyVariable_",tidname];
+					expr' := <sql-const> guard-without-inputs;
+					expr'' := <literal-subst> (expr', [(SystemVariable(<concat-strings>[i, "_in"]), TableColumnName(dummyVariable, tidname))]);
+					stmt := InsertInto("CLASS_DESCS", ["OBJECT_ID"], 
+							SelectQuery([],
+									[ColumnName(tidname)], 
+											Some(FromPart([Aliased(<class-name> i, Alias(dummyVariable), [])])), 
+											Some(Where(expr'')), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None()))
+
+
+					
 					
 	sql-gc: Skip() -> VariableAssign("dummySkip", Int("1"))
 
+	sql-gc: Parallel(gc1, gc2) -> StatementList([decs1*, decs2*, stmts1*, stmts2*])
+		where
+			StatementList(as) := <sql-gc> gc1;
+			StatementList(bs) := <sql-gc> gc2;
+			([decs1*], [stmts1*]) := <partition(?VariableAssign(_,_))> as;
+			([decs2*], [stmts2*]) := <partition(?VariableAssign(_,_))> bs
+			
+			
 	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
 
 	sql-gc: Sequence(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
@@ -334,7 +382,7 @@ rules
 			stmt1 := <sql-gc> gc1 		
 
 
-	booster-to-relational-guarded-command:
+	sql-gc:
 		Choice(Guard(constraint1, gc1),Guard(constraint2, gc2))
 			-> IfThen(expr1, stmt1,[ElseIf(expr2,stmt2)],None())
 		where
@@ -343,7 +391,7 @@ rules
 			stmt1 := <sql-gc> gc1;
 			stmt2 := <sql-gc> gc2 		
 
-	booster-to-relational-guarded-command:
+	sql-gc:
 		Choice(gc1,gc2)
 			-> IfThen(True(), stmt1,[],Some(stmt2))
 		where
@@ -366,6 +414,8 @@ rules
 	sql-const: Not(const) -> Not(<sql-const> const)
 	sql-const: And(c1, c2) -> And(<sql-const>c1, <sql-const>c2)
 	sql-const: Or(c1, c2) -> Or(<sql-const>c1, <sql-const>c2)
+
+	sql-const: Implies(c1, c2) -> Or(Not(<sql-const>c1), <sql-const>c2)
 	
 	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
 	sql-const: NotEqual(e1, e2) -> NotEqual(<sql-expr>e1, <sql-expr>e2)
@@ -487,8 +537,11 @@ rules
 											None(), 
 											None())
 		where
-			tablename := <path-prefix ; _get-type> pth;
-			expr' := <sql-where-expr> pth
+				<attr-is-set> pth;
+				cname := <path-prefix ; _get-type> pth;
+				attname := <path-suffix-name> pth;
+				tablename := <concat-strings>[cname, "_", attname];
+				expr' := <sql-where-expr> pth
 	
 	
 	sql-expr: BasicValue(Integer(n)) -> Int(n)
@@ -635,10 +688,12 @@ rules
 
 
 	path-where:
-		Path(p {Reference(cname)}, PathComponent(attname, None())){t}
+		Path(p , PathComponent(attname, None()))
 			-> Equal(expr, ColumnName(<concat-strings>[cname, "_",attname]))
 		where 
-			expr := <sql-expr> p
+			<attr-is-set> p;
+			expr := <path-prefix ; sql-expr> p;
+			cname := <path-prefix ; class-name> p
 		
 /*	path-where: Output(n) -> True()
 

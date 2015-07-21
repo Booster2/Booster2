@@ -23,5 +23,6 @@ rules
 */	
 									\)
 	get-guard = ?Guard(<id>, gc) <+ !True()
+	get-body = ?Guard(g, <id>) <+ id
 
 rules

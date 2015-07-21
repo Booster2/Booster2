@@ -79,7 +79,7 @@ context-free syntax
   Statement.BeginEnd = <begin <DeclareList> <Statement> end;> 
   Statement = Update 
   Statement = Insert 
-  Statement.InsertInto = InsertInto 
+  Statement = InsertInto 
   Statement = Delete 
   Statement = Return 
   Statement = VariableAssign 
@@ -150,11 +150,11 @@ context-free syntax
   SimpleExpression.Collate = <<SimpleExpression> COLLATE <CollationName>> 
   SimpleExpression = ParamMarker 
   SimpleExpression = Variable 
-  SimpleExpression.Or = <<SimpleExpression> || <SimpleExpression>> 
+  SimpleExpression.BitOr = <<SimpleExpression> || <SimpleExpression>> 
   SimpleExpression.UnaryPlus = <+ <SimpleExpression>> 
   SimpleExpression.UnaryMinus = <- <SimpleExpression>> 
   SimpleExpression.Reverse = <~ <SimpleExpression>> 
-  SimpleExpression.Not = <! <SimpleExpression>> 
+  SimpleExpression.BitNot = <! <SimpleExpression>> 
   SimpleExpression.Binary = <BINARY <SimpleExpression>> 
   SetExpression.SetExpression = <( <{SQLExpression ","}+> )> 
   SimpleExpression = SetExpression 
