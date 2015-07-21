@@ -66,6 +66,11 @@ rules // collect all paths
 
 	path-add-this: t -> t
 
+
+	path-remove-this: Path(This(), PathComponent(p,mbp)) -> PathStart(p, mbp)
+	path-remove-this: Path(This(), Path(p,pc)) -> Path(p, pc)
+	path-remove-this: p -> p
+
 	is-class-name = _nabl-uri ; _nabl-uri-namespace ; ?NablNsClass()
 	
 	in-out-string: Input(_) -> "Input"
@@ -103,5 +108,8 @@ rules // collect all paths
 		//where
 			//<debug> "join paths";
 			//<debug> (p,q)
+	
+	make-post-state: Path(p, PathComponent(a, None())) -> Path(p, PathComponent(a, Some(Primed())))
+	make-post-state: PathStart(p, None()) -> PathStart(p, Some(Primed()))
 
 rules

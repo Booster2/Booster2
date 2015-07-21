@@ -11,6 +11,7 @@ imports
 	trans/lib/traverse
 	trans/api/_runtime
 	trans/pp
+	trans/api/path
 
 signature constructors
 	
@@ -390,7 +391,7 @@ rules // rewrite all invariants to get a name
 	
 rules 
 
-	final-desugar = try(sometd(\ Invariant(name, constraint) -> Invariant(constraint) \))
+	final-desugar = topdown(try(path-remove-this)) ; try(sometd(\ Invariant(name, constraint) -> Invariant(constraint) \))
 
 
 rules
