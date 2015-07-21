@@ -1,0 +1,48 @@
+module generation-heuristics-create
+
+language Booster25
+
+setup Common [[
+system debug
+	
+	class A{
+		attributes
+			i : INT
+]]
+
+test Simplify increment no this [[
+	methods 
+		m1 { i' = i + 1 }
+]] build simplify-builder-ast to [[
+	methods
+		m1 { i := i + 1 }
+]]
+
+test Simplify increment two this[[
+	methods 
+		m1 { this.i' = this.i + 1 }
+]] build simplify-builder-ast to [[
+	methods
+		m1 { i := i + 1 }
+]]
+
+test Simplify increment one this right[[
+	methods 
+		m1 { i' = this.i + 1 }
+]] build simplify-builder-ast to [[
+	methods
+		m1 { i := i + 1 }
+]]
+
+test Simplify increment one this left[[
+	methods 
+		m1 { this.i' = i + 1 }
+]] build simplify-builder-ast to [[
+	methods
+		m1 { i := i + 1 }
+]]
+
+
+setup Teardown [[
+	}
+]]
