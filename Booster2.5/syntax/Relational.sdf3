@@ -168,10 +168,10 @@ context-free syntax
   Literal.String = < '<SQLSTRING>' > 
   Literal.Int = INT 
   Literal.Decimal = DECIMAL 
-  True.True = <true> 
-  False.False = <false> 
-  Literal.Boolean = True
-  Literal.Boolean = False
+  BoolTrue.BoolTrue = <true> 
+  BoolFalse.BoolFalse = <false> 
+  Literal = BoolTrue
+  Literal = BoolFalse
   Literal.Null = <null> 
   Identifier.ColumnName = <`<ID>`> 
   Identifier.TableColumnName = <`<ID>` . `<ID>`> 

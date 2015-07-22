@@ -47,7 +47,7 @@ rules
 			Insert(None(), None(), Some(Into()), 
 						"_Meta_Attributes", 
 						[ColumnName("class"),	ColumnName("attName"),	ColumnName("primType"),	ColumnName("typeMultiplicity"),	ColumnName("oppAttName"),	ColumnName("className"),	ColumnName("setName"),	ColumnName("direction"),	ColumnName("tableName"),	ColumnName("isId")],
-						[String(classname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						isId], 
+						[String(classname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						<sql-expr>isId], 
 						None())
 			where
 				classname := <attr-parent> name;
@@ -70,7 +70,7 @@ rules
 						])
 		where
 			classname := <method-parent>name;
-			isObjectMethod := <is-obj-method> m;
+			isObjectMethod := <sql-expr><is-obj-method> m;
 			html := <string-replace(|"'", "''")> "";
 			[inParamStmts*] := <map(metadata-param(|m))><method-inputs> m;
 			[outParamStmts*] := <map(metadata-param(|m))><method-outputs> m
@@ -554,6 +554,12 @@ rules
 	sql-expr: BasicValue(Integer(n)) -> Int(n)
 	sql-expr: BasicValue(String(n)) -> String(n)
 	sql-expr: BasicValue(Decimal(n)) -> Decimal(n)
+	
+	sql-expr: BasicValue(True()) -> BoolTrue()
+	sql-expr: BasicValue(False()) -> BoolFalse()
+
+	sql-expr: True() -> BoolTrue()
+	sql-expr: False() -> BoolFalse()
 	
 	sql-expr: Input(n) -> SystemVariable(<concat-strings>[n, "_in"])
 	sql-expr: Output(n) -> SystemVariable(<concat-strings>[n, "_out"])
