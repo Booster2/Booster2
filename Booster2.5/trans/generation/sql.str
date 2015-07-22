@@ -416,9 +416,16 @@ rules
 	sql-const: Or(c1, c2) -> Or(<sql-const>c1, <sql-const>c2)
 
 	sql-const: Implies(c1, c2) -> Or(Not(<sql-const>c1), <sql-const>c2)
-	
+
+	sql-const: Equal(e1, Null()) -> IsNull(<sql-expr>e1, None())
+	sql-const: Equal(Null(), e1) -> IsNull(<sql-expr>e1, None())
 	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
+
+	
+	sql-const: NotEqual(e1, Null()) -> IsNull(<sql-expr>e1, Some(Not()))
+	sql-const: NotEqual(Null(), e1) -> IsNull(<sql-expr>e1, Some(Not()))
 	sql-const: NotEqual(e1, e2) -> NotEqual(<sql-expr>e1, <sql-expr>e2)
+
 	sql-const: GreaterThan(e1, e2) -> GreaterThan(<sql-expr>e1, <sql-expr>e2)
 	sql-const: GreaterThanEquals(e1, e2) -> GreaterThanEquals(<sql-expr>e1, <sql-expr>e2)
 	sql-const: LessThan(e1, e2) -> LessThan(<sql-expr>e1, <sql-expr>e2)

@@ -93,8 +93,8 @@ context-free syntax
   SQLExpression.Xor = <<SQLExpression> XOR <SQLExpression>> 
   SQLExpression.And = <<SQLExpression> AND <SQLExpression>> 
   SQLExpression.And = <<SQLExpression> && <SQLExpression>> 
-  SQLExpression.Not = <NOT <SQLExpression>> 
-  SQLExpression.Not = <! <SQLExpression>> 
+  SQLExpression.Not = <NOT (<SQLExpression>)> 
+  SQLExpression.Not = <! (<SQLExpression>)> 
   SQLExpression.Is = <<BooleanPrimary> IS <Not?> <TFU>> 
   SQLExpression = BooleanPrimary 
   SQLExpression = SimpleExpression 
