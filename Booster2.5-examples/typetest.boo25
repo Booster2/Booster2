@@ -1,0 +1,58 @@
+system typeTest
+
+class A {
+	
+	attributes
+		n : INT
+		
+		//  Don't ask how we instantiate this.  It's not important for these tests...
+	  a : A
+	  
+	invariants
+		// Simple invariant to give WP something interesting to do.
+		n > 0
+		
+	methods
+	
+		// This should work
+		works1 {
+			n = 5			
+		}
+	
+		// This should work, too
+		works2 {
+			n' = 5
+		}
+		
+		// This should work, with an input
+		works3 {
+			n' = x?
+		}
+		
+		// This is ok
+		works4 {
+			a.n' = x?
+		}
+		
+		// This is ok, too. Although simplify could do more here.
+		works5 {
+			a.n' = x? & n' = y?
+		}
+		
+		// Let's try creating an object
+		works6 {
+			a! : A'
+		}
+
+		// Let's try creating an object and doing something else at the same time
+		// Yes, that's ok.
+		works7 {
+			a! : A' & n' = x?
+		}
+		
+		// This doesn't work, for some reason.  It's the re-use of a!
+		fails1 {
+			a! : A' & a!.n' = 5
+		}
+				
+}

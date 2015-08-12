@@ -1,15 +1,84 @@
-system test
+system debug
 
+
+/*		
 class A {
-
 	attributes
-	  m : int
-		n : int
+	
+		ab : [B.ba]
 		
 	invariants
-		m < 6
+		ab.bx > 0
+	
+}
+
+class B {
+	attributes
+	
+		ba : [A . ab]
+		bc : [C . cb]
+		bx : INT
+}
+
+class C {
+	attributes
+		cb : [ B . bc]
 		
 	methods
-		changeN { n' = 5 & n' > 6}
+	
+		m { cb.bx' = x? }
+} */
 
+/*
+class Customer {
+	attributes
+		creditCards : set ( CreditCard . forCustomer)[*]
+		orders : set ( Order . forCustomer ) [*]
+	methods
+		newCreditCard { cc! : CreditCard' & cc!.forCustomer' = this}
 }
+
+class CreditCard {
+	attributes
+		forCustomer : Customer . creditCards
+		usedForPayment : set ( Order . paymentCard )[*]
+}
+
+class Order {
+	attributes
+		forCustomer : Customer . orders
+		paymentCard : [ CreditCard . usedForPayment ]
+	invariants
+		paymentCard :  forCustomer . creditCards
+	methods
+} 
+*/
+
+/*
+	class A{
+		attributes
+			ab : [B . ba]
+		invariants
+			ab . i > 0
+			ab . s /= "Hello, World!"
+	}
+	
+	class B {
+		attributes
+			i : INT
+			s : STRING
+			ba : A . ab
+		methods
+			m { i' = i?}
+	}
+	
+	*/
+	
+	class A {
+		attributes
+			i : INT
+		invariants
+			i > 0
+		methods
+			incI { i' = i? }
+	}

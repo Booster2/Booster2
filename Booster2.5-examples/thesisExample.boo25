@@ -1,0 +1,36 @@
+system thesisExample
+
+class Product {
+	attributes
+		name : String
+		price : Decimal
+		previousPrice : [Decimal]
+		line : ProductLine 
+		reviews : set ( Review .reviewForProduct )[0..*]
+		productForLineItems : set ( LineItem . lineItemProduct) [0..*]
+	invariants
+		price > 0	
+}
+
+
+class LineItem {
+	attributes
+		lineItemProduct : Product . productForLineItems
+		quantity : Int
+		lineItemCost : Decimal
+	invariants
+		lineItemCost = quantity * lineItemProduct.price
+		quantity > 0
+}
+
+class ProductLine {
+	attributes
+	
+	
+}
+
+class Review {
+	attributes
+		reviewForProduct : Product . reviews
+	
+}
