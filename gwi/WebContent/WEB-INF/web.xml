@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:web="http://java.sun.com/xml/ns/javaee" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
   <display-name>gwi</display-name>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
@@ -17,7 +17,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>ClassList</servlet-name>
-    <url-pattern>/ClassList</url-pattern>
+    <url-pattern>/api/ClassList</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
@@ -27,7 +27,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>ObjectView</servlet-name>
-    <url-pattern>/ObjectView</url-pattern>
+    <url-pattern>/api/ObjectView</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
@@ -37,7 +37,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>MethodView</servlet-name>
-    <url-pattern>/MethodView</url-pattern>
+    <url-pattern>/api/MethodView</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
@@ -47,7 +47,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>callMethod</servlet-name>
-    <url-pattern>/callMethod</url-pattern>
+    <url-pattern>/api/callMethod</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
@@ -57,7 +57,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>methodPrecondition</servlet-name>
-    <url-pattern>/methodPrecondition</url-pattern>
+    <url-pattern>/api/methodPrecondition</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
@@ -67,7 +67,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>ClassCardinality</servlet-name>
-    <url-pattern>/ClassCardinality</url-pattern>
+    <url-pattern>/api/ClassCardinality</url-pattern>
   </servlet-mapping>
   <servlet>
     <description></description>
@@ -77,6 +77,27 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>ModelBrowser</servlet-name>
-    <url-pattern>/ModelBrowser</url-pattern>
+    <url-pattern>/api/ModelBrowser</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>UserLogin</display-name>
+    <servlet-name>UserLogin</servlet-name>
+    <servlet-class>ox.softeng.booster.UserLogin</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UserLogin</servlet-name>
+    <url-pattern>/UserLogin</url-pattern>
+  </servlet-mapping>
+  
+  <filter>
+    <filter-name>AnyLoginFilter</filter-name>
+    <filter-class>
+			ox.softeng.gwi.LoginFilter
+    </filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>AnyLoginFilter</filter-name>
+    <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
 </web-app>

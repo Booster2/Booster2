@@ -775,5 +775,24 @@ CREATE PROCEDURE `log_debug`(IN lastMethodName VARCHAR(1000), IN lastErrcode VAR
 BEGIN
     INSERT INTO debug_log (methodName, errcode, msg)  VALUES (lastMethodName, lastErrcode, lastMsg);
 END$$
-
 DELIMITER ;
+
+
+drop function if exists `validatePassword`;
+delimiter $$
+create function `validatePassword` (un varchar(4000), passwdIn varchar(4000))
+returns varchar(4000)
+begin
+	set @noMatches = (select count(distinct username) from User where 
+		(select Password(passwdIn) = passwd and (LOWER(un) = LOWER(username) or LOWER(emailAddress) = LOWER(un))));
+return
+(select
+case  @noMatches
+when 1 then (select username from User
+			where (select Password(passwdIn)) = passwd and
+			(LOWER(username) = LOWER(un) or LOWER(emailAddress) = LOWER(un)))
+else ''
+end);
+
+end $$
+delimiter ;

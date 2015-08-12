@@ -51,6 +51,7 @@ public class ClassList extends HttpServlet {
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		super.service(request, response);
 		System.out.println("service() called on ClassList");
 		response.setContentType("application/json");
 		Connection client = UIHelper.trySignIn(request);
@@ -58,7 +59,6 @@ public class ClassList extends HttpServlet {
 		{
 			return;
 		}
-		
 		JSONArray jsonArray = new JSONArray();
 		JSONObject obj = new JSONObject();
 		

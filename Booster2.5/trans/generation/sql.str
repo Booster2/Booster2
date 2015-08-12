@@ -321,6 +321,17 @@ rules
 			
 	sql-gc: Assign(p, expr) -> 
 			StatementList([VariableAssign(pn', expr'), 
+										 Update([], TableName(tname),[UpdateSet(ColumnName(attname), FunctionCall("Password", [LocalVariable(pn')]))],Some(Where(expr'')),None(),None())])
+			where
+			BasicType(Password()) := <_get-type> p;
+			attname := <path-suffix-name> p;
+			pn' := <path-to-var-name> p;
+			tname := <path-prefix ; class-name> p;
+			expr' := <sql-expr> expr;
+			expr'' := <path-where> p
+
+	sql-gc: Assign(p, expr) -> 
+			StatementList([VariableAssign(pn', expr'), 
 										 Update([], TableName(tname),[UpdateSet(ColumnName(attname), LocalVariable(pn'))],Some(Where(expr'')),None(),None())])
 			where
 			not(<attr-is-bidir> p);

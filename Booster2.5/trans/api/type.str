@@ -23,6 +23,8 @@ rules
 	type-to-string: Date() -> "Date"
 	type-to-string: Time() -> "Time"
 	type-to-string: Decimal() -> "Decimal"
+	type-to-string: Boolean() -> "Boolean"
+	type-to-string: Password() -> "Password"
 	
 	multiplicity-to-string = get-multiplicity ; multiplicity-string
 	
@@ -63,6 +65,8 @@ rules
 	sql-type: Date() -> Date()
 	sql-type: Time() -> Time()
 	sql-type: Decimal() -> Decimal()
+	sql-type: Boolean() -> Bit()
+	sql-type: Password() -> Text()
 			
 	sql-type: BasicType(t) -> <sql-type> t
 	

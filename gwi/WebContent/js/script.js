@@ -5,10 +5,38 @@
 	
 
 var boosterApp = angular.module('boosterApp', ['ngRoute', 'ngTable','ui.bootstrap'], function($httpProvider) {
-	  // Use x-www-form-urlencoded Content-Type
+	// Use x-www-form-urlencoded Content-Type
 	//Taken from:
 	// http://victorblog.com/2012/12/20/make-angularjs-http-service-behave-like-jquery-ajax/
 	  $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
+	
+	  var interceptor = ['$rootScope', '$q', '$location', function (scope, $q, location) {
+
+	        function success(response) {
+	            return response;
+	        }
+
+	        function error(response) {
+	            var status = response.status;
+
+	            if (status == 403) {
+	                //console.log('window location: ' + location.path());
+	            	window.location = "#/login/" + location.path();
+	                return $q.reject(response);
+	                
+	            }
+	            // otherwise
+	            return $q.reject(response);
+
+	        }
+	        return function (promise) {
+	            return promise.then(success, error);
+	        }
+	    }]; 
+	    $httpProvider.responseInterceptors.push(interceptor);
+	  
+	  
+	  
 	  /**
 	   * The workhorse; converts an object to x-www-form-urlencoded serialization.
 	   * @param {Object} obj
@@ -51,6 +79,8 @@ var boosterApp = angular.module('boosterApp', ['ngRoute', 'ngTable','ui.bootstra
 	  }];
 });
 
+
+
 boosterApp.filter('nl2br', function(){
     return function(text) {
          return text.replace(/\n/g, '<br/>');
@@ -58,25 +88,33 @@ boosterApp.filter('nl2br', function(){
 );
 
 // configure our routes
-boosterApp.config(function($routeProvider) {
+boosterApp.config(function($routeProvider, $httpProvider) {
 	$routeProvider
 
+	
 	.when('/', {
 		templateUrl : 'pages/classList.html',
 		controller  : 'classListController',
-		service: 'classListService'
+		service		: 'classListService'
+	})
+
+	.when('/login/:redirectUrl*', {
+		//templateUrl : 'pages/login.html',
+		template	: ' ',
+		controller  : 'loginController',
+		service 	: 'loginDialogService'
 	})
 
 	.when('/object/:className/:objectID', {
 		templateUrl : 'pages/objectView.html',
 		controller  : 'objectViewController',
-		service : ['objectViewService', 'methodViewService']
+		service 	: ['objectViewService', 'methodViewService']
 	})
 
 	.when('/class/:className', {
 		templateUrl : 'pages/classSearch.html',
 		controller  : 'classSearchController',
-		service : 'classSearchService'
+		service 	: 'classSearchService'
 	})
 
 	.when('/queries', {
@@ -87,7 +125,7 @@ boosterApp.config(function($routeProvider) {
 	.when('/modelbrowser', {
 		templateUrl : 'pages/modelBrowser.html',
 		controller  : 'modelBrowserController',
-		service: 'modelBrowserService'
+		service		: 'modelBrowserService'
 	})
 	.when('/utilities', {
 		templateUrl : 'pages/utilities.html',
@@ -170,6 +208,14 @@ boosterApp.controller('utilitiesController', function($scope) {
 
 });
 
+boosterApp.controller('loginController', ['$scope', '$routeParams', 'loginDialogService', function($scope, routeParams, loginDialogService) {
+	console.log("Login Controller here");
+	console.log("redirectUrl : " + routeParams.redirectUrl);
+	loginDialogService.open(routeParams.redirectUrl);
+}]);
+
+
+
 boosterApp.controller('modelBrowserController', ['$scope', 'modelBrowserService', function($scope, modelBrowserService) {
 	
 	
@@ -235,9 +281,11 @@ boosterApp.factory('classListService', function($http) {
 	return {
 		getClassList: function() {
 			//return the promise directly.
-			return $http.get('/gwi/ClassList')
+			return $http.get('/gwi/api/ClassList')
 			.then(function(result) {
 				//resolve the promise as the data
+				console.log("Error!");
+				console.log(result);
 				return result.data;
 			});
 		}
@@ -248,7 +296,7 @@ boosterApp.factory('modelBrowserService', function($http) {
 	return {
 		getModel: function() {
 			//return the promise directly.
-			return $http.get('/gwi/ModelBrowser')
+			return $http.get('/gwi/api/ModelBrowser')
 			.then(function(result) {
 				//resolve the promise as the data
 				return result.data;
@@ -261,7 +309,7 @@ boosterApp.factory('objectViewService', function($http) {
 	return {
 		getObjectView: function(className, objectID) {
 			//return the promise directly.
-			return $http.get('/gwi/ObjectView', 
+			return $http.get('/gwi/api/ObjectView', 
 					{	params: {className : className,
 						objectID: objectID}})
 						.then(function(result) {
@@ -276,7 +324,7 @@ boosterApp.factory('methodViewService', function($http) {
 	return {
 		getMethodView: function(className, methodName, oid) {
 			//return the promise directly.
-			return $http.get('/gwi/MethodView', 
+			return $http.get('/gwi/api/MethodView', 
 					{	params: {
 						className : className,
 						methodName: methodName,
@@ -294,7 +342,7 @@ boosterApp.factory('methodSubmitService', function($http, $route, $location) {
 	return {
 		submitMethod: function(params) {
 			//return the promise directly.
-			return $http.post('/gwi/callMethod', 
+			return $http.post('/gwi/api/callMethod', 
 					params)
 						.then(function(result) {
 							//resolve the promise as the data
@@ -315,11 +363,35 @@ boosterApp.factory('methodSubmitService', function($http, $route, $location) {
 	};
 });
 
+boosterApp.factory('loginSubmitService', function($http, $route, $location) {
+	return {
+		submit: function(params) {
+			
+			//return the promise directly.
+			return $http.post('/gwi/UserLogin', params)
+						.then(function(result) {
+							//resolve the promise as the data
+							if(result.data._success){
+								console.log("success here!");
+								$location.path(params.redirectUrl);
+							}
+							return result.data;
+						});
+			
+			console.log("submitted");
+		}
+	
+	};
+});
+
+
+
+
 boosterApp.factory('methodPreconditionService', function($http, $route) {
 	return {
 		getPrecondition: function(params) {
 			//return the promise directly.
-			return $http.post('/gwi/methodPrecondition', 
+			return $http.post('/gwi/api/methodPrecondition', 
 					params)
 						.then(function(result) {
 							//resolve the promise as the data
@@ -350,7 +422,7 @@ boosterApp.factory('classSearchService', function($http) {
 
 
 
-			return $http.get('/gwi/ClassSearch', 
+			return $http.get('/gwi/api/ClassSearch', 
 					{	params: {className : className,
 						searchOrderBy: searchOrderBy,
 						searchDirection: searchDirection,
@@ -380,7 +452,7 @@ var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, cla
 	});
 
 	$scope.ok = function () {
-		console.log("I'm here, I'm here!");
+		//console.log("I'm here, I'm here!");
 		var data = {};
     	$.each($scope.methodObject.parameters,function(index, param){
 	    	
@@ -413,6 +485,22 @@ var ModalInstanceCtrl = function ($scope, $modalInstance, methodViewService, cla
 };
 
 
+var LoginModalCtrl = function ($scope, $modalInstance, loginSubmitService, redirectUrl) {
+	
+	$scope.loginParams = {};
+	
+	$scope.ok = function () {
+		$scope.loginParams.redirectUrl = redirectUrl; 
+		loginSubmitService.submit($scope.loginParams);
+		$modalInstance.close();
+	};
+
+	$scope.cancel = function () {
+		$modalInstance.dismiss('cancel');
+	};
+};
+
+
 boosterApp.factory('methodDialogService',function($log, $http, $modal, methodViewService, methodSubmitService) {
 	return {
 		open : function (classname, methodname, oid) {
@@ -437,6 +525,30 @@ boosterApp.factory('methodDialogService',function($log, $http, $modal, methodVie
 		}
 	};
 });
+
+boosterApp.factory('loginDialogService',function($log, $http, $modal, loginSubmitService) {
+	console.log("loginDialogService here...");
+	return {
+		open : function (redirectUrl) {
+			
+			var modalInstance = $modal.open({
+				templateUrl: 'pages/login.html',
+				controller: LoginModalCtrl,
+				resolve: {
+					redirectUrl: function() { return redirectUrl; }
+				}
+			});
+	
+			modalInstance.result.then(function ($scope) {
+				
+				//$scope.selected = selectedItem;
+			}, function () {
+				//$log.info('Modal dismissed at: ' + new Date());
+			});
+		}
+	};
+});
+
 
 var DatepickerDemoCtrl = function ($scope) {
 	  $scope.today = function() {

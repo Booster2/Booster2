@@ -1,4 +1,4 @@
-system S
+system defaultBooster
       
       
 /* The Default User class.
@@ -9,20 +9,23 @@ class User {
 		lastName (ID) : String
 		firstName (ID) : String
 		emailAddress : String
-		pw : Password
+		passwd : Password
 		enabled : Boolean
 		created : DateTime
 	methods
-		create {u! : User' & 
+		create {u! : User' ; 
 				u!.firstName' = firstName? & 
 				u!.lastName' = lastName? & 
 				u!.emailAddress' = emailAddress? & 
 				u!.username' = username? & 
-				u!.pw' = pw? &
+				u!.passwd' = passwd? &
 				u!.created' = CurrentDateTime & 
-				u!.enabled = true }		
+				u!.enabled = true }
 		enableAccount { enabled = false & enabled' = true}
 		disableAccount { enabled = true & enabled' = false}
-		changePassword { pw' = pw? }
+		changeUserDetails { lastName' = lastName? & 
+												firstName' = firstName? & 
+												emailAddress' = emailAddress? }
+		changePassword { passwd' = passwd? }
 		changeUsername { username' = username? }		
 }
