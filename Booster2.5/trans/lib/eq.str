@@ -11,10 +11,11 @@ rules // equality with ignoring annotations
 	/* nub on a list ignoring annotations */
 	nub-an: [] -> []
 	
-	nub-an: [a, as*] -> [a, as*]
+	nub-an: [a, as*] -> [a, as'*]
 		where
-			[] := <filter(\e -> e where <eq-an>(a,e)\)> [as*]
+			as'* := <nub-an> as*;
+			[] := <filter(\e -> e where <eq-an>(a,e)\)> [as'*]
 
-	nub-an: [a, as*] -> [as*]
+	nub-an: [a, as*] -> <nub-an>[as*]
 	
 	remove-an: (x, as) -> <filter(\ a -> <not(eq-an)> (x, a)\)> as 
