@@ -388,7 +388,7 @@ SELECT * FROM ATTRIBUTES;
 			
 drop procedure if exists `GET_OBJECT_METHOD_NAMES`;
 DELIMITER $$
-CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(1000), OID_in INT)
+CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(1000), OID_in INT, _currentUser INT)
 	BEGIN
 DROP TABLE IF EXISTS OBJECT_METHODS;
 CREATE TEMPORARY TABLE OBJECT_METHODS 
@@ -409,7 +409,7 @@ CREATE TEMPORARY TABLE OBJECT_METHODS
 	WHILE done = 0 DO
 		FETCH NEXT FROM method_names INTO MNAME;
 		IF done = 0 THEN
-			SET @SQL_TEXT = CONCAT("INSERT INTO OBJECT_METHODS (methodName, methodAvailable) VALUES ('", MNAME,"', ", className_in,"_",MNAME,"_available (", OID_in, "));");
+			SET @SQL_TEXT = CONCAT("INSERT INTO OBJECT_METHODS (methodName, methodAvailable) VALUES ('", MNAME,"', ", className_in,"_",MNAME,"_available (", OID_in, ",", _currentUser, "));");
 				PREPARE stmt_name FROM @SQL_TEXT;
 				EXECUTE stmt_name;
 				DEALLOCATE PREPARE stmt_name; 
@@ -778,21 +778,16 @@ END$$
 DELIMITER ;
 
 
-drop function if exists `validatePassword`;
+drop procedure if exists `validatePassword`;
 delimiter $$
-create function `validatePassword` (un varchar(4000), passwdIn varchar(4000))
-returns varchar(4000)
+create procedure `validatePassword` (un varchar(4000), passwdIn varchar(4000))
 begin
-	set @noMatches = (select count(distinct username) from User where 
-		(select Password(passwdIn) = passwd and (LOWER(un) = LOWER(username) or LOWER(emailAddress) = LOWER(un))));
-return
-(select
-case  @noMatches
-when 1 then (select username from User
-			where (select Password(passwdIn)) = passwd and
-			(LOWER(username) = LOWER(un) or LOWER(emailAddress) = LOWER(un)))
-else ''
-end);
 
+select username, UserId from User
+			where (select Password(passwdIn)) = passwd and
+			(LOWER(username) = LOWER(un) or LOWER(emailAddress) = LOWER(un)) and
+			enabled = true;
 end $$
 delimiter ;
+
+call User_Create(null, 'default', 'administrator','defaultadministrator',database(),database(), 'Administrator', @u_out);

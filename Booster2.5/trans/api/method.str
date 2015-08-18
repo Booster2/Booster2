@@ -62,6 +62,7 @@ rules // conjoin methods
 
 	is-input = ?Input(_ {Def(_)}) 
  	is-input = ?This()
+ 	is-input = ?CurrentUser()
  	is-input: ps@PathStart(_{ann}, _) -> This(){Def(ann')}
  		where   
  			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > ps;
@@ -72,10 +73,11 @@ rules // conjoin methods
 
 	convert-param = ?Input(n) ; !Input(<concat-strings>[n, "_in"], <_get-type ; sql-type> n)
 	convert-param = ?This() ; !Input("this", Int())
+	convert-param = ?CurrentUser() ; !Input("_currentUser", Int())
 	convert-param = ?Output(n) ; !Output(<concat-strings>[n, "_out"], <_get-type ; sql-type> n)
 	
-	get-sql-params = get-params ; nub-an ; map(convert-param)
-	get-sql-inputs = method-inputs ; nub-an ; map(convert-param)
+	get-sql-params = get-params ; nub-an ; map(convert-param) 
+	get-sql-inputs = method-inputs ; nub-an ; map(convert-param) 
 	
 	guard-without-ins-outs = method-body ; get-guard ; remove-inputs-and-outputs(|[]) ; simplify
 	

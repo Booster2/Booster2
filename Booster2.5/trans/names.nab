@@ -23,6 +23,7 @@ namespaces
 	Invariant
 	Method
 	This
+	CurrentUser
 	MethodReference
 	Variable
 	InputVariable
@@ -136,6 +137,9 @@ binding rules // References
 	New(v, class):
 		refers to Class class
 		defines OutputVariable v of type class
+		
+	CurrentUser():
+		refers to CurrentUser CurrentUser()
 
 binding rules // Variables
 	

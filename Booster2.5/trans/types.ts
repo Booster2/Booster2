@@ -259,6 +259,13 @@ type rules // Method references should have a path that refers to a method
 			and p-ty has is-method "true"
 			else error $[Expects a method] on path 
 		
+		
+type rules // CurrentUser is a reference to a User object
+
+	CurrentUser(path): ty
+		where
+				path : ty
+		else error $[What is happening?] on path
 	
 type rules // optional or mandatory (not encoded in type but separate property)
 

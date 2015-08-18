@@ -75,6 +75,7 @@ rules // collect all paths
 	
 	in-out-string: Input(_) -> "Input"
 	in-out-string: This() -> "Input"
+	in-out-string: CurrentUser() -> "Input"
 	in-out-string: Output(_) -> "Output" 
 	
 	

@@ -1,5 +1,6 @@
 system defaultBooster
       
+set UserRole { Administrator, User }
       
 /* The Default User class.
 */      
@@ -12,20 +13,38 @@ class User {
 		passwd : Password
 		enabled : Boolean
 		created : DateTime
-	methods
-		create {u! : User' ; 
+		role : UserRole
+		auditTrail : SET ( AuditModOp . auditForUser ) [*]
+	methods 
+		create {(currentUser.role = Administrator or currentUser = null) & u! : User' ; 
 				u!.firstName' = firstName? & 
 				u!.lastName' = lastName? & 
 				u!.emailAddress' = emailAddress? & 
 				u!.username' = username? & 
 				u!.passwd' = passwd? &
+				u!.role' = role? &
 				u!.created' = CurrentDateTime & 
 				u!.enabled = true }
-		enableAccount { enabled = false & enabled' = true}
-		disableAccount { enabled = true & enabled' = false}
-		changeUserDetails { lastName' = lastName? & 
+		enableAccount { currentUser.role = Administrator & enabled = false & enabled' = true}
+		disableAccount { currentUser.role = Administrator & enabled = true & enabled' = false}
+		changeUserDetails {  (currentUser.role = Administrator or currentUser = this) &
+												lastName' = lastName? & 
 												firstName' = firstName? & 
 												emailAddress' = emailAddress? }
-		changePassword { passwd' = passwd? }
-		changeUsername { username' = username? }		
+		changePassword { (currentUser.role = Administrator or currentUser = this) & passwd' = passwd? }
+		changeUsername { (currentUser.role = Administrator or currentUser = this) & username' = username? } 
+		newAuditModOp {
+			a! : AuditModOp' ;
+			// a! : auditTrail' &
+			a!. auditForUser' = this &
+			a! . dateTimeOfModification' = CurrentDateTime &
+			a! . methodCalled' = methodCalled?
+		}
+}
+
+class AuditModOp {
+	attributes
+		auditForUser : User . auditTrail
+		methodCalled (ID) : String
+		dateTimeOfModification (ID): DateTime
 }

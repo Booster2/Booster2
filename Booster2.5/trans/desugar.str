@@ -71,11 +71,14 @@ signature constructors
 	TypeIsASet : Term -> Term
 	
 	Invariant : ID * Constraint -> Invariant
+	
+	CurrentUser : Path -> Term
 
 rules
 	
 	desugar-before-analysis = 
 		try(sometd(inv-add-name)); // needs to be first as it pps the constraint
+		try(sometd(currentuser-add-path));
 		try(sometd(setdef-add-setvalues));
 		try(sometd(subst-add-param));
 		bottomup(try(add-typeisaset));
@@ -87,6 +90,7 @@ rules
 		bottomup(try(rem-typeisaset));
 		try(sometd(subst-rem-param));
 		try(sometd(setdef-rem-setvalues));
+		try(sometd(\ CurrentUser(p) {t} -> CurrentUser() {t} \));
 		warning-on-missing-origin
 
 rules // Help NaBL: add SetVal constructors around the values in set definitions
@@ -389,9 +393,12 @@ rules // rewrite all invariants to get a name
 	
 	inv-add-name: Invariant(c) -> Invariant(<pp-Constraint-string;custom-origin(|c)>c, c)
 	
+	currentuser-add-path: c@CurrentUser() -> CurrentUser(<custom-origin(|c)>PathStart(<custom-origin(|c)>"User", None()))
+	
 rules 
 
-	final-desugar = topdown(try(path-remove-this)) ; try(sometd(\ Invariant(name, constraint) -> Invariant(constraint) \))
+	final-desugar = topdown(try(path-remove-this)) ; 
+													try(sometd(\ Invariant(name, constraint) -> Invariant(constraint) \))
 
 
 rules

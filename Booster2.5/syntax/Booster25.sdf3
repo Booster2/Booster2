@@ -155,7 +155,6 @@ context-free syntax
   Expression.Concat 							= <<Expression> ++ <Expression>> {left}
 
   
-  
   Expression = ValueExpression 
   Expression = <( <Expression> )> {bracket}
   BoosterTerm = Expression 
@@ -174,9 +173,12 @@ context-free syntax
   BasicValue.False = <false> 
   BasicValue.CurrentDateTime = <currentdatetime> 
   BasicValue.CurrentDateTime = <CurrentDateTime> 
-  BasicValue.CurrentDateTime = <currentDateTime> 
+  BasicValue.CurrentDateTime = <currentDateTime>
   BasicValue.CurrentDate = <currentdate> 
   BasicValue.CurrentTime = <currenttime> 
+  CurrentUser.CurrentUser = <currentUser> 
+  CurrentUser.CurrentUser = <CurrentUser> 
+  CurrentUser.CurrentUser = <currentuser> 
   TypeExtent.String = <STRING> {prefer}
   TypeExtent.String = <String> {prefer}
   TypeExtent.String = <string> {prefer}
@@ -208,7 +210,8 @@ context-free syntax
   PathStart = Input 
   PathStart = Output 
   PathStart = This 
-  PathStart = ThisPrimed 
+  PathStart = ThisPrimed
+  PathStart = CurrentUser 
   PathStart.PathStart = <<ID><Primed?>> 
   BoosterTerm = PathStart 
   Input.Input = <<ID>?> 

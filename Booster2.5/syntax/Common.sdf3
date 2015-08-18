@@ -26,6 +26,7 @@ lexical syntax
   ID = 'currentdatetime' {reject}
   ID = 'currentdate' {reject}
   ID = 'currenttime' {reject}
+  ID = 'currentuser' {reject}
   INT = [0-9]+ 
   DECIMAL = [0-9]+ '.' [0-9]+ 
   STRING = "\"" StringChar* "\"" 

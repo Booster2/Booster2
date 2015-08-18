@@ -84,7 +84,7 @@ rules
 			where
 				Method(mname, gc) := m;
 				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> mname;
-				pname := < ?Input(<id>) <+ ?Output(<id>) <+ (?This() ; !"this")> x;
+				pname := < ?Input(<id>) <+ ?Output(<id>) <+ (?This() ; !"this") <+ (?CurrentUser() ; !"_currentUser")> x;
 				ptname := <prim-type-string> x;
 				mult := <multiplicity-string> x;
 				inout := <in-out-string> x;
@@ -195,7 +195,7 @@ rules
 				DropProcedure(pname),
 				CreateProcedure(pname, params, pname, stmt),
 				DropFunction(name1),
-				CreateFunction(name1, [Input("this", Int())], Bit(), statement1),
+				CreateFunction(name1, [Input("this", Int()), Input("_currentUser", Int())], Bit(), statement1),
 				DropFunction(name2),
 				CreateFunction(name2, params2, Bit(), statement2),
 				StatementList(availability-procedures*)
@@ -563,7 +563,7 @@ rules
 	
 	
 	sql-expr: BasicValue(Integer(n)) -> Int(n)
-	sql-expr: BasicValue(String(n)) -> String(n)
+	sql-expr: BasicValue(String(n)) -> String(<un-double-quote>n)
 	sql-expr: BasicValue(Decimal(n)) -> Decimal(n)
 	
 	sql-expr: BasicValue(True()) -> BoolTrue()
@@ -575,6 +575,7 @@ rules
 	sql-expr: Input(n) -> SystemVariable(<concat-strings>[n, "_in"])
 	sql-expr: Output(n) -> SystemVariable(<concat-strings>[n, "_out"])
 	sql-expr: This() -> SystemVariable("this")
+	sql-expr: CurrentUser() -> SystemVariable("_currentUser")
 	
 	sql-expr: Null() -> Null()
 	
