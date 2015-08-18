@@ -20,6 +20,16 @@
     <url-pattern>/api/ClassList</url-pattern>
   </servlet-mapping>
   <servlet>
+    <description>Presents a searchable list of objects of a class</description>
+    <display-name>ClassSearch</display-name>
+    <servlet-name>ClassSearch</servlet-name>
+    <servlet-class>ox.softeng.booster.ClassSearch</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ClassSearch</servlet-name>
+    <url-pattern>/api/ClassSearch</url-pattern>
+  </servlet-mapping>
+  <servlet>
     <description></description>
     <display-name>ObjectView</display-name>
     <servlet-name>ObjectView</servlet-name>
@@ -89,7 +99,16 @@
     <servlet-name>UserLogin</servlet-name>
     <url-pattern>/UserLogin</url-pattern>
   </servlet-mapping>
-  
+  <servlet>
+    <description></description>
+    <display-name>UserLogout</display-name>
+    <servlet-name>UserLogout</servlet-name>
+    <servlet-class>ox.softeng.booster.UserLogout</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UserLogout</servlet-name>
+    <url-pattern>/UserLogout</url-pattern>
+  </servlet-mapping>
   <filter>
     <filter-name>AnyLoginFilter</filter-name>
     <filter-class>

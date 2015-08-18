@@ -22,7 +22,6 @@ import org.json.simple.JSONObject;
 /**
  * Servlet implementation class ClassSearch
  */
-@WebServlet("/ClassSearch")
 public class ClassSearch extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
@@ -111,8 +110,15 @@ public class ClassSearch extends HttpServlet {
 				JSONArray data = new JSONArray();
 				for (int i = 1; i <= count; i++)
 				{
-					String columnName = metaData.getColumnName(i); 
-					data.add(rs.getObject(i));
+					//String columnName = metaData.getColumnName(i); 
+					System.out.println("Type: " + rs.getObject(i).getClass());
+					if(rs.getObject(i).getClass() == java.lang.Integer.class){
+						data.add(rs.getObject(i));
+					}
+					else
+					{
+						data.add(rs.getObject(i).toString());	
+					}
 					
 				}
 				rows.add(data);
