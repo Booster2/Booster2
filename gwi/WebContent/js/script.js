@@ -372,13 +372,18 @@ boosterApp.factory('loginSubmitService', function($http, $route, $location) {
 						.then(function(result) {
 							//resolve the promise as the data
 							if(result.data._success){
-								console.log("success here!");
+								//console.log("success here!");
 								$location.path(params.redirectUrl);
+							}
+							else 
+							{
+								console.log("invalid login");
+								$location.path('/login/'+params.redirectUrl);
 							}
 							return result.data;
 						});
 			
-			console.log("submitted");
+			//console.log("submitted");
 		}
 	
 	};
