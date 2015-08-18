@@ -54,15 +54,20 @@ public class UserLogin extends HttpServlet {
 			ps.setString(2, password);
 			ResultSet rs = ps.executeQuery();
 			if(rs == null){
-				
+				// return user back to the login screen
+				//response.getOutputStream().println("Error in signing in");
+				JSONObject result = new JSONObject();
+				result.put("_success", false);
+				response.getOutputStream().println(result.toJSONString());
+				response.getOutputStream().flush();
 			}
 			else
 			{
-				rs.beforeFirst();
 				while(rs.next())
 				{
-					System.out.println("username: " + rs.getString("username"));
+					System.out.println("username: " + rs.getString(1));
 					request.getSession().setAttribute("Username", rs.getString("username"));
+					request.getSession().setAttribute("UserId", rs.getInt("UserId"));
 				}
 			}
 		}catch(Exception e)

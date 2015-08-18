@@ -91,12 +91,19 @@ public class callMethod extends HttpServlet {
 					}
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
-						if(requestParameters.get(paramName) != null)
+						if("_currentUser".equalsIgnoreCase(paramName))
 						{
-							methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
+							methodInputParameterValues.put(paramName, (Integer)request.getSession().getAttribute("UserId"));
 						}
-						else{
-							methodInputParameterValues.put(paramName, null);
+						else
+						{
+							if(requestParameters.get(paramName) != null)
+							{
+								methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
+							}
+							else{
+								methodInputParameterValues.put(paramName, null);
+							}
 						}
 					}
 					else if(paramType.equalsIgnoreCase("Boolean"))

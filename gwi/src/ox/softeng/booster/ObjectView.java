@@ -242,10 +242,11 @@ public class ObjectView extends HttpServlet {
 		JSONObject method = new JSONObject();
 		
 		
-		ps = client.prepareStatement("call `GET_OBJECT_METHOD_NAMES`(?, ?)");
+		ps = client.prepareStatement("call `GET_OBJECT_METHOD_NAMES`(?, ?, ?)");
 		//ps = client.prepareStatement("call `GET_OBJECT_METHOD_NAMES`(?)");
 		ps.setString(1, className);
 		ps.setInt(2, objectID);
+		ps.setInt(3, (Integer) request.getSession().getAttribute("UserId"));
 		rs = ps.executeQuery();
 		rs.beforeFirst();
 		

@@ -169,14 +169,23 @@ public class methodPrecondition extends HttpServlet {
 			        }
 					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
 					{
-						if(pairs.getValue() == null)
+						if("_currentUser".equals(pairs.getKey()))
 						{
-							cs.setNull(paramNo, java.sql.Types.INTEGER);
+							Integer userId = (Integer)request.getSession().getAttribute("UserId");
+							cs.setInt(paramNo, userId);
+							System.out.println("Putting: " + pairs.getKey() + "," + userId);
 						}
-						else{
-							cs.setInt(paramNo,(Integer)pairs.getValue());
+						else
+						{
+							if(pairs.getValue() == null)
+							{
+								cs.setNull(paramNo, java.sql.Types.INTEGER);
+							}
+							else{
+								cs.setInt(paramNo,(Integer)pairs.getValue());
+							}
+							System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 						}
-						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 					}
 					else if(paramType.equalsIgnoreCase("Boolean"))
 					{
