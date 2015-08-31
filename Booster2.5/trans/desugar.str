@@ -105,7 +105,7 @@ rules // Help NaBL: add SetVal constructors around the values in set definitions
 
 rules //  Help NaBL: make explicit what are Variable definition sites
 		
-	method-add-vardef: Method(name, body) -> Method(name, body')
+	method-add-vardef: Method(name, decs, body) -> Method(name, decs, body')
 	with
 		(body', _) := <topdown-fold(try(add-vardef))>(body, [])
 

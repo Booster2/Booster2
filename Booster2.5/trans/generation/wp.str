@@ -41,7 +41,7 @@ rules
 
 rules
 	
-	method-wp(|ast): Method(name, Both(c, gc)) -> Method(name, gc'')
+	method-wp(|ast): Method(name, decs, Both(c, gc)) -> Method(name, decs, gc'')
 		with
 			cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 	 		all-model-invariants* := <collect-all(?Invariant(_,_))>ast;

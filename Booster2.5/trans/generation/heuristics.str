@@ -19,7 +19,7 @@ rules
 	
 rules
 	
-	method-heuristics: Method(name, const) -> Method(name, Both(const, gc))
+	method-heuristics: Method(name, decs, const) -> Method(name, decs, Both(const, gc))
 		with
 			gc := <program> const
 

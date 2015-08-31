@@ -58,7 +58,9 @@ context-free syntax
   Attribute.Attribute = <<ID> <Decoration*>: <TypeDecl>> 
   BoosterTerm = Attribute 
   Identity.Identity = <(<>ID<>) > 
-  Decoration = Identity 
+  NoAudit.NoAudit = <(<>NA<>) > 
+  Decoration = Identity
+  Decoration = NoAudit 
   TypeDecl = PrimTypeDecl 
   TypeDecl.Optional = <[ <PrimTypeDecl> ]> 
   TypeDecl.Set = <set ( <PrimTypeDecl> ) <Multiplicity>> 
@@ -101,7 +103,7 @@ context-free syntax
   Multiplicity.MultAny = <[ * ]> 
   Multiplicity.MultAny =  
 	BoosterTerm = Multiplicity 
-  Method.Method = <<ID> { 
+  Method.Method = <<ID> <Decoration*>{ 
   	<ConstraintOrGuardedCommand>
   	 }>
   Invariant.Invariant = Constraint

@@ -17,7 +17,7 @@ rules
   to-outline-label = ?SetDef(<id>, _)
   to-outline-label = ?Class(<id>, _, _)
   to-outline-label = ?Attribute(cname, _, ty) ; !<concat-strings>[cname, " : ", <get-type-string> ty] ; custom-origin(|cname)
-  to-outline-label = ?Method(mname, _) ; ! <concat-strings>[mname, " ( )"] ; custom-origin(|mname)
+  to-outline-label = ?Method(mname, _, _) ; ! <concat-strings>[mname, " ( )"] ; custom-origin(|mname)
 
 
   get-type-string : BasicType(t) -> <write-to-string> t

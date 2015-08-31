@@ -22,10 +22,10 @@ imports
 	
 rules // conjoin methods
 	
-	method-body = ?Method(_, <id>)
-	method-name = ?Method(<id>, _)
+	method-body = ?Method(_, _, <id>)
+	method-name = ?Method(<id>, _, _)
 	
-	method-comp-name: Method(mname, gc) -> <concat-strings>[<method-parent> mname, "_", mname]
+	method-comp-name: Method(mname, _, gc) -> <concat-strings>[<method-parent> mname, "_", mname]
 	
 	// @type [Method] -> [Method]
 	method-conjoin-all: [] -> []
@@ -43,9 +43,9 @@ rules // conjoin methods
 			method'* := [m|method*]
 	
 	// @type (|Method) Method -> Method or fail
-	method-conjoin(|m): Method(name1, body1) -> Method(name, body)
+	method-conjoin(|m): Method(name1, decs, body1) -> Method(name, decs, body)
 		where
-			Method(name2, body2) := m;
+			Method(name2, _, body2) := m;
 			<eq-an>(name1, name2)
 		with
 			name := name1;
@@ -56,8 +56,8 @@ rules // conjoin methods
 	is-obj-method: m -> False() where <equal>(<collect-all( ?This() <+ ( ?PathStart(_,_) ; path-prefix ; ?This() ) )> m, [])
 	is-obj-method = !True()
 	
-	method-inputs = ?Method(name, <id>) ; collect-all(is-input) ; nub-an
-	method-outputs = ?Method(name, <id>) ; collect-all(?Output(_) <+ (?New(o, C) ; !Output(o)) ) ; nub-an
+	method-inputs = ?Method(name, _, <id>) ; collect-all(is-input) ; nub-an
+	method-outputs = ?Method(name, _, <id>) ; collect-all(?Output(_) <+ (?New(o, C) ; !Output(o)) ) ; nub-an
 
 
 	is-input = ?Input(_ {Def(_)}) 

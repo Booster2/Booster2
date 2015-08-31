@@ -33,7 +33,7 @@ rules // inline methods
 		 with
 		 	path-ty := <_get-type> path; 
 			_ {Def(path-uri)} := path-ty;
-		  Method(_, method-body) := <uri-to-ast(|path-uri)> ast;
+		  Method(_, _, method-body) := <uri-to-ast(|path-uri)> ast;
 		  subst-method-body := <literal-substitute> (method-body, expr*);
 		  subst-method-body' := <replace-paths> (subst-method-body, path)
 	

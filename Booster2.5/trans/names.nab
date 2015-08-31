@@ -81,7 +81,7 @@ binding rules // Invariant
 
 binding rules // Method
 
-	Method(m,body):
+	Method(m, decs, body):
 		defines Method m
 			of type m
 			of is-method "true"

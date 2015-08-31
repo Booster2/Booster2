@@ -61,7 +61,7 @@ rules
 				tname := <att-table-name> name
 						 
 	sql-metadata:
-		m@Method(name, gc) ->
+		m@Method(name, decs, gc) ->
 			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Methods", 
 						[ColumnName("class"),ColumnName("methodName"),ColumnName("isObjectMethod"),ColumnName("html")], 
 						[String(classname),String(name),isObjectMethod, String(html)], None()),
@@ -82,7 +82,7 @@ rules
 						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
 						None())
 			where
-				Method(mname, gc) := m;
+				Method(mname, decs, gc) := m;
 				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> mname;
 				pname := < ?Input(<id>) <+ ?Output(<id>) <+ (?This() ; !"this") <+ (?CurrentUser() ; !"_currentUser")> x;
 				ptname := <prim-type-string> x;
@@ -190,7 +190,7 @@ rules
 		
 		
 		
-	sql-method:  m@Method(mname, gc) -> 
+	sql-method:  m@Method(mname, decs, gc) -> 
 		StatementList([
 				DropProcedure(pname),
 				CreateProcedure(pname, params, pname, stmt),
