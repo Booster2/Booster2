@@ -88,7 +88,7 @@ class Order {
 					& shippingAddress' = shippingAddress?
 		}
 		dispatch {  status = Complete &
-					(forall s : lineItems @ s . preparedBy /= null) 
+					(forall s : lineItems @ s . preparedOn /= null) 
 					& status' = Dispatched 
 					& dispatchedBy' = dispatchedBy?
 					& dispatchedOn' = currentDateTime}			 
@@ -158,7 +158,7 @@ class Country {
 }
 
 set UserRole { Administrator, User }
-      
+
 /* The Default User class.
 */      
 class User {

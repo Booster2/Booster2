@@ -454,10 +454,12 @@ rules
 
 	sql-const: Implies(c1, c2) -> Or(Not(<sql-const>c1), <sql-const>c2)
 
+	//what happens when an e(xpression) is compared to null
+	//this needs to support references that don't exsist
+	//currently only supports primitives
 	sql-const: Equal(e1, Null()) -> IsNull(<sql-expr>e1, None())
 	sql-const: Equal(Null(), e1) -> IsNull(<sql-expr>e1, None())
 	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
-
 	
 	sql-const: NotEqual(e1, Null()) -> IsNull(<sql-expr>e1, Some(Not()))
 	sql-const: NotEqual(Null(), e1) -> IsNull(<sql-expr>e1, Some(Not()))
@@ -536,8 +538,8 @@ rules
 			-> Equal( SelectQuery([],
 							[FunctionCall("count", [Star()])], 
 							Some(FromPart([TableName(tablename)])), 
-							Some(Where(Not(And(Equal(ColumnName(column1), expr''),
-									const''')))), 
+							Some(Where(And(Equal(ColumnName(column1), expr''),
+										Not(const''')))), 
 							None(), 
 							None(), 
 							None(), 
