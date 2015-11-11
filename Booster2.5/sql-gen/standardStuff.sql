@@ -793,4 +793,4 @@ select username, UserId from User
 end $$
 delimiter ;
 
-call User_Create(null, 'default', 'administrator','defaultadministrator',database(),database(), 'Administrator', @u_out);
+call User_Create(1, 'default', 'administrator','defaultadministrator',database(),database(), 'Administrator', @u_out);

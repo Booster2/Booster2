@@ -72,7 +72,8 @@ rules
 			classname := <method-parent>name;
 			isObjectMethod := <sql-expr><is-obj-method> m;
 			html := <string-replace(|"'", "''")> "";
-			[inParamStmts*] := <map(metadata-param(|m))><method-inputs> m;
+			<debug> <method-inputs> m;
+			[inParamStmts*] := <map(metadata-param(|m))><union>([CurrentUser()], <method-inputs> m);
 			[outParamStmts*] := <map(metadata-param(|m))><method-outputs> m
 						
 						
@@ -91,6 +92,21 @@ rules
 				classname := <class-name> x;
 				setname := <set-name> x 
 
+// Find a better way of doing this!
+	metadata-param(|m): CurrentUser() ->
+			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
+						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
+						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
+						None())
+			where
+				Method(mname, decs, gc) := m;
+				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> mname;
+				pname := "_currentUser";
+				ptname := "ClassRef";
+				mult := "Mandatory";
+				inout := "Input";
+				classname := "User";
+				setname := "" 
 
 	sql-classes: Class(name, exts, comps) -> 
 			<create-table>(name, <concat-strings>[name, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None())
@@ -193,7 +209,7 @@ rules
 	sql-method:  m@Method(mname, decs, gc) -> 
 		StatementList([
 				DropProcedure(pname),
-				CreateProcedure(pname, params, pname, stmt),
+				CreateProcedure(pname, params, pname, stmt'),
 				DropFunction(name1),
 				CreateFunction(name1, [Input("this", Int()), Input("_currentUser", Int())], Bit(), statement1),
 				DropFunction(name2),
@@ -204,10 +220,11 @@ rules
 				pname := <concat-strings>[<method-parent> mname, "_", mname];
 				name1 := <concat-strings> [pname, "_available"];
 				name2 := <concat-strings> [name1, "_inputs"];
-				params := <get-sql-params> m;
-				params2 := <get-sql-inputs> m;
+				params := <union>([Input("_currentUser", Int())], <get-sql-params> m );
+				params2 := <union>([Input("_currentUser", Int())], <get-sql-inputs> m );
 				gc' := Guard(<get-guard ; remove-outputs(|[]) ; simplify> gc, <get-body> gc);
 				stmt := <sql-gc> gc';
+				stmt' := <add-audit-command> (stmt, decs, pname);
 				guard-without-inputs := <guard-without-ins-outs> m;
 				statement1 := IfThen(<sql-const> guard-without-inputs, 
 														Return(Int("1")), 
@@ -221,6 +238,15 @@ rules
 				//<debug> "availability-procedures";
 				booster-params := <get-params ; nub-an> m;
 				availability-procedures* := <map(get-availability-procedure(|mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params										
+		
+	add-audit-command: 
+		(stmt, decs, procname)
+			-> stmt
+			where <elem>(NoAudit(), decs)
+				
+	add-audit-command: 
+		(stmt, decs, procname)
+			-> StatementList([stmt, ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
 				
 	get-availability-procedure(|mname, gc):
 		i -> 
@@ -555,11 +581,27 @@ rules
 											None(), 
 											None())
 		where
-				<attr-is-set> pth;
-				cname := <path-prefix ; _get-type> pth;
-				attname := <path-suffix-name> pth;
-				tablename := <concat-strings>[cname, "_", attname];
-				expr' := <sql-where-expr> pth
+			<attr-is-set> pth;
+			cname := <path-prefix ; _get-type> pth;
+			attname := <path-suffix-name> pth;
+			tablename := <concat-strings>[cname, "_", attname];
+			expr' := <sql-where-expr> pth
+			
+		sql-expr: Cardinality(PathStart(cname, _))
+			-> SelectQuery(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName(tablename)])), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None())
+		where
+			<is-class-name> cname;
+			tablename := cname
 	
 	
 	sql-expr: BasicValue(Integer(n)) -> Int(n)

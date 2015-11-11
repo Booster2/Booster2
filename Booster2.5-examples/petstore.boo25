@@ -156,3 +156,52 @@ class Country {
 		create { country! : Country' & country! . name' = name?}
 
 }
+
+set UserRole { Administrator, User }
+      
+/* The Default User class.
+*/      
+class User {
+	attributes
+		username : String
+		lastName (ID) : String
+		firstName (ID) : String
+		emailAddress : String
+		passwd : Password
+		enabled : Boolean
+		created : DateTime
+		role : UserRole
+		auditTrail : SET ( AuditModOp . auditForUser ) [*]
+	methods 
+		create {(currentUser.role = Administrator or card(User) = 0) & u! : User' ; 
+				u!.firstName' = firstName? & 
+				u!.lastName' = lastName? & 
+				u!.emailAddress' = emailAddress? & 
+				u!.username' = username? & 
+				u!.passwd' = passwd? &
+				u!.role' = role? &
+				u!.created' = CurrentDateTime & 
+				u!.enabled = true }
+		enableAccount { currentUser.role = Administrator & enabled = false & enabled' = true}
+		disableAccount { currentUser.role = Administrator & enabled = true & enabled' = false}
+		changeUserDetails {  (currentUser.role = Administrator or currentUser = this) &
+												lastName' = lastName? & 
+												firstName' = firstName? & 
+												emailAddress' = emailAddress? }
+		changePassword { (currentUser.role = Administrator or currentUser = this) & passwd' = passwd? }
+		changeUsername { (currentUser.role = Administrator or currentUser = this) & username' = username? } 
+		newAuditModOp (NA) {
+			a! : AuditModOp' ;
+			// a! : auditTrail' &
+			a!. auditForUser' = this &
+			a! . dateTimeOfModification' = CurrentDateTime &
+			a! . methodCalled' = methodCalled?
+		}
+}
+
+class AuditModOp {
+	attributes
+		auditForUser (ID) : User . auditTrail
+		methodCalled (ID) : String
+		dateTimeOfModification (ID): DateTime
+}

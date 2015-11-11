@@ -1,0 +1,232 @@
+system ModelCatalogue
+      
+
+class UserGroup {
+	attributes
+		name : String
+		members : set ( User . memberOfGroup)
+		groupWritableItems : set ( Sharable . sharedWithGroupsForWriting )
+		groupReadableItems : set ( Sharable . sharedWithGroupsForReading )
+
+}
+
+
+class AdministeredItem {
+	attributes 
+		GUID : String
+		label : String
+		description : String
+		dateCreated : DateTime
+		lastUpdated : DateTime
+		owner : User 
+}
+
+
+class DataModel extends AdministeredItem, Classifiable, Annotatable {
+	attributes
+		finalised : Boolean
+		releaseLabel : [ String ]
+		finalisedDate : [ DateTime ]
+		containedClasses : set( DataClass . declaredWithinModel )
+	invariants
+		// finalised = true => finalisedDate /= null
+		// finalised = false => finalisedDate = null
+		
+}
+
+class DataClass extends AdministeredItem, Classifiable, Annotatable {
+	attributes
+		declaredWithinModel : DataModel . containedClasses
+		
+		parentClass : [ DataClass . childClasses ]
+		childClasses : set( DataClass . parentClass ) 
+		
+		extendsClass : [ DataClass . extendedBy ]
+		extendedBy : set( DataClass . extendsClass )
+
+		childElements : set ( DataElement . declaredWithinClass )
+		
+		isReferencedBy : set ( ReferenceType . referenceClass )
+}
+
+
+class DataElement extends AdministeredItem, Classifiable, Annotatable {
+	attributes
+		declaredWithinClass : DataClass . childElements
+		valueDomain : ValueDomain . valueDomainForElement
+}
+
+class Multiplicity {
+	attributes
+		minMultiplicity : Int
+		maxMultiplicity : [ Int ]
+}
+
+class ValueDomain extends AdministeredItem {
+	attributes
+		units : [ String ]
+		dataType : DataType . dataTypeForValueDomain
+		multiplicity : Multiplicity
+	
+		valueDomainForElement : set ( DataElement . valueDomain )
+}
+
+class DataType extends AdministeredItem {
+	attributes
+		dataTypeForValueDomain : set ( ValueDomain . dataType )		
+}
+
+class ReferenceType extends DataType {
+	attributes
+		referenceClass : DataClass . isReferencedBy
+}
+
+class PrimitiveType extends DataType {
+	attributes
+		parentPrimitiveType :  [ PrimitiveType . childPrimitiveTypes ]
+		childPrimitiveTypes : set ( PrimitiveType . parentPrimitiveType ) 
+}
+
+class EnumerationType extends DataType {
+	attributes
+		enumerationValues : set ( EnumerationValue . forEnumeration )
+}
+
+class EnumerationValue extends AdministeredItem, Classifiable, Annotatable { 
+	attributes
+		key : String
+		value : String
+		forEnumeration : EnumerationType . enumerationValues
+}
+
+class AnnotationSpace extends AdministeredItem {
+	attributes
+		relationName : String
+		annotations : set ( Annotation . inSpace )
+}
+
+class Annotation extends AdministeredItem {
+	attributes
+		inSpace : AnnotationSpace . annotations
+		
+		source : Annotatable . annotationAsSource
+		target : Annotatable . annotationAsTarget
+}
+
+class Annotatable {
+	attributes
+		annotationAsSource : set ( Annotation . source )
+		annotationAsTarget : set ( Annotation . target )
+	
+}
+
+class ClassificationScheme extends AdministeredItem {
+	attributes
+		classifiers : set ( Classifier . belongsToScheme )
+}
+
+class Classifier extends AdministeredItem {
+	attributes
+		belongsToScheme : ClassificationScheme . classifiers
+		classifies : set ( Classifiable . linkedClassifiers )
+		
+		parentClassifier : [ Classifier . childClassifiers ]
+		childClassifiers : set ( Classifier . parentClassifier)
+}
+
+class Classifiable {
+	attributes
+		linkedClassifiers : set ( Classifier . classifies ) 
+	
+}
+
+class Terminology extends AdministeredItem {
+	attributes
+		terms : set ( TerminologyTerm . belongsToTerminology )
+}
+
+class TerminologyTerm extends AdministeredItem, Annotatable, Classifiable {
+	attributes
+		belongsToTerminology : Terminology . terms
+		
+		parentTerm : [ TerminologyTerm . childTerms ]
+		childTerms : set ( TerminologyTerm . parentTerm )
+}
+
+
+class Sharable {
+	attributes
+		sharedWithEveryone : Boolean
+		sharedWithGroupsForReading : set ( UserGroup . groupReadableItems )
+		sharedWithUsersForReading : set ( User . userReadableItems )
+
+		sharedWithGroupsForWriting : set ( UserGroup . groupWritableItems )
+		sharedWithUsersForWriting : set ( User . userWritableItems )
+}
+
+
+class Dataset extends DataModel {
+	attributes
+		
+}
+
+
+
+
+
+
+
+set UserRole { Administrator, User }
+      
+/* The Default User class.
+*/      
+class User {
+	attributes
+		username : String
+		lastName (ID) : String
+		firstName (ID) : String
+		emailAddress : String
+		passwd : Password
+		enabled : Boolean
+		created : DateTime
+		role : UserRole
+		auditTrail : SET ( AuditModOp . auditForUser ) [*]
+		
+		memberOfGroup : set ( UserGroup . members )
+		userWritableItems : set ( Sharable . sharedWithUsersForWriting )
+		userReadableItems : set ( Sharable . sharedWithUsersForReading )
+
+		
+	methods 
+		create {(currentUser.role = Administrator or currentUser = null) & u! : User' ; 
+				u!.firstName' = firstName? & 
+				u!.lastName' = lastName? & 
+				u!.emailAddress' = emailAddress? & 
+				u!.username' = username? & 
+				u!.passwd' = passwd? &
+				u!.role' = role? &
+				u!.created' = CurrentDateTime & 
+				u!.enabled = true }
+		enableAccount { currentUser.role = Administrator & enabled = false & enabled' = true}
+		disableAccount { currentUser.role = Administrator & enabled = true & enabled' = false}
+		changeUserDetails {  (currentUser.role = Administrator or currentUser = this) &
+												lastName' = lastName? & 
+												firstName' = firstName? & 
+												emailAddress' = emailAddress? }
+		changePassword { (currentUser.role = Administrator or currentUser = this) & passwd' = passwd? }
+		changeUsername { (currentUser.role = Administrator or currentUser = this) & username' = username? } 
+		newAuditModOp {
+			a! : AuditModOp' ;
+			// a! : auditTrail' &
+			a!. auditForUser' = this &
+			a! . dateTimeOfModification' = CurrentDateTime &
+			a! . methodCalled' = methodCalled?
+		}
+}
+
+class AuditModOp {
+	attributes
+		auditForUser (ID) : User . auditTrail
+		methodCalled (ID) : String
+		dateTimeOfModification (ID): DateTime
+}

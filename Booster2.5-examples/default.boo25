@@ -16,7 +16,7 @@ class User {
 		role : UserRole
 		auditTrail : SET ( AuditModOp . auditForUser ) [*]
 	methods 
-		create {(currentUser.role = Administrator or currentUser = null) & u! : User' ; 
+		create {(currentUser.role = Administrator or card(User) = 0) & u! : User' ; 
 				u!.firstName' = firstName? & 
 				u!.lastName' = lastName? & 
 				u!.emailAddress' = emailAddress? & 
@@ -33,7 +33,7 @@ class User {
 												emailAddress' = emailAddress? }
 		changePassword { (currentUser.role = Administrator or currentUser = this) & passwd' = passwd? }
 		changeUsername { (currentUser.role = Administrator or currentUser = this) & username' = username? } 
-		newAuditModOp {
+		newAuditModOp (NA) {
 			a! : AuditModOp' ;
 			// a! : auditTrail' &
 			a!. auditForUser' = this &
@@ -44,7 +44,7 @@ class User {
 
 class AuditModOp {
 	attributes
-		auditForUser : User . auditTrail
+		auditForUser (ID) : User . auditTrail
 		methodCalled (ID) : String
 		dateTimeOfModification (ID): DateTime
 }

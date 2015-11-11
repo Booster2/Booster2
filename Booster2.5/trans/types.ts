@@ -265,7 +265,7 @@ type rules // CurrentUser is a reference to a User object
 	CurrentUser(path): ty
 		where
 				path : ty
-		else error $[What is happening?] on path
+		else error $[What is happening?  Where is the 'User' class?] on path
 	
 type rules // optional or mandatory (not encoded in type but separate property)
 

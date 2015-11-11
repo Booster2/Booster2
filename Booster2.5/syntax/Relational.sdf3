@@ -82,7 +82,8 @@ context-free syntax
   Statement = InsertInto 
   Statement = Delete 
   Statement = Return 
-  Statement = VariableAssign 
+  Statement = VariableAssign
+  Statement = ProcCall 
   SQLExpression.Star = <*> 
   SQLExpression.True = <true> 
   SQLExpression.False = <false> 
@@ -303,5 +304,6 @@ context-free syntax
   DefaultDeclare.DefaultDeclare = <default <SQLExpression>> 
   Return.Return = <return <SQLExpression>;> 
   VariableAssign.VariableAssign = <set @<ID> = <SQLExpression>;>
+  ProcCall.ProcCall = <call `<ID>`(<{Parameter ","}*>);>
   
 context-free syntax   
