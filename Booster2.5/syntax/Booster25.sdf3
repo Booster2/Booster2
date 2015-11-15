@@ -26,6 +26,10 @@ context-free syntax
   > 
   SystemComponent = SetDef 
   SystemComponent = Class 
+  SystemComponent = Import
+  Import.Import = <import <STRING>>
+  Import.Import = <Import <STRING>>
+  Import.Import = <IMPORT <STRING>>
   BoosterTerm = SystemComponent 
   SetDef.SetDef = <set <ID> { <{ID ", "}+> }> 
   BoosterTerm = SetDef 

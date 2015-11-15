@@ -16,3 +16,7 @@ rules
 // 		Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language 
 // 		                                  (this note is defined in trans/check.str)])
 
+constraint-error:
+	Import(filename) -> (filename, $[Cannot resolve file [filename]])
+		where
+			not(<file-exists><concat-strings>[<project-path>, "/",<un-double-quote> filename])

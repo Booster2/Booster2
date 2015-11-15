@@ -12,6 +12,8 @@ imports
 	trans/api/_runtime
 	trans/pp
 	trans/api/path
+	
+	lib/editor-common.generated
 
 signature constructors
 	
@@ -77,6 +79,7 @@ signature constructors
 rules
 	
 	desugar-before-analysis = 
+		replace-imports;
 		try(sometd(inv-add-name)); // needs to be first as it pps the constraint
 		try(sometd(currentuser-add-path));
 		try(sometd(setdef-add-setvalues));
@@ -402,3 +405,17 @@ rules
 
 
 rules
+			
+	replace-imports:
+		s@System(n, cs) -> sys
+			where 
+				cs' := <flatten-list><map(try(replace-import))> cs;
+				sys := <custom-origin(|s)> System(n,cs')
+				
+	replace-import:
+		Import(filename) -> cs
+		where
+			System(n,cs) := <parse-file> <concat-strings>[<project-path>, "/",<un-double-quote> filename]
+			
+	
+rules	

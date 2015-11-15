@@ -34,6 +34,9 @@ binding rules // System
 	System(s,c):
 		defines System s
 		scopes Class, Set, SetVal
+		
+	Import(i):
+		imports Class,Set, SetVal from System i 
 
 binding rules // Set
 
