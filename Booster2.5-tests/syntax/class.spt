@@ -1,0 +1,185 @@
+module syntax-class
+
+language Booster25
+
+test empty class [[
+system mySys 
+
+	class MyClass { }
+
+]] parse succeeds
+
+
+test one-attribute class [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+	}
+]] parse succeeds
+
+test two-attribute class 1 [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+			b : STRING
+	}
+]] parse succeeds
+
+test two-attribute class 2 [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+		attributes
+			b : STRING
+	}
+]] parse succeeds
+
+test class with no name [[
+system mySys 
+
+	class { 
+		attributes
+			a : INT
+	}
+
+]] parse fails
+
+test attributes and constraint 1 [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+			b : STRING
+		invariants
+			a < 10
+	}
+]] parse succeeds
+
+test attributes and constraint 2 [[
+system mySys 
+
+	class MyClass { 
+		invariants
+			a < 10
+		attributes
+			a : INT
+			b : STRING
+	}
+]] parse succeeds
+
+test attributes and method 1 [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+			b : STRING
+		methods
+			M { a' = 10 }
+	}
+]] parse succeeds
+
+test attributes and method 2 [[
+system mySys 
+
+	class MyClass { 
+		methods
+			M { a' = 10 }
+		attributes
+			a : INT
+			b : STRING
+	}
+]] parse succeeds
+
+test all components 1 [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+			b : STRING
+		invariants
+			a < 10
+		methods
+			M { a' = 10 }
+	}
+]] parse succeeds
+
+test all components 2 [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+			b : STRING
+		methods
+			M { a' = 10 }
+		invariants
+			a < 10
+	}
+]] parse succeeds
+
+test all components 3 [[
+system mySys 
+
+	class MyClass { 
+		methods
+			M { a' = 10 }
+		attributes
+			a : INT
+			b : STRING
+		invariants
+			a < 10
+	}
+]] parse succeeds
+
+test all components 4 [[
+system mySys 
+
+	class MyClass { 
+		methods
+			M { a' = 10 }
+		invariants
+			a < 10
+		attributes
+			a : INT
+			b : STRING
+	}
+]] parse succeeds
+
+test all components 5 [[
+system mySys 
+
+	class MyClass { 
+		invariants
+			a < 10
+		attributes
+			a : INT
+			b : STRING
+		methods
+			M { a' = 10 }
+	}
+]] parse succeeds
+
+test all components 6 [[
+system mySys 
+
+	class MyClass { 
+		invariants
+			a < 10
+		methods
+			M { a' = 10 }
+		attributes
+			a : INT
+			b : STRING
+	}
+]] parse succeeds
+
+

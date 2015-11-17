@@ -1,0 +1,80 @@
+module syntax-system
+
+language Booster25
+
+test empty system [[
+system mySys 
+
+]] parse succeeds 
+
+test single empty class [[
+system mySys
+
+class c1 {
+	
+} 
+]] parse succeeds 
+
+test single set [[
+system mySys
+
+set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+ 
+]] parse succeeds
+
+test two empty classes [[
+system mySys
+
+class c1 {
+	
+} 
+
+class c2 {
+	
+}
+]] parse succeeds 
+
+test two sets [[
+system mySys
+
+set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+
+set rainbow { Red, Orange, Yellow, Green, Blue, Indigo, Violet }
+ 
+]] 
+
+test class and set order 1 [[
+system mySys
+
+set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+
+class c1 {
+	
+} 
+]] parse succeeds 
+
+test class and set order 2 [[
+system mySys
+
+class c1 {
+	
+} 
+set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+
+]] parse succeeds
+
+test no name [[
+	system
+]] parse fails
+	
+test no name 2[[
+	system
+	class c1 {
+		
+	}
+]] parse fails
+
+test no name 2[[
+	system
+	set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
+]] parse fails

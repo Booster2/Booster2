@@ -1,0 +1,113 @@
+module syntax-attributes
+
+language Booster25
+
+test primitives [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : INT
+			b : STRING
+			c : DATE
+			d : DATETIME
+			e : PASSWORD
+			f : BOOLEAN
+			g : DECIMAL
+	}
+
+]] parse succeeds
+
+test primitives lower-case [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : int
+			b : string
+			c : date
+			d : datetime
+			e : password
+			f : boolean
+			g : decimal
+	}
+
+]] parse succeeds
+
+test optional primitives [[
+system mySys 
+
+	class MyClass { 
+		attributes
+			a : [INT]
+			b : [STRING]
+			c : [DATE]
+			d : [DATETIME]
+			e : [PASSWORD]
+			f : [BOOLEAN]
+			g : [DECIMAL]
+	}
+
+]] parse succeeds
+
+test set-valued primitives [[
+system mySys 
+	class MyClass { 
+		attributes
+			a : SET(INT)
+			b : SET(STRING)
+			c : SET(DATE)
+			d : SET(DATETIME)
+			e : SET(PASSWORD)
+			f : SET(BOOLEAN)
+			g : SET(DECIMAL)
+	}
+]] parse succeeds
+
+
+test set-value multiplicities [[
+system mySys 
+	class MyClass { 
+		attributes
+			a : SET(INT)[*]
+			b : SET(STRING)[0..*]
+			c : SET(DATE)[0..1]
+			d : SET(DATETIME)[..5]
+			e : SET(PASSWORD)
+			f : SET(BOOLEAN)[10..100]
+			g : SET(DECIMAL)[5]
+	}
+]] parse succeeds
+
+test bidirectional [[
+system mySys 
+
+	class A { 
+		attributes
+			bmm : B . amm
+			bmo : B . aom
+			bms : B . asm 
+			bom : [B . amo]
+			boo : [B . aoo]
+			bos : [B . aso] 
+			bsm : set(B . ams)
+			bso : set(B . aos)
+			bss : set(B . ass) 
+	}
+
+	class B { 
+		attributes
+			amm : A . bmm
+			aom : [A . bmo]
+			asm : set(A . bms)
+			amo : A . bom
+			aoo : [A . boo]
+			aso : set(A . bos)
+			ams : A . bsm
+			aos : [A . bso]
+			ass : set(A . bss)
+	}
+
+]] parse succeeds
+
+

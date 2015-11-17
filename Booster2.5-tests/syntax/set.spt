@@ -1,0 +1,45 @@
+module syntax-set
+
+language Booster25
+
+test empty set [[
+system mySys 
+
+	set MySet { }
+
+]] parse fails 
+
+
+test one-valued set [[
+system mySys 
+
+	set MySet { one }
+
+	
+]] parse succeeds
+
+test two-valued set [[
+system mySys 
+
+	set MySet { one, two }
+	
+]] parse succeeds
+
+test twenty-valued set [[
+system mySys 
+
+	set MySet { one, two, three, four, five,
+							six, seven, eight, nine, ten,
+							eleven, twelve, thirteen, fourteen, fifteen, 
+							sixteen, seventeen, eighteen, nineteen, twenty }
+
+	
+]] parse succeeds
+
+test no name set [[
+system mySys 
+
+	set { one, two, three }
+
+	
+]] parse fails
