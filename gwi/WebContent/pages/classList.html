@@ -19,8 +19,8 @@
 			<td><span ng-if="item.noObjects > 0"><a ng-href="#object/{{item.className}}/{{item.minId}}">Browse...</a></span></td>
 			<td><span ng-if="item.noObjects > 0"><a ng-href="#class/{{item.className}}">Search...</a></span></td>
 			<td><div ng-if="item.classMethods.length > 0" class="input-group">
-					<select class="form-control  input-sm" ng-model="item.selectedMethod" ng-init="item.selectedMethod=item.classMethods[0].methodName.unCamelCase();">
-						<option  ng-repeat="option in item.classMethods">{{option.methodName.unCamelCase()}}</option>
+					<select class="form-control  input-sm" ng-model="item.selectedMethod" ng-init="item.selectedMethod=item.classMethods[0].methodName;">
+						<option  ng-repeat="option in item.classMethods" value="{{option.methodName}}">{{option.methodName.unCamelCase()}}</option>
 					</select>
 					<span class="input-group-btn">
 						&nbsp;

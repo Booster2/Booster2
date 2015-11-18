@@ -34,7 +34,7 @@ public class MethodView extends HttpServlet {
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("service() called on ObjectView");
+		System.out.println("service() called on MethodView");
 		response.setContentType("application/json");
 		
 
