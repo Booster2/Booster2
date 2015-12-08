@@ -67,7 +67,7 @@ public class UserLogin extends HttpServlet {
 				{
 					System.out.println("username: " + rs.getString(1));
 					request.getSession().setAttribute("Username", rs.getString("username"));
-					request.getSession().setAttribute("UserId", rs.getInt("UserId"));
+					request.getSession().setAttribute("UserId", rs.getString("UserId"));
 				}
 			}
 		}catch(Exception e)

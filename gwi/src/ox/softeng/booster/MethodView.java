@@ -40,11 +40,8 @@ public class MethodView extends HttpServlet {
 
 		String className = request.getParameter("className");
 		String methodName = request.getParameter("methodName");
-		String thisParamStr = request.getParameter("thisParam");
-		Integer thisParam = null;
-		if(thisParamStr != null){
-			thisParam = Integer.parseInt(thisParamStr);
-		}
+		String thisParam = request.getParameter("thisParam");
+		
 		
 		JSONObject result = new JSONObject();
 		
@@ -106,7 +103,7 @@ public class MethodView extends HttpServlet {
 						setvalueps.setString(2,  className + "_" + methodName + "_" + paramName + "_choice");
 						if(thisParam != null)
 						{
-							setvalueps.setInt(3, thisParam);
+							setvalueps.setString(3, thisParam);
 						}
 						else{
 							setvalueps.setNull(3, java.sql.Types.INTEGER);	

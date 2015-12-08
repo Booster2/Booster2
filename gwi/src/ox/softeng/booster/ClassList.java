@@ -71,7 +71,7 @@ public class ClassList extends HttpServlet {
 				String className = rs.getString("TABLE_NAME");
 				obj.put("className", className);
 				obj.put("noObjects", rs.getInt("RECORD_COUNT"));
-				obj.put("minId", rs.getInt("MIN_ID"));
+				obj.put("minId", rs.getString("MIN_ID"));
 				PreparedStatement classMethodsPS = client.prepareStatement("call `GET_CLASS_METHOD_NAMES`(?)");
 				classMethodsPS.setString(1, className);
 				ResultSet classMethodsRS = classMethodsPS.executeQuery();

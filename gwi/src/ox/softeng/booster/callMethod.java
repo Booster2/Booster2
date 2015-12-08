@@ -85,26 +85,27 @@ public class callMethod extends HttpServlet {
 				paramTypes.put(paramName, paramType);
 				if(inOut.equalsIgnoreCase("input"))
 				{
-					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
-					{
-						methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
-					}
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password") || paramType.equalsIgnoreCase("ClassRef"))
 					{
 						if("_currentUser".equalsIgnoreCase(paramName))
 						{
-							methodInputParameterValues.put(paramName, (Integer)request.getSession().getAttribute("UserId"));
+							methodInputParameterValues.put(paramName, (String)request.getSession().getAttribute("UserId"));
 						}
 						else
 						{
-							if(requestParameters.get(paramName) != null)
-							{
-								methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
-							}
-							else{
-								methodInputParameterValues.put(paramName, null);
-							}
+							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
 						}
+					}
+					else if(paramType.equalsIgnoreCase("Integer"))
+					{
+						if(requestParameters.get(paramName) != null)
+						{
+							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
+						}
+						else{
+							methodInputParameterValues.put(paramName, null);
+						}
+					
 					}
 					else if(paramType.equalsIgnoreCase("Boolean"))
 					{
@@ -162,12 +163,12 @@ public class callMethod extends HttpServlet {
 		        String paramType = paramTypes.get(pairs.getKey());
 		        if(paramInOuts.get(pairs.getKey() + "_in").equalsIgnoreCase("input"))
 		        {
-			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password") || paramType.equalsIgnoreCase("ClassRef"))
 			        {
 			        	cs.setString(paramNo,(String)pairs.getValue());
 			        	System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 			        }
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+					else if(paramType.equalsIgnoreCase("Integer"))
 					{
 						if(pairs.getValue() == null)
 						{
@@ -213,12 +214,12 @@ public class callMethod extends HttpServlet {
 		        }
 		        else if(paramInOuts.get(pairs.getKey() + "_out").equalsIgnoreCase("output"))
 		        {
-			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue")  || paramType.equalsIgnoreCase("ClassRef"))
 			        {
 			        	cs.registerOutParameter(paramNo, java.sql.Types.VARCHAR);
 			        	System.out.println("Registering: " + pairs.getKey() + "," + pairs.getValue());
 			        }
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+					else if(paramType.equalsIgnoreCase("Integer"))
 					{
 						cs.registerOutParameter(paramNo, java.sql.Types.INTEGER);
 						System.out.println("Registering: " + pairs.getKey() + "," + pairs.getValue());
@@ -247,13 +248,13 @@ public class callMethod extends HttpServlet {
 		        	JSONObject obj = new JSONObject();
 					
 					//obj.put("paramMutiplicity", paramMultiplicity);
-					if(paramType.equalsIgnoreCase("String"))
+					if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("ClassRef"))
 			        {
 			        	String strOutput = cs.getString(paramNo);
 			        	obj.put("value", strOutput);
 			        	System.out.println("Retrieving: " + paramName + "," + result);
 			        }
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+					else if(paramType.equalsIgnoreCase("Integer"))
 					{
 			        	Integer intOutput = cs.getInt(paramNo);
 			        	obj.put("value", intOutput);

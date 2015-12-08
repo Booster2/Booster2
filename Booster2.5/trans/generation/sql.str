@@ -73,7 +73,9 @@ rules
 			isObjectMethod := <sql-expr><is-obj-method> m;
 			html := <string-replace(|"'", "''")> "";
 			<debug> <method-inputs> m;
-			[inParamStmts*] := <map(metadata-param(|m))><union>([CurrentUser()], <method-inputs> m);
+			<debug><union>([CurrentUser()], <method-inputs> m);
+			<debug><nub-an><union>([CurrentUser()], <method-inputs> m);
+			[inParamStmts*] := <map(metadata-param(|m))><nub-an><union>([CurrentUser()], <method-inputs> m);
 			[outParamStmts*] := <map(metadata-param(|m))><method-outputs> m
 						
 						
@@ -109,7 +111,7 @@ rules
 				setname := "" 
 
 	sql-classes: Class(name, exts, comps) -> 
-			<create-table>(name, <concat-strings>[name, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None())
+			<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None())
 
 	
 	// Mandatory or optional basic types get turned into single columns
@@ -135,8 +137,8 @@ rules
 	// Set-valued attributes get turned into tables
 	sql-set-atts: Attribute(name, decs, type) -> 
 		StatementList([
-			<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None()),
-			CreateColumn(tname, firstcolname, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()),
+			CreateColumn(tname, firstcolname, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
 			CreateColumn(tname, name, sqltype, Some(ColumnNotNullable()), None(), None(), None(), None())
 		])
 		where
@@ -151,9 +153,9 @@ rules
 	// Set-valued attributes get turned into tables
 	sql-set-atts: Attribute(name, decs, type) -> 
 		StatementList([
-			<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None()),
-			CreateColumn(tname, firstcolname, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
-			CreateColumn(tname, name, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, setname, [ColumnName(setname)])))
+			<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()),
+			CreateColumn(tname, firstcolname, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, setname, [ColumnName(setname)])))
 		])
 		where
 			<attr-is-set> name;
@@ -167,9 +169,9 @@ rules
 	// Set-valued attributes get turned into tables
 	sql-set-atts: Attribute(name, decs, type) -> 
 		StatementList([
-			<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(),Some(AutoIncrement()), None()),
-			CreateColumn(tname, firstcolname, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
-			CreateColumn(tname, name, Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, classname, [ColumnName(<concat-strings>[classname, "Id"])])))
+			<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()),
+			CreateColumn(tname, firstcolname, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, classname, [ColumnName(<concat-strings>[classname, "Id"])])))
 		])
 		where
 			<attr-is-set> name;
@@ -182,9 +184,9 @@ rules
 		
 	
 	sql-assoc-classes: Attribute(name, decs, type) -> StatementList([
-		<create-table>(tname, <concat-strings>[tname, "Id"], Int(), Some(ColumnNotNullable()), None(), Some(AutoIncrement()), None()),
-		CreateColumn(tname, cname1 , Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
-		CreateColumn(tname, cname2 , Int(), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-cname, "Id"])])))
+		<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(), None(), None()),
+		CreateColumn(tname, cname1 , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
+		CreateColumn(tname, cname2 , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-cname, "Id"])])))
 	])
 		where
 			opp-aname := <attr-get-inverse> name;
@@ -211,7 +213,7 @@ rules
 				DropProcedure(pname),
 				CreateProcedure(pname, params, pname, stmt'),
 				DropFunction(name1),
-				CreateFunction(name1, [Input("this", Int()), Input("_currentUser", Int())], Bit(), statement1),
+				CreateFunction(name1, [Input("this", Varchar("36")), Input("_currentUser", Varchar("36"))], Bit(), statement1),
 				DropFunction(name2),
 				CreateFunction(name2, params2, Bit(), statement2),
 				StatementList(availability-procedures*)
@@ -220,8 +222,8 @@ rules
 				pname := <concat-strings>[<method-parent> mname, "_", mname];
 				name1 := <concat-strings> [pname, "_available"];
 				name2 := <concat-strings> [name1, "_inputs"];
-				params := <union>([Input("_currentUser", Int())], <get-sql-params> m );
-				params2 := <union>([Input("_currentUser", Int())], <get-sql-inputs> m );
+				params := <union>([Input("_currentUser", Varchar("36"))], <get-sql-params> m );
+				params2 := <union>([Input("_currentUser", Varchar("36"))], <get-sql-inputs> m );
 				gc' := Guard(<get-guard ; remove-outputs(|[]) ; simplify> gc, <get-body> gc);
 				stmt := <sql-gc> gc';
 				stmt' := <add-audit-command> (stmt, decs, pname);
@@ -245,8 +247,30 @@ rules
 			where <elem>(NoAudit(), decs)
 				
 	add-audit-command: 
+		(stmt, decs, "User_create")
+			-> StatementList([stmt, 
+			IfThen(
+				And(IsNull(SystemVariable("_currentUser"), None()), Equal(cardUser, Int("1"))),
+				ProcCall("User_newAuditModOp", [SystemVariable("u_out"), SystemVariable("u_out"), String("User_create"), SystemVariable("@auditOutput")]),
+				[],
+				Some(Else(ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String("User_create"), SystemVariable("@auditOutput")]))))])
+			where 
+				cardUser := SelectQuery(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName("User")])), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None())
+
+	add-audit-command: 
 		(stmt, decs, procname)
-			-> StatementList([stmt, ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
+			-> StatementList([stmt, 
+					ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
 				
 	get-availability-procedure(|mname, gc):
 		i -> 
@@ -256,7 +280,7 @@ rules
 				where
 					cname := <method-parent> mname;
 					pname := <concat-strings> [cname, "_", mname,"_",i,"_choice"];
-					params := [Input("this", Int())];
+					params := [Input("this", Varchar("36"))];
 					guard-without-inputs := <simplify><remove-inputs(|[Input(i)])> <get-guard> gc;
 					tidname := <concat-strings>[<class-name> i, "Id"];
 					dummyVariable := <concat-strings>["dummyVariable_",tidname];
@@ -328,7 +352,9 @@ rules
 															None(), 
 															None()), 
 												  		Int("0")), 
-						StatementList([Insert(None(), None(), Some(Into()), tablename, [ColumnName(column1), ColumnName(column2)], [LocalVariable(pn1), LocalVariable(pn2)], None())]),
+						StatementList([Insert(None(), None(), Some(Into()), tablename, 
+						[ColumnName(tablenameid), ColumnName(column1), ColumnName(column2)], 
+						[ FunctionCall("UUID", []), LocalVariable(pn1), LocalVariable(pn2)], None())]),
 						[],
 						None()
 					)])
@@ -340,6 +366,7 @@ rules
 				expr1 := <path-prefix ; sql-expr> path;
 				expr2 := <sql-expr> expr;
 				tablename := <path-suffix-name ; att-table-name> path;
+				tablenameid := <concat-strings> [tablename, "Id"];
 				column1 := <path-suffix-name ; att-table-name> path;
 				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path 
 				
@@ -382,7 +409,9 @@ rules
 															None(), 
 															None()), 
 												  		Int("0")), 
-						StatementList([Insert(None(), None(), Some(Into()), tablename, [ColumnName(column1), ColumnName(column2)], [LocalVariable(pn1), LocalVariable(pn2)], None())]),
+						StatementList([Insert(None(), None(), Some(Into()), tablename, 
+						[ColumnName(tablenameid), ColumnName(column1), ColumnName(column2)], 
+						[FunctionCall("UUID", []), LocalVariable(pn1), LocalVariable(pn2)], None())]),
 						[],
 						None()
 					)])
@@ -395,14 +424,16 @@ rules
 				expr1 := <path-prefix ; sql-expr> p;
 				expr2 := <sql-expr> expr;
 				tablename := <path-suffix-name ; att-table-name> p;
+				tablenameid := <concat-strings> [tablename, "Id"];
 				column1 := <path-suffix-name ; att-table-name> p;
 				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> p
 	
 	sql-gc: New(o, cls)
 			-> 
-			StatementList([Insert(None(), None(), Some(Into()), cls, [], [], None()),
-				SelectStatement([],[FunctionCall("LAST_INSERT_ID", [])], None(), None(), None(), None(), None(), None(), None(), 
-							Some(Into([TableName(<concat-strings>[o, "_out"])])), None())])
+			StatementList([
+				SelectStatement([],[FunctionCall("UUID", [])], None(), None(), None(), None(), None(), None(), None(), 
+							Some(Into([TableName(<concat-strings>[o, "_out"])])), None()),
+				Insert(None(), None(), Some(Into()), cls, [ColumnName(<concat-strings>[cls,"Id"])], [SystemVariable(<concat-strings>[o, "_out"])], None())])
 	
 
 	

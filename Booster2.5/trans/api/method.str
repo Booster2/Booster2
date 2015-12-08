@@ -72,8 +72,8 @@ rules // conjoin methods
 	get-params = <concat>[<method-inputs>, <method-outputs>]
 
 	convert-param = ?Input(n) ; !Input(<concat-strings>[n, "_in"], <_get-type ; sql-type> n)
-	convert-param = ?This() ; !Input("this", Int())
-	convert-param = ?CurrentUser() ; !Input("_currentUser", Int())
+	convert-param = ?This() ; !Input("this", Varchar("36"))
+	convert-param = ?CurrentUser() ; !Input("_currentUser", Varchar("36"))
 	convert-param = ?Output(n) ; !Output(<concat-strings>[n, "_out"], <_get-type ; sql-type> n)
 	
 	get-sql-params = get-params ; nub-an ; map(convert-param) 
