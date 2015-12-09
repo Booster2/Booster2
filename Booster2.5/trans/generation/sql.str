@@ -27,6 +27,8 @@ rules
 		StatementList(<collect-all(sql-metadata)> x),
  		StatementList(<collect-all(sql-set-def)> x),
 		StatementList(<collect-all(sql-classes)> x),
+		StatementList(<collect-all(sql-extensions)> x),
+		StatementList(<collect-all(sql-extended-views)> x),
 		StatementList(<collect-all(sql-set-atts)> x),
 		StatementList(<collect-all(sql-assoc-classes)> x),
 		StatementList(<collect-all(sql-method)> x)
@@ -72,9 +74,9 @@ rules
 			classname := <method-parent>name;
 			isObjectMethod := <sql-expr><is-obj-method> m;
 			html := <string-replace(|"'", "''")> "";
-			<debug> <method-inputs> m;
-			<debug><union>([CurrentUser()], <method-inputs> m);
-			<debug><nub-an><union>([CurrentUser()], <method-inputs> m);
+			//<debug> <method-inputs> m;
+			//<debug><union>([CurrentUser()], <method-inputs> m);
+			//<debug><nub-an><union>([CurrentUser()], <method-inputs> m);
 			[inParamStmts*] := <map(metadata-param(|m))><nub-an><union>([CurrentUser()], <method-inputs> m);
 			[outParamStmts*] := <map(metadata-param(|m))><method-outputs> m
 						
@@ -111,8 +113,36 @@ rules
 				setname := "" 
 
 	sql-classes: Class(name, exts, comps) -> 
-			<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None())
+		<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None())
 
+	sql-extensions: Class(name, Some(Extend(exts)), comps) -> 
+		StatementList(
+				<map(extension-column(|name))> exts
+		)
+		
+	extension-column(|cname):
+			Extension(ename) -> 
+				CreateColumn(cname, colname , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(colname, ename, [ColumnName(<concat-strings>[ename, "Id"])])))
+			where
+				colname := <concat-strings>[cname, ename, "Id"]
+
+	sql-extended-views: Class(name, exts, comps) -> 
+		CreateView(<concat-strings>[name, "_all"], 
+			SelectQuery([],[Star()], Some(FromPart([fromPart])), None(), None(), None(), None(), None(), None(), None(), None()))
+	where
+		<debug> "Extended Views";
+		<debug> name;
+		superclass* := <_relation-lookup(|"<sub:");nub;reverse>name;
+		<debug> <map(_nabl-uri-name)>superclass*;
+		fromPart := <create-view-joins(|TableName(name), name)> <map(_nabl-uri-name)>superclass*
+	
+	create-view-joins(|tableref, name):
+			[] -> tableref
+
+	create-view-joins(|tableref, name):
+			[t, ts*] -> InnerJoin(<create-view-joins(|tableref, name)> [ts*], TableName(t), Some(On(Equal(TableColumnName(t,<concat-strings>[t, "Id"]), TableColumnName(name, <concat-strings>[name, "Id"])))))
+			
+	
 	
 	// Mandatory or optional basic types get turned into single columns
 	sql-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, sqltype, nullable, default, None(), None(), None())

@@ -70,7 +70,8 @@ context-free syntax
 	 			    <Statement>
 	 			  end //
 	 			  delimiter ;>  
-  
+  Statement.CreateView = 
+  				< create view `<ID>` as <Query> ;>
   FunctionParameter.Input = <<ID> <SQLType>> 
   Parameter.Input = <in <ID> <SQLType>> 
   Parameter.Output = <out <ID> <SQLType>> 
@@ -211,7 +212,8 @@ context-free syntax
   Parameter = SQLExpression 
   CollationName = ID 
   Query.SelectQuery = <(SELECT <{SelectType ""}*> <{SelectExpression ","}+> <FromPart?> <WherePart?> <GroupByPart?> <HavingPart?> <OrderByPart?> <LimitPart?> <ProcedurePart?> <IntoPart?> <ModePart?>)> 
-  Statement.SelectStatement = <SELECT <{SelectType ""}*> <{SelectExpression ","}+> <FromPart?> <WherePart?> <GroupByPart?> <HavingPart?> <OrderByPart?> <LimitPart?> <ProcedurePart?> <IntoPart?> <ModePart?>;> 
+  SelectStatement.SelectStatement = <SELECT <{SelectType ""}*> <{SelectExpression ","}+> <FromPart?> <WherePart?> <GroupByPart?> <HavingPart?> <OrderByPart?> <LimitPart?> <ProcedurePart?> <IntoPart?> <ModePart?>;> 
+	Statement = SelectStatement
   SelectType.All = <ALL> 
   SelectType.Distinct = <DISTINCT> 
   SelectType.DistinctRow = <DISTINCTROW> 
