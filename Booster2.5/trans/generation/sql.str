@@ -6,6 +6,7 @@ imports
 	trans/lib/eq
 	trans/api/attribute
 	trans/api/method
+	trans/api/class
 	trans/api/type
 	trans/api/path
 	trans/api/guarded-command
@@ -13,6 +14,10 @@ imports
 	trans/api/_runtime
 	
 	trans/generation/simplify
+
+	lib/runtime/nabl/query
+	lib/runtime/nabl/uri
+	lib/runtime/relations/entries
 	
 	// We need this for literal-subst
 	trans/generation/wp
@@ -29,6 +34,7 @@ rules
 		StatementList(<collect-all(sql-classes)> x),
 		StatementList(<collect-all(sql-extensions)> x),
 		StatementList(<collect-all(sql-extended-views)> x),
+		//StatementList(<collect-all(sql-extent-views(|x))> x),
 		StatementList(<collect-all(sql-set-atts)> x),
 		StatementList(<collect-all(sql-assoc-classes)> x),
 		StatementList(<collect-all(sql-method)> x)
@@ -42,17 +48,17 @@ rules
 			None()) 
 
 
-	sql-metadata: Class(name, exts, comps) -> 
-			Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(name),String(name)], None())
+	sql-metadata: Class(cname, exts, comps) -> 
+			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(cname),String(cname)], None()),
+				StatementList(<collect-all(sql-metadata-attributes(|cname))> comps)])
 
-	sql-metadata: a@Attribute(name, decs, type) -> 
+	sql-metadata-attributes(|cname): a@Attribute(name, decs, type) -> 
 			Insert(None(), None(), Some(Into()), 
 						"_Meta_Attributes", 
 						[ColumnName("class"),	ColumnName("attName"),	ColumnName("primType"),	ColumnName("typeMultiplicity"),	ColumnName("oppAttName"),	ColumnName("className"),	ColumnName("setName"),	ColumnName("direction"),	ColumnName("tableName"),	ColumnName("isId")],
-						[String(classname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						<sql-expr>isId], 
+						[String(cname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						<sql-expr>isId], 
 						None())
 			where
-				classname := <attr-parent> name;
 				primType := <prim-type-string> name;
 				typeMultiplicity := <multiplicity-string> name;
 				setName := <set-name> name;
@@ -117,11 +123,13 @@ rules
 
 	sql-extensions: Class(name, Some(Extend(exts)), comps) -> 
 		StatementList(
-				<map(extension-column(|name))> exts
+				<map(extension-column(|name))> superclasses*
 		)
+	where
+			superclasses* := <map(_nabl-uri-name)><_relation-lookup(|"<sub:");nub;reverse>name
 		
 	extension-column(|cname):
-			Extension(ename) -> 
+			ename -> 
 				CreateColumn(cname, colname , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(colname, ename, [ColumnName(<concat-strings>[ename, "Id"])])))
 			where
 				colname := <concat-strings>[cname, ename, "Id"]
@@ -130,17 +138,33 @@ rules
 		CreateView(<concat-strings>[name, "_all"], 
 			SelectQuery([],[Star()], Some(FromPart([fromPart])), None(), None(), None(), None(), None(), None(), None(), None()))
 	where
-		<debug> "Extended Views";
-		<debug> name;
 		superclass* := <_relation-lookup(|"<sub:");nub;reverse>name;
-		<debug> <map(_nabl-uri-name)>superclass*;
 		fromPart := <create-view-joins(|TableName(name), name)> <map(_nabl-uri-name)>superclass*
+
+/*	sql-extent-views(|ast): c@Class(name, exts, comps) -> 
+		CreateView(<concat-strings>[name, "_extent"], 
+			SelectQuery([],[Star()], Some(FromPart([fromPart])), None(), None(), None(), None(), None(), None(), None(), None()))
+	where
+		superclass* := <_relation-lookup(|"<sub:");nub;reverse>name;
+		<debug> "Extent views";
+		<debug> name;
+		subclass* := <class-get-subtypes(|ast)> c;
+		<debug> subclass*;
+		fromPart := <create-view-unions(|TableName(name), name)> <map(_nabl-uri-name)>subclass*
+*/
+
 	
 	create-view-joins(|tableref, name):
 			[] -> tableref
 
 	create-view-joins(|tableref, name):
 			[t, ts*] -> InnerJoin(<create-view-joins(|tableref, name)> [ts*], TableName(t), Some(On(Equal(TableColumnName(t,<concat-strings>[t, "Id"]), TableColumnName(name, <concat-strings>[name, "Id"])))))
+
+	create-view-unions(|tableref, name):
+			[] -> tableref
+
+	create-view-unions(|tableref, name):
+			[t, ts*] -> InnerJoin(<create-view-unions(|tableref, name)> [ts*], TableName(t), Some(On(Equal(TableColumnName(t,<concat-strings>[t, "Id"]), TableColumnName(name, <concat-strings>[name, "Id"])))))
 			
 	
 	
@@ -420,7 +444,7 @@ rules
 			not(<attr-is-bidir> p);
 			attname := <path-suffix-name> p;
 			pn' := <path-to-var-name> p;
-			tname := <path-prefix ; class-name> p;
+			tname := <_nabl-uri ; nabl-uri-parent ; _nabl-uri-name><path-suffix-name> p;
 			expr' := <sql-expr> expr;
 			expr'' := <path-where> p
 	
@@ -458,15 +482,25 @@ rules
 				column1 := <path-suffix-name ; att-table-name> p;
 				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> p
 	
+	
+	
 	sql-gc: New(o, cls)
 			-> 
 			StatementList([
-				SelectStatement([],[FunctionCall("UUID", [])], None(), None(), None(), None(), None(), None(), None(), 
-							Some(Into([TableName(<concat-strings>[o, "_out"])])), None()),
-				Insert(None(), None(), Some(Into()), cls, [ColumnName(<concat-strings>[cls,"Id"])], [SystemVariable(<concat-strings>[o, "_out"])], None())])
-	
-
-	
+				SelectStatement([],[FunctionCall("UUID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([TableName(<concat-strings>[o, "_out"])])), None()),
+				StatementList(<map(insert-new-superclass(|outVar))><union>(superclass*,[cls]))])
+		where
+			outVar := SystemVariable(<concat-strings>[o, "_out"]);
+			superclass* := <map(nabl-get-all-definitions ; Hd) > <_relation-lookup(|"<sub:");nub;reverse> cls
+						
+		insert-new-superclass(|outVar):
+				cname -> Insert(None(), None(), Some(Into()), cname', [ColumnName(<concat-strings>[cname',"Id"]), cols*], [outVar, outVars*], None())
+			where
+				(cname' := <_nabl-uri ; _nabl-uri-name> cname <+ cname' := cname);
+				superclass* :=  <map(_nabl-uri-name)><_relation-lookup(|"<sub:");nub;reverse> cname;
+				[cols*] := <map(\scname -> ColumnName(<concat-strings>[cname', scname, "Id"])\)> superclass*;
+				[outVars*] := <map(!outVar)> superclass*
+				
 	sql-gc: Guard(const, gc) -> IfThen(const', stmt,[],None())
 		where
 			const' := <sql-const> const;
@@ -812,7 +846,7 @@ rules
 		p -> Equal(expr, ColumnName(<concat-strings>[cname, "Id"]))
 		where 
 			not(<attr-is-set> p);
-			cname := <path-prefix ; class-name> p;
+			cname := <_nabl-uri ; nabl-uri-parent ; _nabl-uri-name><path-suffix-name> p;
 			expr := <path-prefix ; sql-expr> p
 
 
@@ -823,7 +857,7 @@ rules
 		where 
 			<attr-is-set> p;
 			expr := <path-prefix ; sql-expr> p;
-			cname := <path-prefix ; class-name> p
+			cname := <_nabl-uri ; nabl-uri-parent ; _nabl-uri-name><path-suffix-name> p
 		
 /*	path-where: Output(n) -> True()
 
