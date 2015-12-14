@@ -106,13 +106,13 @@ public class MethodView extends HttpServlet {
 							setvalueps.setString(3, thisParam);
 						}
 						else{
-							setvalueps.setNull(3, java.sql.Types.INTEGER);	
+							setvalueps.setNull(3, java.sql.Types.VARCHAR);	
 						}
 						ResultSet setValuesRS = setvalueps.executeQuery();
 						JSONArray valuesArray = new JSONArray();
 						while(setValuesRS.next())
 						{
-							int oid = setValuesRS.getInt("OBJECT_ID");
+							String oid = setValuesRS.getString("OBJECT_ID");
 							String desc = setValuesRS.getString("DESCRIPTION");
 							//System.out.println("Value: " + value);
 							JSONObject objvalue = new JSONObject();

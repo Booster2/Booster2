@@ -90,11 +90,11 @@ public class methodPrecondition extends HttpServlet {
 					}
 					else{
 		
-						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
+						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password") || paramType.equalsIgnoreCase("ClassRef"))
 						{
 							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
 						}
-						else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+						else if(paramType.equalsIgnoreCase("Integer"))
 						{
 							methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
 						}

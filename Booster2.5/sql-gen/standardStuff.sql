@@ -144,7 +144,7 @@ WHILE done = 0 DO
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES_FOR_DESC
                                     (CALL_CLASS, CALL_OID, ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '", className_in, "','",objectID,"','" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@tableName,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
 
     
 
@@ -288,7 +288,7 @@ WHILE done = 0 DO
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",className_in,"_",ANAME," = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
 
     ELSEIF @primType = 'String' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
@@ -331,12 +331,12 @@ WHILE done = 0 DO
    ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Uni' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",className_in,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
 
     ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",className_in,"_",ANAME," = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
  
 
 
