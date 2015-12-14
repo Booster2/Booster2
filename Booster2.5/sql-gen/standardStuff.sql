@@ -724,7 +724,7 @@ CREATE TEMPORARY TABLE CLASS_DESCS
 
 	IF sp_in is not null and this is not null
 	THEN
-		SET @SQL_TXT = CONCAT('CALL `',sp_in,'`(',this,');');
+		SET @SQL_TXT = CONCAT('CALL `',sp_in,'`(''',this,''');');
 	ELSE
 		SET @SQL_TXT = CONCAT('INSERT INTO CLASS_DESCS (OBJECT_ID)  SELECT ',  @classTableName, 'Id from `', @classTableName, '`;');
 	END IF;
