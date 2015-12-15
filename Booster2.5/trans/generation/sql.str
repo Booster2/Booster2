@@ -50,7 +50,8 @@ rules
 
 	sql-metadata: Class(cname, exts, comps) -> 
 			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(cname),String(cname)], None()),
-				StatementList(<collect-all(sql-metadata-attributes(|cname))> comps)])
+				StatementList(<collect-all(sql-metadata-attributes(|cname))> comps),
+				StatementList(<collect-all(sql-metadata-methods(|cname))> comps)])
 
 	sql-metadata-attributes(|cname): a@Attribute(name, decs, type) -> 
 			Insert(None(), None(), Some(Into()), 
@@ -68,33 +69,31 @@ rules
 				opp-cname := <attr-parent <+ !""> opp-aname;
 				tname := <att-table-name> name
 						 
-	sql-metadata:
+	sql-metadata-methods(|cname):
 		m@Method(name, decs, gc) ->
 			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Methods", 
 						[ColumnName("class"),ColumnName("methodName"),ColumnName("isObjectMethod"),ColumnName("html")], 
-						[String(classname),String(name),isObjectMethod, String(html)], None()),
+						[String(cname),String(name),isObjectMethod, String(html)], None()),
 						inParamStmts*,
 						outParamStmts*
 						])
 		where
-			classname := <method-parent>name;
 			isObjectMethod := <sql-expr><is-obj-method> m;
 			html := <string-replace(|"'", "''")> "";
 			//<debug> <method-inputs> m;
 			//<debug><union>([CurrentUser()], <method-inputs> m);
 			//<debug><nub-an><union>([CurrentUser()], <method-inputs> m);
-			[inParamStmts*] := <map(metadata-param(|m))><nub-an><union>([CurrentUser()], <method-inputs> m);
-			[outParamStmts*] := <map(metadata-param(|m))><method-outputs> m
+			[inParamStmts*] := <map(metadata-param(|cname, m))><nub-an><union>([CurrentUser()], <method-inputs> m);
+			[outParamStmts*] := <map(metadata-param(|cname, m))><method-outputs> m
 						
 						
-	metadata-param(|m): x ->
+	metadata-param(|cname, m): x ->
 			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
 						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
 						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
 						None())
 			where
 				Method(mname, decs, gc) := m;
-				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> mname;
 				pname := < ?Input(<id>) <+ ?Output(<id>) <+ (?This() ; !"this") <+ (?CurrentUser() ; !"_currentUser")> x;
 				ptname := <prim-type-string> x;
 				mult := <multiplicity-string> x;
@@ -103,14 +102,13 @@ rules
 				setname := <set-name> x 
 
 // Find a better way of doing this!
-	metadata-param(|m): CurrentUser() ->
+	metadata-param(|cname, m): CurrentUser() ->
 			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
 						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
 						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
 						None())
 			where
 				Method(mname, decs, gc) := m;
-				cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> mname;
 				pname := "_currentUser";
 				ptname := "ClassRef";
 				mult := "Mandatory";
@@ -260,9 +258,12 @@ rules
 	insert-value(|name): value ->
 		Insert(None(), None(), Some(Into()), name, [ColumnName(name)], [String(value)], None())
 		
+	sql-method: 
+		c@Class(cname, exts, comps)
+			->
+		StatementList(<collect-all(sql-class-method(|cname))> comps)	
 		
-		
-	sql-method:  m@Method(mname, decs, gc) -> 
+	sql-class-method(|cname):  m@Method(mname, decs, gc) -> 
 		StatementList([
 				DropProcedure(pname),
 				CreateProcedure(pname, params, pname, stmt'),
@@ -273,7 +274,7 @@ rules
 				StatementList(availability-procedures*)
 			])
 			where
-				pname := <concat-strings>[<method-parent> mname, "_", mname];
+				pname := <concat-strings>[cname, "_", mname];
 				name1 := <concat-strings> [pname, "_available"];
 				name2 := <concat-strings> [name1, "_inputs"];
 				params := <union>([Input("_currentUser", Varchar("36"))], <get-sql-params> m );
@@ -293,7 +294,7 @@ rules
 												Some(Else(Return(Int("0")))));
 				//<debug> "availability-procedures";
 				booster-params := <get-params ; nub-an> m;
-				availability-procedures* := <map(get-availability-procedure(|mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params										
+				availability-procedures* := <map(get-availability-procedure(|cname, mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params										
 		
 	add-audit-command: 
 		(stmt, decs, procname)
@@ -326,13 +327,12 @@ rules
 			-> StatementList([stmt, 
 					ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
 				
-	get-availability-procedure(|mname, gc):
+	get-availability-procedure(|cname, mname, gc):
 		i -> 
 				StatementList([
 						DropProcedure(pname),
 						CreateProcedure(pname, params, pname, stmt) ])
 				where
-					cname := <method-parent> mname;
 					pname := <concat-strings> [cname, "_", mname,"_",i,"_choice"];
 					params := [Input("this", Varchar("36"))];
 					guard-without-inputs := <simplify><remove-inputs(|[Input(i)])> <get-guard> gc;
