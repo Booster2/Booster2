@@ -117,7 +117,10 @@ rules
 				setname := "" 
 
 	sql-classes: Class(name, exts, comps) -> 
-		<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None())
+		StatementList([<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()), 
+										CreateColumn(name, <concat-strings>[name, "_className"] , Varchar("100"), Some(ColumnNotNullable()), None(), None(), None(), None()),
+										CreateColumn(name, <concat-strings>[name,"_createdDate"] , TimeStamp(), Some(ColumnNotNullable()), Some(ColumnDefault(FunctionCall("NOW", []))), None(), None(), None())
+										])
 
 	sql-extensions: Class(name, Some(Extend(exts)), comps) -> 
 		StatementList(
@@ -488,13 +491,13 @@ rules
 			-> 
 			StatementList([
 				SelectStatement([],[FunctionCall("UUID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([TableName(<concat-strings>[o, "_out"])])), None()),
-				StatementList(<map(insert-new-superclass(|outVar))><union>(superclass*,[cls]))])
+				StatementList(<map(insert-new-superclass(|cls, outVar))><union>(superclass*,[cls]))])
 		where
 			outVar := SystemVariable(<concat-strings>[o, "_out"]);
 			superclass* := <map(nabl-get-all-definitions ; Hd) > <_relation-lookup(|"<sub:");nub;reverse> cls
 						
-		insert-new-superclass(|outVar):
-				cname -> Insert(None(), None(), Some(Into()), cname', [ColumnName(<concat-strings>[cname',"Id"]), cols*], [outVar, outVars*], None())
+		insert-new-superclass(|clsname, outVar):
+				cname -> Insert(None(), None(), Some(Into()), cname', [ColumnName(<concat-strings>[cname',"Id"]),ColumnName(<concat-strings>[cname',"_className"]), cols*], [outVar, String(clsname), outVars*], None())
 			where
 				(cname' := <_nabl-uri ; _nabl-uri-name> cname <+ cname' := cname);
 				superclass* :=  <map(_nabl-uri-name)><_relation-lookup(|"<sub:");nub;reverse> cname;
