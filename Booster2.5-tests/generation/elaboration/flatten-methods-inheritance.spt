@@ -1,0 +1,57 @@
+module generation-elaboration-methods-inheritance
+
+language Booster25
+
+setup Common [[
+	system debug
+]]
+
+test Inherit create method [[
+	class A           { 
+		attributes 
+			i : int 
+		methods	
+			create {a! : A'}	
+	}
+	class B extends A {
+		
+	}
+]] build elaborate-builder-ast to [[
+	class A           { 
+		attributes 
+			i : int 
+		methods	
+			create {a! : A'}	
+	}
+	class B extends A {
+		attributes 
+			i : int 
+		methods 
+			create {a! : B'}
+	}
+]]
+
+test Inherit destroy method [[
+	class A           { 
+		attributes 
+			i : int 
+		methods	
+			create {this /: A'}	
+	}
+	class B extends A {
+		
+	}
+]] build elaborate-builder-ast to [[
+	class A           { 
+		attributes 
+			i : int 
+		methods	
+			create {this /: A'}	
+	}
+	class B extends A {
+		attributes 
+			i : int 
+		methods 
+			create {this /: B'}
+	}
+]]
