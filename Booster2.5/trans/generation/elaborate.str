@@ -85,8 +85,9 @@ rules // flatten class hierarchy
 			with // methods: pull all methods in not defined + pull all bodies of methods defined
 				method*           := <class-get-methods>c;
 				superclass-meth*  := <map(class-get-methods);concat>superclass-def*;
-				all-meth*         := [superclass-meth*,method*];
-				all-meth'*        := <reverse;method-conjoin-all;reverse>all-meth*
+				superclass-meth'* := <map(replace-class(|cname))> superclass-meth*;
+				all-meth*         := [superclass-meth'*,method*];
+				all-meth'*        := <reverse;method-conjoin-all;reverse> all-meth*
 			with
 				new-attr* := <?a;if ?[] then ![] else ![Attributes(a)] end>all-attr*;
 				new-inv*  := <?b;if ?[] then ![] else ![Invariants(b)] end>all-inv*;
@@ -95,7 +96,16 @@ rules // flatten class hierarchy
 
 rules
 	
+			replace-class(|cname):
+				m@Method(mname, decs, gc)
+					-> m'
+			where 
+				mcname := <method-parent> mname;
+				gc' := <bottomup(try(replace-class-name(|mcname, cname)))> gc;
+				m' := Method(mname, decs, gc')
 				 
 
+			replace-class-name(|cname, cname'):
+					PathStart(cname, mbp) -> PathStart(cname', mbp)
 	
 rules	
