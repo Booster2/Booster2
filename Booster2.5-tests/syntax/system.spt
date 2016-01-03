@@ -63,10 +63,6 @@ set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
 
 ]] parse succeeds
 
-test no name [[
-	system
-]] parse fails
-	
 test no name 2[[
 	system
 	class c1 {
@@ -74,7 +70,8 @@ test no name 2[[
 	}
 ]] parse fails
 
-test no name 2[[
+test no name 3[[
 	system
 	set dayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
 ]] parse fails
+
