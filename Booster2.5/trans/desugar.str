@@ -2,18 +2,17 @@ module trans/desugar
 
 imports
 	
-	src-gen/signatures/AbstractBoosterModel-sig	
-	src-gen/signatures/Booster25-sig
+	signatures/-
 	
-imports
+	lib/origin
+	lib/traverse
+	api/_runtime
+	pp
+	api/path
+
 	
-	trans/lib/origin
-	trans/lib/traverse
-	trans/api/_runtime
-	trans/pp
-	trans/api/path
-	
-	lib/editor-common.generated
+//2	lib/editor-common.generated becomes:
+	stratego/metaborg
 
 signature constructors
 	
@@ -394,7 +393,7 @@ rules // make PathStart(classReference, _) have type set within BinRel(_, In(), 
 
 rules // rewrite all invariants to get a name
 	
-	inv-add-name: Invariant(c) -> Invariant(<pp-Constraint-string;custom-origin(|c)>c, c)
+	inv-add-name: Invariant(c) -> Invariant(<pp-Booster25-string;custom-origin(|c)>c, c)
 	
 	currentuser-add-path: c@CurrentUser() -> CurrentUser(<custom-origin(|c)>PathStart(<custom-origin(|c)>"User", None()))
 	

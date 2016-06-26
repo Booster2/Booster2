@@ -2,10 +2,10 @@ module trans/types-manual
 
 imports // constructors
 	
-	src-gen/signatures/Booster25-sig
-	trans/desugar
-	trans/names
-	lib/runtime/relations/query
+	signatures/-
+	desugar
+	names/names
+	//lib/runtime/relations/query
 	
 	trans/api/_runtime
 	trans/api/_runtime-constructors

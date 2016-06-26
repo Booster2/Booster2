@@ -2,24 +2,31 @@ module pp
 
 imports
 
-	libstratego-gpp
-	lib/runtime/refactoring/-
-	src-gen/pp/Booster25-pp
-	include/Booster25-parenthesize
-	include/Booster25
-	trans/desugar
+  libstratego-gpp
+  runtime/refactoring/-
+  pp/Booster25-parenthesize
+  pp/Booster25-pp
 
 rules
-	
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+  
   pp-Booster25-string =
-  	parenthesize-Booster25;
-    prettyprint-SDF-start-symbols
+    parenthesize-Booster25
+    ; prettyprint-Booster25-start-symbols
     ; !V([], <id>)
     ; box2text-string(|120)
       
   pp-partial-Booster25-string =
-  	parenthesize-Booster25;
-    prettyprint-example
+    parenthesize-Booster25
+    ; prettyprint-Booster25
     ; !V([], <id>)
     ; box2text-string(|120)
       
@@ -30,31 +37,6 @@ rules
     <+ <bottomup(try(not(is-string); not(is-list); not(pp-Booster25-string); debug(!"cannot pp ")))> ast
     ;  result := ""
 
-  pp-Constraint-string =
-  	parenthesize-Booster25;
-    prettyprint-Constraint
-    ; !V([], <id>)
-    ; box2text-string(|120)
-
-  pp-Path-string =
-  	parenthesize-Booster25;
-    prettyprint-Path
-    ; !V([], <id>)
-    ; box2text-string(|120)
-
-rules // desugared ast pping
-	
-  prettyprint-Invariant : Invariant(a, b) -> <prettyprint-Invariant>Invariant(b)
-  is-Invariant = ?Invariant(_,_)
-
 rules
   
-  /**
-  * Given an old AST and a new AST, pretty-prints the new AST while presevering 
-  * layout (e.g. whitespacing and comments) associated with the old AST.
-  *
-  * Example:
-  *   new-text := <construct-textual-change> (old-ast, new-ast)
-  */
   construct-textual-change = construct-textual-change(pp-partial-Booster25-string, parenthesize, override-reconstruction, resugar)
-

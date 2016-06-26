@@ -1,30 +1,30 @@
-module trans/api/_runtime
+module api/_runtime
 
 imports // generated runtime
 		
-	lib/runtime/analysis/complete	
-	lib/runtime/analysis/debug
-	lib/runtime/analysis/legacy
-	lib/runtime/analysis/resolve
-	lib/runtime/editor/annotations	
-	lib/runtime/editor/origins
-	lib/runtime/editor/outline-library
-	lib/runtime/editor/properties
-	lib/runtime/index/core
-	lib/runtime/index/legacy
-	lib/runtime/nabl/check
-	lib/runtime/nabl/collect
-	lib/runtime/nabl/constraints
-	lib/runtime/nabl/resolve
-	lib/runtime/nabl/tasks
-	lib/runtime/nabl/query
-	lib/runtime/nabl/uri
-	lib/runtime/relations/query
-	lib/runtime/task/core
-	lib/runtime/task/insert
-	lib/runtime/task/messages
-	lib/runtime/task/tasks
-	lib/runtime/types/query
+	runtime/analysis/complete	
+	runtime/analysis/debug
+//	runtime/analysis/legacy
+	runtime/analysis/resolve
+	runtime/editor/annotations	
+	runtime/editor/origins
+	runtime/editor/outline-library
+	runtime/editor/properties
+	runtime/index/core
+	runtime/index/legacy
+	runtime/nabl/check
+	runtime/nabl/collect
+	runtime/nabl/constraints
+	runtime/nabl/resolve
+	runtime/nabl/tasks
+	runtime/nabl/query
+	runtime/nabl/uri
+	runtime/relations/query
+	runtime/task/core
+	runtime/task/insert
+	runtime/task/messages
+	runtime/task/tasks
+	runtime/types/query
 
 imports // custom runtime
 	
@@ -103,13 +103,13 @@ rules
 	
 	_simple-label-outline(to-outline-label) = simple-label-outline(to-outline-label)
 	
-	_analysis-default-editor = analysis-default-editor
-	_analysis-save-default(|language) = analysis-save-default(|language)
-	_analysis-single-default(pre-trans, post-trans, pp-message|language) = analysis-single-default(pre-trans, post-trans, pp-message|language)
-	_analysis-multiple-default(parse-file, pre-trans, post-trans, pp-message|language, project-path) = analysis-multiple-default(parse-file, pre-trans, post-trans, pp-message|language, project-path)
+//	_analysis-default-editor = analysis-default-editor
+//	_analysis-save-default(|language) = analysis-save-default(|language)
+//	_analysis-single-default(pre-trans, post-trans, pp-message|language) = analysis-single-default(pre-trans, post-trans, pp-message|language)
+//	_analysis-multiple-default(parse-file, pre-trans, post-trans, pp-message|language, project-path) = analysis-multiple-default(parse-file, pre-trans, post-trans, pp-message|language, project-path)
 	
-	_index-setup(|language, project-path) = index-setup(|language, project-path)
-	_task-setup(|project-path) = task-setup(|project-path)
+//	_index-setup(|language, project-path) = index-setup(|language, project-path)
+//	_task-setup(|project-path) = task-setup(|project-path)
 	
 	_get-editor-properties(language-pp | language, project-path) =  get-editor-properties(language-pp | language, project-path)
 	

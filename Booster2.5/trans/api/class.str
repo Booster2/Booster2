@@ -1,9 +1,9 @@
 module lib/api/class
 
 imports
-	include/Booster25
-	trans/api/_runtime
-	trans/lib/search
+	signatures/-
+	api/_runtime
+	lib/search
 	
 rules // ast lookup
 				

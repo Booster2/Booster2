@@ -1,4 +1,4 @@
-module trans/lib/eq
+module lib/eq
 
 rules // equality with ignoring annotations
 

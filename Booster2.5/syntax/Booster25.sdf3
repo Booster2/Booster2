@@ -61,8 +61,8 @@ context-free syntax
   BoosterTerm = ClassComponents 
   Attribute.Attribute = <<ID> <Decoration*>: <TypeDecl>> 
   BoosterTerm = Attribute 
-  Identity.Identity = <(<>ID<>) > 
-  NoAudit.NoAudit = <(<>NA<>) > 
+  Identity.Identity = <(ID) > 
+  NoAudit.NoAudit = <(NA) > 
   Decoration = Identity
   Decoration = NoAudit 
   TypeDecl = PrimTypeDecl 
@@ -101,7 +101,7 @@ context-free syntax
   BasicTypeDecl.Password = <password> 
   Multiplicity.MultMinAndMax = <[ <INT> .. <INT> ]> 
   Multiplicity.MultJustMax = <[ .. <INT> ]> 
-  Multiplicity.MultJustMin = <[<><INT> .. *<>]> 
+  Multiplicity.MultJustMin = <[<INT> .. *]> 
   Multiplicity.MultJustMin = <[ <INT> .. ]> 
   Multiplicity.MultSingle = <[ <INT> ]> 
   Multiplicity.MultAny = <[ * ]> 

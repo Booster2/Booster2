@@ -1,14 +1,14 @@
-module trans/lib/nabl-ext
+module lib/nabl-ext
 
 imports // constructors
 	
-	trans/api/_runtime-constructors
+	api/_runtime-constructors
 
 imports // functions
 	
-	trans/api/_runtime
-	trans/lib/string
-	trans/lib/origin
+	api/_runtime
+	lib/string
+	lib/origin
 
 rules // api for unresolved references error messages
 	

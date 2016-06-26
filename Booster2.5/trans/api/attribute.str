@@ -1,10 +1,10 @@
 module trans/api/attribute
 
 imports
-	include/Booster25
-	trans/api/_runtime
-	trans/names
-	trans/types-manual
+	signatures/-
+	api/_runtime
+	names/names
+	types-manual
 	
 rules // attribute properties
 	

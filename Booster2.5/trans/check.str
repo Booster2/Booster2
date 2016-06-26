@@ -2,8 +2,10 @@ module check
 
 imports
 
-	include/Booster25
-	lib/editor-common.generated
+//2	include/Booster25 becomes
+	signatures/-
+//2	lib/editor-common.generated becomes:
+	stratego/metaborg
 
 rules
 	

@@ -1,16 +1,16 @@
-module trans/generation/elaborate
+module elaborate
 
 imports
 	
-	include/booster25
-	trans/api/_runtime
-	trans/api/_runtime-constructors
-	trans/api/path
-	trans/api/class
-	trans/api/method
-	trans/lib/eq
-	trans/lib/search
-	trans/names
+	signatures/-
+	api/_runtime
+	api/_runtime-constructors
+	api/path
+	api/class
+	api/method
+	lib/eq
+	lib/search
+	names/names
 	
 rules // elaborate phase
 	
@@ -94,8 +94,3 @@ rules // flatten class hierarchy
 				cmember'* := [new-attr*, new-inv*, new-meth*]
 
 rules
-	
-				 
-
-	
-rules	

@@ -1,29 +1,26 @@
-module trans/generation/wp
+module wp
 
 imports
 	
-	include/Booster25
-	trans/api/guarded-command
-	trans/api/_runtime
-	trans/desugar
-	trans/api/constraint
-	trans/api/attribute
+	signatures/-
+	api/guarded-command
+	api/_runtime
+	desugar
+	api/constraint
+	api/attribute
 	
-	trans/lib/eq
+	lib/eq
 	
-	trans/pp
+	pp
 	
-	lib/runtime/relations/entries
-	lib/runtime/nabl/uri
+	runtime/relations/entries
+	runtime/nabl/uri
 
-	trans/names
+	names/names
 	runtime/types/collect
 	
-	trans/api/_runtime-constructors
-	
-//	trans/generation/simplify	
-	
-	
+	api/_runtime-constructors
+
 	api/path
 	
 rules
@@ -52,7 +49,7 @@ rules
 
 rules
 	
-	gc-wp(|ast,c): |[skip]| -> (c, Skip())
+	gc-wp(|ast,c): [skip] -> (c, Skip())
 	
 	gc-wp(|ast, c): Assign(path, expr) -> (c', Assign(path, expr)) 
 		where

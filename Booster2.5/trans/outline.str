@@ -1,24 +1,25 @@
-module editor/Booster25-Outliner
+module outline
 
 imports
   
-  include/Booster25
-  // lib/runtime/editor/outline-library
-  // lib/runtime/editor/origins
-  // editor/Booster25-Outliner.generated
-  trans/lib/origin
-  trans/pp
-	
+  signatures/-
+  runtime/editor/outline-library
+  runtime/editor/origins
+  lib/origin
+  pp
+  
 rules
   
-//  to-outline-label = fail
+  editor-outline:
+    (_, _, ast, path, project-path) -> outline
+    where
+      outline := <simple-label-outline(to-outline-label)> ast
   
   to-outline-label = ?System(<id>, _)
   to-outline-label = ?SetDef(<id>, _)
   to-outline-label = ?Class(<id>, _, _)
   to-outline-label = ?Attribute(cname, _, ty) ; !<concat-strings>[cname, " : ", <get-type-string> ty] ; custom-origin(|cname)
   to-outline-label = ?Method(mname, _, _) ; ! <concat-strings>[mname, " ( )"] ; custom-origin(|mname)
-
 
   get-type-string : BasicType(t) -> <write-to-string> t
   get-type-string = ?UniDirectional(<id>)

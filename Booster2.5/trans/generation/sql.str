@@ -1,21 +1,20 @@
-module trans/generation/sql
+module sql
 
 imports
 	
-	include/Booster25
-	trans/lib/eq
-	trans/api/attribute
-	trans/api/method
-	trans/api/type
-	trans/api/path
-	trans/api/guarded-command
-	trans/api/constraint
-	trans/api/_runtime
-	
-	trans/generation/simplify
-	
+	signatures/-
+	lib/eq
+	api/attribute
+	api/method
+	api/type
+	api/path
+	api/guarded-command
+	api/constraint
+	api/_runtime
+		
 	// We need this for literal-subst
-	trans/generation/wp
+	generation/wp
+	generation/simplify
 	
 rules
 	

@@ -2,13 +2,13 @@ module trans/names-manual
 
 imports // constructors
 	
-	src-gen/signatures/Booster25-sig
-	trans/names
-	trans/desugar
+	signatures/Booster25-sig
+	names/names
+	desugar
 
 imports // functions
 	
-	trans/lib/nabl-ext
+	lib/nabl-ext
 
 signature constructors
 	
