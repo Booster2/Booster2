@@ -208,7 +208,7 @@ rules // Debugging
 
 	elaborate-builder-ast = builder-ast(elaborate|"elaborated.boo25")
 	elaborate-builder = builder(elaborate |"elaborated.boo25")
-/*
+
 	heuristics-builder-ast = builder-ast(elaborate ; heuristics | "heuristics.boo25")
 	heuristics-builder = builder(elaborate ; heuristics | "heuristics.boo25")
 		
@@ -228,5 +228,5 @@ rules // Debugging
    		stdtxtfile := <concat-strings>[project-path, "/../Booster2.5/sql-gen/standardStuff.sql"];	            
    		standard-text := <read-text-file> stdtxtfile;
    		result' := <concat-strings>[result, standard-text]  
-*/
+
 			

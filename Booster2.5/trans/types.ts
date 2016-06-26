@@ -2,11 +2,11 @@ module trans/types
 
 imports
 
-	include/Booster25
+	signatures/-
 	trans/desugar
-	trans/names
+	src-gen/names/names
 	trans/names-manual
-  trans/types-manual
+  	trans/types-manual
 	
 type rules // references
 
