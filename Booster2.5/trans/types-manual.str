@@ -5,7 +5,7 @@ imports // constructors
 	signatures/-
 	desugar
 	names/names
-	//lib/runtime/relations/query
+	//runtime/relations/query
 	
 	trans/api/_runtime
 	trans/api/_runtime-constructors

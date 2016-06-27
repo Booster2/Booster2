@@ -1,9 +1,9 @@
 module lib/api/type
 
 imports
-	include/Booster25
+//	include/Booster25
 	trans/api/_runtime
-	trans/names
+	names/names
 	trans/types-manual
 
 rules 

@@ -1,0 +1,213 @@
+module names
+
+imports
+	
+	trans/desugar
+	trans/names-manual
+
+properties
+	
+	is-method of Method : Term
+	multiplicity of Attribute : Term
+	inverse      of Attribute : Term
+	attribute    of Attribute : Term
+
+namespaces
+
+	System
+	Set
+	SetVal
+	Class
+	Attribute
+	Invariant
+	Method
+	This
+	CurrentUser
+	MethodReference
+	Variable
+	InputVariable
+	OutputVariable
+
+binding rules // System
+
+	System(s,c):
+		defines System s
+		scopes Class, Set, SetVal
+		
+	Import(i):
+		imports Class,Set, SetVal from System i 
+
+binding rules // Set
+
+	SetDef(s, values):
+		defines Set s
+			of type s
+		scopes This
+		implicitly defines This This()
+			of type s
+		
+	SetVal(value):
+		defines SetVal value
+			of type ty
+		where This() resolves to This this
+		and this has type ty
+
+binding rules // Class
+
+	Class(c,extends,members):
+		defines Class c
+			of type c
+		scopes Method, Attribute, Invariant, This
+		implicitly defines This This()
+			of type c
+
+	Extension(c):
+		imports Attribute, imported Attribute, Method, imported Method from Class c
+
+binding rules // Attribute
+
+	Attribute(a,dec, a-ty):
+		defines Attribute a
+			of type ty
+			of multiplicity mu
+			of inverse i
+			of attribute a
+			where a-ty has type ty
+			and a-ty has multiplicity mu
+			and a-ty has inverse i
+			
+binding rules // Invariant
+
+	Invariant(name, constr):
+		defines Invariant name
+
+binding rules // Method
+
+	Method(m, decs, body):
+		defines Method m
+			of type m
+			of is-method "true"
+		scopes Variable, InputVariable, OutputVariable
+	
+	MethodReference(path, params):
+		implicitly defines MethodReference MethodReference()
+			of type m
+			in params
+			where path has type m
+
+	Param(v):
+		refers to InputVariable v in Method m
+		where MethodReference() resolves to MethodReference m-ref
+		and m-ref has type m
+
+binding rules // References
+
+	UniDirectional(s):
+		refers to Set s
+	otherwise
+		refers to Class s
+
+	BiDirectional(class, attr):
+		refers to Class class
+		refers to Attribute attr in Class class
+	
+	
+	PathStart(p, prime):
+		refers to Attribute p
+		otherwise refers to Method p
+		otherwise refers to Class p
+		otherwise refers to SetVal p
+		otherwise refers to Variable p
+		otherwise refers to InputVariable p
+		otherwise refers to OutputVariable p
+
+	Input(v):
+		refers to InputVariable v
+		
+	Output(v):
+		refers to OutputVariable v
+
+	Path(path-start, PathComponent(a, prime)):
+		refers to Attribute a in Class c
+			where path-start has type c
+	otherwise
+		refers to Method a in Class c
+			where path-start has type c
+
+	This(): refers to This This()		
+
+	New(v, class):
+		refers to Class class
+		defines OutputVariable v of type class
+		
+	CurrentUser():
+		refers to CurrentUser CurrentUser()
+
+binding rules // Variables
+	
+	Def(v, rhs, In(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type Set(t)
+	Def(v, rhs, In(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type Set(t)
+
+	Def(v, lhs, In(), Right(), Input(), None()): defines InputVariable  v of type Set(t) where lhs has type t
+	Def(v, lhs, In(), Right(), Output(), None()): defines OutputVariable  v of type Set(t) where lhs has type t
+
+
+	Def(v, rhs, NotIn(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type Set(t)
+	Def(v, rhs, NotIn(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type Set(t)
+
+	Def(v, lhs, NotIn(), Right(), Input(), None()): defines InputVariable  v of type Set(t) where lhs has type t
+	Def(v, lhs, NotIn(), Right(), Output(), None()): defines OutputVariable  v of type Set(t) where lhs has type t
+
+
+	Def(v, rhs, Equal(), Left(), Input(), None()): defines InputVariable  v of type t where rhs has type t
+	Def(v, rhs, Equal(), Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type t
+
+	Def(v, lhs, Equal(), Right(), Input(), None()): defines InputVariable  v of type t where lhs has type t
+	Def(v, lhs, Equal(), Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type t
+
+
+	Def(v, lhs, _, Right(), Output(), None()): defines OutputVariable  v of type t where lhs has type t
+	Def(v, lhs, _, Right(), Input(), None()): defines InputVariable  v of type t where lhs has type t
+
+	Def(v, lhs, _, Right(), Output(), SetExtent()): defines OutputVariable  v of type t where lhs has type Set(t)
+	Def(v, lhs, _, Right(), Input(), SetExtent()): defines InputVariable  v of type t where lhs has type Set(t)
+
+/*	Def(v, rhs, _, Left(), Output(), None()): defines OutputVariable  v of type t where rhs has type t
+	Def(v, rhs, _, Left(), Input(), None()): defines InputVariable  v of type t where rhs has type t
+
+	Def(v, rhs, _, Left(), Output(), SetExtent()): defines OutputVariable  v of type t where rhs has type Set(t)
+	Def(v, rhs, _, Left(), Input(), SetExtent()): defines InputVariable  v of type t where rhs has type Set(t)
+*/
+
+
+/*
+	BinRelDefRightInput (lhs, op,             v  ): defines InputVariable  v of type t where lhs has type t
+	BinRelDefRightOutput(lhs, op,             v  ): defines OutputVariable v of type t where lhs has type t
+
+	BinOpDefLeftInput   (v,   Plus(),         rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, Plus(),         v  ): defines InputVariable  v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   Minus(),        rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, Minus(),        v  ): defines InputVariable  v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   Times(),        rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, Times(),        v  ): defines InputVariable  v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   Divide(),       rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, Divide(),       v  ): defines InputVariable  v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   Maximum(),      rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, Maximum(),      v  ): defines InputVariable  v of type t where lhs has type t
+	BinOpDefLeftInput   (v,   Minimum(),      rhs): defines InputVariable  v of type t where rhs has type t
+	BinOpDefRightInput  (lhs, Minimum(),      v  ): defines InputVariable  v of type t where lhs has type t
+
+	BinOpDefLeftInput   (v,   Intersection(), rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinOpDefRightInput  (lhs, Intersection(), v  ): defines InputVariable  v of type t where lhs has type Set(t)
+	BinOpDefLeftInput   (v,   Union(),        rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinOpDefRightInput  (lhs, Union(),        v  ): defines InputVariable  v of type t where lhs has type Set(t)
+	BinOpDefLeftInput   (v,   Minus(),        rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinOpDefRightInput  (lhs, Minus(),        v  ): defines InputVariable  v of type t where lhs has type Set(t)
+	BinOpDefLeftInput   (v,   Concat(),       rhs): defines InputVariable  v of type t where rhs has type Set(t)
+	BinOpDefRightInput  (lhs, Concat(),       v  ): defines InputVariable  v of type t where lhs has type Set(t)
+*/
+
+	AssignDefRightInput (lhs,                 v  ): defines InputVariable  v of type t where lhs has type t
+	SubstDefInput         (p,                   v  ): defines InputVariable  v of type t where p   has type t
+			
+	Forall(v, exp, body):                    defines Variable       v of type t where exp has type Set(t)

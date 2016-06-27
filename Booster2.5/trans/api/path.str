@@ -1,16 +1,16 @@
 module api/path
 
 imports
-	include/Booster25
+//	include/Booster25
 	trans/api/_runtime
-	trans/names
+	names/names
 	runtime/types/collect
 	
 	trans/api/_runtime-constructors
 		
 
-	lib/runtime/relations/entries
-	lib/runtime/nabl/uri
+	runtime/relations/entries
+	runtime/nabl/uri
 	
 	trans/api/attribute
 	trans/pp

@@ -2,7 +2,7 @@ module trans/api/method
 
 imports
 	
-	include/Booster25
+//	include/Booster25
 	trans/lib/eq
 	trans/api/type
 	trans/api/path
@@ -13,12 +13,12 @@ imports
 		
 		runtime/types/collect
 		
-	trans/names
+	names/names
 	trans/generation/simplify
 
-	lib/runtime/relations/entries
-	lib/runtime/nabl/namegen
-	lib/runtime/nabl/uri
+	runtime/relations/entries
+	runtime/nabl/namegen
+	runtime/nabl/uri
 	
 rules // conjoin methods
 	
