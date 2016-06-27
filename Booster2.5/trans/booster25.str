@@ -30,6 +30,8 @@ imports
 	generation/simplify
 	generation/sql
 	generation/wp
+	
+	types/trans/types
 
 rules // Analysis
 
