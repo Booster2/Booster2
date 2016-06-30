@@ -1,0 +1,420 @@
+module trans/desugar
+
+imports
+	
+	signatures/-
+	
+	lib/origin
+	lib/traverse
+	api/_runtime
+	pp
+	api/path
+
+	
+//2	lib/editor-common.generated becomes:
+	stratego/metaborg
+
+signature constructors
+	
+	SetVal : ID -> Term
+
+	Def : ID * Expression * Op * LeftOrRight * InputOrOutput * MaybeSetExtent -> Term
+	
+	Input : InputOrOutput
+	Output : InputOrOutput
+
+	Left : LeftOrRight
+	Right : LeftOrRight
+	
+	SetExtent : MaybeSetExtent
+	None : MaybeSetExtent
+	
+	
+	Equal : Op
+	NotEqual : Op
+	LessThan : Op
+	LessThanEquals : Op
+	GreaterThan : Op
+	GreaterThanEquals : Op
+	In : Op
+	NotIn : Op
+	Subset : Op
+	SubsetEquals : Op
+	Superset : Op
+	SupersetEquals : Op
+	Assign: Op
+	
+	
+	Plus : Op
+	Minus : Op
+	Times : Op
+	Divide : Op
+	Maximum : Op
+	Minimum : Op
+	Intersection : Op
+	Union : Op
+	Concat : Op
+	
+	
+/*	
+	BinRelDefLeftInput   : ID * BinRel * Expression -> Term
+	BinRelDefLeftOutput  : ID * BinRel * Expression -> Term
+	BinRelDefRightInput  : Expression * BinRel * ID -> Term
+	BinRelDefRightOutput : Expression * BinRel * ID -> Term
+	BinOpDefLeftInput    : Expression * BinOp  * ID -> Term
+	BinOpDefRightInput   : Expression * BinOp  * ID -> Term
+*/
+	AssignDefRightInput  : Expression * ID          -> Term
+	SubstDefInput          : Param * ID             -> Term
+
+	Param : ID -> Term
+	
+	TypeIsASet : Term -> Term
+	
+	Invariant : ID * Constraint -> Invariant
+	
+	CurrentUser : Path -> Term
+
+rules
+	
+	desugar-before-analysis = 
+		replace-imports;
+		try(sometd(inv-add-name)); // needs to be first as it pps the constraint
+		try(sometd(currentuser-add-path));
+		try(sometd(setdef-add-setvalues));
+		try(sometd(subst-add-param));
+		bottomup(try(add-typeisaset));
+		try(sometd(method-add-vardef));
+		warning-on-missing-origin
+	
+	desugar-after-analysis = 
+		bottomup(try(binrel-rem-vardef <+ gcmd-rem-vardef <+ param-rem-vardef));
+		bottomup(try(rem-typeisaset));
+		try(sometd(subst-rem-param));
+		try(sometd(setdef-rem-setvalues));
+		try(sometd(\ CurrentUser(p) {t} -> CurrentUser() {t} \));
+		warning-on-missing-origin
+
+rules // Help NaBL: add SetVal constructors around the values in set definitions
+	
+	setdef-add-setvalues = SetDef(id, map(add-setvalues))
+	
+	add-setvalues = ?s;!SetVal(s)
+
+	setdef-rem-setvalues = SetDef(id, map(rem-setvalues))
+	
+	rem-setvalues = ?SetVal(<id>)
+
+rules //  Help NaBL: make explicit what are Variable definition sites
+		
+	method-add-vardef: Method(name, decs, body) -> Method(name, decs, body')
+	with
+		(body', _) := <topdown-fold(try(add-vardef))>(body, [])
+
+	add-vardef : (term, history) -> (term'', history')
+		where
+			if name := <binrel-get-varname <+ binop-get-varname <+ gcmd-get-varname <+ param-get-varname>term; <not(elem)>(name, history) then
+				history' := <list-add(|name)> history;
+				term'    := <binrel-add-vardef <+ binop-add-vardef <+ gcmd-add-vardef <+ param-add-vardef>term;
+				Def(v, e, op, leftright, inout, setext) := term';
+				term''   := <custom-origin(|term)>Def(v, e, <custom-origin(|term)>op, <custom-origin(|term)>leftright, <custom-origin(|term)>inout, <custom-origin(|term)>setext)
+			end
+
+	list-add(|i): a -> [i|a]
+
+// Relations
+
+	binrel-get-varname: rel -> name
+		where
+				((Input(name), rhs), _) := <binrel-const> rel
+
+	binrel-get-varname: rel -> name
+		where
+				((lhs, Input(name)), _) := <binrel-const> rel
+
+	binrel-get-varname: rel -> name
+		where
+				((Output(name), rhs), _) := <binrel-const> rel
+
+	binrel-get-varname: rel -> name
+		where
+				((rhs, Output(name)), _) := <binrel-const> rel
+
+// Expressions
+	
+	binop-get-varname: expr -> name
+		where
+				((Input(name), rhs), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+				((lhs, Input(name)), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+				((Output(name), rhs), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+				((lhs, Output(name)), op) := <binop-arith> expr
+				
+	
+	binop-get-varname: expr -> name
+		where
+			((SetExtent([Input(name)]), rhs), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+			((lhs, SetExtent([Input(name)])), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+			((SetExtent([Output(name)]), rhs), op) := <binop-arith> expr
+
+	binop-get-varname: expr -> name
+		where
+			((lhs, SetExtent([Output(name)])), op) := <binop-arith> expr
+	
+
+	gcmd-get-varname   = ?Assign(lhs,                         Input(v));  !v
+	param-get-varname  = ?Subst(p,                              Input(v));  !v
+
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), None())
+		where
+			((Input(v),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), None())
+		where
+			((Output(v),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), None())
+		where
+			((lhs, Input(v)), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), None())
+		where
+			((lhs, Output(v)), op) := <binrel-const> expr
+
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), SetExtent())
+		where
+			((SetExtent([Input(v)]),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), SetExtent())
+		where
+			((SetExtent([Output(v)]),rhs), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), SetExtent())
+		where
+			((lhs, SetExtent([Input(v)])), op) := <binrel-const> expr
+
+	binrel-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), SetExtent())
+		where
+			((lhs, SetExtent([Output(v)])), op) := <binrel-const> expr
+
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), None())
+		where
+			((Input(v),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), None())
+		where
+			((Output(v),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), None())
+		where
+			((lhs, Input(v)), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), None())
+		where
+			((lhs, Output(v)), op) := <binop-arith> expr
+
+
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Input(), SetExtent())
+		where
+			((SetExtent([Input(v)]),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, rhs, op, Left(), Output(), SetExtent())
+		where
+			((SetExtent([Output(v)]),rhs), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Input(), SetExtent())
+		where
+			((lhs, SetExtent([Input(v)])), op) := <binop-arith> expr
+
+	binop-add-vardef:
+			expr -> Def(v, lhs, op, Right(), Output(), SetExtent())
+		where
+			((lhs, SetExtent([Output(v)])), op) := <binop-arith> expr
+
+
+
+
+	gcmd-add-vardef   = ?Assign(lhs,                         Input(v));             !AssignDefRightInput (lhs,     v)
+	param-add-vardef  = ?Subst(p,                              Input(v));             !SubstDefInput         (p,       v)
+	
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Input(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>Input(v), rhs])
+
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Output(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>Output(v), rhs])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Input(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>Input(v)])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Output(), None())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>Output(v)])
+			
+
+
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Input(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)]), rhs])
+
+	binrel-rem-vardef:
+		Def(v, rhs, op, Left(), Output(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [<custom-origin(|v)>SetExtent([<custom-origin(|v)>Output(v)]), rhs])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Input(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Input(v)])])
+
+	binrel-rem-vardef:
+		Def(v, lhs, op, Right(), Output(), SetExtent())
+			-> expr
+		where
+			expr := <create-term>(op, [lhs, <custom-origin(|v)>SetExtent([<custom-origin(|v)>Output(v)])])
+			
+	
+	
+	
+	
+	gcmd-rem-vardef   = ?AssignDefRightInput (lhs,                   v  ); !Assign(lhs,                              <custom-origin(|v)>Input(v))
+	param-rem-vardef  = ?SubstDefInput         (p,                     v  ); !Subst(p,                                   <custom-origin(|v)>Input(v))
+
+
+	create-term : 
+		(op, [param1, param2])
+			-> <mkterm>(<get-constructor> op, [param1, param2])
+	
+
+	binrel-const : Equal(a,b) 						-> ((a,b), Equal())
+	binrel-const : NotEqual(a,b) 					-> ((a,b), NotEqual())
+	binrel-const : LessThan(a,b) 					-> ((a,b), LessThan())
+	binrel-const : GreaterThan(a,b) 			-> ((a,b), GreaterThan())
+	binrel-const : LessThanEquals(a,b) 		-> ((a,b), LessThanEquals())
+	binrel-const : GreaterThanEquals(a,b) -> ((a,b), GreaterThanEquals())
+	binrel-const : In(a,b) 								-> ((a,b), In())
+	binrel-const : NotIn(a,b) 						-> ((a,b), NotIn())
+	binrel-const : Subset(a,b) 						-> ((a,b), Subset())
+	binrel-const : SubsetEquals(a,b) 			-> ((a,b), SubsetEquals())
+	binrel-const : Superset(a,b) 					-> ((a,b), Superset())
+	binrel-const : SupersetEquals(a,b) 		-> ((a,b), SupersetEquals())
+	binrel-const : Assign(a,b) 						-> ((a,b), Assign())
+
+	binop-arith : Plus(a,b) 							-> ((a,b), Plus())
+	binop-arith : Minus(a,b) 							-> ((a,b), Minus())
+	binop-arith : Times(a,b) 							-> ((a,b), Times())
+	binop-arith : Divide(a,b) 						-> ((a,b), Divide())
+	binop-arith : Maximum(a,b)	 					-> ((a,b), Maximum())
+	binop-arith : Minimum(a,b) 						-> ((a,b), Minimum())
+	binop-arith : Intersection(a,b)	 			-> ((a,b), Intersection())
+	binop-arith : Union(a,b) 							-> ((a,b), Union())
+	binop-arith : Concat(a,b) 						-> ((a,b), Concat())
+
+
+rules //  Help NaBL: make explicit what are Function Call parameters
+	
+	subst-add-param     = ?Subst(Input(v), e);!Subst(<custom-origin(|v)>Param(v), e)
+	subst-rem-param     = ?Subst(Param(v), e);!Subst(<custom-origin(|v)>Input(v), e)
+
+rules // make PathStart(classReference, _) have type set within BinRel(_, In(), _) and  BinRel(_, SubsetEquals(), _)
+
+	add-typeisaset = ?Forall(v,                                   ps@PathStart(_, _), body);!Forall(v,                                      <custom-origin(|ps)>TypeIsASet(ps), body)
+
+	rem-typeisaset = ?TypeIsASet(ps);!ps
+	
+	add-typeisaset: In(a,ps@PathStart(_,_))								-> In(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: NotIn(a,ps@PathStart(_,_))						-> NotIn(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Superset(a,ps@PathStart(_,_))					-> Superset(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: SupersetEquals(a,ps@PathStart(_,_))		-> SupersetEquals(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Subset(a,ps@PathStart(_,_))						-> Subset(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: SubsetEquals(a,ps@PathStart(_,_))			-> SubsetEquals(a, <custom-origin(|ps)>TypeIsASet(ps))
+
+	add-typeisaset: Superset(ps@PathStart(_,_), a)				-> Superset(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: SupersetEquals(ps@PathStart(_,_), a)	-> SupersetEquals(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: Subset(ps@PathStart(_,_), a)					-> Subset(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: SubsetEquals(ps@PathStart(_,_), a)		-> SubsetEquals(<custom-origin(|ps)>TypeIsASet(ps), a)
+	
+	add-typeisaset: Intersection(a,ps@PathStart(_,_))			-> Intersection(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Union(a,ps@PathStart(_,_))						-> Union(a, <custom-origin(|ps)>TypeIsASet(ps))
+	add-typeisaset: Minus(a,ps@PathStart(_,_))						-> Minus(a, <custom-origin(|ps)>TypeIsASet(ps))
+
+
+	add-typeisaset: Intersection(ps@PathStart(_,_), a)		-> Intersection(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: Union(ps@PathStart(_,_), a)						-> Union(<custom-origin(|ps)>TypeIsASet(ps), a)
+	add-typeisaset: Minus(ps@PathStart(_,_), a)						-> Minus(<custom-origin(|ps)>TypeIsASet(ps), a)
+
+
+rules // rewrite all invariants to get a name
+	
+	inv-add-name: Invariant(c) -> Invariant(<pp-Booster2-string;custom-origin(|c)>c, c)
+	
+	currentuser-add-path: c@CurrentUser() -> CurrentUser(<custom-origin(|c)>PathStart(<custom-origin(|c)>"User", None()))
+	
+rules 
+
+	final-desugar = topdown(try(path-remove-this)) ; 
+													try(sometd(\ Invariant(name, constraint) -> Invariant(constraint) \))
+
+
+rules
+			
+	replace-imports:
+		s@System(n, cs) -> sys
+			where 
+				cs' := <flatten-list><map(try(replace-import))> cs;
+				sys := <custom-origin(|s)> System(n,cs')
+				
+	replace-import:
+		Import(filename) -> cs
+		where
+			System(n,cs) := <parse-file> <concat-strings>[<project-path>, "/",<un-double-quote> filename]
+			
+	
+rules	

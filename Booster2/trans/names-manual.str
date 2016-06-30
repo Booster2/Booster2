@@ -1,0 +1,50 @@
+module trans/names-manual
+
+imports // constructors
+	
+	signatures/Booster2-sig
+	names/names
+	desugar
+
+imports // functions
+	
+	lib/nabl-ext
+
+signature constructors
+	
+	MethodReference : Term
+
+rules // check if method calls provide all required parameters
+	
+	contains-all-errors = ![
+		ContainsAll(
+			NablNsInputVariable(),
+			[],
+			"methpar-1",
+			"methpar-2",
+			"methpar-3",
+			"methpar-4"
+		)
+	]
+	
+	eval(|f) = where("methpar-1":=f); is-methodreference
+	eval(|f) = where("methpar-2":=f); methodreference-get-method
+	eval(|f) = where("methpar-3":=f); methodreference-get-params;map(param-get-name)
+	eval(|f) = where("methpar-4":=f); methodreference-get-method
+	
+	is-methodreference         = ?MethodReference(_,_)
+	methodreference-get-method = ?MethodReference(PathStart(<id>, _), _)
+	methodreference-get-method = ?MethodReference(Path(_, PathComponent(<id>, _)), _)
+	methodreference-get-params = ?MethodReference(_, <id>)
+	param-get-name             = ?Subst(Param(<id>), _)
+	param-get-name             = ?SubstDefInput(Param(<id>), _)
+	
+	
+	
+	
+	
+	
+	
+rules 
+	
+	

@@ -1,0 +1,13 @@
+module Stratego-Booster2
+
+imports
+	StrategoMix[StrategoHost]
+	EmbeddedBooster[Term[[StrategoHost]]]
+
+imports
+	Booster2 
+	AbstractBoosterModel
+	Common
+	
+exports
+context-free start-symbols Module [[StrategoHost]]

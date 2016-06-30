@@ -1,0 +1,11 @@
+module completion
+
+imports
+  
+  runtime/completion/-
+  completion/Booster2-cp
+  pp
+  
+rules
+  
+  pp-completion = pp-partial-Booster2-string

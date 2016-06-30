@@ -1,0 +1,316 @@
+// Grammar for the Booster2 language
+// By default, based on an example "entity language" syntax
+
+module Booster2
+
+imports Common	
+        AbstractBoosterModel
+        Relational	
+
+
+context-free start-symbols
+
+  System
+
+context-free syntax
+
+  System.System = <
+  	system <ID>
+  	
+  		<{SystemComponent "\n\n"}*>
+  > 
+  System.System = <
+  	System <ID>
+  	
+  		<{SystemComponent "\n\n"}*>
+  > 
+  SystemComponent = SetDef 
+  SystemComponent = Class 
+  SystemComponent = Import
+  Import.Import = <import <STRING>>
+  Import.Import = <Import <STRING>>
+  Import.Import = <IMPORT <STRING>>
+  BoosterTerm = SystemComponent 
+  SetDef.SetDef = <set <ID> { <{ID ", "}+> }> 
+  BoosterTerm = SetDef 
+  Class.Class = <
+  	class <ID> <Extends?>{
+  		<{ClassComponents "\n"}*>
+  	}
+  > 
+  BoosterTerm = Class 
+  Extends.Extend = <extends <{Extension ","}+> > 
+  BoosterTerm = Extends 
+  Extension.Extension = ID 
+  ClassComponents.Attributes = <
+  	attributes
+  		<{Attribute "\n"}*>
+  > 
+  ClassComponents.Methods = <
+  	methods
+  		<{Method "\n"}*>
+  > 
+  ClassComponents.Invariants = <
+  	invariants
+  		<{Invariant "\n"}*>
+  > 
+  ClassComponents.Workflows = <
+  	workflows
+  		<{WorkflowComponent "\n"}*>
+  > 
+  BoosterTerm = ClassComponents 
+  Attribute.Attribute = <<ID> <Decoration*>: <TypeDecl>> 
+  BoosterTerm = Attribute 
+  Identity.Identity = <(ID) > 
+  NoAudit.NoAudit = <(NA) > 
+  Decoration = Identity
+  Decoration = NoAudit 
+  TypeDecl = PrimTypeDecl 
+  TypeDecl.Optional = <[ <PrimTypeDecl> ]> 
+  TypeDecl.Set = <set ( <PrimTypeDecl> ) <Multiplicity>> 
+  TypeDecl.Set = <SET ( <PrimTypeDecl> ) <Multiplicity>> 
+  BoosterTerm = TypeDecl 
+  PrimTypeDecl.BasicType = BasicTypeDecl 
+  PrimTypeDecl.UniDirectional = ID 
+  PrimTypeDecl.BiDirectional = <<ID>.<ID>> 
+  BoosterTerm = PrimTypeDecl 
+  BasicTypeDecl.String = <STRING>  
+  BasicTypeDecl.String = <String>  
+  BasicTypeDecl.String = <string>
+  BasicTypeDecl.Int = <INT> 
+  BasicTypeDecl.Int = <Int> 
+  BasicTypeDecl.Int = <int> 
+  BasicTypeDecl.Decimal = <DECIMAL> 
+  BasicTypeDecl.Decimal = <Decimal>
+  BasicTypeDecl.Decimal = <decimal> 
+  BasicTypeDecl.Date = <DATE> 
+  BasicTypeDecl.Date = <Date> 
+  BasicTypeDecl.Date = <date> 
+  BasicTypeDecl.Time = <TIME> 
+  BasicTypeDecl.Time = <Time> 
+  BasicTypeDecl.Time = <time> 
+  BasicTypeDecl.DateTime = <DATETIME> 
+  BasicTypeDecl.DateTime = <DateTime> 
+  BasicTypeDecl.DateTime = <Datetime> 
+  BasicTypeDecl.DateTime = <datetime> 
+  BasicTypeDecl.Boolean = <BOOLEAN> 
+  BasicTypeDecl.Boolean = <Boolean>
+  BasicTypeDecl.Boolean = <boolean> 
+  BasicTypeDecl.Password = <PASSWORD> 
+  BasicTypeDecl.Password = <Password>
+  BasicTypeDecl.Password = <password> 
+  Multiplicity.MultMinAndMax = <[ <INT> .. <INT> ]> 
+  Multiplicity.MultJustMax = <[ .. <INT> ]> 
+  Multiplicity.MultJustMin = <[<INT> .. *]> 
+  Multiplicity.MultJustMin = <[ <INT> .. ]> 
+  Multiplicity.MultSingle = <[ <INT> ]> 
+  Multiplicity.MultAny = <[ * ]> 
+  Multiplicity.MultAny =  
+	BoosterTerm = Multiplicity 
+  Method.Method = <<ID> <Decoration*>{ 
+  	<ConstraintOrGuardedCommand>
+  	 }>
+  Invariant.Invariant = Constraint
+  ConstraintOrGuardedCommand = Constraint
+  ConstraintOrGuardedCommand = GuardedCommand
+  ConstraintOrGuardedCommand.Both = <
+  	<Constraint> 
+  	| <GuardedCommand>>
+  BoosterTerm = Method 
+  Constraint.True = <true> 
+  Constraint.False = <false> 
+  Constraint = Relation 
+  Constraint.Not = <not <Constraint>> 
+  Constraint.And = <<Constraint> & <Constraint>> {assoc}
+  Constraint.Or = <<Constraint> or <Constraint>> {assoc}
+  Constraint.Implies = <<Constraint> =\> <Constraint>> {assoc}
+  Constraint.Then = <<Constraint> ; <Constraint>> {assoc}
+  Constraint = <( <Constraint> )> {bracket}
+  // Constraint.Conjuncts = <conjuncts <{Constraint "&"}*>> {deprecated}
+  // Constraint.Disjuncts = <disjuncts <{Constraint "or"}*>> {deprecated}
+  Constraint.Exists = <exists <ID> : <Expression> @ <Constraint>> 
+  Constraint.Forall = <forall <ID> : <Expression> @ <Constraint>> 
+  Constraint = MethodReference 
+  BoosterTerm = Constraint 
+  //Relation.BinRel = <<Expression> <BinRel> <Expression>> 
+  BoosterTerm = Relation
+  Relation.Equal 									= <<Expression> = <Expression>> {left} 
+  Relation.NotEqual 							= <<Expression> /= <Expression>> {left} 
+  Relation.In 										= <<Expression> : <Expression>> {left} 
+  Relation.NotIn 									= <<Expression> /: <Expression>> {left} 
+  Relation.LessThan 							= <<Expression> \< <Expression>> {left} 
+  Relation.GreaterThan 						= <<Expression> \> <Expression>> {left} 
+  Relation.LessThanEquals 				= <<Expression> \<= <Expression>> {left} 
+  Relation.GreaterThanEquals 			= <<Expression> \>= <Expression>> {left} 
+  Relation.Subset 								= <<Expression> \<: <Expression>> {left} 
+  Relation.SubsetEquals 					= <<Expression> \<\<: <Expression>> {left} 
+  Relation.Superset 							= <<Expression> :\> <Expression>> {left} 
+  Relation.SupersetEquals 				= <<Expression> :\>\> <Expression>> {left} 
+  Expression.Head 								= <head <Expression>> {right}
+  Expression.Tail 								= <tail <Expression>> {right}
+  Expression.Cardinality 					= <card <Expression>> {right}
+  Expression.Negative 						= <- <Expression>> {right}
+  Expression.Plus 								= <<Expression> + <Expression>> {left}
+  Expression.Minus 								= <<Expression> - <Expression>> {left}
+  Expression.Times 								= <<Expression> * <Expression>> {left}
+  Expression.Divide 							= <<Expression> / <Expression>> {left}
+  Expression.Maximum 							= <<Expression> max <Expression>> {left}
+  Expression.Minimum 							= <<Expression> min <Expression>> {left}
+  Expression.Intersection					= <<Expression> /\\ <Expression>> {left}
+  Expression.Union 								= <<Expression> \\/ <Expression>> {left}
+  Expression.Concat 							= <<Expression> ++ <Expression>> {left}
+
+  
+  Expression = ValueExpression 
+  Expression = <( <Expression> )> {bracket}
+  BoosterTerm = Expression 
+  ValueExpression.BasicValue = BasicValue 
+  ValueExpression.TypeExtent = TypeExtent 
+  ValueExpression = Path 
+  ValueExpression.Null = <null> {prefer}
+  ValueExpression.SetComprehension = <{ <ID> : <Expression> @ <Path> }> 
+  ValueExpression.SetComprehension = <{ <ID> : <Expression> | <Constraint> @ <Path> }> 
+  ValueExpression.SetExtent = <{ <{Expression ","}*> }> 
+  BoosterTerm = ValueExpression 
+  BasicValue.Integer = INT 
+  BasicValue.String = STRING 
+  BasicValue.Decimal = DECIMAL 
+  BasicValue.True = <true> 
+  BasicValue.False = <false> 
+  BasicValue.CurrentDateTime = <currentdatetime> 
+  BasicValue.CurrentDateTime = <CurrentDateTime> 
+  BasicValue.CurrentDateTime = <currentDateTime>
+  BasicValue.CurrentDate = <currentdate> 
+  BasicValue.CurrentTime = <currenttime> 
+  CurrentUser.CurrentUser = <currentUser> 
+  CurrentUser.CurrentUser = <CurrentUser> 
+  CurrentUser.CurrentUser = <currentuser> 
+  TypeExtent.String = <STRING> {prefer}
+  TypeExtent.String = <String> {prefer}
+  TypeExtent.String = <string> {prefer}
+  TypeExtent.Int = <INT> {prefer}
+  TypeExtent.Int = <Int> {prefer}
+  TypeExtent.Int = <int> {prefer}
+  TypeExtent.Decimal = <DECIMAL> {prefer}
+  TypeExtent.Decimal = <Decimal> {prefer}
+  TypeExtent.Decimal = <decimal> {prefer}
+  TypeExtent.Date = <DATE> {prefer}
+  TypeExtent.Date = <Date> {prefer}
+  TypeExtent.Date = <date> {prefer}
+  TypeExtent.Time = <TIME> {prefer}
+  TypeExtent.Time = <Time> {prefer}
+  TypeExtent.Time = <time> {prefer}
+  TypeExtent.DateTime = <DATETIME> {prefer}
+  TypeExtent.DateTime = <DateTime> {prefer}
+  TypeExtent.DateTime = <Datetime> {prefer}
+  TypeExtent.DateTime = <datetime> {prefer}
+  TypeExtent.Boolean = <BOOLEAN> {prefer}
+  TypeExtent.Boolean = <Boolean> {prefer}
+  TypeExtent.Boolean = <boolean> {prefer}
+  TypeExtent.Password = <PASSWORD> {prefer}
+  TypeExtent.Password = <Password> {prefer}
+  TypeExtent.Password = <password> {prefer}
+  Path = PathStart 
+  Path.Path = <<Path>.<PathComponent>> {prefer}
+  BoosterTerm = Path 
+  PathStart = Input 
+  PathStart = Output 
+  PathStart = This 
+  PathStart = ThisPrimed
+  PathStart = CurrentUser 
+  PathStart.PathStart = <<ID><Primed?>> 
+  BoosterTerm = PathStart 
+  Input.Input = <<ID>?> 
+  Output.Output = <<ID>!> 
+  This.This = <this> 
+  ThisPrimed.ThisPrimed = <this'> 
+  Primed.Primed = <'> 
+  // BoosterTerm = Primed 
+  PathComponent.PathComponent = <<ID><Primed?>> 
+  PathComponent.PathComponent =  {deprecated}
+  BoosterTerm = PathComponent 
+
+  MethodReference.MethodReference = <<Path> ( <{Subst ","}*> )> 
+  Subst.Subst = <<Input> = <Expression>> 
+  BoosterTerm = MethodReference 
+  WorkflowComponent = SeqWf 
+  WorkflowComponent = ParWf 
+  SeqWf.SeqWf = <seq <ID> : <SeqWfExpression>> 
+  ParWf.ParWf = <par <ID> : <ParWfExpression>> 
+  ParWf.ParWf2 = <par <Constraint> & <ID> : <ParWfExpression>> 
+  SeqWfExpression.Skip = <Skip>  
+  SeqWfExpression.Skip = <SKIP> 
+  SeqWfExpression.Choice = <<GuardedAction> -\> <SeqWfExpression> [] <GuardedAction> -\> <SeqWfExpression>> 
+  SeqWfExpression.Wait = <WAIT{ <{INT ","}+> } -\> <SeqWfExpression>>
+  SeqWfExpression.Wait = <Wait{ <{INT ","}+> } -\> <SeqWfExpression>> 
+  SeqWfExpression.WorkflowReference = ID 
+  SeqWfExpression.Prefix = <<GuardedAction> -\> <SeqWfExpression>> 
+  SeqWfExpression = <( <SeqWfExpression> )> {bracket}
+  GuardedAction.GA = <<Guard> & <MethodReference>> 
+  GuardedAction = <( <GuardedAction> )> {bracket}
+  Guard.Normal = Constraint 
+  Guard.Delayed = <Delayed <Constraint>> 
+  ParWfExpression.Single = ID 
+  ParWfExpression.Multiple = <<ID> ||| <ParWfExpression>> 
+
+context-free priorities
+
+		SeqWfExpression.Prefix 
+	> 
+		SeqWfExpression.Choice 
+
+context-free priorities
+	
+	{
+		Constraint.Forall
+		Constraint.Exists
+	}
+	>
+		Constraint.Not
+	>
+		Constraint.And
+	>
+		Constraint.Or
+	>
+		Constraint.Implies
+	>
+		Constraint.Then
+
+context-free priorities
+
+/*		Expression = ValueExpression //TODO: this isn't supported in SDF3 anymore
+	>
+		Expression.UnOp
+	>
+		Expression.BinOp
+*/
+
+context-free priorities
+
+// TODO: Confirm this with Spivey's book.
+
+	{	right:
+			Expression.Negative
+			Expression.Cardinality
+			Expression.Head
+			Expression.Tail
+	}
+	>	
+	{	left:
+		Expression.Times
+		Expression.Divide
+		Expression.Intersection
+		Expression.Union
+	} 
+	>
+	{	left:
+		Expression.Plus
+		Expression.Minus
+		Expression.Concat
+	} 
+	>
+	{	left:
+		Expression.Maximum
+		Expression.Minimum
+	} 
+		
