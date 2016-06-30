@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			a  : INT		methods 			m1 { false --> ( skip ) }	}

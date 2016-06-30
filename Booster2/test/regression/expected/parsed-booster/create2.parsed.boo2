@@ -1,5 +1,0 @@
-system s 
- 
-
-
-	class A  { 		attributes			a  : DECIMAL		invariants 			a < 1.23		methods 			create { (newA! : A' ;newA!.a' = a?) }	}

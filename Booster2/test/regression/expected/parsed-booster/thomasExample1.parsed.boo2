@@ -1,5 +1,0 @@
-system S 
- 
-
-
-	class A  { 		attributes			a_c  : set ( C. c_a )  [0 .. *]	}	class B  { 		attributes			b_c  : C . c_b	}	class C  { 		attributes			c_a  : A . a_c			c_b  : B . b_c		invariants 			1 > 0	}

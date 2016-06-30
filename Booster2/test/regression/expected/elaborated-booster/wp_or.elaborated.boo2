@@ -1,5 +1,0 @@
-system S 
- 
-
-
-	class A  { 		attributes			x  : INT		methods 			m1 { (this.x' = 5 or this.x' = 4) }	}

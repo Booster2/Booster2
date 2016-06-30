@@ -1,5 +1,0 @@
-system s 
- 
-
-
-	class A  { 		attributes			a  : INT		methods 			create { a! : A' }	}

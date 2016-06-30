@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			b1  : B . a1			b2  : B . a2		methods 			update { (this.b1.i := 3) || (this.b2.i := 4) }	}	class B  { 		attributes			i  : INT			a1  : set ( A. b1 )  [0 .. *]			a2  : set ( A. b2 )  [0 .. *]	}

@@ -1,5 +1,0 @@
-system S 
- 
-
-
-	class A  { 		attributes			a  : INT		methods 			create { a! : A' }	}	class B extends A { 		attributes			b  : INT			a  : INT		methods 			create { a! : B' }	}	class C extends B { 		attributes			c  : INT			a  : INT			b  : INT		methods 			create { a! : C' }	}

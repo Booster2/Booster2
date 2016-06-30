@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			b  : set ( B. a )  [0 .. *]		methods 			m1 { b? : this.b' }	}	class B  { 		attributes			a  : set ( A. b )  [0 .. *]	}

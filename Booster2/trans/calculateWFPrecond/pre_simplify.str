@@ -1,7 +1,0 @@
-module pre_simplify
-
-imports
-	include/Booster2
-  
-rules
-	

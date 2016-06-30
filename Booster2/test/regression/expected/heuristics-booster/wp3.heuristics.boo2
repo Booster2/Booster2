@@ -1,5 +1,0 @@
-system Test 
- 
-
-
-	class A  { 		attributes			n  : INT			m  : INT			b  : B . a		invariants 			this.n > 10			this.m > 10	}	class B  { 		attributes			a  : A . b		methods 			update { (this.a.m := m?) || (this.a.n := n?) }	}

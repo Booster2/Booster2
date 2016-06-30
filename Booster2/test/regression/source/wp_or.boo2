@@ -1,8 +1,0 @@
-system S
-      
-class A {
-	attributes
-		x : INT
-	methods
-	    m1 { x' = 5 or x' = 4}
-}

@@ -1,5 +1,0 @@
-system methodTest 
- 
-
-
-	class Child  { 		attributes			parents  : set ( Parent. children )  [0 .. *]	}	class Parent  { 		attributes			children  : set ( Child. parents )  [0 .. *]		methods 			m1 { (this.children := this.children \/ {c?}) || (c?.parents := c?.parents \/ {this}) }	}

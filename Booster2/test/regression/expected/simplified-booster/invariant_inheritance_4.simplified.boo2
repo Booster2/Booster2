@@ -1,5 +1,0 @@
-system Test 
- 
-
-
-	class A  { 		attributes			a  : INT		invariants 			this.a > 0	}	class B extends A { 		attributes			a  : INT		invariants 			this.a < 10			this.a > 0	}	class C extends A { 		attributes			a  : INT		invariants 			this.a < 20			this.a > 0	}	class D extends B, C { 		attributes			a  : INT		invariants 			this.a > 0			this.a < 10			this.a < 20	}

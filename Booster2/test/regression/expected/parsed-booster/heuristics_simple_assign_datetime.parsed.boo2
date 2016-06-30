@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			a  : DATETIME		methods 			m1 { a' = d? }	}

@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			a  : STRING		methods 			m1 { this.a' = "Hello, World!" }	}

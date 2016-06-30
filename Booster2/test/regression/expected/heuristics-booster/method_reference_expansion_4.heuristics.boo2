@@ -1,5 +1,0 @@
-system S 
- 
-
-
-	class A  { 		attributes			b  : B 		methods 			m1 { (this.b.a := this.b.a + 3) || (skip) }	}	class B  { 		attributes			a  : INT		methods 			updateA { this.a := this.a + a? }	}

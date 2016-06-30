@@ -1,5 +1,0 @@
-system S 
- 
-
-
-	class a  { 		attributes			a  : INT		methods 			m1 { a' = 3 }	}	class b extends a { 	}	class c extends b { 	}

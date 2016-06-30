@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			b  : B . a		methods 			m1 { b' = b! }	}	class B  { 		attributes			a  : A . b	}

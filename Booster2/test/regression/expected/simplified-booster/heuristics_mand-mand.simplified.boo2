@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			b  : B . a		methods 			m1 { (b! /: B & this : A) --> ( (new b! : B) ; ((b!.a := this) || (this.b := b!)) ) }	}	class B  { 		attributes			a  : A . b	}

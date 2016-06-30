@@ -1,5 +1,0 @@
-system testSystem 
- 
-
-
-	class A  { 		attributes			a  : BOOLEAN		methods 			m1 { b? : BOOLEAN --> ( this.a := b? ) }	}
