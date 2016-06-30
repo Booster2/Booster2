@@ -305,6 +305,6 @@ rules // catch all not supported
 
 	program: x -> |[ skip ]|
 		where
-			log(|Warning(), "cannot determine program", <pp-Booster25-string> x)
+			<debug> ("None of the heuristics apply: ", x) 
 
 rules
