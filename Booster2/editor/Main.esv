@@ -9,8 +9,8 @@ language
 
   extensions : boo2
 
-//  provider : target/metaborg/stratego.ctree
-  provider : target/metaborg/stratego-javastrat.jar
+  provider : target/metaborg/stratego.ctree
+//  provider : target/metaborg/stratego-javastrat.jar
 
 menus
   
