@@ -70,7 +70,7 @@ rules
 			
 	sql-type: BasicType(t) -> <sql-type> t
 	
-	sql-type: name -> Int() where <is-class> name
+	sql-type: name -> Varchar("36") where <is-class> name
 	sql-type: name -> Varchar("100") where <is-enum> name
 	
 rules				

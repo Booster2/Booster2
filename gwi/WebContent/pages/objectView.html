@@ -1,9 +1,9 @@
     <div class="well row" >
 		<div class="col-md-2" style=" text-align: left;">
-					<a class="btn btn-default" ng-disabled="object.first == 0 || object.first == object.objectID"
+					<a class="btn btn-default" ng-disabled="object.first == null || object.first == object.objectID"
 						ng-href="#object/{{object.className}}/{{object.first}}"><i class="fa fa-fast-backward"></i></a>
 					&nbsp;
-					<a class="btn btn-default" ng-disabled="object.prev == 0 || object.prev == object.objectID"
+					<a class="btn btn-default" ng-disabled="object.prev == null || object.prev == object.objectID"
 						ng-href="#object/{{object.className}}/{{object.prev}}"><i class="fa fa-play fa-flip-horizontal"></i></a>
 		</div>
 		<div class="col-md-8" style=" text-align: center;">
@@ -11,10 +11,10 @@
 					<h4>{{object.description}}</h4>
 		</div>
 		<div class="col-md-2" style=" text-align: right;">
-					<a class="btn btn-default" ng-disabled="object.next == 0 || object.next == object.objectID"
+					<a class="btn btn-default" ng-disabled="object.next == null || object.next == object.objectID"
 						ng-href="#object/{{object.className}}/{{object.next}}"><i class="fa fa-play"></i></a>
 					&nbsp;
-					<a class="btn btn-default" ng-disabled="object.last == 0 || object.last == object.objectID"
+					<a class="btn btn-default" ng-disabled="object.last == null || object.last == object.objectID"
 						ng-href="#object/{{object.className}}/{{object.last}}"><i class="fa fa-fast-forward"></i></a>
 		</div>	
     </div>
@@ -33,6 +33,8 @@
 			<tr ng-repeat="attribute in object.attributes"  >
 				<td class="attribute-name-td">
 					<span class="attribute-name">{{attribute.attName.unCamelCase()}}</span>
+					  <span id="testText" style="float: right"><i onaria-hidden="true" class="fa fa-question-circle"></i></span>
+					  <div id="popup" style="display: none">some text here</div>
 				</td>
 				<td>
 					<span ng-if="attribute.attPrimType == 'String'" >
@@ -106,3 +108,5 @@
 		</tr>
 	</tbody>
 </table>
+
+<div style="border: 1px solid black;" id="">This is my popup</div>

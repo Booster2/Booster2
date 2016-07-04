@@ -44,7 +44,7 @@ public class ObjectView extends HttpServlet {
 		}
 		
 		String className = request.getParameter("className");
-		Integer objectID = Integer.parseInt(request.getParameter("objectID"));
+		String objectID = request.getParameter("objectID");
 		
 		JSONObject result = new JSONObject();
 		
@@ -52,7 +52,7 @@ public class ObjectView extends HttpServlet {
 			//getDBUSERByUserId is a stored procedure
 			CallableStatement callableStatement = client.prepareCall("call `GET_OBJECT_DESCRIPTION`(?,?,?)");
 			callableStatement.setString(1, className);
-			callableStatement.setInt(2, objectID);
+			callableStatement.setString(2, objectID);
 			callableStatement.registerOutParameter(3, java.sql.Types.VARCHAR);
 			 
 			// execute getDBUSERByUserId store procedure
@@ -69,14 +69,14 @@ public class ObjectView extends HttpServlet {
 		try{
 			PreparedStatement ps = client.prepareStatement("call `GET_OBJECT_BROWSE_LOCATION`(?,?)");
 			ps.setString(1, className);
-			ps.setInt(2, objectID);
+			ps.setString(2, objectID);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 			{
-				result.put("prev",rs.getInt("prev"));
-				result.put("next",rs.getInt("next"));
-				result.put("first",rs.getInt("first"));
-				result.put("last",rs.getInt("last"));
+				result.put("prev",rs.getString("prev"));
+				result.put("next",rs.getString("next"));
+				result.put("first",rs.getString("first"));
+				result.put("last",rs.getString("last"));
 				
 			}
 		}
@@ -94,7 +94,7 @@ public class ObjectView extends HttpServlet {
 		try{
 			PreparedStatement ps = client.prepareStatement("call `GET_OBJECT`(?,?)");
 			ps.setString(1, className);
-			ps.setInt(2, objectID);
+			ps.setString(2, objectID);
 			ResultSet rs = ps.executeQuery();
 			
 			LinkedHashMap <String, JSONObject> attributesHashMap = new LinkedHashMap <String, JSONObject>();
@@ -158,7 +158,7 @@ public class ObjectView extends HttpServlet {
 					{
 						JSONArray oidValues = (JSONArray) jsono.get("oidValues");
 						JSONArray objDescs = (JSONArray) jsono.get("objDescs");
-						oidValues.add(rs.getInt("OID_VALUE"));
+						oidValues.add(rs.getString("OID_VALUE"));
 						objDescs.add(rs.getString("OBJ_DESC"));
 					}
 				}
@@ -217,7 +217,7 @@ public class ObjectView extends HttpServlet {
 					}
 					else if("ClassRef".equalsIgnoreCase(attPrimType))
 					{
-						oidValues.add(rs.getInt("OID_VALUE"));
+						oidValues.add(rs.getString("OID_VALUE"));
 						objDescs.add(rs.getString("OBJ_DESC"));
 					}					
 					
@@ -245,8 +245,8 @@ public class ObjectView extends HttpServlet {
 		ps = client.prepareStatement("call `GET_OBJECT_METHOD_NAMES`(?, ?, ?)");
 		//ps = client.prepareStatement("call `GET_OBJECT_METHOD_NAMES`(?)");
 		ps.setString(1, className);
-		ps.setInt(2, objectID);
-		ps.setInt(3, (Integer) request.getSession().getAttribute("UserId"));
+		ps.setString(2, objectID);
+		ps.setString(3, (String) request.getSession().getAttribute("UserId"));
 		rs = ps.executeQuery();
 		rs.beforeFirst();
 		

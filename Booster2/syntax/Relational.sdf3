@@ -70,6 +70,8 @@ context-free syntax
 	 			    <Statement>
 	 			  end //
 	 			  delimiter ;>  
+  Statement.CreateView = 
+  				< create view `<ID>` as <Query> ;>
   
   FunctionParameter.Input = <<ID> <SQLType>> 
   Parameter.Input = <in <ID> <SQLType>> 

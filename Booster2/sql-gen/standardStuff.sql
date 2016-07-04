@@ -777,7 +777,7 @@ BEGIN
     SET actualClass_out = @ACTUAL_CLASS;
 END 
 $$
-
+DELIMITER ;
 
 CREATE TABLE `debug_log` (
     `debug_log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,

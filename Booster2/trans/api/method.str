@@ -2,19 +2,19 @@ module trans/api/method
 
 imports
 	
-//	include/Booster2
-	trans/lib/eq
-	trans/api/type
-	trans/api/path
-	trans/api/constraint
-	trans/api/guarded-command
-	trans/api/_runtime
-	trans/api/_runtime-constructors
+	//include/Booster2
+	lib/eq
+	api/type
+	api/path
+	api/constraint
+	api/guarded-command
+	api/_runtime
+	api/_runtime-constructors
 		
-		runtime/types/collect
+	runtime/types/collect
 		
 	names/names
-	trans/generation/simplify
+	generation/simplify
 
 	runtime/relations/entries
 	runtime/nabl/namegen
@@ -72,8 +72,8 @@ rules // conjoin methods
 	get-params = <concat>[<method-inputs>, <method-outputs>]
 
 	convert-param = ?Input(n) ; !Input(<concat-strings>[n, "_in"], <_get-type ; sql-type> n)
-	convert-param = ?This() ; !Input("this", Int())
-	convert-param = ?CurrentUser() ; !Input("_currentUser", Int())
+	convert-param = ?This() ; !Input("this", Varchar("36"))
+	convert-param = ?CurrentUser() ; !Input("_currentUser", Varchar("36"))
 	convert-param = ?Output(n) ; !Output(<concat-strings>[n, "_out"], <_get-type ; sql-type> n)
 	
 	get-sql-params = get-params ; nub-an ; map(convert-param) 

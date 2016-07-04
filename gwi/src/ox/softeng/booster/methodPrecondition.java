@@ -90,11 +90,11 @@ public class methodPrecondition extends HttpServlet {
 					}
 					else{
 		
-						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
+						if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password") || paramType.equalsIgnoreCase("ClassRef"))
 						{
 							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
 						}
-						else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
+						else if(paramType.equalsIgnoreCase("Integer"))
 						{
 							methodInputParameterValues.put(paramName, Integer.parseInt(requestParameters.get(paramName)[0]));
 						}
@@ -156,36 +156,37 @@ public class methodPrecondition extends HttpServlet {
 		        String paramType = paramTypes.get(pairs.getKey());
 		        if(paramInOuts.get(pairs.getKey() + "_in").equalsIgnoreCase("input"))
 		        {
-			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password"))
+			        if(paramType.equalsIgnoreCase("String") || paramType.equalsIgnoreCase("SetValue") || paramType.equalsIgnoreCase("Password") || paramType.equalsIgnoreCase("ClassRef"))
 			        {
-						if(pairs.getValue() == null)
-						{
-							cs.setNull(paramNo, java.sql.Types.VARCHAR);
-						}
-						else{
-							cs.setString(paramNo,(String)pairs.getValue());
-						}
-						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
-			        }
-					else if(paramType.equalsIgnoreCase("Integer") || paramType.equalsIgnoreCase("ClassRef"))
-					{
 						if("_currentUser".equals(pairs.getKey()))
 						{
-							Integer userId = (Integer)request.getSession().getAttribute("UserId");
-							cs.setInt(paramNo, userId);
+							String userId = (String)request.getSession().getAttribute("UserId");
+							cs.setString(paramNo, userId);
 							System.out.println("Putting: " + pairs.getKey() + "," + userId);
 						}
 						else
 						{
 							if(pairs.getValue() == null)
 							{
-								cs.setNull(paramNo, java.sql.Types.INTEGER);
+								cs.setNull(paramNo, java.sql.Types.VARCHAR);
 							}
 							else{
-								cs.setInt(paramNo,(Integer)pairs.getValue());
+								cs.setString(paramNo,(String)pairs.getValue());
 							}
-							System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
 						}
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+			        }
+					else if(paramType.equalsIgnoreCase("Integer"))
+					{
+						if(pairs.getValue() == null)
+						{
+							cs.setNull(paramNo, java.sql.Types.INTEGER);
+						}
+						else{
+							cs.setInt(paramNo,(Integer)pairs.getValue());
+						}
+						System.out.println("Putting: " + pairs.getKey() + "," + pairs.getValue());
+					
 					}
 					else if(paramType.equalsIgnoreCase("Boolean"))
 					{
