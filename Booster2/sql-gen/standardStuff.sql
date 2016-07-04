@@ -249,95 +249,95 @@ WHILE done = 0 DO
     IF @primType = 'String' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Password' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Integer' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Boolean' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Decimal' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DECIMAL_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Date' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATE_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATE_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Time' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS TIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS TIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS SET_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS SET_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Uni' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
 
     ELSEIF @primType = 'String' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Password' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Integer' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Boolean' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Decimal' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"`` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Date' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS DATE_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATE_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Time' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS TIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS TIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
 
     ELSEIF @primType = 'SetValue' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS SET_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS SET_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
 
    ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Uni' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",ANAME," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
 
     ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, ",@className,"_",@oppAttName," AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
  
 
 

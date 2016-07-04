@@ -278,8 +278,10 @@ rules
 				pname := <concat-strings>[cname, "_", mname];
 				name1 := <concat-strings> [pname, "_available"];
 				name2 := <concat-strings> [name1, "_inputs"];
-				params := <get-sql-params> m ;
-				params2 := <get-sql-inputs> m ;
+				
+				params := <union>([Input("_currentUser", Varchar("36"))], <get-sql-params> m );
+				params2 := <union>([Input("_currentUser", Varchar("36"))], <get-sql-inputs> m );
+				
 				gc' := Guard(<get-guard ; remove-outputs(|[]) ; simplify> gc, <get-body> gc);
 				stmt := <sql-gc> gc';
 				stmt' := <add-audit-command> (stmt, decs, pname);
@@ -307,9 +309,9 @@ rules
 			-> StatementList([stmt, 
 			IfThen(
 				And(IsNull(SystemVariable("_currentUser"), None()), Equal(cardUser, Int("1"))),
-				ProcCall("User_newAuditModOp", [SystemVariable("u_out"), String("User_create"), SystemVariable("@auditOutput")]),
+				ProcCall("User_newAuditModOp", [SystemVariable("u_out"), SystemVariable("u_out"), String("User_create"), SystemVariable("@auditOutput")]),
 				[],
-				Some(Else(ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), String("User_create"), SystemVariable("@auditOutput")]))))])
+				Some(Else(ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String("User_create"), SystemVariable("@auditOutput")]))))])
 			where 
 				cardUser := SelectQuery(	[],
 											[FunctionCall("count", [Star()])], 
@@ -326,7 +328,7 @@ rules
 	add-audit-command: 
 		(stmt, decs, procname)
 			-> StatementList([stmt, 
-					ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
+					ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
 				
 	get-availability-procedure(|cname, mname, gc):
 		i -> 
@@ -745,7 +747,7 @@ rules
 			expr :=  <path-prefix ; sql-expr> pth
 			
 			
-		sql-expr: pth
+	sql-expr: pth
 		// select name from class where classId = expr
 			-> SelectQuery([], [ColumnName(oppattname)], Some(FromPart([TableName(tname)])), 
 						  Some(Where(Equal(expr, ColumnName(tname)))), 
@@ -761,7 +763,7 @@ rules
 			attname := <path-suffix-name> pth;
 			<attr-is-bidir> attname;
 			cname := <path-prefix ; class-name> pth;
-			tname := <concat-strings>[cname, "_", attname];
+			tname := <path-suffix-name ; att-table-name> pth;
 			expr :=  <path-prefix ; sql-expr> pth;
 			opp-aname := <attr-get-inverse> pth;
 			opp-cname := <attr-parent>opp-aname;
