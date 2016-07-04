@@ -1,0 +1,881 @@
+module trans/generation/sql
+
+imports
+	
+	lib/eq
+	api/attribute
+	api/method
+	api/class
+	api/type
+	api/path
+	api/guarded-command
+	api/constraint
+	api/_runtime
+	
+	generation/simplify
+
+	
+	// We need this for literal-subst
+	generation/wp
+	
+	lib/nabl-ext
+	
+rules
+	
+	generate-sql: x@System(name, cs) -> StatementList([
+		DropDatabase(name),
+		CreateDatabase(name),
+		UseDatabase(name),
+		<metadata-tables> name,
+		StatementList(<collect-all(sql-metadata)> x),
+ 		StatementList(<collect-all(sql-set-def)> x),
+		StatementList(<collect-all(sql-classes)> x),
+		StatementList(<collect-all(sql-extensions)> x),
+		StatementList(<collect-all(sql-extended-views)> x),
+		//StatementList(<collect-all(sql-extent-views(|x))> x),
+		StatementList(<collect-all(sql-set-atts)> x),
+		StatementList(<collect-all(sql-assoc-classes)> x),
+		StatementList(<collect-all(sql-method)> x)
+		])
+	
+	sql-metadata:
+		SetDef(setname, values) ->
+			Insert(None(), None(), Some(Into()), "_Meta_Sets", 
+						  	[ColumnName("setName"),	ColumnName("tablename"),	ColumnName("columnName")], 
+								[String(setname),				String(setname),					String(setname)], 
+			None()) 
+
+
+	sql-metadata: Class(cname, exts, comps) -> 
+			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(cname),String(cname)], None()),
+				StatementList(<collect-all(sql-metadata-attributes(|cname))> comps),
+				StatementList(<collect-all(sql-metadata-methods(|cname))> comps)])
+
+	sql-metadata-attributes(|cname): a@Attribute(name, decs, type) -> 
+			Insert(None(), None(), Some(Into()), 
+						"_Meta_Attributes", 
+						[ColumnName("class"),	ColumnName("attName"),	ColumnName("primType"),	ColumnName("typeMultiplicity"),	ColumnName("oppAttName"),	ColumnName("className"),	ColumnName("setName"),	ColumnName("direction"),	ColumnName("tableName"),	ColumnName("isId")],
+						[String(cname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						<sql-expr>isId], 
+						None())
+			where
+				primType := <prim-type-string> name;
+				typeMultiplicity := <multiplicity-string> name;
+				setName := <set-name> name;
+				direction := <get-dir> name;
+				isId := <is-id> a;
+				opp-aname := <attr-get-inverse <+ !""> name;
+				opp-cname := <attr-parent <+ !""> opp-aname;
+				tname := <att-table-name> name
+						 
+	sql-metadata-methods(|cname):
+		m@Method(name, decs, gc) ->
+			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Methods", 
+						[ColumnName("class"),ColumnName("methodName"),ColumnName("isObjectMethod"),ColumnName("html")], 
+						[String(cname),String(name),isObjectMethod, String(html)], None()),
+						inParamStmts*,
+						outParamStmts*
+						])
+		where
+			isObjectMethod := <sql-expr><is-obj-method> m;
+			html := <string-replace(|"'", "''")> "";
+			//<debug> <method-inputs> m;
+			//<debug><union>([CurrentUser()], <method-inputs> m);
+			//<debug><nub-an><union>([CurrentUser()], <method-inputs> m);
+			[inParamStmts*] := <map(metadata-param(|cname, m))><nub-an><union>([CurrentUser()], <method-inputs> m);
+			[outParamStmts*] := <map(metadata-param(|cname, m))><method-outputs> m
+						
+						
+	metadata-param(|cname, m): x ->
+			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
+						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
+						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
+						None())
+			where
+				Method(mname, decs, gc) := m;
+				pname := < ?Input(<id>) <+ ?Output(<id>) <+ (?This() ; !"this") <+ (?CurrentUser() ; !"_currentUser")> x;
+				ptname := <prim-type-string> x;
+				mult := <multiplicity-string> x;
+				inout := <in-out-string> x;
+				classname := <class-name> x;
+				setname := <set-name> x 
+
+// Find a better way of doing this!
+	metadata-param(|cname, m): CurrentUser() ->
+			Insert(None(), None(), Some(Into()), "_Meta_Method_Params", 
+						[ColumnName("class"), 	ColumnName("methodName"), 	ColumnName("paramName"),	ColumnName("paramType"),	ColumnName("paramMultiplicity"),	ColumnName("paramInOut"),	ColumnName("paramClassName"), ColumnName("paramSetName")], 
+						[String(cname), 				String(mname),							String(pname),						String(ptname), 					String(mult),											String(inout), 						String(classname), 						String(setname)], 
+						None())
+			where
+				Method(mname, decs, gc) := m;
+				pname := "_currentUser";
+				ptname := "ClassRef";
+				mult := "Mandatory";
+				inout := "Input";
+				classname := "User";
+				setname := "" 
+
+	sql-classes: Class(name, exts, comps) -> 
+		StatementList([<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()), 
+										CreateColumn(name, <concat-strings>[name, "_className"] , Varchar("100"), Some(ColumnNotNullable()), None(), None(), None(), None()),
+										CreateColumn(name, <concat-strings>[name,"_createdDate"] , TimeStamp(), Some(ColumnNotNullable()), Some(ColumnDefault(FunctionCall("NOW", []))), None(), None(), None())
+										])
+
+	sql-extensions: Class(name, Some(Extend(exts)), comps) -> 
+		StatementList(
+				<map(extension-column(|name))> superclasses*
+		)
+	where
+			superclasses* := <map(_nabl-uri-name)><_relation-lookup(|"<sub:");nub;reverse>name
+		
+	extension-column(|cname):
+			ename -> 
+				CreateColumn(cname, colname , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(colname, ename, [ColumnName(<concat-strings>[ename, "Id"])])))
+			where
+				colname := <concat-strings>[cname, ename, "Id"]
+
+	sql-extended-views: Class(name, exts, comps) -> 
+		CreateView(<concat-strings>[name, "_all"], 
+			SelectQuery([],[Star()], Some(FromPart([fromPart])), None(), None(), None(), None(), None(), None(), None(), None()))
+	where
+		superclass* := <_relation-lookup(|"<sub:");nub;reverse>name;
+		fromPart := <create-view-joins(|TableName(name), name)> <map(_nabl-uri-name)>superclass*
+
+/*	sql-extent-views(|ast): c@Class(name, exts, comps) -> 
+		CreateView(<concat-strings>[name, "_extent"], 
+			SelectQuery([],[Star()], Some(FromPart([fromPart])), None(), None(), None(), None(), None(), None(), None(), None()))
+	where
+		superclass* := <_relation-lookup(|"<sub:");nub;reverse>name;
+		<debug> "Extent views";
+		<debug> name;
+		subclass* := <class-get-subtypes(|ast)> c;
+		<debug> subclass*;
+		fromPart := <create-view-unions(|TableName(name), name)> <map(_nabl-uri-name)>subclass*
+*/
+
+	
+	create-view-joins(|tableref, name):
+			[] -> tableref
+
+	create-view-joins(|tableref, name):
+			[t, ts*] -> InnerJoin(<create-view-joins(|tableref, name)> [ts*], TableName(t), Some(On(Equal(TableColumnName(t,<concat-strings>[t, "Id"]), TableColumnName(name, <concat-strings>[name, "Id"])))))
+
+	create-view-unions(|tableref, name):
+			[] -> tableref
+
+	create-view-unions(|tableref, name):
+			[t, ts*] -> InnerJoin(<create-view-unions(|tableref, name)> [ts*], TableName(t), Some(On(Equal(TableColumnName(t,<concat-strings>[t, "Id"]), TableColumnName(name, <concat-strings>[name, "Id"])))))
+			
+	
+	
+	// Mandatory or optional basic types get turned into single columns
+	sql-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, sqltype, nullable, default, None(), None(), None())
+		where
+			not(<attr-is-set> name);
+			sqltype := <_get-type ; is-prim-type ; sql-type> name;
+			tname := <attr-parent> name;
+			default := <column-default> name;
+			nullable := <column-nullable> name
+
+	// Mandatory or optional enum types get turned into single columns with references
+	sql-classes: Attribute(name, decs, type) -> CreateColumn(tname, name, Varchar("100"), nullable, default, None(), None(), Some(Reference(name, setname, [ColumnName(setname)])))
+		where
+			not(<attr-is-set> name);
+			<attr-is-enum> name;
+			setname := <set-name> name;
+			tname := <attr-parent> name;
+			default := <column-default> name;
+			nullable := <column-nullable> name
+
+
+	// Set-valued attributes get turned into tables
+	sql-set-atts: Attribute(name, decs, type) -> 
+		StatementList([
+			<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()),
+			CreateColumn(tname, firstcolname, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, sqltype, Some(ColumnNotNullable()), None(), None(), None(), None())
+		])
+		where
+			<attr-is-set> name;
+			sqltype := <_get-type ; is-prim-type ; sql-type> name;
+			parent-name := <attr-parent> name;
+			tname := <concat-strings>[parent-name, "_", name];
+			firstcolname := <concat-strings>[parent-name, "Id"]
+
+
+
+	// Set-valued attributes get turned into tables
+	sql-set-atts: Attribute(name, decs, type) -> 
+		StatementList([
+			<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()),
+			CreateColumn(tname, firstcolname, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, setname, [ColumnName(setname)])))
+		])
+		where
+			<attr-is-set> name;
+			<attr-is-enum> name;
+			setname := <set-name> name;
+			parent-name := <attr-parent> name;
+			tname := <concat-strings>[parent-name, "_", name];
+			firstcolname := <concat-strings>[parent-name, "Id"]
+	
+
+	// Set-valued attributes get turned into tables
+	sql-set-atts: Attribute(name, decs, type) -> 
+		StatementList([
+			<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()),
+			CreateColumn(tname, firstcolname, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(firstcolname, parent-name, [ColumnName(<concat-strings>[parent-name, "Id"])]))),
+			CreateColumn(tname, name, Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(name, classname, [ColumnName(<concat-strings>[classname, "Id"])])))
+		])
+		where
+			<attr-is-set> name;
+			<attr-is-unidir> name;
+			classname := <class-name> name;
+			parent-name := <attr-parent> name;
+			tname := <concat-strings>[parent-name, "_", name];
+			firstcolname := <concat-strings>[parent-name, "Id"]
+			
+		
+	
+	sql-assoc-classes: Attribute(name, decs, type) -> StatementList([
+		<create-table>(tname, <concat-strings>[tname, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(), None(), None()),
+		CreateColumn(tname, cname1 , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname1, <attr-parent> name, [ColumnName(<concat-strings>[<attr-parent> name, "Id"])]))),
+		CreateColumn(tname, cname2 , Varchar("36"), Some(ColumnNotNullable()), None(), None(), None(), Some(Reference(cname2, opp-cname, [ColumnName(<concat-strings>[opp-cname, "Id"])])))
+	])
+		where
+			opp-aname := <attr-get-inverse> name;
+			opp-cname := <attr-parent>opp-aname;
+			tname := <concat-strings> [<attr-parent> name, "_", name];
+			cname1 := <concat-strings> [<attr-parent> name, "_", name];
+			cname2 := <concat-strings> [opp-cname, "_", opp-aname]
+			 
+			
+	sql-set-def: SetDef(name, values) -> StatementList([
+		DropTable(name),
+		CreateTable(name, PrimaryKeyColumn(name, Varchar("100"), None(), None(), None(), None())),
+		StatementList(<map(insert-value(|name))> values)
+	])	
+	
+	
+	insert-value(|name): value ->
+		Insert(None(), None(), Some(Into()), name, [ColumnName(name)], [String(value)], None())
+		
+	sql-method: 
+		c@Class(cname, exts, comps)
+			->
+		StatementList(<collect-all(sql-class-method(|cname))> comps)	
+		
+	sql-class-method(|cname):  m@Method(mname, decs, gc) -> 
+		StatementList([
+				DropProcedure(pname),
+				CreateProcedure(pname, params, pname, stmt'),
+				DropFunction(name1),
+				CreateFunction(name1, [Input("this", Varchar("36")), Input("_currentUser", Varchar("36"))], Bit(), statement1),
+				DropFunction(name2),
+				CreateFunction(name2, params2, Bit(), statement2),
+				StatementList(availability-procedures*)
+			])
+			where
+				pname := <concat-strings>[cname, "_", mname];
+				name1 := <concat-strings> [pname, "_available"];
+				name2 := <concat-strings> [name1, "_inputs"];
+				params := <get-sql-params> m ;
+				params2 := <get-sql-inputs> m ;
+				gc' := Guard(<get-guard ; remove-outputs(|[]) ; simplify> gc, <get-body> gc);
+				stmt := <sql-gc> gc';
+				stmt' := <add-audit-command> (stmt, decs, pname);
+				guard-without-inputs := <guard-without-ins-outs> m;
+				statement1 := IfThen(<sql-const> guard-without-inputs, 
+														Return(Int("1")), 
+														[], 
+														Some(Else(Return(Int("0")))));
+				guard := <guard-without-outs> m;
+				statement2 := IfThen(<sql-const> guard, 
+												Return(Int("1")), 
+												[], 
+												Some(Else(Return(Int("0")))));
+				//<debug> "availability-procedures";
+				booster-params := <get-params ; nub-an> m;
+				availability-procedures* := <map(get-availability-procedure(|cname, mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params										
+		
+	add-audit-command: 
+		(stmt, decs, procname)
+			-> stmt
+			where <elem>(NoAudit(), decs)
+				
+	add-audit-command: 
+		(stmt, decs, "User_create")
+			-> StatementList([stmt, 
+			IfThen(
+				And(IsNull(SystemVariable("_currentUser"), None()), Equal(cardUser, Int("1"))),
+				ProcCall("User_newAuditModOp", [SystemVariable("u_out"), String("User_create"), SystemVariable("@auditOutput")]),
+				[],
+				Some(Else(ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), String("User_create"), SystemVariable("@auditOutput")]))))])
+			where 
+				cardUser := SelectQuery(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName("User")])), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None())
+
+	add-audit-command: 
+		(stmt, decs, procname)
+			-> StatementList([stmt, 
+					ProcCall("User_newAuditModOp", [SystemVariable("_currentUser"), String(procname), SystemVariable("@auditOutput")])])
+				
+	get-availability-procedure(|cname, mname, gc):
+		i -> 
+				StatementList([
+						DropProcedure(pname),
+						CreateProcedure(pname, params, pname, stmt) ])
+				where
+					pname := <concat-strings> [cname, "_", mname,"_",i,"_choice"];
+					params := [Input("this", Varchar("36"))];
+					guard-without-inputs := <simplify><remove-inputs(|[Input(i)])> <get-guard> gc;
+					tidname := <concat-strings>[<class-name> i, "Id"];
+					dummyVariable := <concat-strings>["dummyVariable_",tidname];
+					expr' := <sql-const> guard-without-inputs;
+					expr'' := <literal-subst> (expr', [(SystemVariable(<concat-strings>[i, "_in"]), TableColumnName(dummyVariable, tidname))]);
+					stmt := InsertInto("CLASS_DESCS", ["OBJECT_ID"], 
+							SelectQuery([],
+									[ColumnName(tidname)], 
+											Some(FromPart([Aliased(<class-name> i, Alias(dummyVariable), [])])), 
+											Some(Where(expr'')), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None()))
+
+
+					
+					
+	sql-gc: Skip() -> VariableAssign("dummySkip", Int("1"))
+
+	sql-gc: Parallel(gc1, gc2) -> StatementList([decs1*, decs2*, stmts1*, stmts2*])
+		where
+			StatementList(as) := <sql-gc> gc1;
+			StatementList(bs) := <sql-gc> gc2;
+			([decs1*], [stmts1*]) := <partition(?VariableAssign(_,_))> as;
+			([decs2*], [stmts2*]) := <partition(?VariableAssign(_,_))> bs
+			
+			
+	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
+
+	sql-gc: Sequence(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
+
+
+	sql-gc:	Assign(path, Minus(path, SetExtent([expr])))
+			-> StatementList([	
+						VariableAssign(pn1, expr1), 
+						VariableAssign(pn2, expr2) , 
+						Delete(	None(), None(), None(), tablename, 
+												Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+															Equal(ColumnName(column2), LocalVariable(pn2))))), 
+															None(), None())])
+			where
+				pn := <path-to-var-name> path;
+				pn1 := <concat-strings>[pn, "_1"];
+				pn2 := <concat-strings>[pn, "_2"];				
+				expr1 := <path-prefix ; sql-expr> path;
+				expr2 := <sql-expr> expr;
+				tablename := <path-suffix-name ; att-table-name> path;
+				column1 := <path-suffix-name ; att-table-name> path;
+				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path 
+
+
+
+	sql-gc: Assign(path, Union(path, SetExtent([expr]))) ->
+			StatementList([	VariableAssign(pn1, expr1), 
+											VariableAssign(pn2, expr2), 
+											IfThen(	Equal( SelectQuery(	[], [FunctionCall("count", [Star()])], 
+															Some(FromPart([TableName(tablename)])), 
+															Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+														  	Equal(ColumnName(column2), LocalVariable(pn2))))), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None()), 
+												  		Int("0")), 
+						StatementList([Insert(None(), None(), Some(Into()), tablename, 
+						[ColumnName(tablenameid), ColumnName(column1), ColumnName(column2)], 
+						[ FunctionCall("UUID", []), LocalVariable(pn1), LocalVariable(pn2)], None())]),
+						[],
+						None()
+					)])
+					
+			where
+				pn := <path-to-var-name> path;
+				pn1 := <concat-strings>[pn, "_1"];
+				pn2 := <concat-strings>[pn, "_2"];				
+				expr1 := <path-prefix ; sql-expr> path;
+				expr2 := <sql-expr> expr;
+				tablename := <path-suffix-name ; att-table-name> path;
+				tablenameid := <concat-strings> [tablename, "Id"];
+				column1 := <path-suffix-name ; att-table-name> path;
+				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path 
+				
+	
+			
+	sql-gc: Assign(p, expr) -> 
+			StatementList([VariableAssign(pn', expr'), 
+										 Update([], TableName(tname),[UpdateSet(ColumnName(attname), FunctionCall("Password", [LocalVariable(pn')]))],Some(Where(expr'')),None(),None())])
+			where
+			BasicType(Password()) := <_get-type> p;
+			attname := <path-suffix-name> p;
+			pn' := <path-to-var-name> p;
+			tname := <path-prefix ; class-name> p;
+			expr' := <sql-expr> expr;
+			expr'' := <path-where> p
+
+	sql-gc: Assign(p, expr) -> 
+			StatementList([VariableAssign(pn', expr'), 
+										 Update([], TableName(tname),[UpdateSet(ColumnName(attname), LocalVariable(pn'))],Some(Where(expr'')),None(),None())])
+			where
+			not(<attr-is-bidir> p);
+			attname := <path-suffix-name> p;
+			pn' := <path-to-var-name> p;
+			tname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name><path-suffix-name> p;
+			expr' := <sql-expr> expr;
+			expr'' := <path-where> p
+	
+		sql-gc: Assign(p, expr) -> 
+			StatementList([	VariableAssign(pn1, expr1), 
+											VariableAssign(pn2, expr2), 
+											IfThen(	Equal( SelectQuery(	[], [FunctionCall("count", [Star()])], 
+															Some(FromPart([TableName(tablename)])), 
+															Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
+														  	Equal(ColumnName(column2), LocalVariable(pn2))))), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None(), 
+															None()), 
+												  		Int("0")), 
+						StatementList([Insert(None(), None(), Some(Into()), tablename, 
+						[ColumnName(tablenameid), ColumnName(column1), ColumnName(column2)], 
+						[FunctionCall("UUID", []), LocalVariable(pn1), LocalVariable(pn2)], None())]),
+						[],
+						None()
+					)])
+					
+			where
+				<attr-is-bidir> p;
+				pn := <path-to-var-name> p;
+				pn1 := <concat-strings>[pn, "_1"];
+				pn2 := <concat-strings>[pn, "_2"];				
+				expr1 := <path-prefix ; sql-expr> p;
+				expr2 := <sql-expr> expr;
+				tablename := <path-suffix-name ; att-table-name> p;
+				tablenameid := <concat-strings> [tablename, "Id"];
+				column1 := <path-suffix-name ; att-table-name> p;
+				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> p
+	
+	
+	
+	sql-gc: New(o, cls)
+			-> 
+			StatementList([
+				SelectStatement([],[FunctionCall("UUID", [])], None(), None(), None(), None(), None(), None(), None(), Some(Into([TableName(<concat-strings>[o, "_out"])])), None()),
+				StatementList(<map(insert-new-superclass(|cls, outVar))><union>(superclass*,[cls]))])
+		where
+			outVar := SystemVariable(<concat-strings>[o, "_out"]);
+			superclass* := /*<map(nabl-get-all-definitions ; Hd) > */ <_relation-lookup(|"<sub:");nub;reverse> cls
+						
+		insert-new-superclass(|clsname, outVar):
+				cname -> Insert(None(), None(), Some(Into()), cname', [ColumnName(<concat-strings>[cname',"Id"]),ColumnName(<concat-strings>[cname',"_className"]), cols*], [outVar, String(clsname), outVars*], None())
+			where
+				(cname' := <_nabl-uri ; _nabl-uri-name> cname <+ cname' := cname);
+				superclass* :=  <map(_nabl-uri-name)><_relation-lookup(|"<sub:");nub;reverse> cname;
+				[cols*] := <map(\scname -> ColumnName(<concat-strings>[cname', scname, "Id"])\)> superclass*;
+				[outVars*] := <map(!outVar)> superclass*
+				
+	sql-gc: Guard(const, gc) -> IfThen(const', stmt,[],None())
+		where
+			const' := <sql-const> const;
+			stmt := <sql-gc> gc
+
+
+	sql-gc: Choice(Guard(constraint1, gc1),Guard(constraint2, Skip()))
+			-> IfThen(expr1, stmt1,[],None())
+		where
+			expr1 := <sql-const> constraint1;
+			stmt1 := <sql-gc> gc1 		
+
+
+	sql-gc:
+		Choice(Guard(constraint1, gc1),Guard(constraint2, gc2))
+			-> IfThen(expr1, stmt1,[ElseIf(expr2,stmt2)],None())
+		where
+			expr1 := <sql-const> constraint1;
+			expr2 := <sql-const> constraint2;
+			stmt1 := <sql-gc> gc1;
+			stmt2 := <sql-gc> gc2 		
+
+	sql-gc:
+		Choice(gc1,gc2)
+			-> IfThen(True(), stmt1,[],Some(stmt2))
+		where
+			stmt1 := <sql-gc> gc1;
+			stmt2 := <sql-gc> gc2 
+
+
+	sql-gc: gc -> VariableAssign("dummySkip", Int("1"))
+		where
+			<debug> "Cannot convert to sql";
+			<debug> gc
+
+
+
+
+
+	sql-const: True() -> True()
+	sql-const: False() -> False()
+	
+	sql-const: Not(const) -> Not(<sql-const> const)
+	sql-const: And(c1, c2) -> And(<sql-const>c1, <sql-const>c2)
+	sql-const: Or(c1, c2) -> Or(<sql-const>c1, <sql-const>c2)
+
+	sql-const: Implies(c1, c2) -> Or(Not(<sql-const>c1), <sql-const>c2)
+
+	//what happens when an e(xpression) is compared to null
+	//this needs to support references that don't exsist
+	//currently only supports primitives
+	sql-const: Equal(e1, Null()) -> IsNull(<sql-expr>e1, None())
+	sql-const: Equal(Null(), e1) -> IsNull(<sql-expr>e1, None())
+	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
+	
+	sql-const: NotEqual(e1, Null()) -> IsNull(<sql-expr>e1, Some(Not()))
+	sql-const: NotEqual(Null(), e1) -> IsNull(<sql-expr>e1, Some(Not()))
+	sql-const: NotEqual(e1, e2) -> NotEqual(<sql-expr>e1, <sql-expr>e2)
+
+	sql-const: GreaterThan(e1, e2) -> GreaterThan(<sql-expr>e1, <sql-expr>e2)
+	sql-const: GreaterThanEquals(e1, e2) -> GreaterThanEquals(<sql-expr>e1, <sql-expr>e2)
+	sql-const: LessThan(e1, e2) -> LessThan(<sql-expr>e1, <sql-expr>e2)
+	sql-const: LessThanEquals(e1, e2) -> LessThanEquals(<sql-expr>e1, <sql-expr>e2)
+
+	sql-const: In(expr1, PathStart(cname, _))
+			-> NotEqual( SelectQuery([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(cname)])), 
+										Some(Where(Equal(ColumnName(column1), expr'))),
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int("0"))
+			where
+				<is-class-name> cname;
+				column1 := <concat-strings>[cname, "Id"];
+				expr' := <sql-expr> expr1
+
+	sql-const: In(expr1, PathStart(sname, _))
+			-> NotEqual( SelectQuery([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(sname)])), 
+										Some(Where(Equal(ColumnName(sname), expr'))),
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int("0"))
+			where
+				<is-enum> sname;
+				expr' := <sql-expr> expr1
+				
+	sql-const: In(expr1, pth)
+			-> NotEqual( SelectQuery([],
+										[FunctionCall("count", [Star()])], 
+										Some(FromPart([TableName(tablename)])), 
+										Some(Where(And(Equal(ColumnName(column1), expr''),
+												  Equal(ColumnName(column2), expr')))), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None(), 
+										None()), 
+							  Int("0"))
+				
+				
+			where
+				<is-class> pth;
+				attname := <path-suffix-name> pth;
+				cname := <path-prefix ; class-name> pth; 
+				tablename := <concat-strings>[cname, "_", attname];
+				column1 := <concat-strings>[cname, "_", attname];
+				expr' := <sql-expr> expr1;
+				opp-aname := <attr-get-inverse> pth;
+				opp-cname := <attr-parent>opp-aname;
+				column2 := <concat-strings>[opp-cname, "_", opp-aname];
+				expr'' := <path-prefix ; sql-expr> pth
+
+
+	sql-const: Forall(var, pth, constraint)
+			-> Equal( SelectQuery([],
+							[FunctionCall("count", [Star()])], 
+							Some(FromPart([TableName(tablename)])), 
+							Some(Where(And(Equal(ColumnName(column1), expr''),
+										Not(const''')))), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None()), 
+					Int("0"))
+			where
+				cname := <path-prefix ; _get-type> pth;
+				attname := <path-suffix-name> pth;
+				tablename := <concat-strings>[cname, "_", attname];
+				column1 := <concat-strings>[cname, "_", attname];
+				expr'' := <path-prefix ; sql-expr> pth;
+				const' := <literal-subst> (constraint, [(PathStart(var, None()), Input(var))]);
+				sysvar := <concat-strings>[var, "_in"];
+				const'' := <sql-const> const';
+				opp-aname := <attr-get-inverse> pth;
+				opp-cname := <attr-parent>opp-aname;
+				oppattname := <concat-strings>[opp-cname, "_", opp-aname];
+				const''' := <literal-subst> (const'', [(SystemVariable(sysvar), ColumnName(oppattname))])
+
+	sql-const: c -> <fail> where <debug> "cannot translate constraint" ; <debug> c
+
+	
+	sql-expr: Times(e1, e2) -> Times(<sql-expr>e1, <sql-expr>e2)
+	sql-expr: Plus(e1, e2) -> Plus(<sql-expr>e1, <sql-expr>e2)
+	sql-expr: Minus(e1, e2) -> Minus(<sql-expr>e1, <sql-expr>e2)
+	
+	sql-expr: Cardinality(pth)
+	//Path(ps{Reference(cname)}, PathComponent(aname, maybeprimed)){Set(Reference(t))}))
+			-> SelectQuery(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName(tablename)])), 
+											Some(Where(expr')), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None())
+		where
+			<attr-is-set> pth;
+			cname := <path-prefix ; _get-type> pth;
+			attname := <path-suffix-name> pth;
+			tablename := <concat-strings>[cname, "_", attname];
+			expr' := <sql-where-expr> pth
+			
+		sql-expr: Cardinality(PathStart(cname, _))
+			-> SelectQuery(	[],
+											[FunctionCall("count", [Star()])], 
+											Some(FromPart([TableName(tablename)])), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None(), 
+											None())
+		where
+			<is-class-name> cname;
+			tablename := cname
+	
+	
+	sql-expr: BasicValue(Integer(n)) -> Int(n)
+	sql-expr: BasicValue(String(n)) -> String(<un-double-quote>n)
+	sql-expr: BasicValue(Decimal(n)) -> Decimal(n)
+	
+	sql-expr: BasicValue(True()) -> BoolTrue()
+	sql-expr: BasicValue(False()) -> BoolFalse()
+
+	sql-expr: True() -> BoolTrue()
+	sql-expr: False() -> BoolFalse()
+	
+	sql-expr: Input(n) -> SystemVariable(<concat-strings>[n, "_in"])
+	sql-expr: Output(n) -> SystemVariable(<concat-strings>[n, "_out"])
+	sql-expr: This() -> SystemVariable("this")
+	sql-expr: CurrentUser() -> SystemVariable("_currentUser")
+	
+	sql-expr: Null() -> Null()
+	
+	sql-expr: BasicValue(CurrentDateTime()) -> FunctionCall("NOW", [])
+	sql-expr: BasicValue(CurrentDate()) -> FunctionCall("CURDATE", [])
+	sql-expr: BasicValue(CurrentTime()) -> FunctionCall("CURTIME", [])
+
+	
+	sql-expr: PathStart(v,None()) -> String(v) where <is-enum> v
+	
+	sql-expr: pth
+		// select name from class where classId = expr
+			-> SelectQuery([], [ColumnName(attname)], Some(FromPart([TableName(cname)])), 
+						  Some(Where(Equal(expr, ColumnName(<concat-strings>[cname, "Id"])))), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None())
+		where
+			<is-path> pth;
+			attname := <path-suffix-name> pth;
+			not(<attr-is-bidir> attname);
+			cname := <path-prefix ; class-name> pth;
+			expr :=  <path-prefix ; sql-expr> pth
+			
+			
+		sql-expr: pth
+		// select name from class where classId = expr
+			-> SelectQuery([], [ColumnName(oppattname)], Some(FromPart([TableName(tname)])), 
+						  Some(Where(Equal(expr, ColumnName(tname)))), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None(), 
+						  None())
+		where
+			<is-path> pth;
+			attname := <path-suffix-name> pth;
+			<attr-is-bidir> attname;
+			cname := <path-prefix ; class-name> pth;
+			tname := <concat-strings>[cname, "_", attname];
+			expr :=  <path-prefix ; sql-expr> pth;
+			opp-aname := <attr-get-inverse> pth;
+			opp-cname := <attr-parent>opp-aname;
+			oppattname := <concat-strings>[opp-cname, "_", opp-aname]
+	
+
+	sql-expr: e -> <fail> where <debug> "cannot translate expression" ; <debug> e 
+	
+	sql-where-expr: pth
+			-> Equal(expr, ColumnName(<concat-strings>[cname, "Id"]))
+		where 
+			<attr-is-basic> pth;
+			cname := <path-prefix ; _get-type> pth;
+			expr := <path-prefix ; sql-expr> pth
+
+	sql-where-expr: pth
+			-> Equal(expr, ColumnName(<concat-strings>[cname, "_", aname]))
+		where 
+			aname := <path-suffix-name> pth;
+			cname := <path-prefix ; _get-type> pth;
+			expr := <path-prefix ; sql-expr> pth	
+	
+	
+	metadata-tables = !StatementList([
+			<meta-classes-table>,
+			<meta-sets-table>,		
+			<meta-attributes-table>,
+			<meta-methods-table>,
+			<meta-method-params-table>
+	])
+
+	meta-classes-table = !StatementList([
+			<create-table>("_Meta_Classes", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Classes", "className", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Classes", "tableName", Varchar("200"), None(), None(), None(), None(), None())
+	])
+
+	meta-sets-table = !StatementList([
+			<create-table>("_Meta_Sets", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Sets", "setName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "columnName", Varchar("200"), None(), None(), None(), None(), None())
+	])
+
+	meta-attributes-table = !StatementList([
+			<create-table>("_Meta_Attributes", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Attributes", "class", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "attName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "primType", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "typeMultiplicity", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "className", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "setName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "direction", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "oppAttName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "isId", Bit(), None(), None(), None(), None(), None())
+	])
+
+	meta-methods-table = !StatementList([
+			<create-table>("_Meta_Methods", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Methods", "class", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "methodName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "isObjectMethod", Bit(), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Methods", "html", Text(), None(), None(), None(), None(), None())
+	])
+
+
+	meta-method-params-table = !StatementList([
+			<create-table>("_Meta_Method_Params", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
+			CreateColumn("_Meta_Method_Params", "class", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "methodName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramType", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramMultiplicity", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramInOut", Varchar("20"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramClassName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Method_Params", "paramSetName", Varchar("200"), None(), None(), None(), None(), None())
+			
+	])
+
+
+	path-where:
+		p -> Equal(expr, ColumnName(<concat-strings>[cname, "Id"]))
+		where 
+			not(<attr-is-set> p);
+			cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name><path-suffix-name> p;
+			expr := <path-prefix ; sql-expr> p
+
+
+
+	path-where:
+		Path(p , PathComponent(attname, None()))
+			-> Equal(expr, ColumnName(<concat-strings>[cname, "_",attname]))
+		where 
+			<attr-is-set> p;
+			expr := <path-prefix ; sql-expr> p;
+			cname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name><path-suffix-name> p
+		
+/*	path-where: Output(n) -> True()
+
+	path-where: This() -> True()
+
+	path-where: ThisPrimed() -> True()
+*/
+
+
+
+rules
+	
+			create-table: (name, pkname, pktype, pknullable, pkdefault, pkextra, pkreference)	
+				-> 		
+				StatementList([
+					DropTable(name),
+					CreateTable(name, PrimaryKeyColumn(pkname, pktype, pknullable, pkdefault, pkextra, pkreference))
+				])
+
+rules
