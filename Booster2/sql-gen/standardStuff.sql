@@ -314,7 +314,7 @@ WHILE done = 0 DO
     ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"`` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Date' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
                                     (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE) 
