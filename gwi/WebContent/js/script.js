@@ -635,4 +635,30 @@ if (navigator.userAgent.indexOf("Firefox")!==-1) {
 	  });
 	}
 
+boosterApp
+.directive('addTooltipDirective', function() {
+  return function(scope, element, attrs) {
+    if (scope.$last){
+      // iteration is complete, do whatever post-processing
+      // is necessary
+        $('#classtooltip').tooltipster({
+  	   	  theme: 'tooltipster-shadow',
+  	   	  interactive: true,
+            // we detach the element from the page and give it to Tooltipster to serve as content
+            content: $('#ClassPopup').detach().show(),
+            // if you use a single element as content for several tooltips, set this option to true
+            contentCloning: false
+        }); 
+    $('.attributetooltip').tooltipster({
+	   	  theme: 'tooltipster-shadow',
+	   	interactive: true,
+        // we detach the element from the page and give it to Tooltipster to serve as content
+        content: $('#AttPopup').detach().show(),
+        // if you use a single element as content for several tooltips, set this option to true
+        contentCloning: true
+    });
+    }
+  };
+});
+
 

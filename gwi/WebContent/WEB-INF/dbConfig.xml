@@ -6,5 +6,5 @@
 	<port>3306</port>
 	<username>root</username>
 	<password></password>
-	<dbname>ClassicCars</dbname>
+	<dbname>Seshat</dbname>
 </dbconnection>

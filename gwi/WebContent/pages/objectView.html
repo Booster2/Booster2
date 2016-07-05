@@ -7,7 +7,7 @@
 						ng-href="#object/{{object.className}}/{{object.prev}}"><i class="fa fa-play fa-flip-horizontal"></i></a>
 		</div>
 		<div class="col-md-8" style=" text-align: center;">
-					<h5>Browse : <span>{{object.className.unCamelCase()}}</span></h5>
+					<h5>Browse : <span>{{object.className.unCamelCase()}}</span>&nbsp;&nbsp;<i id="classtooltip" class="fa fa-question-circle" aria-hidden="true"></i></h5>
 					<h4>{{object.description}}</h4>
 		</div>
 		<div class="col-md-2" style=" text-align: right;">
@@ -30,11 +30,10 @@
 		<br/>
 		<table class="table table-striped table-bordered">
 		<tbody>
-			<tr ng-repeat="attribute in object.attributes"  >
+			<tr ng-repeat="attribute in object.attributes" add-tooltip-directive>
 				<td class="attribute-name-td">
 					<span class="attribute-name">{{attribute.attName.unCamelCase()}}</span>
-					  <span id="testText" style="float: right"><i onaria-hidden="true" class="fa fa-question-circle"></i></span>
-					  <div id="popup" style="display: none">some text here</div>
+					  <span style="float: right"><i aria-hidden="true" class="fa fa-question-circle attributetooltip"></i></span>
 				</td>
 				<td>
 					<span ng-if="attribute.attPrimType == 'String'" >
@@ -109,4 +108,14 @@
 	</tbody>
 </table>
 
-<div style="border: 1px solid black;" id="">This is my popup</div>
+
+<div id="ClassPopup" style="display: none;">
+	<h2>Background</h2>
+	<p><strong>Description: </strong>Background includes 'Features of Cultivation', 'General Description', 'Human Geography', 'Environment' and 'Agricultural Land Use'.</p>
+	<p><a href="http://modelcatalogue.cs.ox.ac.uk/aligned/#/catalogue/dataClass/83">More information...</a></p>
+</div>
+<div id="AttPopup" style="display: none;">
+	<h2>Duration of field</h2>
+	<p><strong>Description: </strong>How many years are crops grown in a field/garden before it is left fallow or abandoned? If a range of values are given, provide the range as the code and provide details after the heart symbol. </p>
+	<p><a href="http://modelcatalogue.cs.ox.ac.uk/aligned/#/catalogue/dataElement/2866">More information...</a></p>
+</div>
