@@ -393,7 +393,7 @@ rules // make PathStart(classReference, _) have type set within BinRel(_, In(), 
 
 rules // rewrite all invariants to get a name
 	
-	inv-add-name: Invariant(c) -> Invariant(<pp-Booster2-string;custom-origin(|c)>c, c)
+	inv-add-name: Invariant(c) -> Invariant(<write-to-string;custom-origin(|c)>c, c)
 	
 	currentuser-add-path: c@CurrentUser() -> CurrentUser(<custom-origin(|c)>PathStart(<custom-origin(|c)>"User", None()))
 	
