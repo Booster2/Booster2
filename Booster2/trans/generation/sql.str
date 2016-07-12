@@ -361,12 +361,14 @@ rules
 					
 	sql-gc: Skip() -> VariableAssign("dummySkip", Int("1"))
 
-	sql-gc: Parallel(gc1, gc2) -> StatementList([decs1*, decs2*, stmts1*, stmts2*])
+	sql-gc: Parallel(gc1, gc2) -> StatementList([news1*, news2* ,decs1*, decs2*, stmts3*, stmts4*])
 		where
 			StatementList(as) := <sql-gc> gc1;
 			StatementList(bs) := <sql-gc> gc2;
 			([decs1*], [stmts1*]) := <partition(?VariableAssign(_,_))> as;
-			([decs2*], [stmts2*]) := <partition(?VariableAssign(_,_))> bs
+			([decs2*], [stmts2*]) := <partition(?VariableAssign(_,_))> bs;
+			([news1*], [stmts3*]) := <partition(?SelectStatement(_,[FunctionCall("UUID", [])],_,_,_,_,_,_,_,_,_))> stmts1*;
+			([news2*], [stmts4*]) := <partition(?SelectStatement(_,[FunctionCall("UUID", [])],_,_,_,_,_,_,_,_,_))> stmts2*
 			
 			
 	sql-gc: Parallel(gc1, gc2) -> StatementList([<sql-gc> gc1, <sql-gc> gc2])
