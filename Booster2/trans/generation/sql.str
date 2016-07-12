@@ -743,7 +743,7 @@ rules
 			<is-path> pth;
 			attname := <path-suffix-name> pth;
 			not(<attr-is-bidir> attname);
-			cname := <path-prefix ; class-name> pth;
+			cname := <path-suffix-name ; att-table-name> pth;
 			expr :=  <path-prefix ; sql-expr> pth
 			
 			
