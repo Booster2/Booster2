@@ -280,7 +280,7 @@ public class callMethod extends HttpServlet {
 			result.put("outputParameterValues", null);
 		}
 		
-		response.getOutputStream().println(result.toJSONString());
+		response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 
 		return;

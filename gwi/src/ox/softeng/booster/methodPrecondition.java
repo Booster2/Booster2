@@ -267,7 +267,7 @@ public class methodPrecondition extends HttpServlet {
 			result.put("_precondition", false);
 		}
 		
-		response.getOutputStream().println(result.toJSONString());
+		response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 
 		return;

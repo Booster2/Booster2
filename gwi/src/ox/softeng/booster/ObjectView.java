@@ -64,7 +64,7 @@ public class ObjectView extends HttpServlet {
 		catch(Exception e)
 		{
 			e.printStackTrace(System.err);
-			response.getOutputStream().println("Error in getting object view (description / id) from database");
+			response.getOutputStream().write("Error in getting object view (description / id) from database".getBytes("UTF-8"));
 		}
 		try{
 			PreparedStatement ps = client.prepareStatement("call `GET_OBJECT_BROWSE_LOCATION`(?,?)");
@@ -83,7 +83,7 @@ public class ObjectView extends HttpServlet {
 		catch(Exception e)
 		{
 			e.printStackTrace(System.err);
-			response.getOutputStream().println("Error in getting object browse location from database");
+			response.getOutputStream().write("Error in getting object browse location from database".getBytes("UTF-8"));
 		}
 		
 		
@@ -266,10 +266,10 @@ public class ObjectView extends HttpServlet {
 		}catch(Exception e)
 		{
 			e.printStackTrace(System.err);
-			response.getOutputStream().println("Error in getting object view (attributes) from database");
+			response.getOutputStream().write("Error in getting object view (attributes) from database".getBytes("UTF-8"));
 		}
 		
-		response.getOutputStream().println(result.toJSONString());
+		response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 		
 		

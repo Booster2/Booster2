@@ -55,10 +55,10 @@ public class UserLogin extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			if(rs == null){
 				// return user back to the login screen
-				//response.getOutputStream().println("Error in signing in");
+				//response.getOutputStream().write("Error in signing in".getBytes("UTF-8"));
 				JSONObject result = new JSONObject();
 				result.put("_success", false);
-				response.getOutputStream().println(result.toJSONString());
+				response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 				response.getOutputStream().flush();
 			}
 			else
@@ -74,13 +74,13 @@ public class UserLogin extends HttpServlet {
 		{
 			e.printStackTrace(System.err);
 			//System.err.print(e.getStackTrace());
-			response.getOutputStream().println("Error in signing in");
+			response.getOutputStream().write("Error in signing in".getBytes("UTF-8"));
 		}
 		
 		
 		JSONObject result = new JSONObject();
 		result.put("_success", true);
-		response.getOutputStream().println(result.toJSONString());
+		response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 		
 	

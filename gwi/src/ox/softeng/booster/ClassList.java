@@ -91,10 +91,10 @@ public class ClassList extends HttpServlet {
 		{
 			e.printStackTrace(System.err);
 			//System.err.print(e.getStackTrace());
-			response.getOutputStream().println("Error in getting class list from database;");
+			response.getOutputStream().write("Error in getting class list from database;".getBytes("UTF-8"));
 		}
 		
-		response.getOutputStream().println(jsonArray.toJSONString());
+		response.getOutputStream().write(jsonArray.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 		
 	}

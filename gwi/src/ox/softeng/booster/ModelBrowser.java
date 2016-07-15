@@ -91,7 +91,7 @@ public class ModelBrowser extends HttpServlet {
 		{
 			System.err.println("Error!");
 		}
-		response.getOutputStream().println(modelObj.toJSONString());
+		response.getOutputStream().write(modelObj.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 
 	}

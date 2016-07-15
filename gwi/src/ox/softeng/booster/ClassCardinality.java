@@ -61,10 +61,10 @@ public class ClassCardinality extends HttpServlet {
 		catch(Exception e)
 		{
 			e.printStackTrace(System.err);
-			response.getOutputStream().println("Error in getting class cardinality from database");
+			response.getOutputStream().write("Error in getting class cardinality from database".getBytes("UTF-8"));
 		}
 
-		response.getOutputStream().println(result.toJSONString());
+		response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 		
 		

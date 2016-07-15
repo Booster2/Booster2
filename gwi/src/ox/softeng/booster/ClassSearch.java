@@ -129,9 +129,9 @@ public class ClassSearch extends HttpServlet {
 		}catch(Exception e)
 		{
 			e.printStackTrace(System.err);
-			response.getOutputStream().println("Error in getting class table from database");
+			response.getOutputStream().write("Error in getting class table from database".getBytes("UTF-8"));
 		}
-		response.getOutputStream().println(result.toJSONString());
+		response.getOutputStream().write(result.toJSONString().getBytes("UTF-8"));
 		response.getOutputStream().flush();
 
 		

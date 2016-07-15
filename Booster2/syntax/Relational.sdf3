@@ -11,7 +11,7 @@ context-free syntax
 
 
   Statement.DropDatabase = <drop database if exists `<ID>`;> 
-	Statement.CreateDatabase = <create database `<ID>`;>
+	Statement.CreateDatabase = <create database `<ID>` default charset=utf8;>
 	Statement.UseDatabase = <use `<ID>`;
 	SET autocommit=1;>
 	Statement.DropTable = <drop table if exists `<ID>`;>
