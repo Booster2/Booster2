@@ -28,6 +28,7 @@ context-free syntax
   SQLType.Bit = <bit> 
   SQLType.DateTime = <datetime> 
   SQLType.TimeStamp = <timestamp> 
+  SQLType.TimeStamp = <timestamp ( <INT> )> 
   SQLType.Date = <date> 
   SQLType.Time = <time> 
   SQLType.Text = <text>

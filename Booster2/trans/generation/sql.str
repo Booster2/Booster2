@@ -117,7 +117,7 @@ rules
 	sql-classes: Class(name, exts, comps) -> 
 		StatementList([<create-table>(name, <concat-strings>[name, "Id"], Varchar("36"), Some(ColumnNotNullable()), None(),None(), None()), 
 										CreateColumn(name, <concat-strings>[name, "_className"] , Varchar("100"), Some(ColumnNotNullable()), None(), None(), None(), None()),
-										CreateColumn(name, <concat-strings>[name,"_createdDate"] , TimeStamp(), Some(ColumnNotNullable()), Some(ColumnDefault(FunctionCall("NOW", []))), None(), None(), None())
+										CreateColumn(name, <concat-strings>[name,"_createdDate"] , TimeStamp("3"), Some(ColumnNotNullable()), Some(ColumnDefault(FunctionCall("NOW", ["3"]))), None(), None(), None())
 										])
 
 	sql-extensions: Class(name, Some(Extend(exts)), comps) -> 
