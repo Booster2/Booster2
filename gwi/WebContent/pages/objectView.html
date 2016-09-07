@@ -7,7 +7,7 @@
 						ng-href="#object/{{object.className}}/{{object.prev}}"><i class="fa fa-play fa-flip-horizontal"></i></a>
 		</div>
 		<div class="col-md-8" style=" text-align: center;">
-					<h5>Browse : <span>{{object.className.unCamelCase()}}</span>&nbsp;&nbsp;<i id="classtooltip" class="fa fa-question-circle" aria-hidden="true"></i></h5>
+					<h5>Browse : <span>{{object.className.unCamelCase()}}</span>&nbsp;&nbsp;<i class="fa fa-tag" title="{{object.className.unCamelCase()}}: {{object.mc_description}}" data-toggle="tooltip" data-placement="top" tooltip></i></h5>
 					<h4>{{object.description}}</h4>
 		</div>
 		<div class="col-md-2" style=" text-align: right;">
@@ -33,7 +33,11 @@
 			<tr ng-repeat="attribute in object.attributes" add-tooltip-directive>
 				<td class="attribute-name-td">
 					<span class="attribute-name">{{attribute.attName.unCamelCase()}}</span>
-					  <span style="float: right"><i aria-hidden="true" class="fa fa-question-circle attributetooltip"></i></span>
+					  <span style="float: right">
+					  	<i class="fa fa-tag" title="{{attribute.attName.unCamelCase()}}: {{attribute.mc_description}}" data-toggle="tooltip" data-placement="top" tooltip>
+					  	</i>
+					  </span>
+					  
 				</td>
 				<td>
 					<span ng-if="attribute.attPrimType == 'String'" >

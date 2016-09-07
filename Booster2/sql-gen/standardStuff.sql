@@ -1,7 +1,7 @@
 SET @@GLOBAL.max_sp_recursion_depth = 255;
 SET @@session.max_sp_recursion_depth = 255; 
 
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `COUNT_ALL_RECORDS_BY_TABLE`()
 BEGIN
@@ -43,7 +43,7 @@ CLOSE table_names;
 SELECT * FROM TCOUNTS;
 
 END
-$$
+//
 
 CREATE PROCEDURE `GET_OBJECT_DESCRIPTION`( className_in VARCHAR(1000), objectID VARCHAR(36), out objectDesc VARCHAR(1000))
 BEGIN
@@ -70,10 +70,10 @@ CALL `GET_OBJECT_DESCRIPTION_RECURSE`( className_in, objectID, objectDesc);
 
 /*SELECT * FROM ATTRIBUTES_FOR_DESC; */
 END
-$$
+//
 
 
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_RECURSE`( className_in VARCHAR(1000), objectID VARCHAR(36), out objectDesc VARCHAR(1000))
 BEGIN
@@ -196,8 +196,8 @@ SET objectDesc = (SELECT group_concat(STRING_VALUE separator ', ')
 	AND CALL_OID = objectID);
 
 END
-$$
-DELIMITER $$
+//
+DELIMITER //
 
 CREATE PROCEDURE `GET_OBJECT`( className_in VARCHAR(1000), objectID VARCHAR(36))
 BEGIN
@@ -220,6 +220,8 @@ CREATE TEMPORARY TABLE ATTRIBUTES
     ID INT PRIMARY KEY AUTO_INCREMENT,
     ATT_NAME VARCHAR(1000),
     ATT_PRIM_TYPE VARCHAR(1000),
+    MC_DESCRIPTION VARCHAR(10000),
+    MC_URL VARCHAR(2000),
     TYPE_MULT VARCHAR(1000),
     INT_VALUE INT,
     DECIMAL_VALUE DECIMAL(65,30),
@@ -245,99 +247,101 @@ WHILE done = 0 DO
     SET @className = (SELECT _Meta_Attributes.className FROM _Meta_Attributes WHERE attName = ANAME AND class = @ACTUAL_CLASS);
     SET @oppAttName = (SELECT _Meta_Attributes.oppAttName FROM _Meta_Attributes WHERE attName = ANAME AND class = @ACTUAL_CLASS);
     SET @tableName = (SELECT _Meta_Attributes.tableName FROM _Meta_Attributes WHERE attName = ANAME AND class = @ACTUAL_CLASS);
+    SET @mc_description = (SELECT _Meta_Attributes.mc_description FROM _Meta_Attributes WHERE attName = ANAME AND class = @ACTUAL_CLASS);
+    SET @mc_url = (SELECT _Meta_Attributes.mc_url FROM _Meta_Attributes WHERE attName = ANAME AND class = @ACTUAL_CLASS);
     
     IF @primType = 'String' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, STRING_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Password' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, STRING_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Integer' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, INT_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Boolean' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, INT_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Decimal' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DECIMAL_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, DECIMAL_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'DateTime' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, DATETIME_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Date' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATE_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, DATE_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATE_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'Time' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS TIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, TIME_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS TIME_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'SetValue' and @typeMult != 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS SET_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, SET_VALUE)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS SET_VALUE FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Uni' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, OID_VALUE, CLASS_NAME)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, OID_VALUE, CLASS_NAME)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
 
     ELSEIF @primType = 'String' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, STRING_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Password' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, STRING_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, STRING_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS STRING_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Integer' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, INT_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Boolean' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, INT_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS INT_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Decimal' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, INT_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, INT_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DECIMAL_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'DateTime' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATETIME_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, DATETIME_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATETIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Date' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, DATE_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATE_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, DATE_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS DATE_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
     ELSEIF @primType = 'Time' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, TIME_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS TIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, TIME_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS TIME_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
 
     ELSEIF @primType = 'SetValue' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, SET_VALUE) 
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS SET_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, SET_VALUE) 
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS SET_VALUE FROM `", @tableName,"` WHERE ",@ACTUAL_CLASS,"Id = '", objectID, "')");
 
    ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Uni' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, OID_VALUE, CLASS_NAME)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",ANAME,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName,"Id = '", objectID, "')");
 
     ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
-                                    (ATT_NAME, ATT_PRIM_TYPE, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
+                                    (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, OID_VALUE, CLASS_NAME)
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
  
 
 
@@ -384,11 +388,12 @@ SELECT * FROM ATTRIBUTES;
 				END;
 				
 				END
-				$$
+				//
 
-			
+DELIMITER ;
+
 drop procedure if exists `GET_OBJECT_METHOD_NAMES`;
-DELIMITER $$
+DELIMITER //
 CREATE PROCEDURE `GET_OBJECT_METHOD_NAMES` ( className_in VARCHAR(1000), OID_in VARCHAR(36), _currentUser VARCHAR(36))
 	BEGIN
 DROP TABLE IF EXISTS OBJECT_METHODS;
@@ -421,28 +426,30 @@ CLOSE method_names;
 	SELECT * from OBJECT_METHODS;
 	END;
   END;
-$$
+//
 
 
 CREATE PROCEDURE `GET_CLASS_METHOD_NAMES` ( className_in VARCHAR(1000))
 	BEGIN
     SELECT * FROM _Meta_Methods WHERE class = className_in AND isObjectMethod = false;
   END;
-$$
+//
 
 CREATE PROCEDURE `METHOD_PARAMS` ( className_in VARCHAR(1000),  methodName_in VARCHAR(1000))
 	BEGIN
     SELECT * FROM _Meta_Method_Params WHERE class = className_in and methodName = methodName_in;
   END;
-$$
+//
 
 DELIMITER ;
 drop procedure if exists `GET_OBJECT_BROWSE_LOCATION`;
-DELIMITER $$
+DELIMITER //
 CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(1000), Id_in VARCHAR(36))
 	BEGIN
 		
-		SET @tableName = (SELECT tableName FROM _Meta_Classes WHERE className = className_in);  
+		SET @tableName = (SELECT tableName FROM _Meta_Classes WHERE className = className_in);
+		SET @mc_description = (SELECT mc_description FROM _Meta_Classes WHERE className = className_in);
+		SET @mc_url = (SELECT mc_url FROM _Meta_Classes WHERE className = className_in);
 		SET @idName = CONCAT(@tableName, "ID");
 		SET @dcName = CONCAT(@tableName, "_createdDate");
 		
@@ -450,7 +457,9 @@ CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(1000), Id_i
 				"(select ",@idName," from `",@tableName,"` where ",@dcName," > (select ",@dcName," from ",@tableName," where ",@idName," = '",Id_in,"') order by ", @dcName, " asc limit 1) as next,", 
 				"(select ",@idName," from `",@tableName,"` where ",@dcName," < (select ",@dcName," from ",@tableName," where ",@idName," = '",Id_in,"') order by ", @dcName, " desc limit 1) as prev,", 
 				"(select ",@idName," from `",@tableName,"` order by ", @dcName, " asc limit 1) as first,",
-				"(select ",@idName," from `",@tableName,"` order by ", @dcName, " desc limit 1) as last"); 
+				"(select ",@idName," from `",@tableName,"` order by ", @dcName, " desc limit 1) as last,",
+				"'",@mc_description,"' as mc_description,",
+				"'",@mc_url,"' as mc_url"); 
 
 		IF(@SQL_TXT is not null ) THEN
         	PREPARE stmt_name FROM @SQL_TXT;
@@ -458,13 +467,13 @@ CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(1000), Id_i
         	DEALLOCATE PREPARE stmt_name;
     	END IF;
   	END;
- $$
+ //
 
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `GET_OBJECT_DESCRIPTION_AS_TABLE`;
 
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_AS_TABLE`( className_in VARCHAR(1000), orderBy_in VARCHAR(255), direction_in VARCHAR(10), start_in INT, limit_in INT, searchTerm_in VARCHAR(100), out total_out INT)
 BEGIN
@@ -650,13 +659,13 @@ DEALLOCATE PREPARE stmt_result;
 SET total_out = @total_rows ;
 /*SELECT * FROM ATTRIBUTES_FOR_DESC; */
 END
-$$
+//
 
 DELIMITER ;
 
 DELIMITER ;
 DROP PROCEDURE IF EXISTS `GET_NO_OBJECTS_FOR_CLASS` ;
-DELIMITER $$
+DELIMITER //
 CREATE PROCEDURE `GET_NO_OBJECTS_FOR_CLASS`( className_in VARCHAR(100), out recordCount_out INT)
 BEGIN
 DECLARE done INT DEFAULT 0;
@@ -671,22 +680,22 @@ EXECUTE stmt_name;
 DEALLOCATE PREPARE stmt_name; 
 SET recordCount_out = @rc;
 END
-$$
+//
 
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `GET_OBJECT_DESCRIPTION_ATTRIBUTES`;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `GET_OBJECT_DESCRIPTION_ATTRIBUTES`( className_in VARCHAR(1000))
 BEGIN
     SELECT * FROM _Meta_Attributes WHERE class = className_in and isId = 1;
 END 
-$$
+//
 
 DELIMITER ;
 DROP PROCEDURE IF EXISTS `GET_SET_VALUES`;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `GET_SET_VALUES`( setName_in VARCHAR(1000))
 BEGIN
@@ -700,11 +709,11 @@ BEGIN
 	EXECUTE stmt_name;
 	DEALLOCATE PREPARE stmt_name; 
 END 
-$$
+//
 
 DELIMITER ;
 DROP PROCEDURE IF EXISTS `GET_CLASS_VALUES`;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `GET_CLASS_VALUES`( className_in VARCHAR(1000), sp_in VARCHAR(1000), this VARCHAR(36))
 BEGIN
@@ -760,11 +769,11 @@ END;
 
 	SELECT * FROM CLASS_DESCS;
 END 
-$$
+//
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS `GET_OBJECT_ACTUAL_CLASS`;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `GET_OBJECT_ACTUAL_CLASS`(IN className_in VARCHAR(1000), IN objectID_in VARCHAR(36), OUT actualClass_out varchar(1000))
 BEGIN
@@ -776,7 +785,7 @@ BEGIN
 	DEALLOCATE PREPARE stmt_name;	
     SET actualClass_out = @ACTUAL_CLASS;
 END 
-$$
+//
 DELIMITER ;
 
 CREATE TABLE `debug_log` (
@@ -789,18 +798,18 @@ CREATE TABLE `debug_log` (
 );
 
 DROP PROCEDURE IF EXISTS `log_debug`;
-DELIMITER $$
+DELIMITER //
 
 CREATE PROCEDURE `log_debug`(IN lastMethodName VARCHAR(1000), IN lastErrcode VARCHAR(10), IN lastMsg VARCHAR(512))
 
 BEGIN
     INSERT INTO debug_log (methodName, errcode, msg)  VALUES (lastMethodName, lastErrcode, lastMsg);
-END$$
+END//
 DELIMITER ;
 
 
 drop procedure if exists `validatePassword`;
-delimiter $$
+delimiter //
 create procedure `validatePassword` (un varchar(4000), passwdIn varchar(4000))
 begin
 
@@ -808,7 +817,7 @@ select username, UserId from User
 			where (select Password(passwdIn)) = passwd and
 			(LOWER(username) = LOWER(un) or LOWER(emailAddress) = LOWER(un)) and
 			enabled = true;
-end $$
+end //
 delimiter ;
 
 call User_Create(null, 'default', 'administrator','defaultadministrator',database(),database(), 'Administrator', @u_out);

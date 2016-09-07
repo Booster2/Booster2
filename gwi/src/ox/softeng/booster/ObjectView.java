@@ -78,6 +78,9 @@ public class ObjectView extends HttpServlet {
 				result.put("first",rs.getString("first"));
 				result.put("last",rs.getString("last"));
 				
+				result.put("mc_description",rs.getString("mc_description"));
+				result.put("mc_url",rs.getString("mc_url"));
+				
 			}
 		}
 		catch(Exception e)
@@ -102,7 +105,10 @@ public class ObjectView extends HttpServlet {
 			while(rs.next())
 			{
 				String attName = rs.getString("ATT_NAME");
-				
+
+				String mc_description = rs.getString("MC_DESCRIPTION");
+				String mc_url = rs.getString("MC_URL");
+
 				String attPrimType = rs.getString("ATT_PRIM_TYPE");
 				String attTypeMult = rs.getString("TYPE_MULT");
 				if(attributesHashMap.containsKey(attName))
@@ -174,11 +180,14 @@ public class ObjectView extends HttpServlet {
 					JSONArray setValues = new JSONArray();
 					JSONArray oidValues = new JSONArray();
 					JSONArray objDescs = new JSONArray();
-					
+
 					obj.put("attName", attName);
 					obj.put("attPrimType", attPrimType );
 					obj.put("attTypeMult", attTypeMult );
 					obj.put("attClassName", rs.getString("CLASS_NAME"));
+					obj.put("mc_description", mc_description);
+					obj.put("mc_url", mc_url);
+					
 					if("Integer".equalsIgnoreCase(attPrimType))
 					{
 						intValues.add(rs.getInt("INT_VALUE"));

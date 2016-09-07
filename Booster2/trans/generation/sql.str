@@ -41,21 +41,21 @@ rules
 	sql-metadata:
 		SetDef(setname, values) ->
 			Insert(None(), None(), Some(Into()), "_Meta_Sets", 
-						  	[ColumnName("setName"),	ColumnName("tablename"),	ColumnName("columnName")], 
-								[String(setname),				String(setname),					String(setname)], 
+						  	[ColumnName("setName"),	ColumnName("tablename"),	ColumnName("columnName"), ColumnName("mc_description"), ColumnName("mc_url")], 
+								[String(setname),				String(setname),					String(setname), String(""), String("")], 
 			None()) 
 
 
 	sql-metadata: Class(cname, exts, comps) -> 
-			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename")], [String(cname),String(cname)], None()),
+			StatementList([Insert(None(), None(), Some(Into()), "_Meta_Classes", [ColumnName("className"), ColumnName("tablename"), ColumnName("mc_description"), ColumnName("mc_url")], [String(cname),String(cname), String(""), String("")], None()),
 				StatementList(<collect-all(sql-metadata-attributes(|cname))> comps),
 				StatementList(<collect-all(sql-metadata-methods(|cname))> comps)])
 
 	sql-metadata-attributes(|cname): a@Attribute(name, decs, type) -> 
 			Insert(None(), None(), Some(Into()), 
 						"_Meta_Attributes", 
-						[ColumnName("class"),	ColumnName("attName"),	ColumnName("primType"),	ColumnName("typeMultiplicity"),	ColumnName("oppAttName"),	ColumnName("className"),	ColumnName("setName"),	ColumnName("direction"),	ColumnName("tableName"),	ColumnName("isId")],
-						[String(cname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						<sql-expr>isId], 
+						[ColumnName("class"),	ColumnName("attName"),	ColumnName("primType"),	ColumnName("typeMultiplicity"),	ColumnName("oppAttName"),	ColumnName("className"),	ColumnName("setName"),	ColumnName("direction"),	ColumnName("tableName"),	ColumnName("isId"), ColumnName("mc_description"), ColumnName("mc_url")],
+						[String(cname),		String(name),						String(primType),				String(typeMultiplicity),				String(opp-aname),				String(opp-cname),				String(setName),				String(direction),				String(tname),						<sql-expr>isId, String(""), String("")], 
 						None())
 			where
 				primType := <prim-type-string> name;
@@ -800,14 +800,18 @@ rules
 	meta-classes-table = !StatementList([
 			<create-table>("_Meta_Classes", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
 			CreateColumn("_Meta_Classes", "className", Varchar("200"), None(), None(), None(), None(), None()),
-			CreateColumn("_Meta_Classes", "tableName", Varchar("200"), None(), None(), None(), None(), None())
+			CreateColumn("_Meta_Classes", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Classes", "mc_description", Varchar("10000"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Classes", "mc_url", Varchar("2000"), None(), None(), None(), None(), None())
 	])
 
 	meta-sets-table = !StatementList([
 			<create-table>("_Meta_Sets", "id", Int(), None(), None(), Some(AutoIncrement()), None()),
 			CreateColumn("_Meta_Sets", "setName", Varchar("200"), None(), None(), None(), None(), None()),
 			CreateColumn("_Meta_Sets", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
-			CreateColumn("_Meta_Sets", "columnName", Varchar("200"), None(), None(), None(), None(), None())
+			CreateColumn("_Meta_Sets", "columnName", Varchar("200"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "mc_description", Varchar("10000"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Sets", "mc_url", Varchar("2000"), None(), None(), None(), None(), None())
 	])
 
 	meta-attributes-table = !StatementList([
@@ -821,7 +825,9 @@ rules
 			CreateColumn("_Meta_Attributes", "direction", Varchar("200"), None(), None(), None(), None(), None()),
 			CreateColumn("_Meta_Attributes", "tableName", Varchar("200"), None(), None(), None(), None(), None()),
 			CreateColumn("_Meta_Attributes", "oppAttName", Varchar("200"), None(), None(), None(), None(), None()),
-			CreateColumn("_Meta_Attributes", "isId", Bit(), None(), None(), None(), None(), None())
+			CreateColumn("_Meta_Attributes", "isId", Bit(), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "mc_description", Varchar("10000"), None(), None(), None(), None(), None()),
+			CreateColumn("_Meta_Attributes", "mc_url", Varchar("2000"), None(), None(), None(), None(), None())
 	])
 
 	meta-methods-table = !StatementList([
