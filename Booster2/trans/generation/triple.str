@@ -35,7 +35,7 @@ rules
 			Subject := Subject(idcol,name);
 			AttMaps := AttrMapList(
 						<filter(attr-mapping)><class-get-attributes> y
-						);
+						)
 
 	attr-mapping: z@Attribute(name, decs, type)-> 
 			AttrMap(dbcname,name)
