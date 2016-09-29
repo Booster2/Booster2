@@ -30,6 +30,7 @@ imports
 	generation/simplify
 	generation/sql
 	generation/wp
+	generation/triple
 	
 	types/trans/types
 
@@ -222,6 +223,9 @@ rules // Debugging
 	
 	generate-sql-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
 	generate-sql-builder = builder(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
+	
+	generate-mapping-builder-ast = builder-ast(elaborate ; generate-mapping | "mapping.ttl")
+	generate-mapping-builder = builder(elaborate ; generate-mapping | "mapping.ttl")
 
 
   generate-sql-builder-complete: input@(selected, position, ast, path, project-path) -> (filename, result')

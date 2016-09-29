@@ -111,6 +111,40 @@ exports
     GuardedCommand "[" "]" GuardedCommand -> GuardedCommand >
     GuardedCommand ";" GuardedCommand -> GuardedCommand
 
+module Triple
+imports Common
+
+exports
+  context-free start-symbols
+    Statement
+
+  context-free syntax
+    "@prefix" "rr:" "<http://www.w3.org/ns/r2rml#>." "@prefix" "rdf:" "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>." "@prefix" "rdfs:" "<http://www.w3.org/2000/01/rdf-schema#>." "@prefix" "xsd:" "<http://www.w3.org/2001/XMLSchema#>." -> Statement          {cons("Prefixes")}
+    "@prefix" ID ":" "<http://example.com/ns#" ID ">."                                                                                                                                                                                      -> Statement          {cons("Prefix")}
+    Statement*                                                                                                                                                                                                                              -> Statement          {cons("StatementList")}
+    "<#" ID ">" "a" "rr:TriplesMap;" "rr:logicalTable" "[" "rr:tableName" "\"" DBTableName "\";" "];" "."                                                                                                                                   -> Statement          {cons("CreateMapping")}
+    "`" ID "`" "." "`" ID "`"                                                                                                                                                                                                               -> DBTableName        {cons("DBTableName")}
+    "rr:subjectMap" "[" "rr:class" "`" DBName "`;" "rr:template" "\"http://example.com/{" ColumnName "}\";" "];"                                                                                                                            -> SubjectMap         {cons("SubjectMap")}
+    "rr:predicateObjectMap" "[" "rr:predicate" "`" DBName "`:`" ColumnName "`;" "rr:objectMap" "[" "rr:column" "\"`" ColumnName "`\";" "];" "];"                                                                                            -> PredicateObjectMap {cons("PredicateObjectMap")}
+    "`" ID "`"                                                                                                                                                                                                                              -> TableName          {cons("TableName")}
+    "`" ID "`"                                                                                                                                                                                                                              -> DBName             {cons("DBName")}
+    "`" ID "`"                                                                                                                                                                                                                              -> ColumnName         {cons("ColumnName")}
+    "`" ID "`" "." "`" ID "`"                                                                                                                                                                                                               -> TableColumnName    {cons("TableColumnName")}
+
+  context-free syntax
+    "[[Statement]]"          -> Statement          {cons("Statement-Plhdr"), placeholder}
+    "[[DBTableName]]"        -> DBTableName        {cons("DBTableName-Plhdr"), placeholder}
+    "[[SubjectMap]]"         -> SubjectMap         {cons("SubjectMap-Plhdr"), placeholder}
+    "[[PredicateObjectMap]]" -> PredicateObjectMap {cons("PredicateObjectMap-Plhdr"), placeholder}
+    "[[TableName]]"          -> TableName          {cons("TableName-Plhdr"), placeholder}
+    "[[DBName]]"             -> DBName             {cons("DBName-Plhdr"), placeholder}
+    "[[ColumnName]]"         -> ColumnName         {cons("ColumnName-Plhdr"), placeholder}
+    "[[TableColumnName]]"    -> TableColumnName    {cons("TableColumnName-Plhdr"), placeholder}
+    "[[ID]]"                 -> ID                 {cons("ID-Plhdr"), placeholder}
+
+  context-free syntax
+    
+
 module Relational
 imports Common
 
@@ -120,7 +154,7 @@ exports
 
   context-free syntax
     "drop" "database" "if" "exists" "`" ID "`;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                            -> Statement          {cons("DropDatabase")}
-    "create" "database" "`" ID "`;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        -> Statement          {cons("CreateDatabase")}
+    "create" "database" "`" ID "`" "default" "charset=utf8;"                                                                                                                                                                                                                                                                                                                                                                                                                                                               -> Statement          {cons("CreateDatabase")}
     "use" "`" ID "`;" "SET" "autocommit=1;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                -> Statement          {cons("UseDatabase")}
     "drop" "table" "if" "exists" "`" ID "`;"                                                                                                                                                                                                                                                                                                                                                                                                                                                                               -> Statement          {cons("DropTable")}
     "create" "table" "`" ID "`" "(" PrimaryKeyColumn ")" ";"                                                                                                                                                                                                                                                                                                                                                                                                                                                               -> Statement          {cons("CreateTable")}
@@ -483,7 +517,7 @@ exports
     
 
 module Booster2
-imports Common AbstractBoosterModel Relational
+imports Common AbstractBoosterModel Relational Triple
 
 exports
   context-free start-symbols

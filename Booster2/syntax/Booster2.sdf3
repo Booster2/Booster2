@@ -5,7 +5,8 @@ module Booster2
 
 imports Common	
         AbstractBoosterModel
-        Relational	
+        Relational
+        Triple
 
 
 context-free start-symbols

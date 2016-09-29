@@ -1,0 +1,51 @@
+module Triple
+
+imports Common
+
+
+context-free start-symbols
+
+  Statement
+
+context-free syntax
+
+Statement.Prefixes = 
+<@prefix rr: \<http://www.w3.org/ns/r2rml#\>.
+@prefix rdf: \<http://www.w3.org/1999/02/22-rdf-syntax-ns#\>.
+@prefix rdfs: \<http://www.w3.org/2000/01/rdf-schema#\>.
+@prefix xsd: \<http://www.w3.org/2001/XMLSchema#\>.
+@prefix <ID>: \<http://example.com/ns#<ID>\>.
+>
+Statement.StatementList = <<{Statement "\n"}*>>
+
+Statement.CreateMapping = <\<#<ID>\>
+   a rr:TriplesMap;
+   
+   rr:logicalTable [ rr:tableName "<TableNameFull>"; ];
+   
+   <Subject>
+
+   <AttrMap>
+   .
+>
+
+Subject.Subject = 
+<rr:subjectMap [rr:template "http://example.com/{`<ID>`}";  
+                rr:class http://example.com/<ID>; 
+	];>
+										
+AttrMap.AttrMapList = <<{AttrMap "\n\n"}*>>
+										
+										
+AttrMap.AttrMap = 
+<rr:predicateObjectMap [
+        rr:predicate <DBColName>;
+        rr:objectMap [ rr:column "`<ColumnName>`"; ];
+    ];>
+
+  
+TableNameFull.TableNameFull = <`<ID>`.`<ID>`> 
+
+DBColName.DBColName = <<ID>:<ID>> 
+ColumnName.ColumnName = <<ID>> 
+context-free syntax   

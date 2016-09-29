@@ -11,6 +11,7 @@ language
 
   provider : target/metaborg/stratego.ctree
 //  provider : target/metaborg/stratego-javastrat.jar
+//  provider : target/metaborg/stratego.jar
 
 menus
   
@@ -55,4 +56,8 @@ menus
     action: "WP"                     = wp-builder
     action: "Simplify"               = simplify-builder
     action: "Generate SQL-basic"     = generate-sql-builder
-    action: "Generate SQL"     		= generate-sql-builder-complete
+    action: "Generate SQL"     		 = generate-sql-builder-complete
+    action: "Generate Triple Map"    = generate-mapping-builder
+    
+    
+    

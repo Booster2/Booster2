@@ -1,0 +1,48 @@
+module trans/generation/triple
+
+imports
+	
+	lib/eq
+	api/attribute
+	api/method
+	api/class
+	api/type
+	api/path
+	api/guarded-command
+	api/constraint
+	api/_runtime
+	
+	generation/simplify
+	
+	lib/nabl-ext
+	
+rules
+	
+	generate-mapping: x@System(name, cs) -> StatementList([
+			Prefixes(name, name),
+			StatementList(<collect-all(class-mapping)> x)
+		])
+
+	class-mapping: y@Class(name, exts, comps) -> 				
+			StatementList([
+				CreateMapping(mappingname, TableNameFull, Subject, AttMaps)
+			])	
+	where 
+			dbname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
+			idcol := <concat-strings> [name, "Id"];
+			mappingname := <concat-strings> [name, "Mapping"];
+			TableNameFull := TableNameFull(dbname,name);
+			Subject := Subject(idcol,name);
+			AttMaps := AttrMapList(
+						<filter(attr-mapping)><class-get-attributes> y
+						);
+
+	attr-mapping: z@Attribute(name, decs, type)-> 
+			AttrMap(dbcname,name)
+	where
+			not(<attr-is-set> name);
+			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;
+			dbcname := DBColName(sysname,name)
+						
+
+			
