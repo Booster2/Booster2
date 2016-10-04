@@ -25,15 +25,19 @@ rules
 
 	class-mapping: y@Class(name, exts, comps) -> 				
 			StatementList([
-				CreateMapping(mappingname, TableNameFull, Subject, AttMaps)
+				CreateMapping(mappingname, dbdottable, subject, amappings)
 			])	
-	where 
-			dbname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
+	where
+			//ghetto equality checking ( no string-eq in stratego libs)
+			rev := <string-as-chars(reverse)> name;
+			not(<string-starts-with(|"resU")> rev);
+			not(<string-starts-with(|"pOdoMtiduA")> rev);
+			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 			idcol := <concat-strings> [name, "Id"];
 			mappingname := <concat-strings> [name, "Mapping"];
-			TableNameFull := TableNameFull(dbname,name);
-			Subject := Subject(idcol,name);
-			AttMaps := AttrMapList(
+			dbdottable := DBdotTable(sysname,name);
+			subject := Subject(idcol,sysname,name);
+			amappings := AttrMapList(
 						<filter(attr-mapping)><class-get-attributes> y
 						)
 

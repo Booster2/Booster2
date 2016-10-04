@@ -14,14 +14,14 @@ Statement.Prefixes =
 @prefix rdf: \<http://www.w3.org/1999/02/22-rdf-syntax-ns#\>.
 @prefix rdfs: \<http://www.w3.org/2000/01/rdf-schema#\>.
 @prefix xsd: \<http://www.w3.org/2001/XMLSchema#\>.
-@prefix <ID>: \<http://example.com/ns#<ID>\>.
+@prefix <ID>: \<http://example.com/<ID>#\>.
 >
 Statement.StatementList = <<{Statement "\n"}*>>
 
 Statement.CreateMapping = <\<#<ID>\>
    a rr:TriplesMap;
    
-   rr:logicalTable [ rr:tableName "<TableNameFull>"; ];
+   rr:logicalTable [ rr:tableName "<DBdotTable>"; ];
    
    <Subject>
 
@@ -31,7 +31,7 @@ Statement.CreateMapping = <\<#<ID>\>
 
 Subject.Subject = 
 <rr:subjectMap [rr:template "http://example.com/{`<ID>`}";  
-                rr:class http://example.com/<ID>; 
+                rr:class <ID>:<ID>; 
 	];>
 										
 AttrMap.AttrMapList = <<{AttrMap "\n\n"}*>>
@@ -44,7 +44,7 @@ AttrMap.AttrMap =
     ];>
 
   
-TableNameFull.TableNameFull = <`<ID>`.`<ID>`> 
+DBdotTable.DBdotTable = <`<ID>`.`<ID>`> 
 
 DBColName.DBColName = <<ID>:<ID>> 
 ColumnName.ColumnName = <<ID>> 
