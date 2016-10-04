@@ -28,10 +28,8 @@ rules
 				CreateMapping(mappingname, dbdottable, subject, amappings)
 			])	
 	where
-			//ghetto equality checking ( no string-eq in stratego libs)
-			rev := <string-as-chars(reverse)> name;
-			not(<string-starts-with(|"resU")> rev);
-			not(<string-starts-with(|"pOdoMtiduA")> rev);
+			not(?Class("User",_,_));
+			not(?Class("AuditModOp",_,_));
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 			idcol := <concat-strings> [name, "Id"];
 			mappingname := <concat-strings> [name, "Mapping"];
