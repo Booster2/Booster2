@@ -32,7 +32,7 @@ rules
 			not(?Class("AuditModOp",_,_));
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 			idcol := <concat-strings> [name, "Id"];
-			mappingname := <concat-strings> [name, "Mapping"];
+			mappingname := name;
 			dbdottable := DBdotTable(sysname,name);
 			subject := Subject(idcol,sysname,name);
 			amappings := AttrMapList(
