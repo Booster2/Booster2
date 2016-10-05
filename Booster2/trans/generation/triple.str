@@ -33,7 +33,7 @@ rules
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 			idcol := <concat-strings> [name, "Id"];
 			mappingname := name;
-			dbdottable := DBdotTable(sysname,name);
+			dbdottable := DBdotView(sysname,name);
 			subject := Subject(idcol,sysname,name);
 			amappings := AttrMapList(
 						<filter(attr-mapping)><class-get-attributes> y

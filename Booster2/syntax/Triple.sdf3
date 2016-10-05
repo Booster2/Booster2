@@ -22,7 +22,7 @@ Statement.StatementList = <<{Statement "\n"}*>>
 
 Statement.CreateMapping = <map:<ID>
    
-   rr:logicalTable [ rr:tableName "<DBdotTable>"; ];
+   rr:logicalTable [ rr:tableName "<DBdotView>"; ];
    
    <Subject>
 
@@ -32,7 +32,7 @@ Statement.CreateMapping = <map:<ID>
 >
 
 Subject.Subject = 
-<rr:subjectMap [rr:template "http://example.com/{`<ID>`}";  
+<rr:subjectMap [rr:template "booster2/IPG/{`<ID>`}";  
                 rr:class <ID>:<ID>; 
 	];>
 										
@@ -46,7 +46,7 @@ AttrMap.AttrMap =
     ];>
 
   
-DBdotTable.DBdotTable = <`<ID>`.`<ID>`> 
+DBdotView.DBdotView = <`<ID>`.`<ID>_all`> 
 
 DBColName.DBColName = <<ID>:<ID>> 
 ColumnName.ColumnName = <<ID>> 
