@@ -34,7 +34,7 @@ rules
 			idcol := <concat-strings> [name, "Id"];
 			mappingname := name;
 			dbdottable := DBdotView(sysname,name);
-			subject := Subject(idcol,sysname,name);
+			subject := Subject(sysname,idcol,sysname,name);
 			amappings := AttrMapList(
 						<filter(attr-mapping)><class-get-attributes> y
 						)

@@ -32,7 +32,7 @@ Statement.CreateMapping = <map:<ID>
 >
 
 Subject.Subject = 
-<rr:subjectMap [rr:template "booster2/IPG/{`<ID>`}";  
+<rr:subjectMap [rr:template "booster2/<ID>/{`<ID>`}";  
                 rr:class <ID>:<ID>; 
 	];>
 										
