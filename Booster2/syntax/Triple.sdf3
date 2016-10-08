@@ -44,6 +44,21 @@ AttrMap.AttrMap =
         rr:predicate <DBColName>;
         rr:objectMap [ rr:column "`<ColumnName>`"; ];
     ];>
+    
+AttrMap.AttrMapRel = 
+<
+# prototyping for assoc/fkey attributes
+# 
+# rr:predicateObjectMap [
+#        rr:predicate <DBColName>;
+#        rr:objectMap [ rr:column "`<ColumnName>`"; ];
+#    ];
+# join table 1 <ID>
+# join table 2 <ID>
+# join col 1 <ID>
+# join col 2 <ID>
+>
+
 
   
 DBdotView.DBdotView = <`<ID>`.`<ID>_all`> 

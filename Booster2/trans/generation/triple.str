@@ -38,13 +38,31 @@ rules
 			amappings := AttrMapList(
 						<filter(attr-mapping)><class-get-attributes> y
 						)
-
+//basic attributes
 	attr-mapping: z@Attribute(name, decs, type)-> 
 			AttrMap(dbcname,name)
 	where
-			not(<attr-is-set> name);
+			(<attr-is-basic> name);
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;
 			dbcname := DBColName(sysname,name)
-						
+
+//bi- directional Assoc attributes (incl set valued)
+	attr-mapping: z@Attribute(name, decs, type)-> 
+			AttrMapRel(dbcname,name,jt1,jt2,jc1,jc2)
+	where
+			(<attr-is-bidir> name);
+			//(<attr-is-unidir> name);
+			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;
+			dbcname := DBColName(sysname,name);
+			clas:= <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
+			jt1 :=  <concat-strings> [clas,"_",name];
+			inverse := <attr-get-inverse> name;
+			inverseclass := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> inverse;
+			jt2 := <concat-strings> [inverseclass, "_", inverse];
+			jc1 := jt1;
+			jc2 := jt2
+			
+// ref:
+// https://lists.w3.org/Archives/Public/public-rdb2rdf-wg/2011Jul/0169.html
 
 			
