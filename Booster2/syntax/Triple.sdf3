@@ -31,6 +31,19 @@ Statement.CreateMapping = <map:<ID>
    
 >
 
+Statement.Simple = <map:<ID>
+    rr:logicalTable [ rr:tableName "<DBdotView>"; ];
+    
+    <SubjectSimple>
+   .
+   
+>
+
+SubjectSimple.SubjectSimple = 
+<rr:subjectMap [rr:template "booster2/<ID>/{`<ID>_<ID>`}";  
+                rr:class <ID>:<ID>; 
+	];>
+
 Subject.Subject = 
 <rr:subjectMap [rr:template "booster2/<ID>/{`<ID>`}";  
                 rr:class <ID>:<ID>; 
@@ -46,19 +59,17 @@ AttrMap.AttrMap =
     ];>
     
 AttrMap.AttrMapRel = 
-<
-# prototyping for associations (needs map:Class_column to be defined)
-    rr:predicateObjectMap [
+<rr:predicateObjectMap [
         rr:predicate <DBColName>; 
         rr:objectMap [
             rr:parentTriplesMap map:<ColumnName>; 
             rr:joinCondition [ rr:parent "`<ColumnName>`";  rr:child "`<ColumnName>`"; ]; 
         ];
     ];
-
 >
-  
-DBdotView.DBdotView = <`<ID>`.`<ID>_all`> 
+
+
+DBdotView.DBdotView = <`<ID>`.`<ID>_<ID>`> 
 
 DBColName.DBColName = <<ID>:<ID>> 
 ColumnName.ColumnName = <<ID>> 
