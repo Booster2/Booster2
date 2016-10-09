@@ -47,19 +47,16 @@ AttrMap.AttrMap =
     
 AttrMap.AttrMapRel = 
 <
-# prototyping for assoc/fkey attributes
-# 
-# rr:predicateObjectMap [
-#        rr:predicate <DBColName>;
-#        rr:objectMap [ rr:column "`<ColumnName>`"; ];
-#    ];
-# join table 1 <ID>
-# join table 2 <ID>
-# join col 1 <ID>
-# join col 2 <ID>
+# prototyping for associations (needs map:Class_column to be defined)
+    rr:predicateObjectMap [
+        rr:predicate <DBColName>; 
+        rr:objectMap [
+            rr:parentTriplesMap map:<ColumnName>; 
+            rr:joinCondition [ rr:parent "`<ColumnName>`";  rr:child "`<ColumnName>`"; ]; 
+        ];
+    ];
+
 >
-
-
   
 DBdotView.DBdotView = <`<ID>`.`<ID>_all`> 
 
