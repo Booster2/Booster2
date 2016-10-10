@@ -34,12 +34,12 @@ Statement.CreateMapping = <map:<ID>
 Statement.Simple = <map:<ID>
     rr:logicalTable [ rr:tableName "<DBdotView>"; ];
     
-    <SubjectSimple>
+    <AttributeSubject>
    .
    
 >
 
-SubjectSimple.SubjectSimple = 
+AttributeSubject.AttributeSubject = 
 <rr:subjectMap [rr:template "booster2/<ID>/{`<ID>_<ID>`}";  
                 rr:class <ID>:<ID>; 
 	];>
@@ -56,7 +56,8 @@ AttrMap.AttrMap =
 <rr:predicateObjectMap [
         rr:predicate <DBColName>;
         rr:objectMap [ rr:column "`<ColumnName>`"; ];
-    ];>
+    ];
+>
     
 AttrMap.AttrMapRel = 
 <rr:predicateObjectMap [

@@ -73,5 +73,5 @@ rules
 			mapname :=  <concat-strings> [clas,"_",name];
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;		
 			dbdottable := DBdotView(sysname,clas,name);
-			subject := SubjectSimple(sysname,inverseclass,inverse,sysname,inverseclass)
+			subject := AttributeSubject(sysname,inverseclass,inverse,sysname,inverseclass)
 			
