@@ -42,18 +42,20 @@ class LineItem {
 		itemForOrder : Order . lineItems
 		preparedBy : [ StaffMember . preparedLineItems ]
 		preparedOn : [ datetime ]
+		prepared : boolean
 	invariants
 		quantity > 0
 	methods
 		prepare {   itemForOrder.status = Complete &
-					preparedBy = null &
+					prepared = false &
 					preparedBy' = preparedBy? &
-					preparedOn' = currentDateTime}
+					preparedOn' = currentDateTime &
+					prepared' = true}
 }
 
 class Order {
 	attributes
-		forCustomer : Customer . orders
+		forCustomer : Customer . Orders
 		createdOn (ID) : datetime
 		totalCost : decimal
 		status (ID) : OrderStatus
@@ -76,6 +78,7 @@ class Order {
 					 li!.quantity' = quantity?  &
 					 li!.lineCost' = product?.cost * quantity? &
 					 li!.itemForOrder' = this  &
+					 li!.prepared' = false  &
 					 this.totalCost' = this.totalCost + product?.cost * quantity? &
 					 product?.inStock' = product?.inStock - quantity?
 					 }
@@ -87,8 +90,8 @@ class Order {
 					& billingAddress' = billingAddress?
 					& shippingAddress' = shippingAddress?
 		}
-		dispatch {  status = Complete &
-					(forall s : lineItems @ s . preparedOn /= null) 
+		dispatch {  status = Complete 
+					& (forall s : lineItems @ s . prepared = true) 
 					& status' = Dispatched 
 					& dispatchedBy' = dispatchedBy?
 					& dispatchedOn' = currentDateTime}			 
@@ -100,7 +103,7 @@ class Customer {
 		firstName (ID) : string
 		creditCards : set ( CreditCard . forCustomer)[*]
 		addresses : set ( Address . forCustomer )[*]
-		orders : set ( Order . forCustomer ) [*]
+		Orders : set ( Order . forCustomer ) [*]
 	methods
 		create { c! : Customer' ; c!.lastName' = lastName? & c!.firstName' = firstName?}
 		newCreditCard { cc! : CreditCard' ; cc!.type' = type? & cc!.number' = number? & cc!.forCustomer' = this}
