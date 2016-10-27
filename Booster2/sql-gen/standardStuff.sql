@@ -454,8 +454,8 @@ CREATE PROCEDURE `GET_OBJECT_BROWSE_LOCATION` ( className_in VARCHAR(1000), Id_i
 		SET @dcName = CONCAT(@tableName, "_createdDate");
 		
 		SET @SQL_TXT = CONCAT("select ", 
-				"(select ",@idName," from `",@tableName,"` where ",@dcName," > (select ",@dcName," from ",@tableName," where ",@idName," = '",Id_in,"') order by ", @dcName, " asc limit 1) as next,", 
-				"(select ",@idName," from `",@tableName,"` where ",@dcName," < (select ",@dcName," from ",@tableName," where ",@idName," = '",Id_in,"') order by ", @dcName, " desc limit 1) as prev,", 
+				"(select ",@idName," from `",@tableName,"` where ",@dcName," > (select ",@dcName," from `",@tableName,"` where ",@idName," = '",Id_in,"') order by ", @dcName, " asc limit 1) as next,", 
+				"(select ",@idName," from `",@tableName,"` where ",@dcName," < (select ",@dcName," from `",@tableName,"` where ",@idName," = '",Id_in,"') order by ", @dcName, " desc limit 1) as prev,", 
 				"(select ",@idName," from `",@tableName,"` order by ", @dcName, " asc limit 1) as first,",
 				"(select ",@idName," from `",@tableName,"` order by ", @dcName, " desc limit 1) as last,",
 				"'",@mc_description,"' as mc_description,",
@@ -778,7 +778,7 @@ DELIMITER //
 CREATE PROCEDURE `GET_OBJECT_ACTUAL_CLASS`(IN className_in VARCHAR(1000), IN objectID_in VARCHAR(36), OUT actualClass_out varchar(1000))
 BEGIN
 	DECLARE ACTUAL_CLASS VARCHAR(36);
-	SET @SQL_TXT = CONCAT("SELECT ",className_in,"_className into @ACTUAL_CLASS from ",className_in," where ",className_in,"Id = '",objectID_in,"';");
+	SET @SQL_TXT = CONCAT("SELECT ",className_in,"_className into @ACTUAL_CLASS from `",className_in,"` where ",className_in,"Id = '",objectID_in,"';");
 
 	PREPARE stmt_name FROM @SQL_TXT;
 	EXECUTE stmt_name;
