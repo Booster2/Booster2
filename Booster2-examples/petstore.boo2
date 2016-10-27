@@ -55,7 +55,7 @@ class LineItem {
 
 class Order {
 	attributes
-		forCustomer : Customer . Orders
+		forCustomer : Customer . orders
 		createdOn (ID) : datetime
 		totalCost : decimal
 		status (ID) : OrderStatus
@@ -103,7 +103,7 @@ class Customer {
 		firstName (ID) : string
 		creditCards : set ( CreditCard . forCustomer)[*]
 		addresses : set ( Address . forCustomer )[*]
-		Orders : set ( Order . forCustomer ) [*]
+		orders : set ( Order . forCustomer ) [*]
 	methods
 		create { c! : Customer' ; c!.lastName' = lastName? & c!.firstName' = firstName?}
 		newCreditCard { cc! : CreditCard' ; cc!.type' = type? & cc!.number' = number? & cc!.forCustomer' = this}
