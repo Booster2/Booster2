@@ -293,7 +293,7 @@ WHILE done = 0 DO
     ELSEIF @primType = 'ClassRef' and @typeMult != 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE `",@tableName,"` = '", objectID, "')");
 
     ELSEIF @primType = 'String' and @typeMult = 'Set' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES 
@@ -341,7 +341,7 @@ WHILE done = 0 DO
     ELSEIF @primType = 'ClassRef' and @typeMult = 'Set' and @direction = 'Bi' THEN
         SET @SQL_TXT = CONCAT("INSERT INTO ATTRIBUTES
                                     (ATT_NAME, ATT_PRIM_TYPE, MC_DESCRIPTION, MC_URL, TYPE_MULT, OID_VALUE, CLASS_NAME)
-                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE ",@tableName," = '", objectID, "')");
+                                    (SELECT '" , ANAME  , "' AS ATT_NAME, '",@primType,"' AS ATT_PRIM_TYPE, '",@mc_description,"' AS MC_DESCRIPTION, '",@mc_url,"' AS MC_URL, '",@typeMult,"' AS TYPE_MULT, `",@className,"_",@oppAttName,"` AS OID_VALUE,'",@className,"' AS CLASS_NAME FROM `", @tableName,"` WHERE `",@tableName,"` = '", objectID, "')");
  
 
 
