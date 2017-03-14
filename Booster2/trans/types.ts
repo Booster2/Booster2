@@ -97,7 +97,8 @@ type rules // BinRel, BinOp, UnOp
 + SupersetEquals(l,r) : BasicType(Boolean())
 	where	l	: l-ty
 		and	r	: r-ty
-		and	(r-ty == l-ty or r-ty <sub: l-ty) 
+		and	(r-ty == l-ty or r-ty <sub: l-ty or
+		    (l-ty == BasicType(String()) and r-ty == Null()) )
 		      else error $[Type mismatch: expected [l-ty] got [r-ty]] on r
 
 	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)
@@ -223,7 +224,7 @@ type rules // BinRel, BinOp, UnOp
 
 Def(v, e, Concat(), leftright, inout, setext) : e-ty
 	where	e	: e-ty
-		and	e-ty == BasicType(String()) 
+		and e-ty == BasicType(String())
 		     else error $[Type mismatch: expected BasicType(String()) got [e-ty]] on e
 	
 	// Note v is a newly defined variable with the type of e so v-ty == e-ty (but it is defined at the level at BinOpDefRightInput, so we cannot query it)	
