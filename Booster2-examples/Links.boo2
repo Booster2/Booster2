@@ -4,28 +4,28 @@ import "default.boo2"
 
 class Link {
 	attributes
-		source (ID) : WebPage . entitySourceLinkationships
-		target (ID) : WebPage . entityTargetLinkationships
+		source (ID) : WebPage.entitySource
+		target (ID) : WebPage.entityTarget
 	invariants
 		//this contstraint is not enforced
 		//source and target are subclasses of WebPage
-		(source : BlogPost) => (target : ProductWebPage) &
+		//(source : BlogPost) => (target : ProductWebPage) &
 		target /= source &
 		source /= target
 }
 class WebPage{
 	attributes
-		entitySourceLinkationships : SET ( Link . source ) [*]
-		entityTargetLinkationships : SET ( Link . target ) [*]
+		entitySource : SET ( Link.source ) [*]
+		entityTarget : SET ( Link.target ) [*]
 		name (ID) : String
 	methods
 		CreateLink {
 			rel! : Link' &
 			rel!.source' = this &
-			rel!.target' = target? 
-			//These cause the method creation to be skipped
-			& (this : BlogPost) => (target : ProductWebPage)
-			& (this : ProductWebPage) => (target : BlogPost)
+			rel!.target' = target? //&
+			//these contraints are generated, so may be a clue on a workaround to the issue
+			// (this : BlogPost) => (target? : ProductWebPage)
+			//& (this : ProductWebPage) => (target? : BlogPost)
 		}
 
 }
