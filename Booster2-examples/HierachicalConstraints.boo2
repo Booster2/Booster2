@@ -1,0 +1,45 @@
+system Links
+
+import "default.boo2"
+
+class Link {
+	attributes
+		source (ID) : WebPage . entitySourceLinkationships
+		target (ID) : WebPage . entityTargetLinkationships
+	invariants
+		//this contstraint is not enforced
+		//source and target are subclasses of WebPage
+		(source : BlogPost) => (target : ProductWebPage) &
+		target /= source &
+		source /= target
+}
+class WebPage{
+	attributes
+		entitySourceLinkationships : SET ( Link . source ) [*]
+		entityTargetLinkationships : SET ( Link . target ) [*]
+		name (ID) : String
+	methods
+		CreateLink {
+			rel! : Link' &
+			rel!.source' = this &
+			rel!.target' = target? 
+			//This needs to be tested too
+			//& (this : BlogPost) => (target : ProductWebPage)
+		}
+
+}
+class BlogPost extends WebPage{	
+methods
+	Create{
+			ent! : BlogPost' &
+			ent!.name' = name? 
+		}
+}
+
+class ProductWebPage extends WebPage{
+methods
+	Create{
+			ent! : ProductWebPage' &
+			ent!.name' = name? 
+		}
+}
