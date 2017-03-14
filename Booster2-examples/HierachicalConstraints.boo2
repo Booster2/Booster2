@@ -23,8 +23,9 @@ class WebPage{
 			rel! : Link' &
 			rel!.source' = this &
 			rel!.target' = target? 
-			//This needs to be tested too
-			//& (this : BlogPost) => (target : ProductWebPage)
+			//These cause the method creation to be skipped
+			& (this : BlogPost) => (target : ProductWebPage)
+			& (this : ProductWebPage) => (target : BlogPost)
 		}
 
 }

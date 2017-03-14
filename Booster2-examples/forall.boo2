@@ -4,12 +4,14 @@ class Person{
 	attributes
 		name (ID): String
 	invariants
-		//this results in the create method not being created.
-		forall al : Person @ ( forall bo : Person @ al /= bo & al.name /= bo.name)
+		//this results in the create method not being created
+		//forall al : Person @ ( forall bo : Person @ al /= bo & al.name /= bo.name)
 	methods
 		Create{
 			np! : Person' &
-			np!.name' = name?
+			np!.name' = name? &
+			//this causes the method creation to be skilped
+			forall a : Person @ name? /= a.name
 		}
 
 }
