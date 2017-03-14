@@ -93,7 +93,10 @@ public class callMethod extends HttpServlet {
 						}
 						else
 						{
-							methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
+							if (requestParameters.get(paramName)!=null)
+								methodInputParameterValues.put(paramName, requestParameters.get(paramName)[0]);
+							else
+								methodInputParameterValues.put(paramName, null);
 						}
 					}
 					else if(paramType.equalsIgnoreCase("Integer"))
