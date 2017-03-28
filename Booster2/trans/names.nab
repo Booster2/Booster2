@@ -211,3 +211,4 @@ binding rules // Variables
 	SubstDefInput         (p,                   v  ): defines InputVariable  v of type t where p   has type t
 			
 	Forall(v, exp, body):                    defines Variable       v of type t where exp has type Set(t)
+	Exists(v, exp, body):                    defines Variable       v of type t where exp has type Set(t)

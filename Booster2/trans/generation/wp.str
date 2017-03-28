@@ -108,6 +108,14 @@ rules
 			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
  			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsVariable(), "o", uq))>ann	
 
+	contextualize-invariant(|const) : 
+		path {ann} -> Exists("o", path , <literal-subst>(const, [(This(), PathStart("o"{Def(ann')}, None()))]))
+		where
+			<attr-is-set> path;
+			<_nabl-collect-use ; relation-resolve-use ; _nabl-uri-namespace ; ?NablNsAttribute() > path;
+			uq := <nabl-uri ; nabl-uri-parent; collect-one(?Unique(_))> ann;
+ 			ann' := <nabl-uri ; nabl-uri-parent ; nabl-extend-uri(|ID(NablNsVariable(), "o", uq))>ann	
+
 
 	contextualize-invariant(|const) : 
 		path -> <literal-subst>(const, [(This(), path)])

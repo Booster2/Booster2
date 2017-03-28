@@ -179,6 +179,7 @@ context-free syntax
   Literal.Null = <null> 
   Identifier.ColumnName = <`<ID>`> 
   Identifier.TableColumnName = <`<ID>` . `<ID>`> 
+  Identifier.AliasColumnName = <<ID> . <ID>> 
   Identifier.DBTableColumnName = <`<ID>` . `<ID>` . `<ID>`> 
   Variable.LocalVariable = <@<ID>> 
   Variable.SystemVariable = ID 
@@ -254,7 +255,8 @@ context-free syntax
   TableReference = TableFactor 
   TableReference = JoinTable 
   TableFactor = TableName
-  TableName.TableName = <`<ID>`> 
+  TableName.TableName = <`<ID>`>  
+  TableName.TableNameAs = <`<ID>` AS <ID>> 
   TableFactor.Aliased = <`<ID>` <Alias> <{IndexHint ""}*>> 
   TableFactor.Query = <<Query> <Alias>> 
   TableFactor.Bracket = <( <{TableReference ""}*> )> 

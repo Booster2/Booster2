@@ -367,6 +367,8 @@ rules // make PathStart(classReference, _) have type set within BinRel(_, In(), 
 
 	add-typeisaset = ?Forall(v,                                   ps@PathStart(_, _), body);!Forall(v,                                      <custom-origin(|ps)>TypeIsASet(ps), body)
 
+	add-typeisaset = ?Exists(v,                                   ps@PathStart(_, _), body);!Exists(v,                                      <custom-origin(|ps)>TypeIsASet(ps), body)
+
 	rem-typeisaset = ?TypeIsASet(ps);!ps
 	
 	add-typeisaset: In(a,ps@PathStart(_,_))								-> In(a, <custom-origin(|ps)>TypeIsASet(ps))

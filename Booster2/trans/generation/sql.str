@@ -562,6 +562,7 @@ rules
 	sql-const: Equal(e1, e2) -> Equal(<sql-expr>e1, <sql-expr>e2)
 	
 	sql-const: NotEqual(e1, Null()) -> IsNull(<sql-expr>e1, Some(Not()))
+
 	sql-const: NotEqual(Null(), e1) -> IsNull(<sql-expr>e1, Some(Not()))
 	sql-const: NotEqual(e1, e2) -> NotEqual(<sql-expr>e1, <sql-expr>e2)
 
@@ -662,6 +663,43 @@ rules
 				oppattname := <concat-strings>[opp-cname, "_", opp-aname];
 				const''' := <literal-subst> (const'', [(SystemVariable(sysvar), ColumnName(oppattname))])
 
+
+	sql-const: Exists(var, pth, constraint)
+			-> GreaterThan( SelectQuery([],
+							[FunctionCall("count", [Star()])], 
+							Some(FromPart([TableNameAs(tablename,var)])), 
+							Some(Where(const''')),
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None()), 
+					Int("0"))
+			where
+				<is-class> pth;
+				tablename := <path-suffix-name> pth;
+				const''':= <sql-const> constraint
+				
+	sql-const: Forall(var, pth, constraint)
+			-> Equal( SelectQuery([],
+							[FunctionCall("count", [Star()])], 
+							Some(FromPart([TableNameAs(tablename,var)])), 
+							Some(Where(Not(const'''))),
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None(), 
+							None()), 
+					Int("0"))
+			where
+				<is-class> pth;
+				tablename := <path-suffix-name> pth;
+				const''':= <sql-const> constraint
+
 	sql-const: c -> <fail> where <debug> "cannot translate constraint" ; <debug> c
 
 	
@@ -728,7 +766,34 @@ rules
 	sql-expr: BasicValue(CurrentTime()) -> FunctionCall("CURTIME", [])
 
 	
-	sql-expr: PathStart(v,None()) -> String(v) where <is-enum> v
+	sql-expr: PathStart(v,None()) -> String(v) 
+		where 
+			<is-enum> v
+			
+	sql-expr: PathStart(v,None()) -> TableColumnName(v,v) 
+		where 
+			<is-class> v
+	
+	sql-expr: Path(PathStart(var,None()),PathComponent(pth,None()))
+			->  AliasColumnName(var,pth)
+		where
+			//<is-path> pth;
+			not(<is-class-name> var);
+			<attr-is-basic> pth
+			
+	sql-expr: Path(PathStart(var,None()),PathComponent(pth,None()))
+			->  ColumnName(pth)
+		where
+			//<is-path> pth;
+			<is-class-name> var;
+			<attr-is-basic> pth
+	
+	sql-expr: pth
+			->  ColumnName(attname)
+		where
+			<is-path> pth;
+			attname := <path-suffix-name> pth;
+			<attr-is-basic> attname
 	
 	sql-expr: pth
 		// select name from class where classId = expr
@@ -747,6 +812,7 @@ rules
 			not(<attr-is-bidir> attname);
 			cname := <path-suffix-name ; att-table-name> pth;
 			expr :=  <path-prefix ; sql-expr> pth
+			
 			
 			
 	sql-expr: pth
