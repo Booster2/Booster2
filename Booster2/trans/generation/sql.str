@@ -21,6 +21,11 @@ imports
 	lib/nabl-ext
 	
 rules
+
+	generate-sql-methods-only: x@System(name, cs) -> StatementList([
+		UseDatabase(name),
+		StatementList(<collect-all(sql-method)> x)
+		])
 	
 	generate-sql: x@System(name, cs) -> StatementList([
 		DropDatabase(name),

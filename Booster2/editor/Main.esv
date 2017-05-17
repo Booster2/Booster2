@@ -57,6 +57,7 @@ menus
     action: "Simplify"               = simplify-builder
     action: "Generate SQL-basic"     = generate-sql-builder
     action: "Generate SQL"     		 = generate-sql-builder-complete
+    action: "Generate SQL methods"   = generate-sql-builder-methods
     action: "Generate Triple Map"    = generate-mapping-builder
     
     

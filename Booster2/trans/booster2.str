@@ -223,7 +223,10 @@ rules // Debugging
 	
 	generate-sql-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
 	generate-sql-builder = builder(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
-	
+
+	generate-sql-methods-ast = builder-ast(elaborate ; heuristics ; wp ; simplify ; generate-sql-methods-only | "methods.generated.sql")
+	generate-sql-methods = builder(elaborate ; heuristics ; wp ; simplify ; generate-sql-methods-only | "methods.generated.sql")
+
 	generate-mapping-builder-ast = builder-ast(elaborate ; generate-mapping | "mapping.ttl")
 	generate-mapping-builder = builder(elaborate ; generate-mapping | "mapping.ttl")
 
@@ -233,6 +236,14 @@ rules // Debugging
   		(filename, result) := <generate-sql-builder> input;
    		stdtxtfile := <concat-strings>[project-path, "/../Booster2/sql-gen/standardStuff.sql"];	            
    		standard-text := <read-text-file> stdtxtfile;
+   		result' := <concat-strings>[result, standard-text] 
+   		
+  generate-sql-builder-methods: input@(selected, position, ast, path, project-path) -> (filename, result')
+  	where
+  		(filename, result) := <generate-sql-methods> input;
+   		stdtxtfile := <concat-strings>[project-path, "/../Booster2/sql-gen/standardStuff.sql"];	            
+   		standard-text := <read-text-file> stdtxtfile;
    		result' := <concat-strings>[result, standard-text]  
+   		 
 
 			
