@@ -295,9 +295,8 @@ rules
 												Return(Int("1")), 
 												[], 
 												Some(Else(Return(Int("0")))));
-				//<debug> "availability-procedures";
 				booster-params := <get-params ; nub-an> m;
-				availability-procedures* := <map(get-availability-procedure(|cname, mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params										
+				availability-procedures* := <map(get-availability-procedure(|cname, mname, gc))><filter(is-class)><filter(?Input(<id>))><filter(is-input)>booster-params							
 		
 	add-audit-command: 
 		(stmt, decs, procname)
@@ -377,22 +376,29 @@ rules
 
 
 	sql-gc:	Assign(path, Minus(path, SetExtent([expr])))
-			-> StatementList([	
-						VariableAssign(pn1, expr1), 
-						VariableAssign(pn2, expr2) , 
-						Delete(	None(), None(), None(), tablename, 
+			-> StatementList([VariableAssign(pn1, expr1), 
+						VariableAssign(pn2, expr2),
+								Delete(	None(), None(), None(), tablename1, 
 												Some(Where(And(	Equal(ColumnName(column1), LocalVariable(pn1)),
 															Equal(ColumnName(column2), LocalVariable(pn2))))), 
-															None(), None())])
+															None(), None()),
+								Delete(	None(), None(), None(), tablename2, 
+												Some(Where(And(	Equal(ColumnName(column2), LocalVariable(pn2)),
+															Equal(ColumnName(column1), LocalVariable(pn1))))), 
+															None(), None())
+						])
 			where
 				pn := <path-to-var-name> path;
 				pn1 := <concat-strings>[pn, "_1"];
 				pn2 := <concat-strings>[pn, "_2"];				
 				expr1 := <path-prefix ; sql-expr> path;
 				expr2 := <sql-expr> expr;
-				tablename := <path-suffix-name ; att-table-name> path;
+				tablename1 := <path-suffix-name ; att-table-name> path;
+				tablename2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path;
 				column1 := <path-suffix-name ; att-table-name> path;
 				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> path 
+				
+
 
 
 
@@ -486,7 +492,6 @@ rules
 				tablenameid := <concat-strings> [tablename, "Id"];
 				column1 := <path-suffix-name ; att-table-name> p;
 				column2 := <path-suffix-name ; attr-get-inverse ; att-table-name> p
-	
 	
 	
 	sql-gc: New(o, cls)
