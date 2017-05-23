@@ -1,3 +1,6 @@
+
+
+
 SET @@GLOBAL.max_sp_recursion_depth = 255;
 SET @@session.max_sp_recursion_depth = 255; 
 
