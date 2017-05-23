@@ -287,14 +287,14 @@ context-free syntax
   Update.Update = <UPDATE <UpdateOption*> <TableReference> SET <{UpdateSet ","}+ > <WherePart?> <OrderByPart?> <LimitPart?>;> 
   UpdateOption.LowPriority = <LOW_PRIORITY> 
   UpdateOption.Ignore = <IGNORE> 
-  UpdateSet.UpdateSet = <<ColumnName> = <SQLExpression>> 
-  UpdateSet.UpdateSetDefault = <<ID> = DEFAULT> 
+  UpdateSet.UpdateSet = <`<ColumnName>` = <SQLExpression>> 
+  UpdateSet.UpdateSetDefault = <`<ID>` = DEFAULT> 
   Insert.Insert = <	insert <InsertPriority?> <Ignore?> <Into?> `<ID>` ( <{ ColumnName ","}*> ) values ( <{SQLExpression ","}*> ) <OnDuplicate?>;>
   ColumnName.ColumnName = <`<ID>`>
   InsertInto.InsertInto = <insert into <ID> ( <{ID ","}*> ) <Query>;> 
   InsertPriority.LowPriority = <LOW_PRIORITY> 
   InsertPriority.DelayedPriority = <DELAYED> 
-  InsertPriority.HighPriority = <HIGH_PRIORITY> 
+  InsertPriority.HighPriority = <HIGH_PRIORITY>
   Ignore.Ignore = <IGNORE> 
   Into.Into = <into> 
   Values.Values = <Values> 
@@ -303,7 +303,7 @@ context-free syntax
   Delete.Delete = <DELETE <DeletePriority?> <Quick?> <Ignore?> FROM <ID> <WherePart?> <OrderByPart?> <LimitPart?>;> 
   DeletePriority.DeletePriority = <LOW_PRIORITY> 
   Quick.Quick = <QUICK> 
-  UpdatePart.UpdatePart = <<ID> = <SQLExpression>> 
+  UpdatePart.UpdatePart = <`<ID>` = <SQLExpression>> 
   DeclareList.DeclareList = <<Declare*>> 
   Declare.Declare = <DECLARE <{ID ","}+> <SQLType> <DefaultDeclare?>;> 
   DefaultDeclare.DefaultDeclare = <default <SQLExpression>> 
