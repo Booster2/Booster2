@@ -20,9 +20,9 @@ Statement.Prefixes =
 >
 Statement.StatementList = <<{Statement "\n"}*>>
 
-Statement.TableMapping = <map:<ID>
+Statement.CreateMapping = <map:<ID>
    
-   rr:logicalTable map:<ID>;
+   rr:logicalTable [ rr:tableName "<DBdotView>"; ];
    
    <Subject>
 
@@ -31,6 +31,13 @@ Statement.TableMapping = <map:<ID>
    
 >
 
+Statement.Simple = <map:<ID>
+    rr:logicalTable [ rr:tableName "<DBdotView>"; ];
+    
+    <AttributeSubject>
+   .
+   
+>
 
 AttributeSubject.AttributeSubject = 
 <rr:subjectMap [rr:template "booster2/<ID>/{`<ID>_<ID>`}";  
@@ -51,33 +58,20 @@ AttrMap.AttrMap =
         rr:objectMap [ rr:column "`<ColumnName>`"; ];
     ];
 >
-
-AttrMap.Ref = 
+    
+AttrMap.AttrMapRel = 
 <rr:predicateObjectMap [
         rr:predicate <DBColName>; 
-           rr:objectMap [ rr:template "booster2/<ID>/{`<ColumnName>`}"; ]; 
+        rr:objectMap [
+            rr:parentTriplesMap map:<ColumnName>; 
+            rr:joinCondition [ rr:parent "`<ColumnName>`";  rr:child "`<ColumnName>`"; ]; 
+        ];
     ];
 >
-
-
-Statement.RMLView = <map:<ID> rr:sqlQuery """
-SELECT
-`<ID>`,
-<{ ColumnName ",\n"}*>
-FROM <DBdotView>;
-"""
-.
-
->
-
-////
-//	   <{ ForeignSelect ",\n"}*>
-
-ColumnName.ForeignSelect =  <(SELECT <ColumnName> FROM <DBdotView> WHERE `<ColumnName>`.`<ColumnName>`=`<ColumnName>`.`<ColumnName>`) AS `<ColumnName>`>
 
 
 DBdotView.DBdotView = <`<ID>`.`<ID>_<ID>`> 
 
 DBColName.DBColName = <<ID>:<ID>> 
-ColumnName.ColumnName = <`<ID>`> 
+ColumnName.ColumnName = <<ID>> 
 context-free syntax   
