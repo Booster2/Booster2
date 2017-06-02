@@ -20,13 +20,49 @@ rules
 	
 	generate-mapping: x@System(name, cs) -> StatementList([
 			Prefixes(name, name),
-			StatementList(<collect-all(class-mapping)> x)
+			StatementList(<collect-all(class-mapping)> x),
+			StatementList(<collect-all(table-views)> x)
 		])
+		
+	table-views: y@Class(name, exts, comps) -> 				
+			StatementList([
+				RMLView(view_name,idcol,attrs,dbdottable)
+			])	
+	where
+			not(?Class("User",_,_));
+			not(?Class("AuditModOp",_,_));
+			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
+			idcol := <concat-strings> [name, "Id"];
+			view_name := <concat-strings> [name, "AllView"];
+			mappingname := name;
+			dbdottable := DBdotView(sysname,name,"all");
+			attrs := <collect-all(select-column)><class-get-attributes> y
+			
+			
+	select-column: a@Attribute(name, decs, type) ->
+			ColumnName(name)
+		where
+			<attr-is-basic> a
+			
+	select-column: a@Attribute(name, decs, type) ->
+			ForeignSelect(target,table,column_name,column_name,view,idcol,column_name)
+		where
+			<attr-is-bidir> a;
+			inverse := <attr-get-inverse> name;
+			inverseclass := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> inverse;
+			target := <concat-strings>[inverseclass,"_",inverse];
+			clas:= <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
+			idcol := <concat-strings> [clas, "Id"];
+			system:=<_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;
+			table := DBdotView(system,clas,name); 
+			view := <concat-strings> [clas,"_all"];
+			column_name := <concat-strings> [clas,"_",name]
+
+						
 
 	class-mapping: y@Class(name, exts, comps) -> 				
 			StatementList([
-				CreateMapping(mappingname, dbdottable, subject, amappings),
-				rmappings
+				TableMapping(mappingname, dbdottable, subject, amappings)
 			])	
 	where
 			not(?Class("User",_,_));
@@ -34,13 +70,10 @@ rules
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 			idcol := <concat-strings> [name, "Id"];
 			mappingname := name;
-			dbdottable := DBdotView(sysname,name,"all");
+			dbdottable := <concat-strings> [name, "AllView"];
 			subject := Subject(sysname,idcol,sysname,name);
 			amappings := AttrMapList(
 						<filter(attr-mapping)><class-get-attributes> y
-						);
-			rmappings := StatementList(
-						<filter(fk-mapping)><class-get-attributes> y
 						)
 			
 //basic attributes
@@ -53,25 +86,28 @@ rules
 
 //bi- directional Assoc attributes (incl set valued)
 	attr-mapping: z@Attribute(name, decs, type)-> 
-			AttrMapRel(dbcname,mapname,mapname,idcolumn)
+			Ref(dbcname,sysname,mapname)
 	where
 			(<attr-is-bidir> name);
-			//(<attr-is-unidir> name);
 			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;
 			clas:= <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
 			mapname :=  <concat-strings> [clas,"_",name];
 			dbcname := DBColName(sysname,mapname);
 			idcolumn := <concat-strings> [clas,"Id"]
 			
-	fk-mapping: z@Attribute(name, decs, type)-> 
-			Simple(mapname,dbdottable,subject)
-	where
-			(<attr-is-bidir> name);
-			inverse := <attr-get-inverse> name;
-			inverseclass := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> inverse;
-			clas := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
-			mapname :=  <concat-strings> [clas,"_",name];
-			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;		
-			dbdottable := DBdotView(sysname,clas,name);
-			subject := AttributeSubject(sysname,inverseclass,inverse,sysname,inverseclass)
+			
+						
+			
+			
+//	fk-mapping: z@Attribute(name, decs, type)-> 
+//			Simple(mapname,dbdottable,subject)
+//	where
+//			(<attr-is-bidir> name);
+//			inverse := <attr-get-inverse> name;
+//			inverseclass := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> inverse;
+//			clas := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-name> name;
+//			mapname :=  <concat-strings> [clas,"_",name];
+//			sysname := <_nabl-uri ; _nabl-uri-parent ; _nabl-uri-parent ; _nabl-uri-name> name;		
+//			dbdottable := DBdotView(sysname,clas,name);
+//			subject := AttributeSubject(sysname,inverseclass,inverse,sysname,inverseclass)
 			
