@@ -8,6 +8,10 @@ imports Common
         Relational
         Triple
 
+lexical syntax
+
+  SEMANTICURL = ~[\ \t\n\r\,\/\:]+ "://" ~[\ \t\n\r]+
+  PREFIXID = ~[\ \t\n\r\,\/\:]+ 
 
 context-free start-symbols
 
@@ -17,24 +21,34 @@ context-free syntax
 
   System.System = <
   	system <ID>
-  	
-  		<{SystemComponent "\n\n"}*>
+    	
+  	<{SystemComponent "\n\n"}*>
   > 
   System.System = <
   	System <ID>
   	
-  		<{SystemComponent "\n\n"}*>
+  	<{SystemComponent "\n\n"}*>
   > 
+  
+  SemanticPrefix.SemanticPrefix = <@prefix <PREFIXID>:<SEMANTICURL>>
   SystemComponent = SetDef 
+  SystemComponent = SemanticPrefix 
   SystemComponent = Class 
   SystemComponent = Import
   Import.Import = <import <STRING>>
   Import.Import = <Import <STRING>>
   Import.Import = <IMPORT <STRING>>
   BoosterTerm = SystemComponent 
+  
   SetDef.SetDef = <set <ID> { <{ID ", "}+> }> 
   BoosterTerm = SetDef 
   Class.Class = <
+  	class <ID> <Extends?>{
+  		<{ClassComponents "\n"}*>
+  	}
+  > 
+  Class.SemanticClass = <
+  	<{Mapping "\n"}+>
   	class <ID> <Extends?>{
   		<{ClassComponents "\n"}*>
   	}
@@ -61,6 +75,10 @@ context-free syntax
   > 
   BoosterTerm = ClassComponents 
   Attribute.Attribute = <<ID> <Decoration*>: <TypeDecl>> 
+  Attribute.SemanticAttribute = <<{Mapping "\n"}+> <ID> <Decoration*>: <TypeDecl>> 
+  Mapping.Mapping = <@mapto <SemanticReference>>
+  SemanticReference.PrefixReference = <<PREFIXID>:<ID>>
+  SemanticReference.Url =<<SEMANTICURL>>
   BoosterTerm = Attribute 
   Identity.Identity = <(ID) > 
   NoAudit.NoAudit = <(NA) > 

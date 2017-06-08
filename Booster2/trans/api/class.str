@@ -17,11 +17,23 @@ rules // class getters
 	class-get-attributes: Class(_, _, member*) -> attribute*
 		with
 			attribute* := <filter(?Attributes(<id>));concat>member*
+			
+	class-get-attributes: SemanticClass(_,_, _, member*) -> attribute*
+		with
+			attribute* := <filter(?Attributes(<id>));concat>member*
 
 	class-get-invariants: Class(_, _, member*) -> invariant*
 		with
 			invariant* := <filter(?Invariants(<id>));concat>member*
 
+	class-get-invariants: SemanticClass(_,_, _, member*) -> invariant*
+		with
+			invariant* := <filter(?Invariants(<id>));concat>member*
+
 	class-get-methods: Class(_, _, member*) -> method*
+		with
+			method* := <filter(?Methods(<id>));concat>member*
+
+	class-get-methods: SemanticClass(_,_, _, member*) -> method*
 		with
 			method* := <filter(?Methods(<id>));concat>member*

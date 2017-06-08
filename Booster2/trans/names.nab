@@ -18,6 +18,7 @@ namespaces
 	Set
 	SetVal
 	Class
+	SemanticClass
 	Attribute
 	Invariant
 	Method
@@ -27,15 +28,24 @@ namespaces
 	Variable
 	InputVariable
 	OutputVariable
+	Prefix
 
 binding rules // System
 
 	System(s,c):
 		defines System s
-		scopes Class, Set, SetVal
+		scopes Class,SemanticClass, Set, SetVal
 		
 	Import(i):
 		imports Class,Set, SetVal from System i 
+		
+binding rules // SemanticPrefix
+
+	SemanticPrefix(s,u):
+		defines Prefix s
+			
+	PrefixReference(a,i):
+		refers to Prefix a
 
 binding rules // Set
 
@@ -62,11 +72,41 @@ binding rules // Class
 			of type c
 
 	Extension(c):
-		imports Attribute, imported Attribute, Method, imported Method from Class c
+		imports Attribute, imported Attribute, Method, imported Method from Class c 
+		
+	Extension(c):
+		imports Attribute, imported Attribute, Method, imported Method from SemanticClass c 
+		
+binding rules // SemanticClass
+
+	SemanticClass(mappings,c,extends,members):
+		defines Class c
+			of type c
+		scopes Method, Attribute, Invariant, This
+		implicitly defines This This()
+			of type c
+
+	Extension(c):
+		imports Attribute, imported Attribute, Method, imported Method from Class c		
+		
+	Extension(c):
+		imports Attribute, imported Attribute, Method, imported Method from SemanticClass c 
 
 binding rules // Attribute
 
 	Attribute(a,dec, a-ty):
+		defines Attribute a
+			of type ty
+			of multiplicity mu
+			of inverse i
+			of attribute a
+			where a-ty has type ty
+			and a-ty has multiplicity mu
+			and a-ty has inverse i
+			
+binding rules // SemanticAttribute
+	
+		SemanticAttribute(m,a,dec, a-ty):
 		defines Attribute a
 			of type ty
 			of multiplicity mu

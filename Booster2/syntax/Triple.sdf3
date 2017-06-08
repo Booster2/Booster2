@@ -16,9 +16,14 @@ Statement.Prefixes =
 @prefix xsd: \<http://www.w3.org/2001/XMLSchema#\>.
 @prefix map: \<#\>.
 @prefix <ID>: \<booster2/<ID>#\>.
+>
+
+Statement.Prefix = <@prefix <ID>: \<<URL>\>.>
+
+
+Statement.StatementList = <<{Statement "\n"}*>
 
 >
-Statement.StatementList = <<{Statement "\n"}*>>
 
 Statement.CreateMapping = <map:<ID>
    
@@ -48,6 +53,19 @@ Subject.Subject =
 <rr:subjectMap [rr:template "booster2/<ID>/{`<ID>`}";  
                 rr:class <ID>:<ID>; 
 	];>
+	
+Subject.MultiSubject = 
+<rr:subjectMap [rr:template "booster2/<ID>/{`<ID>`}";  
+                rr:class <ID>:<ID>;
+                <SubjectList> 
+	];>
+	
+SubjectList.SubjectList = <<{SubjectMap"\n"}*>>
+
+SubjectMap.SubjectMap = <rr:class <ID>:<ID>;>
+
+SubjectMap.SubjectMap = <rr:class <URL>;>
+
 										
 AttrMap.AttrMapList = <<{AttrMap "\n\n"}*>>
 										
@@ -58,7 +76,20 @@ AttrMap.AttrMap =
         rr:objectMap [ rr:column "`<ColumnName>`"; ];
     ];
 >
-    
+
+AttrMap.MultiAttrMap = 
+<rr:predicateObjectMap [	
+        <Predicate>
+        <PredicateList>
+        rr:objectMap [ rr:column "`<ColumnName>`"; ];
+    ];
+>
+PredicateList.PredicateList = <<{Predicate"\n"}*>>
+
+Predicate.Predicate = <rr:predicate <ID>:<ID>;>
+
+Predicate.Predicate = <rr:predicate <URL>;>
+
 AttrMap.AttrMapRel = 
 <rr:predicateObjectMap [
         rr:predicate <DBColName>; 
@@ -74,4 +105,7 @@ DBdotView.DBdotView = <`<ID>`.`<ID>_<ID>`>
 
 DBColName.DBColName = <<ID>:<ID>> 
 ColumnName.ColumnName = <<ID>> 
-context-free syntax   
+lexical syntax
+
+  URL = ~[\ \t\n\r\,\/\:]+ "://" ~[\ \t\n\r]+
+  PREFIXID = ~[\ \t\n\r\,\/\:]+  
