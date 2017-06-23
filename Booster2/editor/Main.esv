@@ -51,6 +51,7 @@ menus
     end
   
   menu: "Booster Generation"                   (openeditor) (realtime)
+    action: "De-annotate"            = de-annotate-builder
     action: "Elaborate"              = elaborate-builder
     action: "Heuristics"             = heuristics-builder
     action: "WP"                     = wp-builder

@@ -1,0 +1,43 @@
+module de-annotate
+
+imports
+	
+	signatures/-
+	api/_runtime
+	api/_runtime-constructors
+	api/path
+	api/class
+	api/method
+	lib/eq
+	lib/search
+	names/names
+	
+rules // deannotate phase
+	
+	de-annotate =
+		?ast;
+		replace-annotations
+
+		
+rules // remove annotations
+
+	// inline-methods AST -> AST
+	replace-annotations:
+		ast -> ast''
+		where
+			ast' := <sometd(replace-attr-annotations(|ast)) <+ id> ast;
+			ast'' := <sometd(replace-class-annotations(|ast)) <+ id> ast'
+	
+	replace-attr-annotations(|ast):
+	a@SemanticAttribute(_,name, decs, type) -> 
+		Attribute(name, decs, type)
+		where
+		<debug> "replace semattr";
+		<debug> a
+
+	replace-class-annotations(|ast):
+	c@SemanticClass(_,cname, ext, cmember*) -> 
+		Class(cname, ext, cmember*)
+		where
+		<debug> "replace semclass";
+		<debug> c

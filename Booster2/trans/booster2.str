@@ -31,6 +31,7 @@ imports
 	generation/sql
 	generation/wp
 	generation/triple
+	generation/de-annotate
 	
 	types/trans/types
 
@@ -209,23 +210,26 @@ rules // Debugging
 		 result := <pp-debug> ast' 
 
 
-	elaborate-builder-ast = builder-ast(elaborate|"elaborated.boo2")
-	elaborate-builder = builder(elaborate |"elaborated.boo2")
+	de-annotate-builder-ast = builder-ast(de-annotate|"deannotate.boo2")
+	de-annotate-builder = builder(de-annotate |"deannotate.boo2")
+	
+	elaborate-builder-ast = builder-ast(de-annotate;elaborate|"elaborated.boo2")
+	elaborate-builder = builder(de-annotate;elaborate |"elaborated.boo2")
 
-	heuristics-builder-ast = builder-ast(elaborate ; heuristics | "heuristics.boo2")
-	heuristics-builder = builder(elaborate ; heuristics | "heuristics.boo2")
+	heuristics-builder-ast = builder-ast(de-annotate;elaborate ; heuristics | "heuristics.boo2")
+	heuristics-builder = builder(de-annotate;elaborate ; heuristics | "heuristics.boo2")
 		
-	wp-builder-ast = builder-ast(elaborate ; heuristics ; wp | "wp.boo2")
-	wp-builder = builder(elaborate ; heuristics ; wp | "wp.boo2")
+	wp-builder-ast = builder-ast(de-annotate;elaborate ; heuristics ; wp | "wp.boo2")
+	wp-builder = builder(de-annotate;elaborate ; heuristics ; wp | "wp.boo2")
 	
-	simplify-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify | "simplify.boo2")
-	simplify-builder = builder(elaborate ; heuristics ; wp ; simplify | "simplify.boo2")
+	simplify-builder-ast = builder-ast(de-annotate;elaborate ; heuristics ; wp ; simplify | "simplify.boo2")
+	simplify-builder = builder(de-annotate;elaborate ; heuristics ; wp ; simplify | "simplify.boo2")
 	
-	generate-sql-builder-ast = builder-ast(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
-	generate-sql-builder = builder(elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
+	generate-sql-builder-ast = builder-ast(de-annotate; elaborate ; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
+	generate-sql-builder = builder(de-annotate ; elaborate; heuristics ; wp ; simplify ; generate-sql | "generated.sql")
 
-	generate-sql-methods-ast = builder-ast(elaborate ; heuristics ; wp ; simplify ; generate-sql-methods-only | "methods.generated.sql")
-	generate-sql-methods = builder(elaborate ; heuristics ; wp ; simplify ; generate-sql-methods-only | "methods.generated.sql")
+	generate-sql-methods-ast = builder-ast(de-annotate;elaborate ; heuristics ; wp ; simplify ; generate-sql-methods-only | "methods.generated.sql")
+	generate-sql-methods = builder(de-annotate;elaborate ; heuristics ; wp ; simplify ; generate-sql-methods-only | "methods.generated.sql")
 
 	generate-mapping-builder-ast = builder-ast(elaborate ; generate-mapping | "mapping.ttl")
 	generate-mapping-builder = builder(elaborate ; generate-mapping | "mapping.ttl")
